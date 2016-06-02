@@ -1,0 +1,119 @@
+% Math mode
+%-----------
+\newenvironment{nop}{}{}
+\newenvironment{smathpar}{
+\begin{nop}\small\begin{mathpar}}{
+\end{mathpar}\end{nop}\ignorespacesafterend}
+
+% Theorem
+%--------
+\newtheorem{axiom}{Axiom}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+% Listings
+%----------
+\newcommand{\lsttxnimp}{\lstset{
+      language=c,
+      basicstyle=\ttfamily\normalsize,
+      flexiblecolumns=false,
+			tabsize=2,
+      %basewidth={0.5em,0.45em},
+      %aboveskip={3pt},
+      %belowskip={3pt},
+      keywordstyle=\color{Bittersweet}\bfseries,
+      commentstyle=\color{darkgreen}\itshape,
+      morekeywords={transaction},
+			classoffset=1,
+			upquote=true,
+			keywordstyle=\color{Fuchsia}\bfseries,
+			classoffset=0,
+			mathescape=true
+    }}
+\lstnewenvironment{txnimpcode}
+    { % \centering
+			\lsttxnimp
+      \lstset{}%
+      \csname lst@setfirstlabel\endcsname}
+    { %\centering
+      \csname lst@savefirstlabel\endcsname}
+
+% Formatting
+%---------
+\newcommand{\C}[1]{\code{#1}}
+\newcommand{\tuplee}[1]{\langle #1 \rangle}
+\newcommand*{\rom}[1]{\expandafter\romannumeral #1}
+
+% Formatting commands
+% -------------------
+\newcommand{\code}[1]{\,{\tt #1}\,}
+\newcommand{\spc}[0]{\quad}
+\newcommand{\ALT}{~\mid~}
+\newcommand{\rel}[1]{{R}_{\mathit{#1}}}
+\newcommand{\conj}{~\wedge~}
+\newcommand{\disj}{~\vee~}
+\newcommand{\rulelabel}[1]{\textrm{\sc {#1}}}
+\newcommand{\ilrulelabel}[1]{{\sc #1}}
+\newcommand{\RULE}[2]{\frac{\begin{array}{c}#1\end{array}}
+                           {\begin{array}{c}#2\end{array}}}
+\newcommand{\txnimp}{{\sc TxnImp}\xspace}
+\newcommand{\coloneqq}{::=}
+\newcommand{\qqquad}{\quad\quad}
+\newcommand{\cskip}{\C{SKIP}}
+\newcommand{\ctxn}[1]{\C{Txn}\{#1\}}
+\newcommand{\catomic}[1]{\C{ATOMIC}\{#1\}}
+\newcommand{\stepsto}{\longrightarrow}
+\newcommand{\rstepsto}{\longrightarrow_{R}}
+\newcommand{\stepssto}{\longrightarrow^{*}}
+\newcommand{\rstepssto}[1]{\longrightarrow^{#1}_{R}}
+\newcommand{\xstepsto}[1]{\longrightarrow_{#1}}
+\newcommand{\xstepssto}[2]{\longrightarrow^{#1}_{#2}}
+\newcommand{\tstepsto}{\hookrightarrow}
+\newcommand{\xtstepsto}[1]{\hookrightarrow_{#1}}
+\newcommand{\rtstepsto}{\hookrightarrow_R}
+\newcommand{\rtstepssto}[1]{\hookrightarrow^{#1}_R}
+\newcommand{\xtstepssto}[2]{\hookrightarrow^{#1}_{#2}}
+\newcommand{\hoare}[3]{\{#1\}\,#2\,\{#3\}}
+\newcommand{\defeq}[0]{\overset { def }{ = } }
+\newcommand{\rg}[3]{\{#1\}\,#2\,\{#3\}}
+%\newcommand{\defeq}[0]{ \triangleq }
+\newcommand{\op}{\textsf{op}}
+\newcommand{\E}{\textsf{E}}
+\newcommand{\A}{\textsf{A}}
+\newcommand{\I}{\mathbb{I}}
+\newcommand{\visZ}{\textsf{vis}}
+\newcommand{\soZ}{\textsf{so}}
+\newcommand{\sameobj}[2]{\textsf{sameobj}(#1,#2)}
+\newcommand{\sameobjZ}{\textsf{sameobj}}
+\newcommand{\visar}{\xrightarrow{\visZ}}
+\newcommand{\soar}{\xrightarrow{\soZ}}
+\newcommand{\invisar}{\xrightarrow{\textsf{invis}}}
+\newcommand{\etaar}{\xrightarrow{\eta}}
+\newcommand{\wrstoar}{\xrightarrow{\textsf{wrsto}}}
+\newcommand{\rdsfmar}{\xrightarrow{\textsf{rdsfm}}}
+\newcommand{\fresh}{\textsf{fresh}}
+\newcommand{\isReadf}{\textsf{isRD}}
+\newcommand{\isWritef}{\textsf{isWR}}
+\newcommand{\oper}{\textsf{oper}}
+\newcommand{\committed}{\textsf{committed}}
+\newcommand{\txn}{\textsf{txn}}
+\newcommand{\id}{\textsf{id}}
+\newcommand{\kind}{\textsf{oper}}
+\newcommand{\rval}{\textsf{rval}}
+\newcommand{\visible}{\textsf{visible}}
+\newcommand{\maxId}{\textsf{maxId}}
+\newcommand{\aeval}{\textsf{aeval}}
+\newcommand{\underE}[1]{\E \Vdash #1}
+\newcommand{\underIT}[1]{\;\I,\C{Txn}_i \vdash #1\;}
+\newcommand{\underI}[1]{\;\I \vdash #1\;}
+\newcommand{\underT}[1]{\;\C{Txn}_i \vdash #1\;}
+\newcommand{\stable}{\mathtt{stable}}
