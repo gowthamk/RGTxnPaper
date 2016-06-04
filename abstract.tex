@@ -6,29 +6,29 @@ correctness criterion for concurrent transactions.
 % implementation-independent model to reason about program invariants in
 % presence of concurrent transactions. Unfortunately, 
 While serializability is an easily-stated high-level property,
-enforcing serializability in a database severely restricts
+enforcing it requires the database to severely restrict
 concurrency.
 % , thus limiting the availability and performance
 % (latency/throughput) of the data store.  In the database parlance,
 % serializibility is \emph{not highly available}~\cite{bailishotos13},
 % making it particularly unsuitable for modern-day distributed web
 % applications that aspire to be \emph{always on}.
-Pragmatic concerns has led to the development of various weaker
-alternatives to serializability, which are overwhelmingly
-preferred in practice.
+Pragmatic concerns led to the development of various weaker
+alternatives to serializability, which are overwhelmingly preferred in
+practice.
 % some of which have been
 % standardized by the community as \emph{ANSI SQL isolation
 % levels}~\cite{berenson}. Indeed, weakly isolated transactions are
 % overwhelmingly preferred to serializability in practice, to the extent
 % that the default isolation level in popular industrial-strength
 % databases is often weaker than serializability.
-Unlike serializability, the semantics of weaker isolation levels are
-often described informally in terms of an implementation. While there
-have been some attempts at formalizing the semantics of weak
-isolation, there nonetheless exists a wide chasm between formal models
-of weak isolation and the operational models of programs, hindering 
-uniform reasoning about program invariants in presence of weakly
-isolated transactions.
+However, unlike serializability, the semantics of weaker isolation
+levels are often described informally in terms of an implementation.
+While there have been some attempts at formalization, there
+nonetheless exists a wide chasm between formal models of weak
+isolation and the operational models of programs, hindering uniform
+reasoning about program invariants in presence of weakly isolated
+transactions.
 
 In this paper, we propose an operational model and a compositional
 reasoning framework for concurrent imperative programs with weakly
@@ -39,6 +39,6 @@ of isolation. Our reasoning framework enables formal reasoning about
 program invariants while taking into account the fine-grained
 isolation semantics of transactions. We use a combination of simple
 static analysis and manual proofs in our reasoning framework to
-formally establish the correctness for several examples, which were
+formally establish the correctness for several benchmarks, which were
 hitherto known to be correct only through experiments.
 \end{abstract}

@@ -31,8 +31,9 @@
       %aboveskip={3pt},
       %belowskip={3pt},
       keywordstyle=\color{Bittersweet}\bfseries,
-      commentstyle=\color{darkgreen}\itshape,
-      morekeywords={transaction},
+      commentstyle=\color{blue}\itshape,
+      stringstyle=\color{MidnightBlue},
+      morekeywords={transaction,txn},
 			classoffset=1,
 			upquote=true,
 			keywordstyle=\color{Fuchsia}\bfseries,
@@ -117,3 +118,9 @@
 \newcommand{\underI}[1]{\;\I \vdash #1\;}
 \newcommand{\underT}[1]{\;\C{Txn}_i \vdash #1\;}
 \newcommand{\stable}{\mathtt{stable}}
+\newcommand{\iso}[1]{{\sc #1}}
+\newcommand{\writef}{\textsf{Write}}
+\newcommand{\readf}{\textsf{Read}}
+\newcommand{\commitf}{\textsf{Commit}}
+\newcommand{\eg}{\emph{eg.,}}
+\newcommand{\GK}[1]{\textcolor{red}{GK: #1}}
