@@ -1,1 +1,12 @@
 \section{Introduction}
+
+Database transactions allow users to group operations on multiple
+objects into a coherent unit with useful properties including
+atomicity, consistency, (serializable) isolation and durability
+(ACID). ACID has been the \emph{de facto} standard for database
+transactions for many decades, providing programmers with a simple
+implementation-independent model to reason about concurrent
+transactions. However, achieving serializability, the ACID-prescribed
+standard for isolation, requires databases to severely restrict
+concurrency, which brings down the overall throughput of the system. 
+
