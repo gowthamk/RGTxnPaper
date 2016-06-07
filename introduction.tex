@@ -27,10 +27,13 @@ replicated stores~\cite{dbtuningbook,bailishat,bailisvldb}, leading to
 their overwhelming adoption. A 2013 study~\cite{bailishotos} of 18
 popular ACID and ``NewSQL'' databases found that only 3 of them offer
 serializability by default, and half, including Oracle 11g, do not
-offer it at all.  A 2015 study~\cite{bailisferal} of a large corpus of
-database applications finds no evidence of any of them changing the
-default isolation level offered by the database. Together, the studies
-establish the prevalance of weak isolation in practice.
+offer it at all.  
+% A 2015 study~\cite{bailisferal} of a large corpus of database
+% applications finds no evidence of any of them changing the default
+% isolation level offered by the database. Together, the studies
+% establish the prevalance of weak isolation in practice.
+Weakly isolated transactions are therefore quite prevalent in
+practice.
 
 Unfortunately, weak isolation introduces new set of behaviors into
 programs that often give rise to anomalous executions and
@@ -53,11 +56,15 @@ risk of being violated due to weak isolation. Indeed, incidents of
 safety violations due to weak isolation have been reported on web
 services in production~\cite{starbucksbug, scimedbug}, including in
 safety-critical applications such as bitcoin
-exchanges~\cite{poloniexbug, bitcoinbug}. Evidently, the ill effects
-of weak isolation are as prevalent as the weak isolation itself.
+exchanges~\cite{poloniexbug, bitcoinbug}. While enforcing
+serializability for all transactions is sufficient to restore safety,
+it is an overkill considering that 75\% of invariants studied
+in~\cite{bailisferal} can be maintained under one or the other form of
+weak isolation. When to use weak isolation, and in what form, is
+therefore a question facing all database programmers.
 
-The root cause of problems with weak isolation is that its semantics
-in context of user programs is not well-understood. The original
+A major problem with weak isolation is that its semantics in context
+of user programs is not well-understood. The original
 proposal~\cite{gray1976} defines multiple ``degrees'' of weak
 isolation in terms of implementation details, such as the nature and
 duration of locks held in each case. ANSI SQL 92 standard four levels
@@ -67,16 +74,16 @@ to prevent. While this is an improvement, it requires programmers to
 be clairvoyant about the possible ways various undesirable phenomena
 might manifest in their applications, and determine, in each case, if
 the phenomenon can be allowed without violating application
-invaraints. Adya's thesis~\cite{adyaphd} includes first formal
-definitions of some of the well-known isolation levels in the context
-of a sequentially consistent (SC) database. However, there have been
-no attempts to relate Adya's system model to an operational model of
-programs in a reasoning framework that facilitates formal proofs of
-correctness. For this reason, the unsystematic way of reasoning about
-weak isolation in terms of undesirable phenomena remains popular to
-date, with major database vendors continuing to document their
-isolation levels in terms of the such phenomena~\cite{postgresiso,
-mysqliso, oracleiso}.
+invaraints. This is understandably hard. Adya's thesis~\cite{adyaphd}
+includes first formal definitions of some of the well-known isolation
+levels in the context of a sequentially consistent (SC) database.
+However, there have been no attempts to relate Adya's system model to
+an operational model of programs in a proof system that facilitates
+formal proofs of correctness. For this reason, the unsystematic way of
+reasoning about weak isolation in terms of undesirable phenomena
+remains popular to date, with major database vendors continuing to
+document their isolation levels in terms of the such
+phenomena~\cite{postgresiso, mysqliso, oracleiso}.
 
 There have been encouraging developments in Programming Languages and
 Systems research towards reasoning about application invariants in
@@ -90,33 +97,66 @@ and fully isolated operations against different but consistent states
 of the database, where each operation locally preserves invariants. In
 contrast, reasoning about weak isolation involves reasoning about
 concurrent execution of transactions, whose operations witness
-different states which, although consistent individually, may not be
+different states, which, although consistent individually, may not be
 reconciled into a consistent view. Moreover, operations may violate
-invariants as long as the transaction as a whole preserves them. It is
-easy to see that the latter problem reduces to the former if all
-transactions are singletons. The generality of weak isolation is also
-evident from the fact that weakly isolated transactions have existed
-on sequentially consistent relational databases long before the advent
-of weakly consistent replicated stores. Thus, there is a need for
-reasoning frameworks for weak isolation that generalize those for weak
-consistency in some important ways. The framework should be general
-enough to reason about the semantics of various isolation levels,
-including ANSI SQL isolation levels, in the context of data stores
-with various consistency semantics (\eg sequentially consistent data
-store of~\cite{adyaphd}, causally consistent store assumed
-in~\cite{gotsmanpopl16} etc). Considering the increasing diversity in
-the semantics of weak consistency~\cite{zoo} and
-isolation~\cite{gotsmanconcur}, it is ideal if the reasoning framework
-is parameterized on the semantics of consistency and isolation.  In
-short, what is neededis a reasoning framework that can answer the
-following question:
-\begin{center}
-\emph{Given a program annotated with desired invaraints, and isolation
-semantics for transactions in the program, assuming that the program
-executes against a data store with a given consistency semantics, are
-the invariants guaranteed to hold?}
-\end{center}
+invariants as long as the transaction as a whole preserves them.
+Intuitively, the latter problem reduces to the former if all
+transactions are singletons. Furthermore, weak isolation can exist
+independent of weak consistency, as evident from the presence of
+weakly isolated transactions on sequentially consistent relational
+databases long before the advent of weakly consistent NoSQL stores.
+Thus, there is a need for weak isolation reasoning frameworks that
+generalize reasoning under weak consistency in some important ways. 
 
-In this paper, we propose a reasoning framework that attempts to
-answer this question.
+% The framework should be general enough to reason about the semantics
+% of multiple isolation levels, including those proposed after the SQL
+% 92 standard, in the context of various stores (\eg sequentially
+% consistent store of~\cite{adyaphd}, causally consistent store
+% of~\cite{gotsmanpopl16} etc). 
+In this paper, we propose a program logic for weakly isolated
+transations. In particular, we propose a set of syntax-directed proof
+rules that lets one build compositional proofs of correctness for
+transactional programs in presence of weak isolation. The key novelty
+of our approach is that it is parametric over the \emph{isolation
+semantics} of transactions in the program, as well as the
+\emph{consistency semantics} of the store. In concrete terms, this
+means that, unlike~\cite{gotsmanpopl16, redblueatc, ecinec}, our
+system model does not assume a minimum consistency/isolation level,
+nor does it assume a predefined set of such levels. Instead, our
+operational semantics admits declarative specifications of transaction
+isolation levels (\eg~\cite{pldi15,gotsmanconcur15}) and store
+consistency level, and generates executions that are guaranteed to
+satisfy the specifications. The result is a flexible system model that
+is general enough to incorporate the semantics of a range of isolation
+levels on variety of stores (\eg sequentially consistent store
+of~\cite{adyaphd}, causally consistent store of~\cite{gotsmanpopl16}
+etc). The parametricity in operational semantics naturally lends
+itself to parametricity in static semantics. Our key technical
+contribution is thus a set of proof rules, for demonstrating that a
+program with a given selection of isolation levels for its
+transactions preserves its invariants when executed on a store
+satisfying a certain consistency gurantees. The paper makes the
+following contributions:
+\begin{itemize}
+  \item We describe \txnimp - a simple imperative language equipped
+  with concurrency and weakly isolated transactions. We describe an
+  operational semantics for \txnimp that generates execution traces
+  satisfying a given set of well-formedness constraints. Building on
+  some ideas expoused in previous work, we show that semantics of
+  isolation levels can be captured as well-formedness constraints on
+  excution traces.
+  \item We propose a compositional proof system for \txnimp programs
+  to show that the program satisfies its invariants in all the
+  executions whose traces satisfy well-formedness constraints
+  corresponding to the chosen isolation levels. Our reasoning
+  framework comes with a rigorous proof of soundness that establishes
+  its correctness with respect to the operational semantics.
+  \item We define a \emph{maximum visibility principle} to reconcile
+  store consistency guarantees with transaction isolation requirements,
+  and use it to instantiate our operational model and the proof system
+  for various kinds of stores.
+  \item We describe case studies modeled after real-world scenarios
+  to demonstrate the applicability and utility of our proof
+  methodology.
+\end{itemize}
 
