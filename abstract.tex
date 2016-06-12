@@ -1,33 +1,34 @@
 \begin{abstract}
 
   Serializability is a well-understood mechanism that simplifies
-  reasoning about the behavior of concurrent transactions.  However,
-  its two key properties, \emph{atomicity} - a transaction's effects
-  are seen only when it commits, and \emph{isolation} - a transaction
-  never witnesses the effects of other committed transactions while it
-  is executing, impose significant constraints on implementations, and
-  can negatively impact database performance by restricting
-  opportunities to exploit concurrency.
+  reasoning about the behavior of concurrent transactions by ensuring
+  an executing transaction is \emph{isolated} from the effects of
+  other concurrenty executing transactions once it begins executing.
+  However, enforcing serializabity comes at the cost in performance
+  because it necessarily restricts opportunities to exploit
+  concurrency even when such opportunities would not violate
+  application-specific invariants.
   
   As a result, database systems (in practice) support, and often
   encourage, developers to use weaker alternatives.  Generally, these
   alternatives break the strong isolation guarantees provided by
   serializable transactions to permit greater concurrency.
   Unfortunately, the semantics of weak isolation is often poorly
-  understood, and usually explained informally in terms of low-level
-  implementation artifacts.  Consequently, verifying high-level
-  correctness properties in such environments can be problematic.
+  understood, and usually explained only informally in terms of
+  low-level implementation artifacts.  Consequently, verifying
+  high-level correctness properties in such environments is
+  challenging.
 
-  To address this issue, this paper presents a novel program logic
-  that enables compositional reasoning about the behavior of
-  concurrently executing weakly-isolated transactions.  Notably, our
-  development is parametric over a transaction's specific isolation
-  semantics, and the consistency guarantees provided by the underlying
-  data store, allowing it to be applicable over a large range of
-  different isolation and consistency models.  Case studies and
-  experiments on real-world applications demonstrate the utility of
-  our approach, and provide strong evidence that weakly-isolated
-  transactions can be placed on the same formal footing as their
-  strongly-isolated serializable counterparts.
+  To address this issue, this paper presents a program logic that
+  enables compositional reasoning about the behavior of concurrently
+  executing weakly isolated transactions.  Notably, our development is
+  parametric over a transaction's specific isolation semantics, and
+  the consistency guarantees provided by the underlying data store,
+  allowing it to be applicable over a large range of concurrency
+  control mechanisms.  Case studies and experiments on real-world
+  applications demonstrate the utility of our approach, and provide
+  strong evidence that weakly isolated transactions can be placed on
+  the same formal footing as their strongly-isolated serializable
+  counterparts.
 
 \end{abstract}
