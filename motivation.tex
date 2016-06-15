@@ -1,11 +1,11 @@
 \section{Motivation}
 
-In this section, we motivate our proof system for weak isolation
-through a series of examples written in \txnimp - a C-like imperative
-language equipped with a \C{txn} lexical block for transactions. Each
+In this section, we motivate our proof system for weak isolation via
+an example written in \txnimp - a C-like imperative language equipped
+with a \C{txn} lexical block defining a transaction scope. Each
 \C{txn} block is associated with a single-quoted string in angle
 braces that uniquely identifies the transaction. We use Hoare triple
-notation to annotate programs with pre and post conditions.
+notation to annotate programs with pre- and post- conditions.
 
 \begin{figure}
 \centering
@@ -45,17 +45,15 @@ are guaranteed to hold if both withdraw transactions are serialized,
 making \iso{Serializable} isolation (SER) level a sufficent condition
 to preserve invaraints. But, is SER necessary?
 
-% Most weak isolation levels allow executions to interleave operations
-% (Reads, Writes and Commits) of one transaction with other's, while
-% enforcing some additional constraints. Arbitrary interleavings may
-% lead to the violation of invaraints. 
-Let us consider \iso{Read Committed} (RC), a weak isolation level
-default in Postgres 9.5 and Oracle 11g databases. An RC transaction is
-isolated from the writes of an uncommitted transactions, thus
-preventing the so called \emph{dirty reads}
-phenomenon~\cite{berenson}. In the current example, RC isolation
-admits following executions on an SC store, such as a relational
-database:
+As an alternative, consider the execution of this transaction under a
+\emph{read committed} ({\sc rc}) isolation level, which is weaker than
+{\sc ser}\footnote{{\sc rc} is in fact the default isolation level in
+Postgres 9.5 and Oracle 11g databases.} An {\sc rc} transaction is
+isolated from the writes of uncommitted transactions, thus preventing
+the transaction from witnessing \emph{dirty reads}~\cite{berenson},
+reads that observe the effects of non-committed transactions. In the
+current example, {\sc rc} isolation admits the two executions shown in
+Fig.~\ref{fig:rc-ex} on an SC store, such as a relational database:
 
 \begin{figure}[!h]
 \centering
@@ -75,29 +73,29 @@ database:
   \includegraphics[scale=0.5]{Figures/motiv-eg-1-b}
 }
 \end{figure}
-
-An execution is a series of Read, Write and Commit operations.
-Subscript of an operation indicates its transaction. For clarity,
-effects of different transactions are shown against differently
-colored backgrounds. In the first execution, the first transaction
-(`Wd1') reads the current balance (\C{k}) and writes the new balance
-(\C{k-a1}), but before it commits transaction `Wd2' executes and
-commits, writing the new balance (\C{k-a2}). RC isolation has
-prevented the writes of uncommitted transaction `Wd1' from being
-\emph{visible} in `Wd2'. Committing `Wd1' now leads to the loss of
-updates from `Wd2' (the so called \emph{lost update
-anomaly}~\cite{berenson}), resulting in a balance of \C{k-a1}. The
-second execution describes a similar scenario with `Wd1' and `Wd2'
-exchanging their roles. Clearly, RC is not sufficient because it loses
-the updates of one transaction resulting in the violation of post
-condition.  We need an isolation level that prevents lost updates.
-\iso{Snapshot Isolation} (SI)~\cite{berenson} fits this requirement by
-its definition. SI implementations effectively serialize transactions
-that update a shared data object mostly by aborting and re-executing a
-transaction if write-write conflicts are detected during its commit.
-Since SI, unlike SER, need not necessarily rely on expensive
-lock-based concurrency control, it is also more efficient, making it
-appropriate appropriate for both `Wd' transactions. 
+The figure depicts an execution as a series of read, write, and commit
+operations.  The subscript of an operation indicates the transaction
+that executes it\footnote{For clarity, the effects of different
+transactions are shown in different colored backgrounds.} In the first
+execution, transaction {\bf Wd1} reads the current balance (\C{k}) and
+writes the new balance (\C{k-a1}), but before it commits transaction
+{\bf Wd2} executes and commits, writing the new balance (\C{k-a2}). RC
+isolation prevent {\bf Wd2} from witnessing the uncommitted writes of
+transaction {\bf Wd1}.  Subsequently committing {\bf Wd1} leads to the
+loss of {\bf Wd2}'s updates (the so called \emph{lost update
+anomaly}~\cite{berenson}), resulting in an incorrect balance of
+\C{k-a1}. The second execution describes a similar scenario with {\bf
+Wd1} and {\bf Wd2} exchanging their roles.  Clearly, RC is not
+sufficient because it loses the updates of one transaction resulting
+in the violation of post condition.  We need an isolation level that
+prevents lost updates.  \iso{Snapshot Isolation} (SI)~\cite{berenson}
+fits this requirement by its definition. SI implementations
+effectively serialize transactions that update a shared data object
+mostly by aborting and re-executing a transaction if write-write
+conflicts are detected during its commit.  Since SI, unlike SER, need
+not necessarily rely on expensive lock-based concurrency control, it
+is also more efficient, making it appropriate appropriate for both
+`Wd' transactions. 
 
 Thinking in terms of anomalies, as described above, is how database
 programmers are often encouraged to reason about weak isolation.

@@ -33,6 +33,7 @@
       basicstyle=\ttfamily\normalsize,
       flexiblecolumns=false,
 			tabsize=2,
+      escapechar=',                        
       %basewidth={0.5em,0.45em},
       %aboveskip={3pt},
       %belowskip={3pt},
@@ -48,7 +49,7 @@
     }}
 \lstnewenvironment{txnimpcode}
     { % \centering
-			\lsttxnimp
+      \lsttxnimp
       \lstset{}%
       \csname lst@setfirstlabel\endcsname}
     { %\centering
@@ -129,5 +130,7 @@
 \newcommand{\writef}{\textsf{Write}}
 \newcommand{\readf}{\textsf{Read}}
 \newcommand{\commitf}{\textsf{Commit}}
-\newcommand{\eg}{\emph{eg.,}}
+\newcommand{\eg}{\emph{e.g.,}}
 \newcommand{\GK}[1]{\textcolor{red}{GK: #1}}
+
+\newcommand{\B}[1]{\small\bf #1}

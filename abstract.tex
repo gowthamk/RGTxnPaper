@@ -1,42 +1,34 @@
 \begin{abstract}
-ACID model of database transactions advocates serializability as the
-correctness criterion for concurrent transactions. 
-% Serializability is an easily-stated property,
-% providing database programmers with a simple
-% implementation-independent model to reason about program invariants in
-% presence of concurrent transactions. Unfortunately, 
-While serializability is an easily-stated high-level property,
-enforcing it requires the database to severely restrict
-concurrency.
-% , thus limiting the availability and performance
-% (latency/throughput) of the data store.  In the database parlance,
-% serializibility is \emph{not highly available}~\cite{bailishotos13},
-% making it particularly unsuitable for modern-day distributed web
-% applications that aspire to be \emph{always on}.
-Pragmatic concerns led to the development of various weaker
-alternatives to serializability, which are overwhelmingly preferred in
-practice.
-% some of which have been
-% standardized by the community as \emph{ANSI SQL isolation
-% levels}~\cite{berenson}. Indeed, weakly isolated transactions are
-% overwhelmingly preferred to serializability in practice, to the extent
-% that the default isolation level in popular industrial-strength
-% databases is often weaker than serializability.
-However, unlike serializability, the semantics of weaker isolation
-levels are often described informally in terms of an implementation.
-While there have been some attempts at formalization, there
-nonetheless exists a wide chasm between formal models of weak
-isolation and the operational models of programs, hindering uniform
-reasoning about program invariants in presence of weakly isolated
-transactions.
 
-In this paper, we propose an operational model and a compositional
-proof system for concurrent imperative programs with weakly isolated
-transactions (\txnimp programs, as we call them).  Our operational
-model captures all the behaviors exhibited by a program under weak
-isolation without referring to any specific implementation of
-isolation. Our proof system enables formal reasoning about program
-invariants while taking into account the fine-grained isolation
-semantics of transactions. Case studies demonstrate the utility of our
-approach.
+  Serializability is a well-understood mechanism that simplifies
+  reasoning about the behavior of concurrent transactions by ensuring
+  an executing transaction is \emph{isolated} from the effects of
+  other concurrenty executing transactions once it begins executing.
+  However, enforcing serializabity comes at the cost in performance
+  because it necessarily restricts opportunities to exploit
+  concurrency even when such opportunities would not violate
+  application-specific invariants.
+  
+  As a result, database systems (in practice) support, and often
+  encourage, developers to use weaker alternatives.  Generally, these
+  alternatives break the strong isolation guarantees provided by
+  serializable transactions to permit greater concurrency.
+  Unfortunately, the semantics of weak isolation is often poorly
+  understood, and usually explained only informally in terms of
+  low-level implementation artifacts.  Consequently, verifying
+  high-level correctness properties in such environments is
+  challenging.
+
+  To address this issue, this paper presents a program logic that
+  enables compositional reasoning about the behavior of concurrently
+  executing weakly isolated transactions.  Notably, our development is
+  parametric over a transaction's specific isolation semantics, and
+  the consistency guarantees provided by the underlying data store,
+  allowing it to be applicable over a large range of concurrency
+  control mechanisms.  Case studies and experiments on real-world
+  applications demonstrate the utility of our approach, and provide
+  strong evidence that weakly isolated transactions can be placed on
+  the same formal footing as their strongly-isolated serializable
+  counterparts.
+
 \end{abstract}
