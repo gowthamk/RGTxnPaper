@@ -20,6 +20,12 @@
 \newenvironment{remark}[1][Remark]{\begin{trivlist}
 \item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
 
+% Decorations
+%-----------
+\newenvironment{decoration}
+  {\color{blue}\begin{array}{l}}
+  {\end{array}}
+
 % Listings
 %----------
 \newcommand{\lsttxnimp}{\lstset{
@@ -96,6 +102,7 @@
 \newcommand{\sameobj}[2]{\textsf{sameobj}(#1,#2)}
 \newcommand{\sameobjZ}{\textsf{sameobj}}
 \newcommand{\visar}{\xrightarrow{\visZ}}
+\newcommand{\hboar}{\xrightarrow{\textsf{hb}}}
 \newcommand{\soar}{\xrightarrow{\soZ}}
 \newcommand{\invisar}{\xrightarrow{\textsf{invis}}}
 \newcommand{\etaar}{\xrightarrow{\eta}}
@@ -105,7 +112,7 @@
 \newcommand{\isReadf}{\textsf{isRD}}
 \newcommand{\isWritef}{\textsf{isWR}}
 \newcommand{\oper}{\textsf{oper}}
-\newcommand{\committed}{\textsf{committed}}
+\newcommand{\committed}{\textsf{com}}
 \newcommand{\txn}{\textsf{txn}}
 \newcommand{\id}{\textsf{id}}
 \newcommand{\kind}{\textsf{oper}}

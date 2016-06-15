@@ -1,12 +1,11 @@
 \section{Motivation}
 
-In this section, we motivate the need for a formal reasoning framework
-for weakly isolated transactions through a series of examples. All our
-examples are written in C-like imperative language equipped with a
-\C{txn} lexical block for transactions. Each \C{txn} block is
-associated with a single-quoted string in angle braces that uniquely
-identifies the transaction. We use Hoare triple notation to annotate
-programs with pre and post conditions.
+In this section, we motivate our proof system for weak isolation
+through a series of examples written in \txnimp - a C-like imperative
+language equipped with a \C{txn} lexical block for transactions. Each
+\C{txn} block is associated with a single-quoted string in angle
+braces that uniquely identifies the transaction. We use Hoare triple
+notation to annotate programs with pre and post conditions.
 
 \begin{figure}
 \centering
@@ -50,12 +49,13 @@ to preserve invaraints. But, is SER necessary?
 % (Reads, Writes and Commits) of one transaction with other's, while
 % enforcing some additional constraints. Arbitrary interleavings may
 % lead to the violation of invaraints. 
-Let us consider \iso{Read Committed} (RC), an isolation level weaker
-than SER that is default in Postgres 9.5~\cite{postgres95} and Oracle
-11g~\cite{oracle11g} databases. An RC transaction is isolated from the
-writes of an uncommitted transactions, thus preventing the so called
-\emph{dirty reads} phenomenon~\cite{berenson}. In the current example,
-RC isolation admits following executions:
+Let us consider \iso{Read Committed} (RC), a weak isolation level
+default in Postgres 9.5 and Oracle 11g databases. An RC transaction is
+isolated from the writes of an uncommitted transactions, thus
+preventing the so called \emph{dirty reads}
+phenomenon~\cite{berenson}. In the current example, RC isolation
+admits following executions on an SC store, such as a relational
+database:
 
 \begin{figure}[!h]
 \centering
@@ -83,249 +83,278 @@ colored backgrounds. In the first execution, the first transaction
 (`Wd1') reads the current balance (\C{k}) and writes the new balance
 (\C{k-a1}), but before it commits transaction `Wd2' executes and
 commits, writing the new balance (\C{k-a2}). RC isolation has
-prevented `Wd2' from witnessing the writes of uncommitted transaction
-`Wd1'. Committing `Wd1' now leads to the loss of updates from `Wd2'
-(the so called \emph{lost update anomaly}~\cite{berenson}), resulting
-in a balance of \C{k-a1}. The second execution describes a similar
-scenario with `Wd1' and `Wd2' exchanging their roles. 
+prevented the writes of uncommitted transaction `Wd1' from being
+\emph{visible} in `Wd2'. Committing `Wd1' now leads to the loss of
+updates from `Wd2' (the so called \emph{lost update
+anomaly}~\cite{berenson}), resulting in a balance of \C{k-a1}. The
+second execution describes a similar scenario with `Wd1' and `Wd2'
+exchanging their roles. Clearly, RC is not sufficient because it loses
+the updates of one transaction resulting in the violation of post
+condition.  We need an isolation level that prevents lost updates.
+\iso{Snapshot Isolation} (SI)~\cite{berenson} fits this requirement by
+its definition. SI implementations effectively serialize transactions
+that update a shared data object mostly by aborting and re-executing a
+transaction if write-write conflicts are detected during its commit.
+Since SI, unlike SER, need not necessarily rely on expensive
+lock-based concurrency control, it is also more efficient, making it
+appropriate appropriate for both `Wd' transactions. 
 
-Clearly, \iso{Read Committed} is not sufficient because it loses the
-updates of one transaction and violates the invariant in
-Fig.~\ref{fig:motiv-eg-1}. Now, consider an alternative unfolding of
-Execution 1, where, rather than committing `Wd1' and overwriting the
-updates of `Wd2', we rollback `Wd1' to reexecute it starting from the
-state that contains the updates of `Wd2'. No updates are lost in this
-alternative execution, leading to the satisfaction of
-Fig.~\ref{fig:motiv-eg-1} invariant. Rolling back and reexecuting an
-uncommitted transaction to prevent write-write conflicts with a
-committed transaction is a strategy often adopted by databases to
-implement \iso{Snapshot Isolation} (SI) level. Indeed, SI is
-sufficient to enforce the required invaraints in this
-example\footnote{\iso{Parallel Snapshot Isolation} (PSI), a weaker
-version of SI tailor-made for replicated stores is also sufficient.}.
-Moreover, relying on optimistic speculation instead of pessimistic
-locking for concurrency control makes SI more efficient than SER,
-making it appropriate for transactions in Fig.~\ref{fig:motiv-eg-1}.
-Note that we have arrived at his judgment via adhoc reasoning based on
-speculations about database's implementation strategies. Such a
-reasoning process is necessarily fragile and error-prone. Is there a
-better way?
+Thinking in terms of anomalies, as described above, is how database
+programmers are often encouraged to reason about weak isolation.
+Unfortunately, such reasoning does not rest on any sound foundation,
+thus highly error-prone. Reasoning in terms of the implementations of
+weak isolation is not any better since it requires application
+programmers to understand and reason about low-level implementation
+details of the database (or, databases) that are far removed from the
+application semantics. An attractive alternative in this context is a
+formal proof system that combines declarative reasoning about
+isolation guarantees with operational reasoning about programs. We
+demonstrate how our proof system makes this possible in the context of
+the current example.
+
+Firstly, we note that the example in Fig.~\ref{fig:motiv-eg-1} is a
+concurrent program, hence admits \emph{rely-guarantee} style
+reasoning~\cite{rgjones}. Rely-guarantee is compositional proof
+technique that allows us to reason about one thread at a time by
+abstracting away the interference due to remaining threads
+(collectively called \emph{the environment}) into a \emph{rely}
+relation. In an ordinary concurrent program, every environment step is
+a valid interference in the current thread. However, in presence of
+transactions and variable isolation, determining what constitutes an
+interference and what does not is a non-trivial problem. For example,
+inside a serializable transaction no interference is a valid
+interference, whereas inside a transaction executing under \iso{Read
+Uncommitted}, the weakest isolation level, all interferences are
+valid. Between these two extremes are various levels of isolation
+that admit some interferences while prohibiting others. 
+% For example, \iso{Read Committed} isolation admits interference of a
+% committed transaction, but not that of an uncommitted transaction.
+% \iso{Snapshot Isolation} admits interference from committed
+% non-conflicting transactions, and so on. 
+The key aspect of our proof system is that it facilitates
+rely-guarantee reasoning while allowing the programmer to ignore any
+interference that is invalid as per the chosen isolation level or the
+store consistency level. For instance, in the current example, `Wd2'
+executes concurrently with `Wd1', hence latter's rely relation is
+required to model all possible interferences from `Wd1'. However,
+since RC prevents the effects of an uncommitted transaction from being
+visible, our proof system allows the programmer to effectively ignore
+the interference from `Wd2' unless the interference includes its
+commit. RC execution 1 shown above is an example of a case where
+interference from `Wd2' includes its commit. Such interference is not
+prohibited by RC, and the SC store makes \emph{all} effects of `Wd2'
+immediately visible. Our proof system insists that the
+programmer consider all effects of `Wd2' and conclude the value of
+\C{C} as \C{k-a2}, thus leading (rightfully) to the failure of proof.
+On the other hand, \iso{Snapshot Isolation} proscribes any
+interference from a concurrent transaction performing conflicting
+writes. The RC executions shown above are therefore invalid under SI.
+Accordingly, programmer is allowed to ignore any interference from
+`Wd2', thus facilitating the proof of postcondition.
+
+As evident from the above example, a proof system for weak isolation
+has to be flexible enough to admit different kinds of reasoning for
+different isolation and consistency levels. One way this can be
+achieved is by having a separate proof rule for each combination of
+transaction isolation level and store consistency level, such that the
+rule reflects the operational semantics of the isolation level on the
+store. Given the large and ever-increasing diversity among isolation
+and consistency semantics, this approach is unlikely to scale. Our
+proof system avoids this problem by being parametric over the
+semantics of isolation and consistency levels. This approach is based
+on a couple of observations. First, as noted by some
+authors~\cite{pldi15,gotsmanconcur15}, semantics of various isolation
+and consistency levels can be captured as well-formedness conditions
+over execution traces. If an execution trace satisfies specified
+well-formedness conditions, then the program is considered to have
+experienced the required levels of consistency and isolation in that
+execution. Second, well-formedness conditions are often
+\emph{prefix-complete}, meaning that every prefix of a well-formed
+trace is also well-formed, or conversely, an ill-formed trace cannot
+be extended to a well-formed one. Prefix-completeness allows us to
+reason about programs operationally, in terms of an imaginary machine
+whose primary artifact is an execution trace. The machine starts from
+a well-formed trace, executes a read/write/commit operation, and
+extends the trace while preserving well-formedness. If well-formedness
+cannot be preserved by taking a step, the machine gets ``stuck''. In
+executions that run to completion, the machine models a store whose
+consistency and isolation guarantees are captured by the trace
+well-formedness conditions. Thus, to show that program's invariants
+are preserved under weak isolation, it suffices to show that they are
+preserved in all executions of the imaginary machine that do not get
+stuck. This is indeed how our proof system facilitates program
+verification. The ``invalid interference'' described informally before
+corresponds to a case of machine getting stuck due to the violation of
+trace well-formedness conditions. The proof system inherits the
+parametricity of the machine over trace well-formedness conditions,
+leading to a generic set of parameterized proof rules that can be
+instantiated for various store consistency and transaction isolation
+levels.
+
+We now demonstrate how rely-guarantee reasoning, parametricity ,and
+trace well-formedness conditions facilitate the proof of the example
+in Fig.~\ref{fig:motiv-eg-1}. The trace-wellformedness condition
+corresponding to \iso{Snapshot Isolation} is shown below\footnote{This
+is a simplified version of the actual specification of SI
+(\S~\ref{sec:opsem}), which is a little more involved.}:
+\begin{smathpar}
+\begin{array}{lcl}
+\underE{\C{SI}(T_j)} & \Rightarrow & \forall T_i. T_i \neq T_j \conj \\
+  & & (\exists \C{X}.~\underE{T_i \wrstoar \C{X}} \conj 
+                  \underE{T_j \wrstoar \C{X}}) \Rightarrow \\
+  &  & \underE{T_i \hboar T_j} \disj \underE{T_j \hboar \C{COMMIT}(T_i)} \\
+\end{array}
+\end{smathpar}
+A transaction $T_j$ that writes to a variable $\C{X}$ has experienced
+snapshot isolation in an execution $\E$ only if every other
+transaction $T_i$ that also wrote to \C{X} in $\E$ either happened
+before (i.e., committed before) $T_j$, or executed concurrently but
+commited after $T_j$. Here, $\E$ denotes an execution trace, and
+$\underE{\phi}$ asserts that proposition $\phi$ about $\E$ is valid.
+Since we require both `Wd1' and `Wd2' to be executed under SI, the
+trace invariant ($\I$) for the example is $\C{SI(Wd1)} \wedge
+\C{SI(Wd2)}$. That is, if the machine extends an execution $\E$ that
+satisfies $\I$ (i.e.,$\underE{\I}$) to $\E'$, then $\E'$ also satisfies
+$\I$ (i.e., $\E' \Vdash \I$). Since we reason in terms of traces, pre
+and post conditions need to be written with respect to a trace.
 
 \begin{figure}
 \centering
-$\{\{\texttt{C+S}\ge\texttt{0}\}\}$
-\begin{tabular}{l||l}
 \begin{txnimpcode}
-  txn$\langle$'WdC'$\rangle${
-    if (C+S $\ge$ a1) {
-      C := C - a1
+ $\begin{decoration}
+ P_1:\{ {\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \conj\\
+        \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2}
+        \hboar \C{Wd1} \wedge \C{Wd2} \wrstoar \C{C} \wedge \C{C = k-a2} \}
+ \end{decoration}$
+  txn$\langle$'Wd1'$\rangle${
+   $\begin{decoration}
+    \phi_1 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \conj
+      {\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj\\
+       \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
+        {\C{Wd2} \hboar \C{Wd1}} 
+       \Rightarrow \C{C = k-a2} \}
+    \end{decoration}$ 
+    v1 = C
+   $\begin{decoration}
+    \phi_2 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \wedge \C{v1 = k} \conj\\
+       \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj \\
+       \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
+        {\C{Wd2} \hboar \C{Wd1}} 
+       \Rightarrow \C{C = k-a2} \wedge \C{v1 = k-a2}\}
+    \end{decoration}$ 
+    if (v1 $\ge$ a1) {
+      v2 = C;
+     $\begin{decoration}
+      \phi_3 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \wedge \C{v2 = k} \conj\\
+       \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj \\
+         \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
+          {\C{Wd2} \hboar \C{Wd1}} \Rightarrow \C{C = k-a2} \wedge \\
+          \hspace*{1.9in}\C{v2 = k-a2}\}
+      \end{decoration}$ 
+      v3 = v2 - a1;
+     $\begin{decoration}
+      \phi_4 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \wedge \C{v3 = k-a1} \conj\\
+         \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj \\
+         \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
+          {\C{Wd2} \hboar \C{Wd1}} 
+         \Rightarrow \C{C = k-a2} \wedge \\
+         \hspace*{1.9in}\C{v3 = k-a2-a1}\}
+      \end{decoration}$ 
+      C := v3
+     $\begin{decoration}
+      \phi_5 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k-a1}) 
+                \conj\\
+         \hspace*{0.3in}{\committed(\C{Wd2})} 
+                \Rightarrow \C{C = k-a1-a2}\}
+      \end{decoration}$ 
     }
   }
+ $\begin{decoration}
+  Q_1 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k-a1}
+            \conj \committed(\C{Wd1}) \conj\\
+      \hspace*{0.12in}{\committed(\C{Wd2})} 
+          \Rightarrow \C{C = k-a1-a2} \}
+  \end{decoration}$ 
 \end{txnimpcode}
-&
-\begin{txnimpcode}
-  txn$\langle$'WdS'$\rangle${
-    if (C+S $\ge$ a2) {
-      S := S - a2
-    }
-  }
-\end{txnimpcode}
-\\
-\end{tabular}
-$\{\{\texttt{C+S}\ge\texttt{0}\}\}$
 
-\caption{Withdraws from current (\C{C}) and savings (\C{S}) accounts.}
-\label{fig:motiv-eg-2}
+\caption{`Wd1' transaction decorated with assertions}
+\label{fig:wd1-decorated}
 \end{figure}
 
-\iso{Snapshot Isolation} effectively serializes updates to a data
-object without necessarily relying on expensive lock-based concurrency
-control. While this makes it a better alternative to
-\iso{Serializable} isolation, it is however not a replacement for the
-latter. Consider a different banking application that maintains a
-current (\C{C}) and savings account (\C{S}) for each user. A user can
-withdraw either from current or from savings account as long as the
-combined balance is at least as much as the amount being withdrawn.
-Fig.~\ref{fig:motiv-eg-2} shows a pair of concurrent transactions,
-`WdC' and `WdS', performing withdraws from current and savings
-accounts, respectively. Pre and post conditions assert non-negative
-combined balance invariant. \iso{Serializable} isolation is sufficient
-to preserve the invariant, but \iso{Snapshot Isolation} is not.
-Intuitively, this is because there are no \emph{lost updates} in this
-example even when both transactions commit concurrently, hence there
-is no reason for SI to effectively serialize them. A reasoning
-framework for weak isolation should let us formally deduce this fact
-by making it impossible to construct a proof of correctness for the
-program under SI, but facilitating a proof under SER.
+The fully decorated implementation of transaction `Wd1' is shown in
+Fig.~\ref{fig:wd1-decorated}. Decorated `Wd2' is similar. Assignment
+statements are broken down and temporary local variables (\C{v1},
+\C{v2} and \C{v3}) are introduced so as to separate shared variable
+reads and writes.  Since we reason in terms of executions, all
+assertions implicitly refer to the current execution (just as hoare
+triples implicitly refer to the current state). Also implicit is the
+invariant \C{k $\ge$ a1+a2}. Proposition $\committed(T)$ indicates
+that the transaction $T$ is already committed. Precondition ($P_1$) of
+`Wd1' accounts for the possibility of `Wd2' committing before `Wd1',
+writing \C{k-a2} to \C{C}.  Precondition of `Wd2' is similar.  Since
+neither `Wd1' nor `Wd2' are committed at the beginning, the
+precondition in Fig.~\ref{fig:motiv-eg-1} is extended to include
+$\neg\committed(\C{Wd1}) \wedge \neg\committed(\C{Wd2})$, from which
+$P_1$ follows. Once the execution is inside `Wd1', commit of `Wd2'
+($\committed(\C{Wd2})$) may mean that either `Wd2' happened before
+`Wd1', or that it committed concurrently with `Wd1'. Since SI
+proscribes the latter possibility, we only consider the case when
+$\C{Wd2} \hboar \C{Wd1}$. A proof for $\C{Wd2} \hboar \C{Wd1}$ is
+obtained subsequently, allowing us to get rid of the special case.
 
-\begin{figure}[t]
-\centering
-$\{\{\texttt{C+S}\ge\texttt{0}\}\}$
-\begin{tabular}{l||l||}
-\begin{txnimpcode}
-  txn$\langle$'Xfer'$\rangle${
-    C := C - a;
-    S := S + a;
-  }
-\end{txnimpcode}
-&
-\begin{txnimpcode}
-  txn$\langle$'TotBal'$\rangle${
-    T := S + C
-  }
-\end{txnimpcode}
-% \\
-% \multicolumn{2}{c} {
-% }
-\end{tabular}
-\begin{tabular}{c}
-  \begin{txnimpcode}
-    txn$\langle$'AddInt'$\rangle${
-      S := S + (T*0.1)
-    }
-  \end{txnimpcode}
-\end{tabular}
+The first obligation is to show that the assertions that decorate
+`Wd1' are indeed valid. This entails proving that, for each statement
+of `Wd1', if evaluating the statement and extending an execution that
+satisfies its precondition results in a well-formed execution, then
+the extended execution must satisfy the postcondition. The
+well-formedness assumption lets us ignore the executions that violate
+the trace invariant lead the machine to a stuck state. This is useful
+in case of the assignment statement that writes \C{v3} to \C{C}. Since
+`Wd2' also writes to \C{C}, the trace invariant ($\I$) requires
+$\C{Wd2} \hboar \C{Wd1}$ if $\committed(\C{Wd2})$ (the alternative
+$\C{Wd1} \hboar \C{COMMIT}(\C{Wd2})$ allowed by \C{SI(Wd1)} is
+impossible in this case because \C{Wd2} has already committed, while
+\C{Wd1} is still in progress). This lets us treat the special case
+$\committed(\C{Wd2})\conj \C{Wd2} \hboar \C{Wd1}$ as being equivalent
+to the general case $\committed(\C{Wd2})$, which is required to prove
+the postcondition of `Wd1'. Observe that \C{RC(Wd1)} does not justify
+this generalization, hence replacing \C{SI(Wd1)} by \C{RC(Wd1)} is not
+sufficient to prove the postcondition of `Wd1'.
 
-$\{\{\texttt{C+S}\ge\texttt{0}\}\}$
-
-\caption{Concurrent transfer (\C{Xf}) and interest accumulation (\C{Int}).}
-\label{fig:motiv-eg-3}
-\end{figure}
-
-The previous two examples preserve invariants on \C{C} and \C{S} by
-effectively serializing transactions that write to \C{C} and \C{S}.
-However, in general, serializing a subset of transactions that write
-to the data objects referred by invariants is neither sufficient nor
-necessary to uphold the invariants. Consider the banking application
-in Fig.~\ref{fig:motiv-eg-3} with three transactions. Transaction
-`Xfer' transfers some amount (\C{a}) from current (\C{C}) to savings
-(\C{S}) account.  Transaction `TotBal' records the total balance in
-both the accounts in a data object \C{T}, and transaction `AddIntr'
-calculates interest on total balance (10\% of \C{T}) and adds it to
-the savings account. Using a data object to record some function of
-the current state of other data objects is a standard practice in
-relational databases, where Materialized Views~\cite{oraclematview}
-are created to maintain the results of a SQL query. Like the previous
-example, the invariant of interest in this example is non-negative
-total balance; if we start with a non-negative total balance, and we
-add interest based on the total balance, we must end up with a
-non-negative total balance.  However, unlike the previous example,
-serializing transactions that write to \C{C} and \C{S} is not
-sufficient to guarantee the invariant.  The following execution
-demonstrates this anomaly:
-
-\begin{figure}[!h]
-\centering
-\includegraphics[scale=0.5]{Figures/motiv-eg-3-a}
-
-\label{fig:motiv-eg-3-a}
-\end{figure}
-
-The subscripts X, TB and AI denote `Xfer', `TotBal' and `AddInt'
-transactions, respectively. Assume that \C{C} and \C{S} are initially
-10 and 0, respectively. Let \C{a} be 200, i.e., we subtract 200 from
-\C{C} and add it to \C{S}.  This operation must be allowed because it
-doesn't effect the total balance, hence the interest. The execution
-begins with `TotBal' transaction reading the savings (\C{S}) balance
-as 0 (we assume left-to-right evaluation order for \C{S + C}).
-However, before it reads the current (\C{C}) balance, `Xfer'
-transaction executes and commits, changing \C{C} to -190.
-Subsequently, `TotBal' reads -190 from \C{C}, and updates \C{T} to
--190. `AddInt', which begins execution after `TotBal', reads -190 from
-\C{T}, calculates interest as -19, and updates \C{S} to 181. The
-result is a state with total balance as -190 + 181 = -9, thus
-violating the invariant.
-
-Note that transactions `Xfer' and `AddInt', which write to the data
-objects (\C{C} and \C{S}) relevant to the invariant, are serialized in
-the above execution. Transaction `TotBal' however is not. While
-serializing it fixes the problem, it is not necessary. A simpler fix
-is to isolate `TotBal' transaction from the effects of concurrent
-`Xfer' transaction, so that it reads \C{C} as 10 despite the
-concurrent `Xfer' transaction committing -190 to \C{C}. This can be
-achieved by executing `TotBal' under \iso{Repeatable Read} (RR)
-isolation level, which guarantees that any two reads of a data object
-in a transaction return the same value (the \emph{repeatable reads}
-property~\cite{berenson}). Allowing `Xfer' to interfere with `TotBal'
-violates the repeatable read property since a hypothetical read from
-\C{S} in `TotBal' after the interference returns a different value
-(200) than the first read (0). Executing `TotBal' under RR restores
-repeatable read by \emph{effectively} prohibiting such interference.
-
-\begin{figure}[t]
-\centering
-\hspace*{-0.3in}$\{\{\texttt{V=0}\}\}$
-\begin{tabular}{l||l}
-\begin{txnimpcode}
-  txn$\langle$'Rd'$\rangle${
-    X := V
-    Y := V
-  }
-\end{txnimpcode}
-&
-\begin{txnimpcode}
-  cobegin (i $\leftarrow$ [1$\ldots$3]) {
-    txn$\langle$'Inc['+i+']'$\rangle${
-      V := V + 1
-    }
-  }
-\end{txnimpcode}
-% &
-% \begin{txnimpcode}
-%   txn$\langle$'Inc2'$\rangle${
-%     V := V + 1
-%   }
-% \end{txnimpcode}
-\\
-\end{tabular}
-\hspace*{-0.3in}$\{\{\texttt{Y}\ge\texttt{X}\}\}$
-
-\caption{View counter (\C{V}) increments (\C{Inc}) and reads (\C{Rd})}
-\label{fig:motiv-eg-4}
-\end{figure}
-
-Our last example demonstrates that it is not necessary to serialize
-transactions, even those that write to the same data objects, to
-maintain essential invariants in practical applications. Consider a
-counter used to count video views on a YouTube-like application. The
-counter need not accurately track the view count, but it must at least
-ensure that the count does not decrease (nor does it appear to be
-decreasing). Fig.~\ref{fig:motiv-eg-4} shows a simple example
-involving a view counter (\C{V}). The three `Inc' transactions
-(`Inc[1]' to `Inc[3]') increment the counter, while the transaction
-`Rd' reads the counter twice and writes the values read to \C{X} and
-\C{Y}, respectively. The count is 0 initially. Since we expect the
-view count to monotonically increase, we require $\C{Y}\ge\C{X}$ at
-the end. Under the standard setting, where new writes to data objects
-always overwrite previous writes, the postcondition may not hold. For
-instance, consider an execution where `Inc[1]' reads \C{V} as 0 (but
-doesn't commit), then `Inc[2]' and `Inc[3]' commit serially changing
-\C{V} to 2, followed by `Rd' reading 2 and writing it to \C{X}. Now
-`Inc[1]', which has read \C{V} as 0 writes 1 to \C{V} and commits. The
-subsequent read of \C{V} by `Rd' returns 1, which it writes to \C{Y}
-and commits. In the final state, \C{X} is 2 and \C{Y} is 1, thus
-violating the monotonicity invariant.
-
-However, in an unconventional setting, such as a modern day replicated
-data store, writes arriving at a replica need not necessarily
-overwrite the existing writes. A \emph{conflict resolution strategy}
-may be employed to pick, for example, a write with the largest value
-among competing concurrent writes. Under this setting, the write to
-\C{V} by `Inc[1]' with a value (1) less than the current value (2) is
-discarded. Transaction `Rd' therefore continues to read 2, allowing it
-to satisfy the postcondition. Note that we did not have to serialize
-`Inc' transactions to uphold the monotonicity invariant, although they
-are involved in Write-Write conflicts.  The default \iso{Read
-Committed} isolation level suffices\footnote{We have implicitly assumed that
-`Rd' transaction witnesses monotonically growing state, i.e., the
-transactions that appear committed to the first read of \C{V} in `Rd'
-also appear committed to the second read.  Most implementations of RC
-enforce this \emph{Monotonic View} invariant. However,
-some~\cite{pldi15,bailishat} categorize RC with Monotonic View as a
-separate isolation level called \iso{Monotonic Atomic View} (MAV). On
-those stores, we need MAV for `Rd'. }, provided that the conflict
-resolution strategy consistently picks writes with larger values. A
-reasoning framework for weak isolation must be sensitive to the
-semantics of conflict resolution in order to formally prove the
-monotonicity invariant in this example.
-
+The second obligation is to prove that assertions are valid despite
+the interference from the the concurrent thread executing `Wd2'. The
+interference is given by the following rely relation ($R_1$):
+\begin{smathpar}
+\begin{array}{lcl}
+  R_1 & = & \{ (\E,\E') \;|\; \neg\underE{\committed(\C{Wd2})} \conj 
+        \underE{\I} \conj \E'\Vdash \I \conj\\
+%       \conj (\E'-\E) \subseteq \C{Wd2} \conj \\
+%   & & \hspace*{0.5in} \E' \Vdash \committed(\C{Wd2}) ~\Rightarrow~ \E'
+%       \Vdash \C{Wd2} \wrstoar \C{C} \conj \\ 
+%   & & \hspace*{0.5in} \underE{\committed(\C{Wd1})} \conj \E' \Vdash
+%   \committed(\C{Wd2}) \Rightarrow \C{C=k-a1-a2} \\
+    & & \hspace*{0.5in} \neg\underE{\committed(\C{Wd1})} \conj
+        \C{COMMIT(Wd2)} \in (\E'-\E) \\
+    & & \hspace*{0.8in}\Rightarrow \C{C=k-a2} \conj 
+        \E' \Vdash \C{Wd2} \wrstoar \C{C} \conj \\
+    & & \hspace*{0.5in} \underE{\committed(\C{Wd1})} \conj
+        \C{COMMIT(Wd2)} \in (\E'-\E) \\
+    & & \hspace*{0.6in}\Rightarrow \C{C=k-a1-a2} \conj
+        \E' \Vdash \C{Wd2} \wrstoar \C{C} \}\\
+\end{array}
+\end{smathpar}
+The rely relation says the following about the concurrent thread: (1).
+It may interfere only if `Wd2' is not already committed, (2). Any
+interference takes well-formed executions to well-formed executions,
+(3). If the interference commits `Wd2', then `Wd2' should have already
+written to \C{C}, and (4). The value written is either $\C{k-a1-a2}$
+or $\C{k-a1}$ depending on whether or not `Wd1' has already committed.
+Interference from `Wd2' is allowed between any two operations of
+`Wd1', and assertions are required to be valid despite the
+interference. For instance, if the execution ($\E$) immediately after
+evaluating $\C{v1 = C}$ satisfies $\phi_2$ (i.e., $\underE{\phi_2}$),
+and an interference from `Wd2' extends $\E$ to $\E'$ (i.e.,
+$R_1(\E,\E')$), then the execution $\E'$ just before evaluating the
+condition must satisfy $\phi_2$ (i.e., $\E' \Vdash \phi_2$). Indeed,
+all $\phi_i$'s do satisfy this \emph{stability} condition, thus
+lending the validity to the proof.
