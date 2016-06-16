@@ -110,6 +110,18 @@ isolation guarantees with operational reasoning about programs. We
 demonstrate how our proof system makes this possible in the context of
 the current example.
 
+\begin{figure}
+\centering
+  \includegraphics[scale=0.4]{Figures/motiv-eg-1-hb}
+
+\label{fig:motiv-eg-1-hb}
+\caption{$\hbZ$ arrows allowed by SI (solid) and RC (solid and dashed)
+isolation levels for the example in Fig.~\ref{fig:motiv-eg-1}. Each
+arrow represents $\hbZ$ relationship between all operations of `Wd2'
+and operations in `Wd1' that follow the arrow head. Letters R, W and C
+stand for read, write and commit, respectively.}
+\end{figure}
+
 Firstly, we note that the example in Fig.~\ref{fig:motiv-eg-1} is a
 concurrent program, hence admits \emph{rely-guarantee} style
 reasoning~\cite{rgjones}. Rely-guarantee is compositional proof
@@ -129,230 +141,114 @@ that admit some interferences while prohibiting others.
 % committed transaction, but not that of an uncommitted transaction.
 % \iso{Snapshot Isolation} admits interference from committed
 % non-conflicting transactions, and so on. 
-The key aspect of our proof system is that it facilitates
-rely-guarantee reasoning while allowing the programmer to ignore any
-interference that is invalid as per the chosen isolation level or the
-store consistency level. For instance, in the current example, `Wd2'
-executes concurrently with `Wd1', hence latter's rely relation is
-required to model all possible interferences from `Wd1'. However,
-since RC prevents the effects of an uncommitted transaction from being
-visible, our proof system allows the programmer to effectively ignore
-the interference from `Wd2' unless the interference includes its
-commit. RC execution 1 shown above is an example of a case where
-interference from `Wd2' includes its commit. Such interference is not
-prohibited by RC, and the SC store makes \emph{all} effects of `Wd2'
-immediately visible. Our proof system insists that the
-programmer consider all effects of `Wd2' and conclude the value of
-\C{C} as \C{k-a2}, thus leading (rightfully) to the failure of proof.
-On the other hand, \iso{Snapshot Isolation} proscribes any
-interference from a concurrent transaction performing conflicting
-writes. The RC executions shown above are therefore invalid under SI.
-Accordingly, programmer is allowed to ignore any interference from
-`Wd2', thus facilitating the proof of postcondition.
-
-As evident from the above example, a proof system for weak isolation
-has to be flexible enough to admit different kinds of reasoning for
-different isolation and consistency levels. One way this can be
-achieved is by having a separate proof rule for each combination of
-transaction isolation level and store consistency level, such that the
-rule reflects the operational semantics of the isolation level on the
-store. Given the large and ever-increasing diversity among isolation
-and consistency semantics, this approach is unlikely to scale. Our
-proof system avoids this problem by being parametric over the
-semantics of isolation and consistency levels. This approach is based
-on a couple of observations. First, as noted by some
-authors~\cite{pldi15,gotsmanconcur15}, semantics of various isolation
-and consistency levels can be captured as well-formedness conditions
-over execution traces. If an execution trace satisfies specified
-well-formedness conditions, then the program is considered to have
-experienced the required levels of consistency and isolation in that
-execution. Second, well-formedness conditions are often
-\emph{prefix-complete}, meaning that every prefix of a well-formed
-trace is also well-formed, or conversely, an ill-formed trace cannot
-be extended to a well-formed one. Prefix-completeness allows us to
-reason about programs operationally, in terms of an imaginary machine
-whose primary artifact is an execution trace. The machine starts from
-a well-formed trace, executes a read/write/commit operation, and
-extends the trace while preserving well-formedness. If well-formedness
-cannot be preserved by taking a step, the machine gets ``stuck''. In
-executions that run to completion, the machine models a store whose
-consistency and isolation guarantees are captured by the trace
-well-formedness conditions. Thus, to show that program's invariants
-are preserved under weak isolation, it suffices to show that they are
-preserved in all executions of the imaginary machine that do not get
-stuck. This is indeed how our proof system facilitates program
-verification. The ``invalid interference'' described informally before
-corresponds to a case of machine getting stuck due to the violation of
-trace well-formedness conditions. The proof system inherits the
-parametricity of the machine over trace well-formedness conditions,
-leading to a generic set of parameterized proof rules that can be
-instantiated for various store consistency and transaction isolation
-levels.
-
-We now demonstrate how rely-guarantee reasoning, parametricity ,and
-trace well-formedness conditions facilitate the proof of the example
-in Fig.~\ref{fig:motiv-eg-1}. The trace-wellformedness condition
-corresponding to \iso{Snapshot Isolation} is shown below\footnote{This
-is a simplified version of the actual specification of SI
-(\S~\ref{sec:opsem}), which is a little more involved.}:
+For the rely guarantee approach to be useful it has to constrain the
+interference in accordance with the chosen level of isolation. The
+first key observation we make is that we can constrain interference by
+constraining the nature of \emph{happens-before} ($\hbZ$) relation
+between transactions or their respective constituents. We make use of
+the $\hbZ$ relation to axiomatize the interference characteristic of
+isolation levels as their specifications ($\psi$). For example,
+\iso{Read Committed} specification allows an operation $\eta_1$ of
+$T_1$ to happen before an operation $\eta_2$ of $T_2$ only if every
+operation in $T_1$ (including its commit) happens before $\eta_2$ (we
+write $T_1 \hboar \eta_2$ to denote this). RC spec does not require
+$T_1$ to happen before all operations of $T_2$, thus allowing it to
+interfere in $T_2$, as possible under RC isolation. \iso{Snapshot
+Isolation} spec requires two transactions that write to the same
+variable to be related by happens-before.  This effectively proscribes
+interference due to $T_1$ in $T_2$ (or, $T_2$ in $T_1$).
+Formally\footnote{Note that specs are simplified for illustration. The
+actual specs (\S~\ref{sec:opsem}) are more nuanced.  }:
 \begin{smathpar}
 \begin{array}{lcl}
-\underE{\C{SI}(T_j)} & \Rightarrow & \forall T_i. T_i \neq T_j \conj \\
-  & & (\exists \C{X}.~\underE{T_i \wrstoar \C{X}} \conj 
-                  \underE{T_j \wrstoar \C{X}}) \Rightarrow \\
-  &  & \underE{T_i \hboar T_j} \disj \underE{T_j \hboar \C{COMMIT}(T_i)} \\
+\psi_{RC} & \defeq & \forall \eta_1,\eta_2,T_1,T_2.\; \txn(\eta_1) = T_1 
+  \conj \txn(\eta_2) = T_2 \\
+  & & \hspace*{0.6in}\conj T_1 \neq T_2 \conj \eta_1 \hboar
+  \eta_2 \Rightarrow T_1 \hboar \eta_2 \\
+\psi_{SI} & \defeq & \forall T_1,T_2.\; T_1 \neq T_2 \conj
+  (\exists \C{X}.~{T_1 \wrstoar \C{X}} \conj 
+                      {T_2 \wrstoar \C{X}})\\
+  &  & \hspace*{0.6in}\Rightarrow{T_1 \hboar T_2} \disj {T_2 \hboar T_1} \\
 \end{array}
 \end{smathpar}
-A transaction $T_j$ that writes to a variable $\C{X}$ has experienced
-snapshot isolation in an execution $\E$ only if every other
-transaction $T_i$ that also wrote to \C{X} in $\E$ either happened
-before (i.e., committed before) $T_j$, or executed concurrently but
-commited after $T_j$. Here, $\E$ denotes an execution trace, and
-$\underE{\phi}$ asserts that proposition $\phi$ about $\E$ is valid.
-Since we require both `Wd1' and `Wd2' to be executed under SI, the
-trace invariant ($\I$) for the example is $\C{SI(Wd1)} \wedge
-\C{SI(Wd2)}$. That is, if the machine extends an execution $\E$ that
-satisfies $\I$ (i.e.,$\underE{\I}$) to $\E'$, then $\E'$ also satisfies
-$\I$ (i.e., $\E' \Vdash \I$). Since we reason in terms of traces, pre
-and post conditions need to be written with respect to a trace.
+Fig.~\ref{fig:motiv-eg-1-hb} is a visualization of $\hbZ$ arrows
+from `Wd2' to `Wd1' allowed by $\psi_{RC}$and $\psi_{SI}$. All
+arrows re legal under $\psi_{RC}$ because in no case does an operation
+$\eta_1$ from `Wd1' happen before $\eta_2$ of `Wd2' without the commit
+of `Wd1' also happening before $\eta_2$. $\psi_{SI}$ however disallows
+all dashed arrows, becase dashed arrows establish $\hbZ$ between `Wd2'
+and only a subset of operations in `Wd1'. Ligher (blue) arrows with
+hollow heads denote $\hbZ$ relationships that do not effect the value
+of \C{C} in a way that causes the program to violate its
+postcondition.  Darker (black) arrows with solid heads denote $\hbZ$
+relationships that lead to the violation of postcondition. The task of
+the reasoning framework is to determine if all $\hbZ$ relationships
+allowed by an isolation level lead to the satisfaction of the
+postcondition.
 
-\begin{figure}
-\centering
-\begin{txnimpcode}
- $\begin{decoration}
- P_1:\{ {\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \conj\\
-        \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2}
-        \hboar \C{Wd1} \wedge \C{Wd2} \wrstoar \C{C} \wedge \C{C = k-a2} \}
- \end{decoration}$
-  txn$\langle$'Wd1'$\rangle${
-   $\begin{decoration}
-    \phi_1 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \conj
-      {\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj\\
-       \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
-        {\C{Wd2} \hboar \C{Wd1}} 
-       \Rightarrow \C{C = k-a2} \}
-    \end{decoration}$ 
-    v1 = C
-   $\begin{decoration}
-    \phi_2 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \wedge \C{v1 = k} \conj\\
-       \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj \\
-       \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
-        {\C{Wd2} \hboar \C{Wd1}} 
-       \Rightarrow \C{C = k-a2} \wedge \C{v1 = k-a2}\}
-    \end{decoration}$ 
-    if (v1 $\ge$ a1) {
-      v2 = C;
-     $\begin{decoration}
-      \phi_3 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \wedge \C{v2 = k} \conj\\
-       \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj \\
-         \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
-          {\C{Wd2} \hboar \C{Wd1}} \Rightarrow \C{C = k-a2} \wedge \\
-          \hspace*{1.9in}\C{v2 = k-a2}\}
-      \end{decoration}$ 
-      v3 = v2 - a1;
-     $\begin{decoration}
-      \phi_4 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \wedge \C{v3 = k-a1} \conj\\
-         \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj \\
-         \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
-          {\C{Wd2} \hboar \C{Wd1}} 
-         \Rightarrow \C{C = k-a2} \wedge \\
-         \hspace*{1.9in}\C{v3 = k-a2-a1}\}
-      \end{decoration}$ 
-      C := v3
-     $\begin{decoration}
-      \phi_5 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k-a1}) 
-                \conj\\
-         \hspace*{0.3in}{\committed(\C{Wd2})} 
-                \Rightarrow \C{C = k-a1-a2}\}
-      \end{decoration}$ 
-    }
-  }
- $\begin{decoration}
-  Q_1 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k-a1}
-            \conj \committed(\C{Wd1}) \conj\\
-      \hspace*{0.12in}{\committed(\C{Wd2})} 
-          \Rightarrow \C{C = k-a1-a2} \}
-  \end{decoration}$ 
-\end{txnimpcode}
+% There is a $\hb$ edge (first dashed) that is allowed by RC but
+% prohibited by SI, which nonetheless does not lead to invariant
+% violation. 
 
-\caption{`Wd1' transaction decorated with assertions}
-\label{fig:wd1-decorated}
-\end{figure}
-
-The fully decorated implementation of transaction `Wd1' is shown in
-Fig.~\ref{fig:wd1-decorated}. Decorated `Wd2' is similar. Assignment
-statements are broken down and temporary local variables (\C{v1},
-\C{v2} and \C{v3}) are introduced so as to separate shared variable
-reads and writes.  Since we reason in terms of executions, all
-assertions implicitly refer to the current execution (just as hoare
-triples implicitly refer to the current state). Also implicit is the
-invariant \C{k $\ge$ a1+a2}. Proposition $\committed(T)$ indicates
-that the transaction $T$ is already committed. Precondition ($P_1$) of
-`Wd1' accounts for the possibility of `Wd2' committing before `Wd1',
-writing \C{k-a2} to \C{C}.  Precondition of `Wd2' is similar.  Since
-neither `Wd1' nor `Wd2' are committed at the beginning, the
-precondition in Fig.~\ref{fig:motiv-eg-1} is extended to include
-$\neg\committed(\C{Wd1}) \wedge \neg\committed(\C{Wd2})$, from which
-$P_1$ follows. Once the execution is inside `Wd1', commit of `Wd2'
-($\committed(\C{Wd2})$) may mean that either `Wd2' happened before
-`Wd1', or that it committed concurrently with `Wd1'. Since SI
-proscribes the latter possibility, we only consider the case when
-$\C{Wd2} \hboar \C{Wd1}$. A proof for $\C{Wd2} \hboar \C{Wd1}$ is
-obtained subsequently, allowing us to get rid of the special case.
-
-The first obligation is to show that the assertions that decorate
-`Wd1' are indeed valid. This entails proving that, for each statement
-of `Wd1', if evaluating the statement and extending an execution that
-satisfies its precondition results in a well-formed execution, then
-the extended execution must satisfy the postcondition. The
-well-formedness assumption lets us ignore the executions that violate
-the trace invariant lead the machine to a stuck state. This is useful
-in case of the assignment statement that writes \C{v3} to \C{C}. Since
-`Wd2' also writes to \C{C}, the trace invariant ($\I$) requires
-$\C{Wd2} \hboar \C{Wd1}$ if $\committed(\C{Wd2})$ (the alternative
-$\C{Wd1} \hboar \C{COMMIT}(\C{Wd2})$ allowed by \C{SI(Wd1)} is
-impossible in this case because \C{Wd2} has already committed, while
-\C{Wd1} is still in progress). This lets us treat the special case
-$\committed(\C{Wd2})\conj \C{Wd2} \hboar \C{Wd1}$ as being equivalent
-to the general case $\committed(\C{Wd2})$, which is required to prove
-the postcondition of `Wd1'. Observe that \C{RC(Wd1)} does not justify
-this generalization, hence replacing \C{SI(Wd1)} by \C{RC(Wd1)} is not
-sufficient to prove the postcondition of `Wd1'.
-
-The second obligation is to prove that assertions are valid despite
-the interference from the the concurrent thread executing `Wd2'. The
-interference is given by the following rely relation ($R_1$):
+Specification of an isolation level encodes its interference
+characteristic as constraints over $\hbZ$ relation. However, for this
+to be useful in reasoning about programs, rely guarantee framework
+should be able to use the specification to determine if an
+interference is valid or invalid, allowing the programmer to only
+focus on the former. Our second key observation is that this is
+possible if the reasoning framework adequately tracks $\hbZ$ at each
+program point, while preserving $\hbZ$ constraints as invariants
+between program points. An interference that leads to the violation of
+$\hbZ$ constraints (i.e., an invalid interference) is thus
+automatically prohibited. For instance, consider the program point
+after the write to \C{C} in `Wd1'. The expected invariant ($\phi$) at
+that program point is shown below ($\committed$ stands for
+``committed''):
 \begin{smathpar}
-\begin{array}{lcl}
-  R_1 & = & \{ (\E,\E') \;|\; \neg\underE{\committed(\C{Wd2})} \conj 
-        \underE{\I} \conj \E'\Vdash \I \conj\\
-%       \conj (\E'-\E) \subseteq \C{Wd2} \conj \\
-%   & & \hspace*{0.5in} \E' \Vdash \committed(\C{Wd2}) ~\Rightarrow~ \E'
-%       \Vdash \C{Wd2} \wrstoar \C{C} \conj \\ 
-%   & & \hspace*{0.5in} \underE{\committed(\C{Wd1})} \conj \E' \Vdash
-%   \committed(\C{Wd2}) \Rightarrow \C{C=k-a1-a2} \\
-    & & \hspace*{0.5in} \neg\underE{\committed(\C{Wd1})} \conj
-        \C{COMMIT(Wd2)} \in (\E'-\E) \\
-    & & \hspace*{0.8in}\Rightarrow \C{C=k-a2} \conj 
-        \E' \Vdash \C{Wd2} \wrstoar \C{C} \conj \\
-    & & \hspace*{0.5in} \underE{\committed(\C{Wd1})} \conj
-        \C{COMMIT(Wd2)} \in (\E'-\E) \\
-    & & \hspace*{0.6in}\Rightarrow \C{C=k-a1-a2} \conj
-        \E' \Vdash \C{Wd2} \wrstoar \C{C} \}\\
+\begin{array}{l}
+  \neg\committed(\C{Wd1}) \conj (\neg\committed(\C{Wd2}) \Rightarrow
+  \C{C = k-a1}) 
+                \\
+      \C{Wd1} \wrstoar \C{C} \conj (\committed(\C{Wd2})
+                \Rightarrow \C{C = k-a1-a2})\}
 \end{array}
 \end{smathpar}
-The rely relation says the following about the concurrent thread: (1).
-It may interfere only if `Wd2' is not already committed, (2). Any
-interference takes well-formed executions to well-formed executions,
-(3). If the interference commits `Wd2', then `Wd2' should have already
-written to \C{C}, and (4). The value written is either $\C{k-a1-a2}$
-or $\C{k-a1}$ depending on whether or not `Wd1' has already committed.
-Interference from `Wd2' is allowed between any two operations of
-`Wd1', and assertions are required to be valid despite the
-interference. For instance, if the execution ($\E$) immediately after
-evaluating $\C{v1 = C}$ satisfies $\phi_2$ (i.e., $\underE{\phi_2}$),
-and an interference from `Wd2' extends $\E$ to $\E'$ (i.e.,
-$R_1(\E,\E')$), then the execution $\E'$ just before evaluating the
-condition must satisfy $\phi_2$ (i.e., $\E' \Vdash \phi_2$). Indeed,
-all $\phi_i$'s do satisfy this \emph{stability} condition, thus
-lending the validity to the proof.
+$\phi$ asserts that `Wd1' is not yet committed, and that it wrote to
+\C{C}, and the value of \C{C} is either \C{k-a1-a2} or \C{k-a1}
+depending on whether or not `Wd2' is committed. If $\phi$ stays
+invariant until `Wd1' commits, then the postcondition (\C{C =
+k-a1-a2}) can be established easily. However, an interference from
+`Wd2' at this stage (captured by the last dashed arrow in
+Fig.~\ref{fig:motiv-eg-1-hb}) may violate the invariant by writing
+$\C{k-a1}$ to \C{C} and committing `Wd2', thus leading to
+$\committed(\C{Wd2}) \Rightarrow \C{C=k-a2}$. Fortunately,
+\iso{Snapshot Isolation} prevents this interference, and this can be
+proved by showing that an interference from `Wd2' starting from a
+execution state that satisfies $\psi_{SI} \wedge \phi$ leads to an
+execution state where neither $\C{Wd2} \hboar \C{Wd1}$ nor $\C{Wd1}
+\hboar \C{Wd2}$ holds (former does not hold because at least one write
+from `Wd1' has happened before at least one operation of `Wd2', and
+the latter doesn't hold because `Wd1' hasn't yet committed and `Wd2'
+has already begun). Since `Wd2' also writes to \C{C}, this violates
+the $\psi_{SI}$ constraint which we assume to be an invariant. A proof
+for postcondition now follows from the contradiction. It is
+informative to note that if the invariant is $\psi_{RC}$ instead of
+$\psi_{SI}$, we cannot derive a contradiction and we cannot rule out
+the interference, which causes (rightfully) the proof to fail.
+
+We have thus far assumed an SC store that, in the absence of
+transactions with special isolation requirements, makes effects of an
+operation to be immediately visible to subsequent operations. Thus,
+the natural behavior of SC store to totally order all operations w.r.t
+$\hbZ$ relation could be in conflict with the constraints imposed by
+weak isolation. To meet the requirements of weaker isolation levels,
+say RC, the store has to adapt itself to \emph{hide} the effects of
+concurrent transactions until they are committed. Once committed
+though, the effects need to be immediately and perennially visible to
+subsequent operations. This semantics of an SC store can be built into
+the reasoning framework leading to a proof system tailor-made for such
+stores. However, for the reasoning framework to be useful across the
+stores, it has to be parametric over store consistency semantics, and
+should be able to reconcile conflicts betweenconsistency and isolation
+constraints. Later sections demonstrate how our reasoning framework
+makes this possible.

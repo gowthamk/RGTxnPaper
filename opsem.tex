@@ -1,0 +1,42 @@
+\section{\txnimp}
+
+As evident from the above example, a proof system for weak isolation
+has to be flexible enough to admit different kinds of reasoning for
+different isolation and consistency levels. One way this can be
+achieved is by having a separate proof rule for each combination of
+transaction isolation level and store consistency level, such that the
+rule reflects the operational semantics of the isolation level on the
+store. Given the large and ever-increasing diversity among isolation
+and consistency semantics, this approach is unlikely to scale. Our
+proof system avoids this problem by being parametric over the
+semantics of isolation and consistency levels. This approach is based
+on a couple of observations. First, as noted by some
+authors~\cite{pldi15,gotsmanconcur15}, semantics of various isolation
+and consistency levels can be captured as well-formedness conditions
+over execution traces. If an execution trace satisfies specified
+well-formedness conditions, then the program is considered to have
+experienced the required levels of consistency and isolation in that
+execution. Second, well-formedness conditions are often
+\emph{prefix-complete}, meaning that every prefix of a well-formed
+trace is also well-formed, or conversely, an ill-formed trace cannot
+be extended to a well-formed one. Prefix-completeness allows us to
+reason about programs operationally, in terms of an imaginary machine
+whose primary artifact is an execution trace. The machine starts from
+a well-formed trace, executes a read/write/commit operation, and
+extends the trace while preserving well-formedness. If well-formedness
+cannot be preserved by taking a step, the machine gets ``stuck''. In
+executions that run to completion, the machine models a store whose
+consistency and isolation guarantees are captured by the trace
+well-formedness conditions. Thus, to show that program's invariants
+are preserved under weak isolation, it suffices to show that they are
+preserved in all executions of the imaginary machine that do not get
+stuck. This is indeed how our proof system facilitates program
+verification. The ``invalid interference'' described informally before
+corresponds to a case of machine getting stuck due to the violation of
+trace well-formedness conditions. The proof system inherits the
+parametricity of the machine over trace well-formedness conditions,
+leading to a generic set of parameterized proof rules that can be
+instantiated for various store consistency and transaction isolation
+levels.
+
+
