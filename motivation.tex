@@ -114,12 +114,12 @@ the current example.
 \centering
   \includegraphics[scale=0.4]{Figures/motiv-eg-1-hb}
 
-\label{fig:motiv-eg-1-hb}
 \caption{$\hbZ$ arrows allowed by SI (solid) and RC (solid and dashed)
 isolation levels for the example in Fig.~\ref{fig:motiv-eg-1}. Each
 arrow represents $\hbZ$ relationship between all operations of `Wd2'
 and operations in `Wd1' that follow the arrow head. Letters R, W and C
 stand for read, write and commit, respectively.}
+\label{fig:motiv-eg-1-hb}
 \end{figure}
 
 Firstly, we note that the example in Fig.~\ref{fig:motiv-eg-1} is a
@@ -238,8 +238,8 @@ the interference, which causes (rightfully) the proof to fail.
 
 We have thus far assumed an SC store that, in the absence of
 transactions with special isolation requirements, makes effects of an
-operation to be immediately visible to subsequent operations. Thus,
-the natural behavior of SC store to totally order all operations w.r.t
+operation to be immediately visible to subsequent operations. The
+natural behavior of SC store to totally order all operations w.r.t
 $\hbZ$ relation could be in conflict with the constraints imposed by
 weak isolation. To meet the requirements of weaker isolation levels,
 say RC, the store has to adapt itself to \emph{hide} the effects of
