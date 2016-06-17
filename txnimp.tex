@@ -1,0 +1,203 @@
+\renewcommand {\ctxn}[2]{\C{txn}\langle #1 \rangle\{#2\}}
+\begin{figure*}[!ht]
+%
+\textbf{Syntax}\\
+%
+\begin{smathpar}
+\renewcommand{\arraystretch}{1.2}
+\begin{array}{lclcl}
+\multicolumn{5}{c} {
+  {X,Y} \in \mathtt{Id} \qquad
+  {i,j,n,v} \in \mathbb{N} \qquad
+  {T_i,T_j} \in \mathtt{TxnId} \qquad
+}\\
+e & \in & \mathtt{Expressions} & \coloneqq & v \ALT X \ALT e \pm e \\
+c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT X := e 
+      \ALT c_1;c_2 \ALT c1 || c2 \ALT \ctxn{i}{ c } \\
+t & \in & \mathtt{Terms} & \coloneqq & e \ALT c\\
+\end{array}
+\end{smathpar}
+%
+
+%
+\textbf{Auxiliary Definitions}
+%
+
+\begin{minipage}{3.6in}
+\begin{smathpar}
+\begin{array}{lclcl}
+\op& \in &  \mathtt{Op.\;Name} & \coloneqq & \C{RD}(X) \ALT \C{WR}(X) \ALT \C{COMMIT}\\
+\eta &  \in & \mathtt{Effect} & \coloneqq & (\C{Txn}_i,j,\op,\mathbb{N})\\
+\A & \in & \mathtt{Effect\;Set} & \coloneqq &  2^{\mathtt{Effect}}\\
+\llbracket \cdot \rrbracket &  \in & \mathtt{State} & \coloneqq & 2^{\mathtt{Effect}} \rightarrow \mathtt{Id} \rightarrow \mathbb{N}\\
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+%
+\begin{minipage}{2.25in}
+\begin{smathpar}
+\begin{array}{lclcl}
+\visZ & \in & \mathtt{Visibility} & \coloneqq & 2^{\mathtt{Effect}\times\mathtt{Effect}}\\
+\E & \in & \mathtt{Execution} & \coloneqq &  (\A,\visZ)\\
+\I & \in & \mathtt{Invariant} & \coloneqq & \E \rightarrow \mathtt{Prop}\\
+\mathcal{F} & \in & \mathtt{Op.\;Def.} & \coloneqq &
+2^{\mathtt{Effect}} \rightarrow \mathtt{Effect}\\
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+\renewcommand{\arraystretch}{1.5}
+\begin{smathpar}
+\begin{array}{c}
+\txn(t_i,\_,\_,\_) = t_i \qquad
+\id(\_,j,\_,\_) = j \qquad
+\kind(\_,\_,\op,\_) = \op \qquad
+\rval(\_,\_,\_,n) = n\\
+\end{array}
+\end{smathpar}
+
+\renewcommand{\arraystretch}{1.2}
+
+%
+\textbf{Evaluation} \quad 
+\fbox {\({\I} \vdash (\mathcal{F},\E) \redsto (v,\E')\)} \quad
+\fbox {\({\I} \vdash (\txnbox{t}_i,\E) \tstepsto (t',\E')\)} \quad
+\fbox {\(\I \vdash (c,\E) \stepsto (c',\E')\)}\\
+
+%
+\begin{minipage}{2.6in}
+\begin{smathpar}
+\begin{array}{lclcl}
+\ectx & \in & \mathtt{Eval\;Ctx} & ::= & \bullet \ALT  
+  \bullet || c_2 \ALT c_1 || \bullet \\
+\end{array}
+\end{smathpar}
+\end{minipage}
+\begin{minipage}{3.5in}
+\begin{smathpar}
+\begin{array}{lclcl}
+\ectx_i & \in & \mathtt{Eval\;Ctx\;in}\;\C{txn}\langle i \rangle & ::= &
+  \ctxn{i}{\bullet} \ALT \txnbox{\bullet \pm e_2}_i \ALT 
+  \txnbox{v_1 \pm \bullet}_i \ALT \txnbox{\bullet;\,c_2}_i \\
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+\bigskip
+
+%
+\begin{minipage}{2.8in}
+\rulelabel{E-Aux}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  S \subseteq \A \spc
+  \eta = \mathcal{F}(S) \spc
+  \id(\eta) > \maxId(\A) \\
+% \I(\A,\visZ) \spc
+  \E' = (\A \cup \{\eta\},\visZ \cup S \times \{\eta\}) \spc\spc
+  \I(\E')
+}
+{
+  \I \vdash (\mathcal{F},(\A,\visZ)) \tstepsto (v,\E')
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+%
+\begin{minipage}{1.75in}
+\rulelabel{E-Ctx1}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \\
+  \underI{(t,\E) \stepsto (t',\E')}
+}
+{
+  \I \vdash (\ectx\lbrack t \rbrack,\E) \tstepsto 
+      (\ectx\lbrack t' \rbrack,\E')
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+%
+\begin{minipage}{1.75in}
+\rulelabel{E-Ctx2}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \\
+  \underI{(\txnbox{t}_i,\E) \stepsto (t',\E')}
+}
+{
+  \I \vdash (\ectx_i\lbrack t \rbrack,\E) \tstepsto 
+      (\ectx_i\lbrack t' \rbrack,\E')
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+%
+\begin{minipage}{2.3in}
+\rulelabel{E-Var}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \mathcal{F} = \lambda S.\, (T_i,j,\C{RD(X)},\interp{S})\\
+  \underI{(\mathcal{F},\E) \tstepsto (v,\E')}
+}
+{
+  \I \vdash (\txnbox{X}_i,\E) \tstepsto (v,\E')
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+%
+\begin{minipage}{2.3in}
+\rulelabel{E-Asgn}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \mathcal{F} = \lambda S.\, (T_i,j,\C{WR(X)},v)\\
+  \underI{(\mathcal{F},\E) \tstepsto (v,\E')}
+}
+{
+  \I \vdash (\txnbox{X:=v}_i,\E) \tstepsto (\cskip,\E')
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+%
+\begin{minipage}{2.3in}
+\rulelabel{E-Commit}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \mathcal{F} = \lambda S.\, (T_i,j,\C{COMMIT},\bot)\\
+  \underI{(\mathcal{F},\E) \tstepsto (\bot,\E')}
+}
+{
+  \I \vdash (\ctxn{i}{\cskip},\E) \stepsto (\cskip, \E')
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+\caption{\txnimp: Syntax and Small-step semantics}
+\label{fig:txnimp-v5}
+\end{figure*}
+
