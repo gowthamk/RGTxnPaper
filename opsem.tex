@@ -18,14 +18,13 @@ transaction, we use the number $i$ instead of $T_i$ for identification
 $t$ range over both expressions and commands.
 
 Small-step semantics of \txnimp are defined in terms of an abstract
-machine that generates an execution trace, also called an execution
-($\E$). First artifact of the trace is a set ($\A$) of \emph{effects},
+machine that generates an execution trace ($\E$). First artifact of the trace is a set ($\A$) of \emph{effects},
 where an effect ($\eta$) documents a read (\C{RD(X)}), or a write
 (\C{WR(X)}), or a transaction commit (\C{COMMIT}) operation performed
 during the execution. Any value associated with the operation (\eg,
 value read or value written) is also documented, and can be accessed
 via $\rval$. Every effect has a unique identifier accessible via
-$\id$, and a transction idenfier accessible via $\txn$.  The latter
+$\id$, and a transction identifier accessible via $\txn$.  The latter
 identifies the transaction that generated the effect. In every step of
 the evaluation, abstract machine reduces a \txnimp term by executing a
 read, write or commit operation, generating an effect, and extending
@@ -38,7 +37,7 @@ other component of the execution trace is the visibility relation
 ($\visZ$) between the effects. The intent and mechanics of $\visZ$
 become clear as we describe the evaluation rules in the following.
 
-Fundamental to our operational semantics is the notation of a trace
+Fundamental to our operational semantics is the notion of a trace
 invariant ($\I$), which is a function from traces ($\E$) to
 propositions ($\texttt{Prop}$) that declare well-formedness
 constraints over traces. Abstract machine takes a step only if the
@@ -58,7 +57,7 @@ parametric over $\I$, and can be instantiated with any
 trace-parametric proposition that expresses constraints over the given
 trace. While the machine takes a step only if the constraints are
 satisfied, it neither defines nor explicitly assumes an oracle to
-check the satisfaction; there is no motivation for doing so in the
+check the satisfaction; there is no need for doing so in the
 semantics.
 
 As explained in \S\ref{sec:motivation}, semantics of various isolation
