@@ -18,19 +18,20 @@ transaction, we use the number $i$ instead of $T_i$ for identification
 $t$ range over both expressions and commands.
 
 Small-step semantics of \txnimp are defined in terms of an abstract
-machine that generates an execution trace ($\E$). First artifact of the trace is a set ($\A$) of \emph{effects},
-where an effect ($\eta$) documents a read (\C{RD(X)}), or a write
-(\C{WR(X)}), or a transaction commit (\C{COMMIT}) operation performed
-during the execution. Any value associated with the operation (\eg,
-value read or value written) is also documented, and can be accessed
-via $\rval$. Every effect has a unique identifier accessible via
-$\id$, and a transction identifier accessible via $\txn$.  The latter
-identifies the transaction that generated the effect. In every step of
-the evaluation, abstract machine reduces a \txnimp term by executing a
-read, write or commit operation, generating an effect, and extending
-the trace. Since effects include transaction identifiers, semantics
-distinguishes between terms ($t$) of different transactions. For
-example, $\txnbox{t}_i$ denotes a term $t$ inside a transaction $T_i$.
+machine that generates an execution trace ($\E$). First artifact of
+the trace is a set ($\A$) of \emph{effects}, where an effect ($\eta$)
+documents a read (\C{RD(X)}), or a write (\C{WR(X)}), or a transaction
+commit (\C{COMMIT}) operation performed during the execution. Any
+value associated with the operation (\eg, value read or value written)
+is also documented, and can be accessed via $\rval$. Every effect has
+a unique identifier accessible via $\id$, and a transction identifier
+accessible via $\txn$.  The latter identifies the transaction that
+generated the effect. In every step of the evaluation, abstract
+machine reduces a \txnimp term by executing a read, write or commit
+operation, generating an effect, and extending the trace. Since
+effects include transaction identifiers, semantics distinguishes
+between terms ($t$) of different transactions. For example,
+$\txnbox{t}_i$ denotes a term $t$ inside a transaction $T_i$.
 Evaluation contexts are also appropriately marked. For example,
 $\ectx_i$ denotes evaluation context for a term inside $T_i$. The
 other component of the execution trace is the visibility relation
@@ -166,8 +167,7 @@ can either be an assignment, or a sequential composition of
 assignments. Nested transactions and transactions that fork multiple
 threads are forbidden to focus on the problems relevant to this paper.
 
-\subsection{Isolation Specifications}
-\label{sec:ansi-isolation}
+\input{ansi-isolation}
 
 \subsection{Store Consistency}
 \label{sec:store-consistency}

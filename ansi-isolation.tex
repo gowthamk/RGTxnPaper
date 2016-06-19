@@ -1,0 +1,193 @@
+\subsection{Isolation Specifications}
+\label{sec:ansi-isolation}
+
+\begin{figure*}[t]
+\begin{smathpar}
+\begin{array}{lcl}
+(\A,\visZ) \Vdash \eta \in T_i & \Leftrightarrow & \eta \in \A \conj \txn(\eta) = T_i\\
+(\A,\visZ) \Vdash \eta_1 \visar \eta_2 & \Leftrightarrow & \{\eta_1,\eta_2\}
+        \subseteq \A \conj (\eta_1,\eta_2) \in \visZ\\
+(\A,\visZ) \Vdash \eta_1 \soar \eta_2 & \Leftrightarrow & \{\eta_1,\eta_2\}
+        \subseteq \A \conj \txn(\eta_1)=\txn(\eta_2) \conj \id(\eta_1)
+        < \id(\eta_2)\\
+\E \Vdash S \subseteq T_i & \Leftrightarrow & \forall \eta.~ \eta
+        \in S \Rightarrow \underE{\eta \in T_i} \\
+\E \Vdash T_i \visar \eta & \Leftrightarrow &\forall\eta_1
+        .\,(\E \Vdash \eta_1 \in T_i) \Rightarrow \E \Vdash \eta_1 \visar \eta \\
+\underE{T_i \visar T_j} & \Leftrightarrow &  \forall\eta_1,\eta_2.\,
+    %\sameobj{\eta_1}{\eta_2}  \Rightarrow 
+    \underE{\eta_1\in T_i} \conj \underE{\eta_2 \in T_j} \Rightarrow 
+    \underE{\eta_1 \visar \eta_2} \\
+\underE{T_i \invisar T_j} & \Leftrightarrow &  \forall\eta_1,\eta_2.\,
+        %\sameobj{\eta_1}{\eta_2}\Rightarrow 
+        \underE{\eta_1\in T_i} \conj \underE{\eta_2 \in T_j} \Rightarrow 
+        \neg (\underE{\eta_1 \visar \eta_2})\\
+\underE{T_i \wrstoar X} & \Leftrightarrow & \exists\eta.~
+        \underE{\eta \in T_i} \conj \kind(\eta) = \C{WR}(X)\\
+\underE{\C{RMWVis}(T_j)} & \Leftrightarrow & \forall\eta_1,\eta_2.\,
+       \underE{\{\eta_1,\eta_2\} \subseteq T_j} \conj
+       \underE{\eta_1 \soar \eta_2} \Rightarrow \underE{\eta_1 \visar
+       \eta_2}\\
+\underE{\C{MonotonicVis}(T_j)} & \Leftrightarrow & 
+       \underE{\C{RMWVis}(T_j)} \conj 
+       \forall\eta,\eta_1,\eta_2.\, \underE{\{\eta_1,\eta_2\} \in T_j} 
+          \conj \\
+  &   & \hspace*{1.2in}\underE{\eta \visar \eta_1} \conj
+        \underE{\eta_1 \soar \eta_2} \Rightarrow \underE{\eta \visar
+        \eta_2} \\
+%  \C{CausalVis}(T_i) & \Leftrightarrow & 
+%         \C{MonotonicVis}(T_i) \conj \C{RMWVis}(T_i)\\
+\underE{\C{AtomicVis}(T_j)} & \Leftrightarrow & 
+       \forall\eta_1,\eta_2.\, \neg(\underE{\eta_1 \in T_j}) \conj
+       \underE{\eta_2 \in T_j} \conj
+       \underE{\eta_1 \visar \eta_2} \Rightarrow \underE{\txn(\eta_1)
+       \visar \eta_2}\\
+\underE{\C{CommitVis}(T_j)} & \Leftrightarrow & 
+       \forall\eta_1,\eta_2.~ \neg(\underE{\eta_1 \in T_j}) \conj 
+          \underE{\eta_2 \in T_j} \conj
+       \underE{\eta_1 \visar \eta_2} \Rightarrow\\
+  &   & \hspace*{1.2in}\exists\eta.\, \underE{\eta \in \txn(\eta_1)} 
+        \conj \kind(\eta) = \C{COMMIT} 
+        \conj \underE{\eta \visar \eta_2}\\
+% \underE{\C{TransVis}(T_j)} & \Leftrightarrow &  \forall
+%        \eta_1,\eta_2,\eta_3.\, \underE{\eta_3 \in T_j} \conj
+%        \underE{\eta_1 \visar \eta_2} \conj
+%        \underE{\eta_2 \visar \eta_3} \Rightarrow \underE{\eta_1 \visar
+%        \eta_3} \\
+\underE{\C{SnapshotVis}(T_i,T_j)} & \Leftrightarrow &  \underE{T_i
+       \visar T_j} \disj \underE{T_i \invisar T_j}\\
+\underE{\C{OneWaySER}(T_i,T_j)} & \Leftrightarrow &  \underE{T_i
+       \visar T_j} \disj (\underE{T_i \invisar T_j} \conj \\
+  &   &\hspace*{1.2in}\exists \eta.~\underE{\eta\in T_i} \conj \kind(\eta) =
+       \C{COMMIT} \Rightarrow \underE{T_j \visar \eta})\\
+\underE{\C{RC}(T_j)} & \Leftrightarrow & \underE{\C{AtomicVis}(T_j)} 
+        \conj \underE{\C{CommitVis}(T_j)}\\
+\underE{\C{MAV}(T_j)} & \Leftrightarrow & \underE{\C{RC}(T_j)} \conj
+      \underE{\C{MonotonicVis}(T_j)} \\
+\underE{\C{RR}(T_j)} & \Leftrightarrow & \underE{\C{MAV}(T_j)}
+       \conj \forall T_i.\,T_i \neq T_j \Rightarrow 
+        \underE{\C{SnapshotVis}(T_i,T_j)} \\
+% &   & \hspace*{2in}\conj  \C{SnapshotVis}(T_i,T_j)\\
+\underE{\C{SI}(T_j)} & \Leftrightarrow &  \underE{\C{RR}(T_j)}
+       \conj \forall T_i.\,(T_i \neq T_j \conj \exists X.\, \underE{T_i \wrstoar X} \conj 
+        \underE{T_j \wrstoar X})\\
+%      (\exists X.\, T_i \wrstoar X \conj T_j \wrstoar X)
+%      \Rightarrow  \C{TotalVis}(T_i,T_j)\\
+  &   & \hspace*{2in} \Rightarrow \underE{\C{OneWaySER}(T_i,T_j)}\\
+\underE{\C{SER}(T_j)} & \Leftrightarrow & \underE{\C{MAV}(T_j)}
+       \conj \forall T_i.\,T_i \neq T_j 
+       \Rightarrow \underE{\C{OneWaySER}(T_i,T_j)}\\
+% &   & \hspace*{2in}\conj  \C{TotalVis}(T_i,T_j)\\
+\end{array}
+\end{smathpar}
+
+\caption{Standard isolation guarantees expressed as trace
+well-formedness constraints}
+\label{fig:ansi-isolation}
+\end{figure*}
+
+Fig.~\ref{fig:ansi-isolation} shows specifications of standard
+isolation guarantees expressed as constraints over trace
+well-formedness. For brevity and convenience, we adopt some notations.
+An execution trace is destructed into $\A$ and $\visZ$ whenever
+individual components of the pair are needed.  Otherwise it is written
+$\E$. When $\psi$ is a proposition, we write $\underE{\psi}$ to denote
+an interpretation of $\psi$ in the context of the trace $\E$. Such
+interpretations are defined on a case-by-case basis in
+Fig.~\ref{fig:ansi-isolation}. In the following, we give informal
+explanations for each definition.
+
+In the context of a trace $(\A,\visZ)$, An effect $\eta$ is said to
+belong to a transaction $T_i$ if $\eta$ belongs to the effect set $A$
+and its transaction identifier is $T_i$. The containment relation is
+trivially lifted to the set of effects to define $\underE{S \subseteq
+T_i}$.  The interpretations of $\eta_1 \visar \eta_2$ and $\eta_1
+\soar \eta_2$ are straightforward and explained in \S\ref{sec:syntax}.
+A transaction $T_i$ is said to be visible to an effect $\eta$ if every
+effect $\eta_1$ of $T_i$ recorded by the trace is visible to $\eta$.
+$T_i$ may be visible to $\eta$ but may not be visible to every other
+effect in the transaction. For a transaction $T_i$ to be considered to
+be visible to a transaction $T_j$ in the context of a trace $\E$
+(written $\underE{T_i \visar T_j}$), every effect ($\eta_1$) of $T_i$
+present in $\E$ must be visible to every effect ($\eta_2$) of $T_j$ in
+$\E$. Conversely, if none of the effects of $T_i$ present in $\E$ are
+visible to any effect of $T_j$, then $T_i$ is considered invisible to
+$T_j$ under $\E$ (written $\underE{T_i \invisar T_j}$). Transaction
+$T_i$ is said to have written to a variable $X$ under $\E$ (i.e.,
+$\underE{T_i \wrstoar X}$) if there exists a write-to-$X$ effect from
+$T_i$ in $\E$.
+
+Various isolation guarantees are defined as propositions indexed by
+a transaction identifier $T_j$. Transaction $T_j$ is said to have
+experienced \emph{read-my-writes} visibility under $\E$ if every
+effect ($\eta_1$) of $T_j$ is visible to every subsequent effect
+($\eta_2$) of the same transaction in $\E$. This lets $T_j$ to never
+lose its own updates. Monotonic visibility adds one more constraint to
+read-my-writes; besides requiring $\eta_1$ to be visible to $\eta_2$,
+it also requires every effect ($\eta$) visible to $\eta_1$ in $\E$ to
+be visible to $\eta_2$ as well. Thus $T_j$ witnesses monotonically
+increasing state as time progresses. Atomic visibility allows an
+effect $\eta_2$ of $T_j$ to witness an effect $\eta_1$ of $T_i$ only
+if all effects of $T_i$ in $\E$ are also visible to $\eta_2$. Atomic
+visibility thus prevents a transaction from being partially visible.
+However, atomic visiblity does not prevent an uncommitted transaction
+from being visible. To confine visibility to only committed
+transactions, we need an additional constraint that requires an effect
+($\eta_2$) of $T_j$ to also witness the commit effect of $T_i$
+whenever it witnesses some effect ($\eta_1$) of $T_i$. This additional
+constraint is captured by the $\mathtt{CommitVis}$ specification. A
+transaction $T_i$ is said to be snapshot-visible to a transaction
+$T_j$ if either it is visible to $T_j$, or it is invisible; it is
+forbidden for only a suffix (more generally, a subset) of $T_j$ to
+witness $T_i$. Snapshot visibility does not prevent $T_i$ and $T_j$ to
+execute and commit oblivious of each other. One-way
+serializability\footnote{\GK{This is a name I invented. Please feel
+free to rename it appropriately.}} proscribes this possiblity. $T_i$
+is said to be one-way-serializable w.r.t $T_j$ if either it is visible
+to $T_j$ or $T_j$ is visible to the commit effect of $T_i$.  Note that
+both $\mathtt{SnapshotVis}$ and $\mathtt{OneWaySER}$ are asymmetric
+definitions that guarantee complete visiblity or invisibility of $T_i$
+to $T_j$, but not the converse. While $\mathtt{SnapshotVis}$ provides
+no guarantees to $T_i$, $\mathtt{OneWaySER}$ guarantees that at least
+the commit effect of $T_i$ witnesses $T_j$.
+
+ANSI SQL 92 standard requires \iso{Read Committted} isolation to avoid
+dirty reads phenomenon, which is achieved by enforcing
+$\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$ guarantees. \C{RC}
+specification is therefore a combination of these two guarantees. The
+specification also agrees with the description and
+implementation~\cite{bailishat,pldi15} of RC for highly available
+replicated stores. On relational databases, however, RC has also come
+to be associated with the $\mathtt{MonotonicVis}$ guarantee.
+Nonetheless, $\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$ are
+sufficient to reason about RC isolation on relational stores too. As
+we demonstrate in \S\ref{sec:store-consistency}, the combination of
+these guarantees with the SC property of relational stores
+automatically leads to the monotonicity guarantee, which probably
+explains why RC comes with $\mathtt{MonotonicVis}$ on such stores. On
+weakly consistent stores however, $\mathtt{AtomicVis}$ and
+$\mathtt{CommitVis}$ do not imply $\mathtt{MonotonicVis}$. A stronger
+isolation level called \emph{Monotonic Atomic View} (\C{MAV} of
+Fig.~\ref{fig:ansi-isolation})~\cite{bailishat,pldi15} was proposed to
+explicitly extend RC with monotonicity on such stores. \iso{Repeatable
+Read} spec (\C{RR}) extends \C{MAV} with snapshot visibility guarantee
+described before. \iso{Snapshot Isolation} spec (\C{SI}) extends
+\C{RR} with one-way serializability guarantee w.r.t the transactions
+that perform conflicting writes (i.e., writes to the same shared
+variable). Finally, \iso{Serializable} isolation extends one-way
+$\mathtt{SnapshotVis}$ to all transactions, including those that do
+not conflict. 
+
+It is worth noting that, unlike some previous proposals
+~\cite{gotsmanconcur15}, our specifications for SI and SER do not
+necessarily impose a total order among transactions (conflicting or
+otherwise). In reality, total order under SER (resp. SI) is guaranteed
+only if the store executes all transactions under SER (resp. SI)
+isolation. Our specifications admit this possibility, and derive total
+order under the assumption of homogenity. However, databases almost
+always allow isolation levels to be configured on a per-transaction
+basis, allowing transactions at various isolation levels to coexist.
+Specifications that assume homogenity are incorrect under this
+setting\footnote{On the other hand, Fig.~\ref{fig:ansi-isolation}
+presents slightly weaker versions of \C{SI} and \C{SER} specs in the
+interest of clarity.}.
