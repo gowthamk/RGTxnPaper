@@ -86,22 +86,22 @@ well-formedness constraints}
 \label{fig:ansi-isolation}
 \end{figure*}
 
-Fig.~\ref{fig:ansi-isolation} shows specifications of standard
+Fig.~\ref{fig:ansi-isolation} shows the specification of standard
 isolation guarantees expressed as constraints over trace
-well-formedness. For brevity and convenience, we adopt some notations.
+well-formedness. For brevity and convenience, we adopt some notation.
 An execution trace is destructed into $\A$ and $\visZ$ whenever
-individual components of the pair are needed.  Otherwise it is written
-$\E$. When $\psi$ is a proposition, we write $\underE{\psi}$ to denote
+individual components of the pair are needed.  Otherwise, it is written
+as $\E$. When $\psi$ is a proposition, we write $\underE{\psi}$ to denote
 an interpretation of $\psi$ in the context of the trace $\E$. Such
 interpretations are defined on a case-by-case basis in
 Fig.~\ref{fig:ansi-isolation}. In the following, we give informal
 explanations for each definition.
 
-In the context of a trace $(\A,\visZ)$, An effect $\eta$ is said to
+In the context of a trace $(\A,\visZ)$, an effect $\eta$ is said to
 belong to a transaction $T_i$ if $\eta$ belongs to the effect set $A$
 and its transaction identifier is $T_i$. The containment relation is
 trivially lifted to the set of effects to define $\underE{S \subseteq
-T_i}$.  The interpretations of $\eta_1 \visar \eta_2$ and $\eta_1
+T_i}$.  The interpretation of $\eta_1 \visar \eta_2$ and $\eta_1
 \soar \eta_2$ are straightforward and explained in \S\ref{sec:syntax}.
 A transaction $T_i$ is said to be visible to an effect $\eta$ if every
 effect $\eta_1$ of $T_i$ recorded by the trace is visible to $\eta$.
@@ -139,10 +139,9 @@ constraint is captured by the $\mathtt{CommitVis}$ specification. A
 transaction $T_i$ is said to be snapshot-visible to a transaction
 $T_j$ if either it is visible to $T_j$, or it is invisible; it is
 forbidden for only a suffix (more generally, a subset) of $T_j$ to
-witness $T_i$. Snapshot visibility does not prevent $T_i$ and $T_j$ to
-execute and commit oblivious of each other. One-way
-serializability\footnote{\GK{This is a name I invented. Please feel
-free to rename it appropriately.}} proscribes this possiblity. $T_i$
+witness $T_i$. Observe that snapshot visibility permits $T_i$ and $T_j$ to
+execute and commit while being  oblivious of each other. One-way
+serializability proscribes this possiblity. $T_i$
 is said to be one-way-serializable w.r.t $T_j$ if either it is visible
 to $T_j$ or $T_j$ is visible to the commit effect of $T_i$.  Note that
 both $\mathtt{SnapshotVis}$ and $\mathtt{OneWaySER}$ are asymmetric
@@ -151,41 +150,41 @@ to $T_j$, but not the converse. While $\mathtt{SnapshotVis}$ provides
 no guarantees to $T_i$, $\mathtt{OneWaySER}$ guarantees that at least
 the commit effect of $T_i$ witnesses $T_j$.
 
-ANSI SQL 92 standard requires \iso{Read Committted} isolation to avoid
-dirty reads phenomenon, which is achieved by enforcing
-$\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$ guarantees. \C{RC}
+The ANSI SQL 92 standard requires \iso{Read Committted} isolation to avoid
+the dirty reads phenomenon, which is achieved by enforcing
+$\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$ guarantees. The {\sc rc}
 specification is therefore a combination of these two guarantees. The
 specification also agrees with the description and
-implementation~\cite{bailishat,pldi15} of RC for highly available
-replicated stores. On relational databases, however, RC has also come
+implementation~\cite{bailishat,pldi15} of {\sc rc} for highly available
+replicated stores. On relational databases, however, {\sc rc} has also come
 to be associated with the $\mathtt{MonotonicVis}$ guarantee.
 Nonetheless, $\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$ are
-sufficient to reason about RC isolation on relational stores too. As
+sufficient to reason about {\sc rc} isolation on relational stores too. As
 we demonstrate in \S\ref{sec:store-consistency}, the combination of
-these guarantees with the SC property of relational stores
+these guarantees with the {\sc sc} property of relational stores
 automatically leads to the monotonicity guarantee, which probably
-explains why RC comes with $\mathtt{MonotonicVis}$ on such stores. On
+explains why {\sc rc} comes with $\mathtt{MonotonicVis}$ on such stores. On
 weakly consistent stores however, $\mathtt{AtomicVis}$ and
 $\mathtt{CommitVis}$ do not imply $\mathtt{MonotonicVis}$. A stronger
-isolation level called \iso{Monotonic Atomic View} (\C{MAV} of
+isolation level called \iso{Monotonic Atomic View} ({\sc mav} of
 Fig.~\ref{fig:ansi-isolation})~\cite{bailishat,pldi15} was proposed to
-explicitly extend RC with monotonicity on such stores. \iso{Repeatable
-Read} spec (\C{RR}) extends \C{MAV} with snapshot visibility guarantee
-described before. \iso{Snapshot Isolation} spec (\C{SI}) extends
-\C{RR} with one-way serializability guarantee w.r.t the transactions
+explicitly extend {\sc rc} with monotonicity on such stores. \iso{Repeatable
+Read} spec ({\sc rr}) extends {\sc mav} with the snapshot visibility guarantee
+as described before. \iso{Snapshot Isolation} spec ({\sc si}) extends
+{\sc rr} with a one-way serializability guarantee w.r.t the transactions
 that perform conflicting writes (i.e., writes to the same shared
 variable). Finally, \iso{Serializable} isolation extends one-way
 $\mathtt{SnapshotVis}$ to all transactions, including those that do
 not conflict\footnote{Fig.~\ref{fig:ansi-isolation} presents slightly
-weaker versions of \C{SI} and \C{SER} specs in the interest of
+weaker versions of {\sc si} and {\sc ser} specs in the interest of
 clarity.}. 
 
-It is worth noting that, unlike some previous proposals
-~\cite{gotsmanconcur15}, our specifications for SI and SER do not
+Note that, unlike recent proposals (\emph{e.g.},
+~\cite{gotsmanconcur15}, our specifications for {\sc si} and {\sc ser} do not
 necessarily impose a total order among transactions (conflicting or
-otherwise). In reality, total order under SER (resp. SI) is guaranteed
-only if the store executes all transactions under SER (resp. SI)
-isolation. Our specifications admit this possibility, and derive total
+otherwise). In reality, a total order under {\sc ser} (resp. {\sc si}) is guaranteed
+only if the store executes all transactions under {\sc ser} (resp. {\sc SI})
+isolation. Our specifications admit this possibility, and derive a total
 order under the assumption of homogenity. However, databases almost
 always allow isolation levels to be configured on a per-transaction
 basis, allowing transactions at various isolation levels to coexist.
@@ -195,13 +194,13 @@ setting.
 Having specified isolation levels as trace well-formedness
 constraints, we can now construct trace invariants ($\I$) for \txnimp
 programs by composing isolation specifications for various
-transactions. For instance, the following trace invariant enforces SI
+transactions. For instance, the following trace invariant enforces {\sc si}
 for both transactions of the program in Fig.~\ref{fig:motiv-eg-1},
 allowing it to satisfy its postcondition:
 \begin{smathpar}
 \I \;=\; \lambda\E.~ \underE{\C{SI(Wd1)}} \conj \underE{\C{SI(Wd2)}}
 \end{smathpar}
-In contrast, the following trace invariant enforces RC for one and SI
+In contrast, the following trace invariant enforces {\sc rc} for one and {\sc si}
 for another, leading to a possible violation of the postcondition:
 \begin{smathpar}
 \I \;=\; \lambda\E.~ \underE{\C{RC(Wd1)}} \conj \underE{\C{SI(Wd2)}}
