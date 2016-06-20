@@ -39,24 +39,141 @@ $\I_s(\E)$ is $true$ for any $\E$.
 
 \paragraph{An SC store} An SC store guarantees total order of all
 operations w.r.t $\visZ$ that is consistent with their chronological
-order. A straightforward $\I_s$ for this store formalizes this
-guarantee:
+order. A straightforward $\I_s$ for this store is the SC guarantee
+defined below:
 \begin{smathpar}
 \begin{array}{l}
-  \I_s \;=\; \lambda\E.~\forall\eta_1,\eta_2.~\{\eta_1,\eta_2\}
+  \C{SC}(\E) \;=\; \forall\eta_1,\eta_2.~\{\eta_1,\eta_2\}
   \subseteq \E.\A \conj \id(\eta_1) < \id(\eta_2) \\
   \hspace*{2in}\Rightarrow \underE{\eta_1 \visar \eta_2}
 \end{array}
 \end{smathpar}
-Unfortunately, the above $\I_s$ is inconsistent with all isolation
-specifications of Fig.~\ref{fig:ansi-isolation}. For instance, let
-$\eta_1$ be an effect of an uncommitted transaction and let $\eta_2$
-be an effect of a \iso{Read Committed} transaction such that
-$\id(\eta_1) < \id(\eta_2)$. While \C{RC} prohibits $\eta_1$ from
-being visible $\eta_2$, $\I_s$ requires $\eta_1$ to be visible to
-$\eta_2$. The machine, which cannot satisfy both constraints
-simultaneously, gets stuck.
+Unfortunately, $\I_s=\C{SC}$ conflicts with all isolation
+specifications of Fig.~\ref{fig:ansi-isolation}. For instance,
+consider a case where $\I_c(\E) \;=\; \forall
+T_i.~\underE{\C{RC}(T_i)}$. That is, all transactions execute under
+\iso{Read Committed} isolation. Imagine a sample execution where
+$\eta_1$'s transaction is not yet committed when $\eta_2$ is
+generated. Letting $\eta_1$ be visible to $\eta_2$ violates $\I_c$,
+whereas not letting it be visible violates $\I_{s}$. The only way to
+satisfy both the invariants is to rule out all the executions that
+interleave the operations of one transaction with the other, thereby
+enforcing serializability and the ACID model of
+transactions\footnote{Thus, serializability is a natural
+generalization of SC to transactions.}. In general, when $\I_s$ is in
+conflict (but not inconsistent) with $\I_c$, the only way to enforce
+both is to restrict concurrency. Clearly, this is unacceptable since
+it defeats the very purpose of weak isolation. 
+% How then do we enforce weak isolation on a strongly consistent
+% machine?
 
-The way out of this impasse is to recognize that SC property of the
-store needs to be weakened to admit weak isolation.
+Relational databases demonstrate a way of out this impasse.
+Implementations of weak isolation levels on relational databases
+implicitly relax the SC requirement so as to maximize concurrency and
+improve performance. Consequently, execution traces do not necessarily
+satisfy \C{SC}. This approach hints at a general solution reconciling
+$\I_s$ with $\I_c$, which is to weaken the former. However, there are
+many ways $\I_s$ can be weakened; for instance, by setting it to
+$true$, which makes the store EC. In reality though, weak isolation on
+databases does not cause so drastic a reduction in consistency. It is
+therefore possible that there exists a a principled approach to weaken
+$\I_s$ that adequately captures the underlying reality. Such a
+principle can be gleaned by observing that data stores often make
+\emph{recency} commitments~\cite{bailishat}, by which they aim to make
+the most recent data available to clients. SC is infact an extreme
+form of a recency commitment, which guarantees that reads witness most
+recent writes to a data item. In case this conflicts with weak
+isolation guarantees, such as RR which requires all reads in a
+transaction to witness the same state, the natural way to weaken
+consistency while prioritizing recency is to let the reads witness
+most recent state that \emph{does not} violate the isolation
+constraints. In the context of the operational model of
+Fig.~\ref{fig:txnimp}, this translates to making visible to an
+operation the largest subset ($S$) of the global state ($\A$) that
+does not lead to the violation of isolation constraints. Generalizing
+this approach to any $\I_s$ and $\I_c$ gives the \emph{maximum
+visiblity principle}, which requires the weakened consistency
+guarantee ($\I_s'$) of a store to enforce all visibility relationships
+imposed by the actual consistency guarantee ($\I_s$) on a given trace,
+unless enforcing such a relationship violates $\I_c$.  Formally,
+maximum visibility weakening of $\I_s$ is an $\I_s'$, such that:
+\begin{itemize}
+  \item $\I_s'$ is weaker than $\I_s$: 
+      $\forall\E.~ \I_s(\E) \Rightarrow \I_s'(\E)$, and
+  \item In every trace $\E$ that satisfies $\I_c$, and for every pair
+  of effects $\eta_1$ and $\eta_2$ in $\E$, if $\I_s(\E)$ requires
+  $\eta_1$ to be visible to $\eta_2$, then so does $\I_s'(\E)$ unless
+  extending $\E$ with $\visZ(\eta_1,\eta_2)$ violates
+  $\I_c$\footnote{\GK{ToDo: consider other well-formedness conditions
+  on trace, such as acyclicity of $\visZ$ and $\soZ$. Are they needed
+  (considering that the machine never violates them)? Encode the
+  specifications in Z3 and make sure they are consistent.}}:
+  \begin{smathpar}
+  \begin{array}{l}
+  \forall\E,\eta_1,\eta_2.~ \I_c(\E) \Rightarrow (\I_s(\E)
+    \Rightarrow \underE{\eta_1 \visar \eta_2}) \Rightarrow \\
+    \hspace*{0.5in}(\I_s'(\E) \Rightarrow \underE{\eta_1 \visar
+    \eta_2} \disj \neg\I_c(\E\,\cup\,(\emptyset,\{(\eta_1,\eta_2)\})))
+  \end{array}
+  \end{smathpar}
+\end{itemize}
 
+Applying maximum visibility principle, we weaken \C{SC} to obtain the
+following store trace invariant ($\I_s$) for an SC store whose
+isolation constraints are captured by $\I_c$:
+\begin{smathpar}
+\begin{array}{lcl}
+\I_s(\E) & = & \forall \eta_1,\eta_2.\, \{\eta_1,\eta_2\},
+    \subseteq \E.\A \conj \id(\eta_1) <
+    \id(\eta_2) \\
+    & & \hspace*{0.5in} \Rightarrow 
+      \underE{\eta_1 \visar \eta_2} \disj \neg\I_c(\E
+    \cup (\emptyset,\{(\eta_1,\eta_2)\}))\\
+\end{array}
+\end{smathpar}
+As usual $\I = \I_s \wedge \I_c$. The resultant operational model
+hides an existing effect ($\eta\in\A$) from being visible to the
+current operation if and only if showing it results in the violation
+of $\I_c$.
+
+\paragraph{A CC store} A causally consistent data store, such as the
+one underlying the reasoning framework of~\cite{gotsmanpopl16}, allows
+operations to only witness a causally consistent snapshot of the
+global state. A straightforward trace invariant ($\I_s$) for this
+store is the \C{CC} guarantee that requires an effect to witness all
+causally preceding effects regardless of the isolation requirements of
+its transaction:
+\begin{smathpar}
+\begin{array}{lccl}
+\C{CC}(\E) & \;=\; &  & \forall \eta_1,\eta_2.\, 
+      \E \Vdash \eta_1 \soar \eta_2 \Rightarrow  \underE{\eta_1 \visar
+      \eta_2}\\
+    &   & \wedge & \forall\eta_1,\eta_2,\eta_3.\,\underE{\eta_1 \visar
+      \eta_2} \conj \underE{\eta_2 \visoar \eta_3} \\
+    &   & &\hspace*{0.5in} \Rightarrow \underE{\eta_1 \visar \eta_3}\\
+\end{array}
+\end{smathpar}
+However, like $\I_s = \C{SC}$, $\I_s = \C{CC}$ may induce the store to
+meet isolation requirements by restricting concurrency, thus failing
+to abide by the spirit of weak isolation. In order to admit weak
+isolation without restricting concurrency, we weaken $\I_s$ while
+being guided by the maximum visibility principle. The weakened $\I_s$
+is shown below:
+\begin{smathpar}
+\begin{array}{lccl}
+\C{CC}(\E) & \;=\; &  & \forall \eta_1,\eta_2.\, 
+      \E \Vdash \eta_1 \soar \eta_2 \Rightarrow  \underE{\eta_1 \visar
+      \eta_2} \\
+    & & & \hspace*{0.6in}\disj \neg\I_c(\E \cup 
+                (\emptyset,\{(\eta_1,\eta_2)\}))\\
+    &   & \wedge & \forall\eta_1,\eta_2,\eta_3.\,\underE{\eta_1 \visar
+      \eta_2} \conj \underE{\eta_2 \visoar \eta_3} \\
+    &   & &\hspace*{0.3in} \Rightarrow \underE{\eta_1 \visar \eta_3}
+      \disj \neg\I_c(\E \cup (\emptyset,\{(\eta_1,\eta_2)\}))\\
+\end{array}
+\end{smathpar}
+Instantiating the parameter $\I$  with $\I_s \wedge \I_c$ in
+Fig.~\ref{fig:txnimp} results in an operational semantics that admits
+the violation of causal consistency if and only if the violation is
+inevitable to enforce
+$\I_c$.
