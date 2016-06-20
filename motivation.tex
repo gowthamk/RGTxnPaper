@@ -74,6 +74,8 @@ As an alternative, consider the execution of this transaction under a
 }{
   \includegraphics[scale=0.5]{Figures/motiv-eg-1-b}
 }
+\caption{A possible execution of the program shown in Fig.~\ref{fig:motiv-eg-1} under
+  a read committed isolation level.}
 \end{figure}
 The figure depicts an execution as a series of read, write, and commit
 operations.  The subscript of an operation indicates the transaction
@@ -130,41 +132,43 @@ the current example.
 
 First, we note that the example in Fig.~\ref{fig:motiv-eg-1} is a
 concurrent program, and hence is amenable to \emph{rely-guarantee}
-style reasoning~\cite{rgjones}. Rely-guarantee is a compositional
-proof technique that allows us to reason about one thread at a time by
-abstracting away interference induced by other threads (collectively
-called \emph{the environment}) into a \emph{rely} relation. In an
-ordinary concurrent program, every environment step is a valid
-interference in the current thread. However, in the presence of
-transactions executing under weak isolation, determining what
-constitutes an interference and what does not is a non-trivial
-problem. For example, inside a serializable transaction there is no
-interference, wherase inside a transaction executing under \iso{Read
-  Uncommitted}, the weakest isolation level, all interferences are
-valid. Between these two extremes are various levels of isolation that
-admit some interferences while prohibiting others.
-% For example, \iso{Read Committed} isolation admits interference of a
-% committed transaction, but not that of an uncommitted transaction.
-% \iso{Snapshot Isolation} admits interference from committed
-% non-conflicting transactions, and so on. 
-For the rely-guarantee approach to be useful, it has to thus constrain the
-interference in accordance with the chosen level of isolation. The
-first key observation we make is that we can constrain interference by
-constraining the definition of the \emph{happens-before} ($\hbZ$) relation
-between transactions, or their respective constituents.  To do so, we
-axiomatize  the $\hbZ$ relation to capture the interference characteristics of
-different isolation levels as their specifications ($\psi$). For example,
-a \iso{Read Committed} specification allows an operation $\eta_1$ of
+style reasoning~\cite{rgjones}, a compositional proof technique that
+allows us to reason about one thread at a time by abstracting away
+interference induced by other threads (collectively called \emph{the
+  environment}) into a \emph{rely} relation. In an ordinary concurrent
+program, every environment step is a valid interference in the current
+thread. However, in the presence of transactions executing under weak
+isolation, determining what constitutes an interference is a
+non-trivial problem. For example, inside a serializable transaction
+there is no interference, whereas within a transaction executing under
+\iso{Read Uncommitted}, the weakest isolation level, all interferences
+are valid. Between these two extremes are various levels of isolation
+that admit some interferences while prohibiting others.  For example,
+\iso{Read Committed} isolation admits interference of a committed
+transaction, but not that of an uncommitted transaction.
+\iso{Snapshot Isolation} admits interference from committed
+non-conflicting transactions, and so on.
+
+For the rely-guarantee approach to be useful, it has to thus constrain
+allowed interference in accordance with the chosen level of isolation
+associated with a transaction. The first key observation we make is
+that we can constrain interference by constraining the definition of
+the \emph{happens-before} ($\hbZ$) relation between transactions, or
+their respective constituents.  To do so, we axiomatize the $\hbZ$
+relation to capture the interference characteristics of different
+isolation levels as their specifications ($\psi$). For example, a
+\iso{Read Committed} specification allows an operation $\eta_1$ of
 $T_1$ to happen before an operation $\eta_2$ of $T_2$ only if every
 operation in $T_1$ (including its commit) happens before $\eta_2$ (we
-write $T_1 \hboar \eta_2$ to denote this). The {\sc rc} specification does not require
-$T_1$ to execute and commit before all operations of $T_2$, thus allowing it to
-interfere in $T_2$. The  \iso{Snapshot
-Isolation} specification requires two transactions that write to the same
-variable to be related by happens-before.  This effectively prohibits
-interference due to actions in $T_1$ being interleaved in $T_2$ (or, vise versa).
-Formally\footnote{Note that specifications are simplified for illustration. The
-actual specifications described in (\S~\ref{sec:opsem}) are more nuanced.  }:
+write $T_1 \hboar \eta_2$ to denote this). The {\sc rc} specification
+does not require $T_1$ to execute and commit before all operations of
+$T_2$, thus allowing it to interfere in $T_2$. The \iso{Snapshot
+  Isolation} specification requires two transactions that write to the
+same variable to be related by happens-before.  This effectively
+prohibits interference due to actions in $T_1$ being interleaved in
+$T_2$ (or, vise versa).  Formally\footnote{Note that specifications
+  are simplified for illustration. The actual specifications described
+  in (\S~\ref{sec:opsem}) are more nuanced.  }:
 \begin{smathpar}
 \begin{array}{lcl}
 \psi_{RC} & \defeq & \forall \eta_1,\eta_2,T_1,T_2.\; \txn(\eta_1) = T_1 
@@ -196,7 +200,7 @@ post-condition.
 % prohibited by SI, which nonetheless does not lead to invariant
 % violation. 
 
-Specification of an isolation level encodes its interference
+The specification of an isolation level encodes its interference
 characteristic as constraints over the $\hbZ$ relation. However, for this
 to be useful in reasoning about programs, the rely-guarantee framework
 should be able to use the specification to determine if an
@@ -229,10 +233,10 @@ Fig.~\ref{fig:motiv-eg-1-hb}) may violate the invariant by writing
 $\C{k-a1}$ to \C{C} and committing {\bf Wd2}, thus leading to
 $\committed(\C{Wd2}) \Rightarrow \C{C=k-a2}$. Fortunately,
 \iso{Snapshot Isolation} prevents this interference, and this can be
-shown by demonstrating that an interference from {\bf Wd2} starting from a
+shown by demonstrating that an interference from {\bf Wd2} starting from an
 execution state that satisfies $\psi_{SI} \wedge \phi$ leads to an
 execution state where neither $\C{Wd2} \hboar \C{Wd1}$ nor $\C{Wd1}
-\hboar \C{Wd2}$ holds (former does not hold because at least one write
+\hboar \C{Wd2}$ holds (the former does not hold because at least one write
 from {\bf Wd1} has happened before at least one operation of {\bf Wd2}, and
 the latter does not hold because {\bf Wd1} has not yet committed, and {\bf Wd2}
 has already begun). Since {\bf Wd2} also writes to \C{C}, this violates
@@ -252,7 +256,7 @@ requirements of weaker isolation levels, say {\sc rc}, the store has
 to adapt itself to \emph{hide} the effects of concurrent transactions
 until they are committed. Once committed though, effects need to be
 immediately and perennially visible to subsequent operations. This
-semantics can be built into the reasoning framework leading to a proof
+semantics can be built into the reasoning framework, leading to a proof
 system tailor-made for such stores. However, for the reasoning
 framework to be truly useful, it has to be parametric over different
 store consistency semantics, supporting stores that are weaker than
