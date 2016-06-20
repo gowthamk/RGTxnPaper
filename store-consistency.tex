@@ -1,0 +1,62 @@
+\subsection{Store Consistency}
+\label{sec:store-consistency}
+
+Under a trivial trace invariant (i.e., $\I(\E) = true$), the abstract
+machine of Fig.~\ref{fig:txnimp} assumes the semantics of an EC store;
+it allows operations of a transaction witness arbitrary subsets of the
+global state. A non-trivial $\I$ composed of isolation specifications
+from Fig.~\ref{fig:ansi-isolation} induces the machine to provide
+non-trivial isolation guarantees for transactions. However, weak
+isolation levels often only constrain the visibility sets of
+operations by dictating what \emph{not} to see; not what to see.  For
+instance, \iso{Repeatable Read} isolation prohibits operations of a
+transaction from witnessing different states. It however does not
+prohibit all operations of a transaction from witnessing an aribitrary
+subset of the global state. Consequently, the machine can remain an EC
+store even while providing non-trivial isolation. How then to model
+the semantics of an SC store, such as a relational database, with
+variable isolation?
+
+The answer lies in enforcing store-specific consistency constraints,
+along with transaction-specific isolation constraints, via the trace
+invariant $\I$. In particular, we split $\I$ into two components: (1).
+$\I_s$, the store-specific invariant, and (2). $\I_c$, the
+program-specific (or, client-specific) invariant, to capture
+consistency and isolation constraints, respectively. $\I$ is now a
+conjunction:
+\begin{smathpar}
+  \I \;=\; \lambda\E.~\I_s(\E) \wedge \I_c(\E)
+\end{smathpar}
+The trace invariant we wrote in \S\ref{sec:ansi-isolation} for the
+withdraw program of Fig.~\ref{fig:motiv-eg-1} now becomes its $\I_c$
+and remains an invariant regardless of the store. $\I_s$ however
+changes from store to store. We now consider various stores and
+describe their corresponding $\I_s$.
+
+\paragraph{An EC store} An EC store provides no additional consistency
+guarantees besides those provided by the machine. Hence, its
+$\I_s(\E)$ is $true$ for any $\E$.
+
+\paragraph{An SC store} An SC store guarantees total order of all
+operations w.r.t $\visZ$ that is consistent with their chronological
+order. A straightforward $\I_s$ for this store formalizes this
+guarantee:
+\begin{smathpar}
+\begin{array}{l}
+  \I_s \;=\; \lambda\E.~\forall\eta_1,\eta_2.~\{\eta_1,\eta_2\}
+  \subseteq \E.\A \conj \id(\eta_1) < \id(\eta_2) \\
+  \hspace*{2in}\Rightarrow \underE{\eta_1 \visar \eta_2}
+\end{array}
+\end{smathpar}
+Unfortunately, the above $\I_s$ is inconsistent with all isolation
+specifications of Fig.~\ref{fig:ansi-isolation}. For instance, let
+$\eta_1$ be an effect of an uncommitted transaction and let $\eta_2$
+be an effect of a \iso{Read Committed} transaction such that
+$\id(\eta_1) < \id(\eta_2)$. While \C{RC} prohibits $\eta_1$ from
+being visible $\eta_2$, $\I_s$ requires $\eta_1$ to be visible to
+$\eta_2$. The machine, which cannot satisfy both constraints
+simultaneously, gets stuck.
+
+The way out of this impasse is to recognize that SC property of the
+store needs to be weakened to admit weak isolation.
+
