@@ -167,7 +167,7 @@ automatically leads to the monotonicity guarantee, which probably
 explains why RC comes with $\mathtt{MonotonicVis}$ on such stores. On
 weakly consistent stores however, $\mathtt{AtomicVis}$ and
 $\mathtt{CommitVis}$ do not imply $\mathtt{MonotonicVis}$. A stronger
-isolation level called \emph{Monotonic Atomic View} (\C{MAV} of
+isolation level called \iso{Monotonic Atomic View} (\C{MAV} of
 Fig.~\ref{fig:ansi-isolation})~\cite{bailishat,pldi15} was proposed to
 explicitly extend RC with monotonicity on such stores. \iso{Repeatable
 Read} spec (\C{RR}) extends \C{MAV} with snapshot visibility guarantee
@@ -176,7 +176,9 @@ described before. \iso{Snapshot Isolation} spec (\C{SI}) extends
 that perform conflicting writes (i.e., writes to the same shared
 variable). Finally, \iso{Serializable} isolation extends one-way
 $\mathtt{SnapshotVis}$ to all transactions, including those that do
-not conflict. 
+not conflict\footnote{Fig.~\ref{fig:ansi-isolation} presents slightly
+weaker versions of \C{SI} and \C{SER} specs in the interest of
+clarity.}. 
 
 It is worth noting that, unlike some previous proposals
 ~\cite{gotsmanconcur15}, our specifications for SI and SER do not
@@ -188,6 +190,19 @@ order under the assumption of homogenity. However, databases almost
 always allow isolation levels to be configured on a per-transaction
 basis, allowing transactions at various isolation levels to coexist.
 Specifications that assume homogenity are incorrect under this
-setting\footnote{On the other hand, Fig.~\ref{fig:ansi-isolation}
-presents slightly weaker versions of \C{SI} and \C{SER} specs in the
-interest of clarity.}.
+setting.
+
+Having specified isolation levels as trace well-formedness
+constraints, we can now construct trace invariants ($\I$) for \txnimp
+programs by composing isolation specifications for various
+transactions. For instance, the following trace invariant enforces SI
+for both transactions of the program in Fig.~\ref{fig:motiv-eg-1},
+allowing it to satisfy its postcondition:
+\begin{smathpar}
+\I \;=\; \lambda\E.~ \underE{\C{SI(Wd1)}} \conj \underE{\C{SI(Wd2)}}
+\end{smathpar}
+In contrast, the following trace invariant enforces RC for one and SI
+for another, leading to a possible violation of the postcondition:
+\begin{smathpar}
+\I \;=\; \lambda\E.~ \underE{\C{RC(Wd1)}} \conj \underE{\C{SI(Wd2)}}
+\end{smathpar}
