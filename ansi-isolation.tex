@@ -179,17 +179,17 @@ not conflict\footnote{Fig.~\ref{fig:ansi-isolation} presents slightly
 weaker versions of {\sc si} and {\sc ser} specs in the interest of
 clarity.}. 
 
-Note that, unlike recent proposals (\emph{e.g.},
-~\cite{gotsmanconcur15}, our specifications for {\sc si} and {\sc ser} do not
-necessarily impose a total order among transactions (conflicting or
-otherwise). In reality, a total order under {\sc ser} (resp. {\sc si}) is guaranteed
-only if the store executes all transactions under {\sc ser} (resp. {\sc SI})
-isolation. Our specifications admit this possibility, and derive a total
-order under the assumption of homogenity. However, databases almost
-always allow isolation levels to be configured on a per-transaction
-basis, allowing transactions at various isolation levels to coexist.
-Specifications that assume homogenity are incorrect under this
-setting.
+In contrast to recent proposals (\emph{e.g.},
+~\cite{gotsmanconcur15}), our specifications for {\sc si} and {\sc
+  ser} do not necessarily impose a total order among transactions
+(conflicting or otherwise). In reality, a total order under {\sc ser}
+(resp. {\sc si}) is guaranteed only if the store executes all
+transactions under {\sc ser} (resp. {\sc SI}) isolation. Our
+specifications admit this possibility, and derive a total order under
+the assumption of homogenity. However, databases almost always allow
+isolation levels to be configured on a per-transaction basis, allowing
+transactions at various isolation levels to coexist.  Specifications
+that assume homogenity are incorrect under this setting.
 
 Having specified isolation levels as trace well-formedness
 constraints, we can now construct trace invariants ($\I$) for \txnimp
