@@ -38,27 +38,49 @@ appropriately marked. For example, $\ectx_i$ denotes the evaluation
 context for a term inside $T_i$. The other component of an execution
 trace is a visibility relation ($\visZ$) that establishes a visibility
 property between effects among different transactions. The intent and
-mechanics of $\visZ$ is described below.
+mechanics of $\visZ$ is described in the sequel.
 
 Fundamental to our development is the notion of a trace invariant
-($\I$), is a function from traces ($\E$) to propositions
-($\texttt{Prop}$) that defines well-formedness constraints over
-traces. The machine takes a step only if the resulting trace satisfies
-the constraints imposed by $\I$. This behaviour is captured by the
+($\I$). $\I$ is a function from traces ($\E$) to propositions
+($\texttt{Prop}$) that define well-formedness constraints over traces.
+The machine takes a step only if the resulting trace satisfies the
+constraints imposed by $\I$. This behaviour is captured by the
 auxiliary reduction rule \rulelabel{E-Aux} that factors out the trace
-extension aspect of the evaluation by abstracting away
-operation-specific behaviour as a function ($\mathcal{F}$) that
-generates an appropriate effect.  \rulelabel{E-Aux} uses $\mathcal{F}$
-to generate a new effect and extend the trace ($\E = (\A,\visZ)$)
-\emph{only if} the well-formedness constraints imposed by $\I$ on $\E$
-(i.e., $\I(\E')$) are satisfied. Otherwise, it gets stuck. In an
-execution that runs to completion, every small-step preserves the
-well-formedness of a trace, thus ensuring the invariance of $\I$.
-Note that the semantics makes no assumptions about $\I$ other than its
-type. As such, it can be instantiated with any trace-parametric
-proposition that expresses constraints over the given trace. While the
-machine takes a step only if the constraints are satisfied, it neither
-defines nor explicitly assumes an oracle to check satisfaction.
+extension aspect of the evaluation by abstracting away the
+operation-specific behaviour as a function that generates an
+appropriate effect. We let $\mathcal{F}$ denote this function.
+\rulelabel{E-Aux} uses $\mathcal{F}$ to generate a new effect and
+extend the trace ($\E = (\A,\visZ)$) \emph{only if} the
+well-formedness constraints imposed by $\I$ on $\E$ (i.e., $\I(\E')$)
+are satisfied. Otherwise, it gets stuck. In an execution that runs to
+completion, every small-step preserves the well-formedness of a trace,
+thus ensuring the invariance of $\I$.  Note that the semantics makes
+no assumptions about $\I$ other than its type. As such, it can be
+instantiated with any trace-parametric proposition that expresses
+constraints over the given trace. For instance, consider the
+$\psi_{RC}$ specification from \S\ref{sec:motivation}, but with
+bounded $T_1$ and $T_2$ instantiated with \C{Wd1} and \C{Wd2},
+respectively. The instantiated specification is the following
+proposition:
+\begin{smathpar}
+\begin{array}{l}
+  \forall \eta_1,\eta_2,.\; \txn(\eta_1) = \C{Wd1}
+  \conj \txn(\eta_2) = \C{Wd2} \\
+  \hspace*{0.6in}\conj \C{Wd1} \neq \C{Wd2} \conj \eta_1 \hboar
+  \eta_2 \Rightarrow \C{Wd1} \hboar \eta_2 \\
+\end{array}
+\end{smathpar}
+It is easy to intepret the above proposition in the context of a trace
+$\E$ that captures an execution of the program in
+Fig.~\ref{fig:motiv-eg-1}. Such a trace-parametric proposition can be
+used to instantiate the trace invariant $\I$ in Fig.~\ref{fig:txnimp}.
+The resultant operational semantics describes an abstract machine that
+gets stuck if an operation of \C{Wd2} is executed in a state that
+incorporates some, but not all the effects (including the \C{COMMIT})
+of \C{Wd1}. 
+% While the machine takes a step only if the constraints are
+% satisfied, it neither defines nor explicitly assumes an oracle to
+% check satisfaction.
 
 As described in \S\ref{sec:motivation}, the semantics of various
 isolation levels can be captured as constraints over the
@@ -85,8 +107,7 @@ defining $\interp{\cdot}$ in \rulelabel{E-Var}, as we show
 later). Thus, the value of a read depends on what write effects it can
 witness. An operation can only witness the effects of already
 concluded operations, which varies between executions due to the
-non-deterministic order of evaluating the parallel composition
-(cf. evaluation contexts ($\ectx$) for parallel composition) of
+non-deterministic order of evaluating the parallel composition of
 transactions. A more notable source of non-determinism, however, is
 the \rulelabel{E-Aux} rule, which allows the machine to expose an
 arbitrary subset ($S$) of existing effects ($\A$) to the incoming
@@ -117,11 +138,11 @@ execution, operations are guaranteed to experience the level of
 isolation specified by $\I$.  Thus, in executions that run to
 completion, the abstract machine models a store that provides the
 required levels of isolation. Notably, the machine achieves this
-without being restricted to any particular isolation level by relying
-on a declarative specification of isolation as trace well-formedness
-constraints.  \S\ref{sec:ansi-isolation} shows the specification of
-various ANSI SQL isolation levels stated as trace well-formedness
-constraints.
+without defining an operation semantics for isolation levels, solely
+by relying on their declarative characterization as trace
+well-formedness constraints.  \S\ref{sec:ansi-isolation} shows the
+specification of various ANSI SQL isolation levels stated as trace
+well-formedness constraints.
 
 As described previously, \rulelabel{E-Aux} abstracts away the
 operation-specific behaviour of a machine step as a function ($\F$)

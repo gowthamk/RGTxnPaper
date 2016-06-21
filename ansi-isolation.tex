@@ -191,17 +191,17 @@ isolation levels to be configured on a per-transaction basis, allowing
 transactions at various isolation levels to coexist.  Specifications
 that assume homogenity are incorrect under this setting.
 
-Having specified isolation levels as trace well-formedness
-constraints, we can now construct trace invariants ($\I$) for \txnimp
-programs by composing isolation specifications for various
-transactions. For instance, the following trace invariant enforces {\sc si}
-for both transactions of the program in Fig.~\ref{fig:motiv-eg-1},
-allowing it to satisfy its postcondition:
-\begin{smathpar}
-\I \;=\; \lambda\E.~ \underE{\C{SI(Wd1)}} \conj \underE{\C{SI(Wd2)}}
-\end{smathpar}
-In contrast, the following trace invariant enforces {\sc rc} for one and {\sc si}
-for another, leading to a possible violation of the postcondition:
-\begin{smathpar}
-\I \;=\; \lambda\E.~ \underE{\C{RC(Wd1)}} \conj \underE{\C{SI(Wd2)}}
-\end{smathpar}
+% Having specified isolation levels as trace well-formedness
+% constraints, we can now construct trace invariants ($\I$) for
+% \txnimp programs by composing isolation specifications for various
+% transactions. For instance, the following trace invariant enforces
+% {\sc si} for both transactions of the program in
+% Fig.~\ref{fig:motiv-eg-1}, allowing it to satisfy its postcondition:
+% \begin{smathpar}
+% \I \;=\; \lambda\E.~ \underE{\C{SI(Wd1)}} \conj \underE{\C{SI(Wd2)}}
+% \end{smathpar}
+% In contrast, the following trace invariant enforces {\sc rc} for one and {\sc si}
+% for another, leading to a possible violation of the postcondition:
+% \begin{smathpar}
+% \I \;=\; \lambda\E.~ \underE{\C{RC(Wd1)}} \conj \underE{\C{SI(Wd2)}}
+% \end{smathpar}

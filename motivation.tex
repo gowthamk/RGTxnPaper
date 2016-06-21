@@ -1,4 +1,5 @@
 \section{Motivation}
+\label{sec:motivation}
 
 In this section, we motivate our proof system for weak isolation via
 an example written in \txnimp - a C-like imperative language equipped
@@ -160,18 +161,18 @@ isolation levels as their specifications ($\psi$). For example, a
 \iso{Read Committed} specification allows an operation $\eta_1$ of
 $T_1$ to happen before an operation $\eta_2$ of $T_2$ only if every
 operation in $T_1$ (including its commit) happens before $\eta_2$ (we
-write $T_1 \hboar \eta_2$ to denote this). The {\sc rc} specification
+let $T_1 \hboar \eta_2$ denote this). The {\sc rc} specification
 does not require $T_1$ to execute and commit before all operations of
 $T_2$, thus allowing it to interfere in $T_2$. The \iso{Snapshot
   Isolation} specification requires two transactions that write to the
 same variable to be related by happens-before.  This effectively
 prohibits interference due to actions in $T_1$ being interleaved in
 $T_2$ (or, vise versa).  Formally\footnote{Note that specifications
-  are simplified for illustration. The actual specifications described
-  in (\S~\ref{sec:opsem}) are more nuanced.  }:
+    presented here are solely for illustration. The actual
+    specifications described in \S\ref{sec:ansi-isolation} are more nuanced.}:
 \begin{smathpar}
 \begin{array}{lcl}
-\psi_{RC} & \defeq & \forall \eta_1,\eta_2,T_1,T_2.\; \txn(\eta_1) = T_1 
+\psi_{RC} & \defeq & \forall T_1,T_2,\eta_1,\eta_2,.\; \txn(\eta_1) = T_1 
   \conj \txn(\eta_2) = T_2 \\
   & & \hspace*{0.6in}\conj T_1 \neq T_2 \conj \eta_1 \hboar
   \eta_2 \Rightarrow T_1 \hboar \eta_2 \\
