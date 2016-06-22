@@ -88,11 +88,16 @@ well-formedness constraints}
 
 Fig.~\ref{fig:ansi-isolation} shows the specification of standard
 isolation guarantees expressed as constraints over trace
-well-formedness. For brevity and convenience, we adopt some notation.
-An execution trace is destructed into $\A$ and $\visZ$ whenever
-individual components of the pair are needed.  Otherwise, it is written
-as $\E$. When $\psi$ is a proposition, we write $\underE{\psi}$ to denote
-an interpretation of $\psi$ in the context of the trace $\E$. Such
+well-formedness. For brevity and convenience, we adopt few notations
+in this and subsequent sections.  An execution trace is destructed
+into $\A$ and $\visZ$ whenever individual components of the pair are
+needed. Otherwise, it is written as $\E$. Sometimes, the dot notation
+(\eg~$\E.\A$) is also used. Since $\A$ and $\visZ$ are both sets, we
+lift the operations on sets to pairs of sets when updating $\E$. For
+example, $\E' = \E \cup (\{\eta_2\},\{(\eta_1,\eta_2)\})$ expands to
+$\E' = (\E.\A \cup \{\eta_2\},\,\E.\visZ \cup \{(\eta_1,\eta_2)\})$.
+When $\psi$ is a proposition, $\underE{\psi}$ denotes the
+interpretation of $\psi$ in the context of the trace $\E$. Such
 interpretations are defined on a case-by-case basis in
 Fig.~\ref{fig:ansi-isolation}. In the following, we give informal
 explanations for each definition.
@@ -150,34 +155,38 @@ to $T_j$, but not the converse. While $\mathtt{SnapshotVis}$ provides
 no guarantees to $T_i$, $\mathtt{OneWaySER}$ guarantees that at least
 the commit effect of $T_i$ witnesses $T_j$.
 
-The ANSI SQL 92 standard requires \iso{Read Committted} isolation to avoid
-the dirty reads phenomenon, which is achieved by enforcing
+The ANSI SQL 92 standard requires \iso{Read Committted} isolation to
+avoid the dirty reads phenomenon, which is achieved by enforcing
 $\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$ guarantees. The {\sc rc}
 specification is therefore a combination of these two guarantees. The
 specification also agrees with the description and
-implementation~\cite{bailishat,pldi15} of {\sc rc} for highly available
-replicated stores. On relational databases, however, {\sc rc} has also come
-to be associated with the $\mathtt{MonotonicVis}$ guarantee.
-Nonetheless, $\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$ are
-sufficient to reason about {\sc rc} isolation on relational stores too. As
-we demonstrate in \S\ref{sec:store-consistency}, the combination of
-these guarantees with the {\sc sc} property of relational stores
+implementation~\cite{bailishat,pldi15} of {\sc rc} for highly
+available replicated stores. On relational databases, however, {\sc
+rc} has also come to be associated with the $\mathtt{MonotonicVis}$
+guarantee.  Nonetheless, $\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$
+are sufficient to reason about {\sc rc} isolation on relational stores
+too. The combination of these guarantees with the {\sc sc} property of
+relational stores (formalized in \S\ref{sec:store-consistency})
 automatically leads to the monotonicity guarantee, which probably
-explains why {\sc rc} comes with $\mathtt{MonotonicVis}$ on such stores. On
-weakly consistent stores however, $\mathtt{AtomicVis}$ and
+explains why {\sc rc} comes with $\mathtt{MonotonicVis}$ on such
+stores. On weakly consistent stores however, $\mathtt{AtomicVis}$ and
 $\mathtt{CommitVis}$ do not imply $\mathtt{MonotonicVis}$. A stronger
 isolation level called \iso{Monotonic Atomic View} ({\sc mav} of
 Fig.~\ref{fig:ansi-isolation})~\cite{bailishat,pldi15} was proposed to
-explicitly extend {\sc rc} with monotonicity on such stores. \iso{Repeatable
-Read} spec ({\sc rr}) extends {\sc mav} with the snapshot visibility guarantee
-as described before. \iso{Snapshot Isolation} spec ({\sc si}) extends
-{\sc rr} with a one-way serializability guarantee w.r.t the transactions
-that perform conflicting writes (i.e., writes to the same shared
-variable). Finally, \iso{Serializable} isolation extends one-way
+explicitly extend {\sc rc} with monotonicity on such stores. Sample
+{\sc rc} executions shown in Fig.~\ref{fig:rc-executions} are also
+{\sc mav}. \iso{Repeatable Read} spec ({\sc rr}) extends {\sc mav}
+with the snapshot visibility guarantee as described before.
+\iso{Snapshot Isolation} spec ({\sc si}) extends {\sc rr} with a
+one-way serializability guarantee w.r.t the transactions that perform
+conflicting writes (i.e., writes to the same shared variable).
+Finally, \iso{Serializable} isolation extends one-way
 $\mathtt{SnapshotVis}$ to all transactions, including those that do
 not conflict\footnote{Fig.~\ref{fig:ansi-isolation} presents slightly
 weaker versions of {\sc si} and {\sc ser} specs in the interest of
-clarity.}. 
+clarity.}. \GK{ToDo: Figures. Need to figure out a convention to
+uniformly represent various isolation levels. Current idea: concurrent
+timelines with arrows in both directions.}
 
 In contrast to recent proposals (\emph{e.g.},
 ~\cite{gotsmanconcur15}), our specifications for {\sc si} and {\sc

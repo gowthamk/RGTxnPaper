@@ -137,6 +137,15 @@ hides an existing effect ($\eta\in\A$) from being visible to the
 current operation if and only if showing it results in the violation
 of $\I_c$.
 
+It is worthwhile to note that, although conflict-free $\I_s$ shown
+above captures the behaviour of an {\sc SC} database in presence of
+isolation constraints, it does not necessarily describe how the
+database achieves this behaviour (i.e., its implementation). It is
+unusual for databases to check for satisfaction of isolation
+constraints everytime an operation is executed. Efficient
+implementation strategies (\eg multi-versioning) are employed to
+achieve the twin goals of isolation and consistency/recency.
+
 \paragraph{A CC store} A causally consistent data store, such as the
 one underlying the reasoning framework of~\cite{gotsmanpopl16}, allows
 operations to only witness a causally consistent snapshot of the
