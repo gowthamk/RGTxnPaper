@@ -1,0 +1,214 @@
+\begin{figure*}[!t]
+%
+\textbf{Expressions in Txn} \quad \fbox {\(
+\rg{\mathbb{I},P,R}{\txnbox{e}_i}{G,C,Q} \)}\\
+%
+\begin{minipage}{4.5in}
+\rulelabel{RG-Var}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \stable(R,\I) \spc
+  \I \vdash \mathtt{stable}(R,P) \spc
+  \I \vdash \mathtt{stable}(R,Q) \\
+  \hspace*{0in}\forall \E,j,\eta,S,\E'.\; P(\E) \wedge j > \maxId(\E.\A)
+    \conj S \subseteq \E.\A \conj \eta =
+    (T_i,j,\C{RD}(X),\llbracket S \rrbracket(X))\\
+    \hspace*{1in}\conj \E' = \E \cup (\{\eta\},S\times\{\eta\}) \conj
+    \I(\E') \Rightarrow C(\llbracket S \rrbracket(X)) \wedge Q(\E') 
+      \wedge G(\E,\E')
+}
+{
+  \rg{\mathbb{I},P,R}{\txnbox{X}_i}{G,C,Q}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+%
+\begin{minipage}{3.7in}
+\rulelabel{RG-Arith}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+% \I \vdash \mathtt{stable}(R,P) \spc
+% \I \vdash \mathtt{stable}(R,Q) \\
+  \forall v_1,v_2.\; C_1(v_1) \conj C_2(v_2) \Rightarrow
+          C(v_1 \pm v_2)\\
+  \rg{\mathbb{I},P,R}{\txnbox{e_1}_i}{G,C_1,Q'}\spc
+  \rg{\mathbb{I},Q',R}{\txnbox{e_2}_i}{G,C_2,Q}
+% G_1;G_2 \subseteq G
+}
+{
+  \rg{\mathbb{I},P,R}{\txnbox{e_1 \pm e_2}_i}{G,C,Q}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+%
+\begin{minipage}{2in}
+\rulelabel{RG-Conseq1}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \I' \Rightarrow \I \spc 
+  P' \Rightarrow P \spc
+  Q \Rightarrow Q' \spc C \Rightarrow C'\\
+  R' \subseteq R \spc G \subseteq G' \spc
+  \rg{\mathbb{I},P,R}{\txnbox{e}_i}{G,C,Q}
+}
+{
+  \rg{\mathbb{I'},P',R'}{\txnbox{e}_i}{G',C',Q'}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+\bigskip
+
+%
+\textbf{Commands in Txn} \quad \fbox {\(
+\rg{\mathbb{I},P,R}{\txnbox{c}_i}{G,Q} \)}\\
+%
+\begin{minipage}{3in}
+\rulelabel{RG-Asgn}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+% \I \vdash \mathtt{stable}(R,P)\spc
+  \stable(R,\I)\spc
+  \I \vdash \mathtt{stable}(R,Q')\spc
+  \I \vdash \mathtt{stable}(R,Q)\spc
+  \C{Txn}\vdash \rg{\I,P,R}{e}{G,C,Q'}\\
+ \hspace*{0in}
+  \forall v,\E,j,\eta,S,\E'.~ C(v) \conj Q'(\E) \conj j>\maxId(\E.\A) 
+      \conj \eta = (T_i,j,\C{WR}(X),v)\\
+    \hspace*{0.8in}\conj S\subseteq \E.\A \conj 
+     \E' = \E \cup (\{\eta\},S\times\{\eta\})
+     \conj \I(\E') \Rightarrow Q(\E') \conj G(\E,\E') 
+}
+{
+  \rg{\mathbb{I},P,R}{\txnbox{X:=e}_i}{G,Q}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+%
+\begin{minipage}{3.6in}
+\rulelabel{RG-Seq}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+% \I \vdash \mathtt{stable}(R,P)\spc
+% \I \vdash \mathtt{stable}(R,Q)\\
+  \rg{\mathbb{I},P,R}{\txnbox{c_1}_i}{G,Q'}\\
+  \rg{\mathbb{I},Q',R}{\txnbox{c_2}_i}{G,Q}
+}
+{
+  \rg{\mathbb{I},P,R}{\txnbox{c_1;c_2}_i}{G,Q}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+\begin{minipage}{2in}
+\rulelabel{RG-Conseq2}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \I' \Rightarrow \I \spc 
+  P' \Rightarrow P \spc Q \Rightarrow Q' \\
+  R' \subseteq R \spc G \subseteq G' \spc
+  \rg{\mathbb{I},P,R}{\txnbox{c}_i}{G,Q}
+}
+{
+  \rg{\mathbb{I'},P',R'}{\txnbox{c}_i}{G',Q'}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+%
+\bigskip
+
+%
+\textbf{Top-Level Commands} \quad \fbox {\(\rg{\mathbb{I},P,R}{c}{G,Q} \)}\\
+%
+
+%
+\begin{minipage}{3.5in}
+\rulelabel{RG-Txn}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \stable(R,\I)\spc
+% \I \vdash \mathtt{stable}(R,P)\spc
+  \I \vdash \mathtt{stable}(R,Q)\spc
+  \I \vdash \mathtt{stable}(R,Q')\spc
+  \rg{\mathbb{I},P,R}{\txnbox{c}_i}{G,Q'}\\
+  \hspace*{-0.5in}\forall \E,j,\eta,S,\E'.~Q'(\E) \conj j > \maxId(\E.\A) 
+    \conj \eta = (T_i,j,\C{COMMIT},\bot) \\
+    \hspace*{0.4in} S \subseteq \E.\A \conj \E' = \E \cup
+    (\{\eta\},S\times\{\eta\}) \conj \I(\E') \Rightarrow Q(\E') \conj G(\E,\E')\\
+}
+{
+  \rg{\mathbb{I},P,R}{\ctxn{i}{c}}{G,Q}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+%
+\begin{minipage}{3.6in}
+\rulelabel{RG-Par}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+% \I \vdash \mathtt{stable}(R_1,P_1)\spc
+% \I \vdash \mathtt{stable}(R_1,Q_1)\\
+% \I \vdash \mathtt{stable}(R_2,P_2)\spc
+% \I \vdash \mathtt{stable}(R_2,Q_2)\\
+ \rg{\I,P_1,R \cup G_2}{c_1}{G_1,Q_1} \\
+ \rg{\I,P_2,R \cup G_1}{c_2}{G_2,Q_2}
+}
+{\rg{\I,P_1\wedge P_2,R}{c1||c2}{G_1\cup G_2,Q_1 \wedge Q_2}}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+%
+\begin{minipage}{2in}
+\rulelabel{RG-Conseq3}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \I' \Rightarrow \I \spc 
+  P' \Rightarrow P \spc Q \Rightarrow Q' \\
+  R' \subseteq R \spc G \subseteq G' \spc
+  \rg{\mathbb{I},P,R}{c}{G,Q}
+}
+{
+  \rg{\mathbb{I'},P',R'}{c}{G',Q'}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+\caption{\txnimp: Rely-Guarantee Rules}
+\label{fig:rg-rules}
+\end{figure*}
