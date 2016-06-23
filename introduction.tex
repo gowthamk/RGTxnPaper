@@ -15,38 +15,38 @@ there is no interleaving of actions from different transactions.
 
 The guarantees provided by serializability, and strong isolation in
 particular, do not come for free, however - pessimistic concurrency
-control methods, for example, require databases to provide expensive
-techniques such as two-phase locking that incur overhead to deal with
-deadlocks, rollbacks, and re-execution~\cite{twopl,ullmanbook}.
-Similar criticisms apply to optimistic multi-version concurrency
-control methods that must deal with timestamp and version
-management~\cite{BG81}.  Regardless of the particular concurrency
-control method employed, enforcing serializability in a replicated
-data store additionally requires global coordination among
-geo-distributed replicas, which makes the store \emph{unavailable} in
-the presence of network
+control methods that enforce serializability, for example, require
+databases to provide expensive techniques such as two-phase locking
+that incur overhead to deal with deadlocks, rollbacks, and
+re-execution~\cite{twopl,ullmanbook}.  Similar criticisms apply to
+optimistic multi-version concurrency control methods that must deal
+with timestamp and version management~\cite{BG81}.  Regardless of the
+particular concurrency control method employed, enforcing
+serializability in a replicated data store additionally requires
+global coordination among geo-distributed replicas, which makes the
+store \emph{unavailable} in the presence of network
 partitions~\cite{cap,sernotavlbl,bailishat,bernsigmod13}.
 
 The tension between serializable transactions, which are easy to
-reason about but difficult to implement, and more pragmatic goals
-driven by performance and availability considerations, has motivated
-the development of different weaker forms of transaction isolation,
-beginning as early as 1976~\cite{gray1976}. The ANSI SQL 92 standard
-defines three such weak isolation levels which are now implemented in
-many relational and NoSQL databases. Not surprisingly, weakly-isolated
-transactions have been found to significantly outperform serializable
-transactions on benchmark suites, both on single-node databases and
-multi-node replicated stores~\cite{dbtuningbook,bailishat,bailisvldb},
-leading to their overwhelming adoption. A 2013
-study~\cite{bailishotos} of 18 popular ACID and ``NewSQL'' databases
-found that only three of them offer serializability by default, and
-half, including Oracle 11g, do not offer it at all.  A 2015
-study~\cite{bailisferal} of a large corpus of database applications
-finds no evidence that applications manifestly change the default
-isolation level offered by the database. Taken together, these studies
-make clear that weakly-isolated transactions are quite prevalent in
-practice, and strongly-isolated (serializable) transactions are often
-eschewed.
+reason about but difficult to implement, and more pragmatic goals but
+weaker variants that are driven by performance and availability
+considerations, has motivated the development of weaker forms of
+transaction isolation, beginning as early as 1976~\cite{gray1976}. The
+ANSI SQL 92 standard defines three such weak isolation levels which
+are now implemented in many relational and NoSQL databases. Not
+surprisingly, weakly-isolated transactions have been found to
+significantly outperform serializable transactions on benchmark
+suites, both on single-node databases and multi-node replicated
+stores~\cite{dbtuningbook,bailishat,bailisvldb}, leading to their
+overwhelming adoption. A 2013 study~\cite{bailishotos} of 18 popular
+ACID and ``NewSQL'' databases found that only three of them offer
+serializability by default, and half, including Oracle 11g, do not
+offer it at all.  A 2015 study~\cite{bailisferal} of a large corpus of
+database applications finds no evidence that applications manifestly
+change the default isolation level offered by the database. Taken
+together, these studies make clear that weakly-isolated transactions
+are quite prevalent in practice, and strongly-isolated (serializable)
+transactions are often eschewed.
 
 Unfortunately, weak isolation admits behaviors that are difficult to
 comprehend~\cite{berenson}. To quantify weak isolation anomalies,
@@ -173,11 +173,21 @@ The paper makes the following contributions:
     the applicability and utility of our proof methodology.
 \end{itemize}
 
-Our results thus provide the first (to the best of our knowledge)
+\noindent Our results thus provide the first (to the best of our knowledge)
 mechanism that precisely relates high-level program invariants to
 low-level weak isolation and store consistency guarantees, thereby
 allowing weakly-isolated transactions to enjoy the same rigorous
 reasoning capabilities as their strongly isolated (serializable)
 counterparts.
 
-
+The remainder of the paper is organized as follows.  The next section
+provides motivation and background on serializable and weakly-isolated
+transactions. \S\ref{sec:opsem} presents an operational semantics for
+a core language that supports weakly-isolated transactions, and which
+is parameterized over different isolation and store-consistency
+notions. \S\ref{sec:proofrules} formalizes the proof systemt that we
+use to reason about program invariants, and establishes the soundness
+of these rules with respect to the semantics.  We describe the impact
+of our reasoning framework in the context of several real-world case
+studies in \S\ref{sec:casestudies}.  Related work and conclusions are
+given in \S\ref{sec:relatedwork}.
