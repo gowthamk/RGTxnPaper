@@ -1,0 +1,21 @@
+\section{The Reasoning Framework}
+\label{sec:reasoning}
+
+We now describe a proof system that lets us prove that a \txnimp
+program satisfies its high-level invariants in all small-step
+executions that satisfy a trace invariant\footnote{It is important to
+mind the distinction between high-level invariants (\eg~\C{X$\ge$0})
+and trace invariants (\eg~\C{RC}). The former constitute \emph{proof}
+\emph{obligations} for the programmer, whereas the latter capture
+\emph{assumptions} about the machine. } ($\I$).  Since the trace
+invariant is a conjunction of store consistency ($\I_s$) and
+transaction isolation ($\I_c$) constraints, the proof demonstrates
+that program preserves its invariants when executed on a given store
+under a given selection of isolation levels for its transactions.
+
+
+Our proof system generalizes rely-guarantee reasoning to a setting
+that includes weakly consistent stores and weakly isolated
+transactions. 
+
+\input{rg-rules}
