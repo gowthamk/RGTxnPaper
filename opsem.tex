@@ -1,10 +1,10 @@
+\subsection{\txnimp: Syntax and Semantics}
 \section{\txnimp}
 \label{sec:opsem}
 
-\input{txnimp}
-
-\subsection{Syntax and Semantics}
 \label{sec:syntax}
+
+\input{txnimp}
 
 Fig.~\ref{fig:txnimp} shows the syntax and small-step semantics of
 \txnimp, a core language that we will use to formalize the intuitions
@@ -62,6 +62,7 @@ $\psi_{RC}$ specification from \S\ref{sec:motivation}, but with
 bounded $T_1$ and $T_2$ instantiated with \C{Wd1} and \C{Wd2},
 respectively. The instantiated specification is the following
 proposition:
+
 \begin{smathpar}
 \begin{array}{l}
   \forall \eta_1,\eta_2,.\; \txn(\eta_1) = \C{Wd1}
@@ -70,7 +71,8 @@ proposition:
   \eta_2 \Rightarrow \C{Wd1} \hboar \eta_2 \\
 \end{array}
 \end{smathpar}
-It is easy to intepret the above proposition in the context of a trace
+
+\noindent It is easy to intepret the above proposition in the context of a trace
 $\E$ that captures an execution of the program in
 Fig.~\ref{fig:motiv-eg-1}. Such a trace-parametric proposition can be
 used to instantiate the trace invariant $\I$ in Fig.~\ref{fig:txnimp}.
@@ -167,6 +169,7 @@ that accepts a set of effects and a variable name, and returns the
 value associated with the variable. A straightforward interpretation
 function that chooses the last write (i.e., write with largest id) is
 shown below:
+
 \begin{smathpar}
 \begin{array}{lcl}
   \isMax(S,\eta) & \Leftrightarrow &  \forall (\eta'\in S).  
@@ -178,7 +181,8 @@ shown below:
   & & \C{then}\;\rval(\eta)\;\C{else}\;0\\
 \end{array}
 \end{smathpar}
-Rules \rulelabel{E-Top-Ctx} and \rulelabel{E-Txn-Ctx} define
+
+\noindent Rules \rulelabel{E-Top-Ctx} and \rulelabel{E-Txn-Ctx} define
 congruence properties for top-level terms and transaction-bound terms,
 respectively. The rules and evaluation contexts ($\ectx$ and
 $\ectx_i$) are defined such that only certain kinds of terms are
