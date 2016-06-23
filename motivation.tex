@@ -106,6 +106,24 @@ unlike {\sc ser}, does not rely on expensive lock-based
 concurrency control, it is also more efficient, making it appropriate
 appropriate for both {\bf Wd} transactions.
 
+\begin{figure}
+\begin{smathpar}
+\begin{array}{lcl}
+\psi_{RC} & \defeq & \forall T_1,T_2,\eta_1,\eta_2,.\; \txn(\eta_1) = T_1 
+  \conj \txn(\eta_2) = T_2 \\
+  & & \hspace*{0.6in}\conj T_1 \neq T_2 \conj \eta_1 \hboar
+  \eta_2 \Rightarrow T_1 \hboar \eta_2 \\
+\psi_{SI} & \defeq & \forall T_1,T_2.\; T_1 \neq T_2 \conj
+  (\exists \C{X}.~{T_1 \wrstoar \C{X}} \conj 
+                      {T_2 \wrstoar \C{X}})\\
+  &  & \hspace*{0.6in}\Rightarrow{T_1 \hboar T_2} \disj {T_2 \hboar T_1} \\
+\end{array}
+\end{smathpar}
+\caption{Visibility and interference properties for different weak isolation levels can be
+  captured by different instantiations of their happens-before relation.}
+\label{fig:interference-ex}
+\end{figure}
+
 Thinking in terms of anomalies, as described above, is how database
 programmers are often encouraged to reason about weak isolation.
 Unfortunately, such reasoning does not rest on any sound foundation,
@@ -168,21 +186,11 @@ $T_2$, thus allowing it to interfere in $T_2$. The \iso{Snapshot
   Isolation} specification requires two transactions that write to the
 same variable to be related by happens-before.  This effectively
 prohibits interference due to actions in $T_1$ being interleaved in
-$T_2$ (or, vise versa).  Formally\footnote{Note that specifications
+$T_2$ (or, vise versa).  We formalize these properties in Fig.~\ref{fig:interference-ex}\footnote{Note that specifications
     presented here are solely for illustration. The actual
-    specifications described in \S\ref{sec:ansi-isolation} are more nuanced.}:
-\begin{smathpar}
-\begin{array}{lcl}
-\psi_{RC} & \defeq & \forall T_1,T_2,\eta_1,\eta_2,.\; \txn(\eta_1) = T_1 
-  \conj \txn(\eta_2) = T_2 \\
-  & & \hspace*{0.6in}\conj T_1 \neq T_2 \conj \eta_1 \hboar
-  \eta_2 \Rightarrow T_1 \hboar \eta_2 \\
-\psi_{SI} & \defeq & \forall T_1,T_2.\; T_1 \neq T_2 \conj
-  (\exists \C{X}.~{T_1 \wrstoar \C{X}} \conj 
-                      {T_2 \wrstoar \C{X}})\\
-  &  & \hspace*{0.6in}\Rightarrow{T_1 \hboar T_2} \disj {T_2 \hboar T_1} \\
-\end{array}
-\end{smathpar}
+    specifications described in \S\ref{sec:ansi-isolation} are more nuanced.}.
+
+
 Fig.~\ref{fig:motiv-eg-1-hb} is a visualization of $\hbZ$ 
 from {\bf Wd2} to {\bf Wd1} allowed by $\psi_{RC}$ and $\psi_{SI}$. All
 arrows are legal under $\psi_{RC}$ because in no case does an operation
@@ -216,6 +224,7 @@ automatically prohibited. For instance, consider the program point
 after the write to \C{C} in {\bf Wd1}. The expected invariant ($\phi$) at
 that program point is shown below ($\committed$ stands for
 ``committed''):
+
 \begin{smathpar}
 \begin{array}{l}
   \neg\committed(\C{Wd1}) \conj (\neg\committed(\C{Wd2}) \Rightarrow
@@ -225,7 +234,8 @@ that program point is shown below ($\committed$ stands for
                 \Rightarrow \C{C = k-a1-a2})
 \end{array}
 \end{smathpar}
-$\phi$ asserts that {\bf Wd1} is not yet committed, and that it wrote to
+
+\noindent $\phi$ asserts that {\bf Wd1} is not yet committed, and that it wrote to
 \C{C}, and the value of \C{C} is either \C{k-a1-a2} or \C{k-a1}
 depending on whether or not {\bf Wd2} is committed. If $\phi$ remains
 invariant until {\bf Wd1} commits, then the post-condition (\C{C =
