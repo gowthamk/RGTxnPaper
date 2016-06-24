@@ -102,7 +102,7 @@ t & \in & \mathtt{Terms} & \coloneqq & e \ALT c\\
   \I(\E')
 }
 {
-  \I \vdash (\mathcal{F},(\A,\visZ)) \redsto (v,\E')
+  \I \vdash (\mathcal{F},(\A,\visZ)) \redsto (\rval(\eta),\E')
 }
 \end{array}
 \end{smathpar}
@@ -152,7 +152,7 @@ t & \in & \mathtt{Terms} & \coloneqq & e \ALT c\\
 \begin{array}{c}
 \RULE
 {
-  \mathcal{F} = \lambda S.\, (T_i,j,\C{RD(X)},\interp{S})\\
+  \mathcal{F} = \lambda S.\, (T_i,j,\C{RD}(X),\interp{S}(X))\\
   \underI{(\mathcal{F},\E) \redsto (v,\E')}
 }
 {
