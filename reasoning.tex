@@ -40,9 +40,9 @@ states resulting from executing the program, the value of \C{C} is
 ($\lambda\E.~\interp{\E}(\C{C})\,=\,\C{k-a1-a2}$) asserts that in all
 executions of the program, the value of \C{C} is \C{k-a1-a2}.
 However, having access to an execution facilitates assertions that go
-beyond the state. An example is the invariant at a program point
-inside \C{Wd1} described abstractly in \S\ref{sec:motivation}, and
-reified as an execution-based assertion below:
+beyond the state. An example is an invariant of \C{Wd1} described
+abstractly in \S\ref{sec:motivation}, and reified as an
+execution-based assertion below:
 \begin{smathpar}
 \begin{array}{l}
   \lambda\E.~ \neg(\underE{\committed(\C{Wd1}}) \conj 
@@ -69,29 +69,28 @@ the execution trace.
 
 \input{rg-rules}
 
-The standard rely guarantee judgment is the quintuple $\rg{P,R}{c}{G,Q}$,
-which intuitively means the following: if a command $c$ is executed in
-a state that satisfies its precondition $P$, provided that every
-interference step during the execution is contained inside the rely
-relation $R$, then the effect that each step of executing $c$ has on
-the state is captured by $G$, and the final state of execution
-satisfies the postcondition $Q$. The terms ``execution'' and ``step''
-are defined with respect to an operational semantics, which in our
-case, is parameterized on the trace invariant $\I$. Consequently, our
-rely-guarantee judgment for commands is the sextuple\footnote{$\I$ is
-written in the same group as $P$ to suggest that it is an assumption;
-not an obligation.} $\rg{\I,P,R}{c}{G,Q}$, whose semantics differs
-from the quintuple in that it requires every step of the execution to
-preserve the trace invariant $\I$ for the postcondition to be valid.
-As usual, we write $\txnbox{t}_i$ to denote a term $t$ inside a
-transaction $T_i$.  \txnimp expressions are side-effecting (they
-generate \C{RD} effects), and admit interference during their
-evaluation. Therefore, like the commands, expressions need to be
-reasoned about explicitly. But, unlike commands, expressions evaluate
-to values, and reasoning framework should also admit assertions on such
-values. We therefore define a separate judgment for expressions - the
-septuple $\rg{\I,P,R}{e}{G,C,Q}$. The new entrant $C : \mathbb{N}
-\rightarrow \Prop$ is an assertion on the return value of $e$.
+The standard rely guarantee judgment is the quintuple
+$\rg{P,R}{c}{G,Q}$, which intuitively means the following: if a
+command $c$ is executed in a state that satisfies its precondition
+$P$, provided that every interference step during the execution is
+contained inside the rely relation $R$, then the effect that each step
+of executing $c$ has on the state is captured by $G$, and the final
+state of execution satisfies the postcondition $Q$. The terms
+``execution'' and ``step'' are defined with respect to an operational
+semantics, which, in our case, is parameterized on the trace invariant
+$\I$. Consequently, our rely-guarantee judgment for commands is the
+sextuple $\rg{\I,P,R}{c}{G,Q}$, whose semantics differs from the
+quintuple in that it requires every step of the execution to preserve
+the trace invariant $\I$ for the postcondition to be valid.  As usual,
+if $c$ is inside a transaction $T_i$, we write $\txnbox{c}_i$. \txnimp
+expressions are side-effecting (they generate \C{RD} effects), and
+admit interference during their evaluation.  Therefore, like the
+commands, expressions need to be reasoned about explicitly. But,
+unlike commands, expressions evaluate to values, and the reasoning
+framework should also admit assertions on such values.  We therefore
+define a separate judgment for expressions - the septuple
+$\rg{\I,P,R}{e}{G,C,Q}$. The new entrant $C : \mathbb{N} \rightarrow
+\Prop$ is an assertion on the return value of $e$.
 
 The rules that define rely-guarantee judgment are shown in
 Fig.~\ref{fig:rg-rules}. Like the standard definitions of rely
@@ -108,12 +107,11 @@ the interference preserves the trace invariant $\I$. Formally:
 \end{array}
 \end{smathpar}
 However, the assumption that the interference preserves $\I$ (or,
-equivalently, $\I$ withstands inteferference) needs to
-be justified separately. We call this the stability requirement on
-$\I$:
+dually, $\I$ withstands inteferference) needs to be justified
+separately. We call this the stability requirement on $\I$:
 \begin{smathpar}
 \begin{array}{lcl}
-\stable(R,\I)& \Leftrightarrow & \forall \E, \E'.\, 
+\stable(R,\I)& \defeq & \forall \E, \E'.\, 
   \I(\E) \conj R(\E,\E')\Rightarrow \I(\E')\\
 \end{array}
 \end{smathpar}
@@ -135,58 +133,54 @@ the return value ($\interp{S}(X)$) of the read to satisfy the
 assertion $C$ meant for the value. \rulelabel{RG-Arith} defines the
 RG judgment for an arithmetic expression $e_1\pm e_2$ in terms of the
 corresponding judgments for the constitutent expressions $e_1$ and
-$e_2$. Note that the pre-condition of $e_2$ ($Q'$) is also the
-postcondition of $e_1$, reflecting the order of evaluation established
-in Fig.~\ref{fig:txnimp}. The quantified premise requires any value
-resulting from evaluating $e_1 \pm e_2$ to satisfy the assertion $C$,
-provided that $e_1$ and $e_2$ always evaluate to values that satisfy
-$C_1$ and $C_2$, respectively. 
+$e_2$. The quantified premise requires any value resulting from
+evaluating $e_1 \pm e_2$ to satisfy the assertion $C$, provided that
+$e_1$ and $e_2$ always evaluate to values that satisfy $C_1$ and
+$C_2$, respectively. The rules for sequential and parallel composition
+of comands are more-or-less same as the corresponding rules in
+classical rely-guarantee, hence elided.
 
-RG judgment for the assignment $X:=e$ makes use of the corresponding
-judgment for the RHS expression $e$. The quantified premise asserts
-that evaluating the assigment after evaluating $e$ to a value $v$ and
-an execution $\E$, should result in an execution $\E'$ that satisfies
-the postcondition $Q$, while being related to $\E$ via the guarantee
-$G$. RG judgment for the \C{txn} lexical block is similar.  It uses
-the judgment for the transaction-bound command $c$ (i.e.,
-$\txnbox{c}_i$) to obtain an invariant $Q'$ for the execution $\E$
-before the commit, and verifies that committing the transaction under
-$\E$ results in an execution $\E'$ that satisfies transaction's
-postcondition $Q$. As usual, $\E$ and $\E'$ need to be related by $G$.
-The rules for sequential composition of transaction-bound comands
-(\rulelabel{RG-Seq}) and parallel composition of top-level commands
-(\rulelabel{RG-Par}) are straightforward, and more-or-less same as the
-corresponding rules in classical rely-guarantee.
+% RG judgment for the assignment $X:=e$ makes use of the corresponding
+% judgment for the RHS expression $e$. The quantified premise asserts
+% that evaluating the assigment after evaluating $e$ to a value $v$ and
+% an execution $\E$, should result in an execution $\E'$ that satisfies
+% the postcondition $Q$, while being related to $\E$ via the guarantee
+% $G$. RG judgment for the \C{txn} lexical block is similar.  It uses
+% the judgment for the transaction-bound command $c$ (i.e.,
+% $\txnbox{c}_i$) to obtain an invariant $Q'$ for the execution $\E$
+% before the commit, and verifies that committing the transaction under
+% $\E$ results in an execution $\E'$ that satisfies transaction's
+% postcondition $Q$. As usual, $\E$ and $\E'$ need to be related by $G$.
+% The rules for sequential composition of transaction-bound comands
+% (\rulelabel{RG-Seq}) and parallel composition of top-level commands
+% (\rulelabel{RG-Par}) are straightforward, and more-or-less same as the
+% corresponding rules in classical rely-guarantee.
 
-The three \rulelabel{RG-Conseq} rules define ways to strengthen or
-weaken relations and assertions associated with RG judgments of
-transaction-bound expressions, commands and top-level commands,
-respectively. In particular, they allow the precondition $P$ and the
-rely relation $R$ to be strengthened\footnote{A stronger relation is a
-smaller set than a weaker relation, hence a stronger $R$ admits lesser
+The \rulelabel{RG-Conseq} rule defines ways to strengthen or weaken
+relations and assertions associated with the RG judgment of
+transaction-bound expressions. Similar rules exist for
+transaction-bound and top-level commands, but are not shown. In
+particular, the rules allow the precondition $P$ and the rely relation
+$R$ to be strengthened\footnote{A stronger relation is a smaller set
+than a weaker relation, hence a stronger $R$ admits lesser
 interference than a weaker $R$}, and the postcondition $Q$ (also, $C$
 in the case of expressions) and the guarantee relation $G$ to be
 weakened. This kind of strengthening/weakening is also admitted in the
 classical RG framework. The most notable aspect of
 \rulelabel{RG-Conseq} rules however is that they allow the trace
 invariant $\I$ to be strengthened. Considering that $\I$ captures
-consistency and isolation properties, this means that a program proved
-correct under weaker consistency and isolation levels is also correct
-under stronger levels.  Parametricity over the trace invariant $\I$,
-combined with the ability to strengthen $\I$ as needed, allows our
-proof system to admit a highly flexible proof strategy to prove
-programs correct on various stores. Instead of requiring programs to
-be proved correct with respect to a pre-defined store (\eg~A CC store
-like in~\cite{gotsmanpopl16}), our reasoning framework allows
-programmers to \emph{define} a store of their choice (by defining $\I$
-appropriately) and then prove programs correct with respect to this
-store. Thus, programmers can prove their programs correct with respect
-to an imaginary store that provides only the required consistency and
-isolation guarantees. Soundness of strengthening $\I$ guarantees that
-the program can now be executed safely on any real store (\eg~a
-relational database, or a NoSQL store) that offers same or stronger
-consistency and isolation guarantees as the imaginary store. The
-following subsection proves the soundness of our proof system.
+isolation properties, this means that a program proved correct under
+weaker isolation levels is also correct under stronger levels.
+Parametricity over the trace invariant $\I$, combined with the ability
+to strengthen $\I$ as needed, allows our proof system to admit a
+highly flexible proof strategy to prove programs correct on various
+stores. For example, programmers can \emph{define} isolation
+guarantees of their choice (by defining $\I$ appropriately) and then
+prove programs correct assuming the guarantees hold. Soundness of
+strengthening $\I$ assures that the program can now be executed safely
+on any real store that offers same or stronger isolation guarantees
+than those assumed. The following subsection proves the soundness of
+our proof system.
 
 \subsection{Semantics and Soundness}
 
@@ -271,7 +265,7 @@ verification, the transaction must therefore make its internal state
 available via its guarantee relation.
 
 Soundness of rely-guarantee judgments can now be stated
-thus\footnote{Supplemntary contains a rigorous proof of the soundness
+thus\footnote{Supplementary contains a rigorous proof of the soundness
 theorem, and all relevant lemmas.}:
 \begin{theorem}[Soundness] 
 Rely-guarantee judgments defined by the rules in
