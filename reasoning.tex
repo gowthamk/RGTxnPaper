@@ -175,19 +175,18 @@ correct under weaker consistency and isolation levels is also correct
 under stronger levels.  Parametricity over the trace invariant $\I$,
 combined with the ability to strengthen $\I$ as needed, allows our
 proof system to admit a highly flexible proof strategy to prove
-programs correct on various stores. Unlike the existing approaches,
-which require programs to be proved correct with respect to a
-pre-defined store (\eg~A CC store in~\cite{gotsmanpopl16}), our
-reasoning framework allows programmers to \emph{define} a store of
-their choice (by defining $\I$ appropriately) and then prove programs
-correct with respect to this store. Thus, programmers can prove their
-programs correct with respect to an imaginary store that provides only
-the required consistency and isolation guarantees. Soundness of
-strengthening $\I$ guarantees that the program can now be executed
-safely on any real store (\eg~a relational database, or a NoSQL store)
-that offers same or stronger consistency and isolation guarantees as
-the imaginary store. The following subsection proves the soundness of
-our proof system.
+programs correct on various stores. Instead of requiring programs to
+be proved correct with respect to a pre-defined store (\eg~A CC store
+like in~\cite{gotsmanpopl16}), our reasoning framework allows
+programmers to \emph{define} a store of their choice (by defining $\I$
+appropriately) and then prove programs correct with respect to this
+store. Thus, programmers can prove their programs correct with respect
+to an imaginary store that provides only the required consistency and
+isolation guarantees. Soundness of strengthening $\I$ guarantees that
+the program can now be executed safely on any real store (\eg~a
+relational database, or a NoSQL store) that offers same or stronger
+consistency and isolation guarantees as the imaginary store. The
+following subsection proves the soundness of our proof system.
 
 \subsection{Semantics and Soundness}
 
@@ -290,10 +289,6 @@ soundness of the judgment $\rg{\I,P,R}{\txnbox{e}_i}{G,C,Q}$ also
 proves that $e$ is always evaluated to a value that satisfies $C$.
 
 \subsection{Soundness under Eventually Consistent Replication}
-
-\GK{Here, I give intuitive explanation of soundness in the context of
-EC replication. This answers Gustavo's question of why Gotsman-like
-special case reasoning about replicas is not needed in our setting.}
 
 \subsection{Examples}
 
