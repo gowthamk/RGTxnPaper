@@ -1,4 +1,4 @@
-\subsection{Store Consistency}
+\section{Store Consistency}
 \label{sec:store-consistency}
 
 Under a trivial trace invariant (i.e., $\I(\E) = true$), the abstract
@@ -192,3 +192,90 @@ is shown below:
 Fig.~\ref{fig:txnimp} results in an operational semantics that admits
 violation of causal consistency if and only if the violation is
 inevitable to enforce $\I_c$.
+
+\subsection{Eventually Consistent Replication}
+
+\begin{figure}
+\centering
+\subcaptionbox {
+  Replica model
+  \label{fig:ec-theirs}
+} [
+  0.4\columnwidth
+] {
+  \includegraphics[scale=0.7]{Figures/ec-theirs}
+ 
+}
+\hspace*{0.1in}
+\subcaptionbox {
+  Subset model
+  \label{fig:ec-ours}
+}{
+  \includegraphics[scale=0.45]{Figures/ec-ours}
+} \caption{In the replica model, operation $\op$ generates effect
+$\eta$ at replica $R_1$, which is then merged to $R_2$. If the
+\emph{store is {\sc cc}}, then $R_2$'s state at merge event is same or
+larger than $R_1$'s state at generation event (the difference is
+highlighted). In our subset model, $\op$ witnesses $S_1 \subseteq
+\E.\A$ and generates $\eta$, which is immediately added to $\E.\A$. A
+later operation may witness $S_2 \subseteq \E.\A$, and if the
+\emph{operation is} {\sc cc} and $\eta \in S_2$, then it also
+witnesses $S_1$ (i.e., $S_1 \subseteq S_2$). } 
+% Moreover, Like $R_2 - R_1$, if all effects in $S_2 - S_1$ are
+% concurrent with $\eta$, i.e., $\not\exists\eta'.~\eta' \in S_2 - S_1
+% \conj % visZ(\eta,\eta')$, then any precondition $P$ that is valid
+% when $\op$ executed is also valid when $\eta$ is witnessed because
+% of the stability condition.
+\label{fig:ec-theirs-vs-ours}
+\end{figure}
+
+In this section, we present an intuitive explanation of the soundness
+result in context of eventually consistent replication. 
+% In other words, we explain why our approach is a sound way of
+% reasoning about transactions under eventually consistent replication
+% despite our system model not including the standard artifacts
+% associated with a replicated store. 
+
+
+Existing approaches to reason about eventually consistent replication
+necessarily involve reasoning in terms of \emph{replicas} of data. The
+primary challenge in this setting is to ensure that the assumptions
+made and guarantees enforced by an operation at one replica carry over
+to other replicas that merge its effects, thus preserving the overall
+integrity of the system. Reasoning frameworks, such
+as~\cite{gotsmanpopl16}, address this challenge by imposing
+restrictions on how various replica states differ, i.e., by
+strengthening the consistency of the store. Our view of eventually
+consistent replication however does not explicitly involve replicas.
+Fig.~\ref{fig:ec-theirs-vs-ours} contrasts our model of EC replication
+with the conventional replica-based model.  Under our model, the
+notion of a replica is subsumed by the concept of visibility; a
+replica is defined by the subset ($S$) of global state ($\E.\A$) that
+an operation witnesses.  Constraints over replica states therefore
+manifest as constraints over the visibility relation. For example,
+instead of requiring the store to be causally consistent, an operation
+can request to witness a causally consistent subset of the state; such
+demands can be made via the trace invariant $\I$. For a precondition
+($P$) of the operation to be useful, it has to be an assertion over
+every causally consistent subset of the global state. Since any
+replica that eventually executes the operation has to expose one such
+subset ($S$), the precondition is guaranteed to hold regardless of the
+replica. There is however one problem with this explanation; by
+considering subsets of just one global state, it ignores the fact that
+the global state (hence, the replica states) change during the
+execution of the operation. Existing approaches account for this
+change by distinguishing between \emph{effect generation} event at one
+replica and \emph{effect merge} event at another replica, and
+requiring that certain invariants be preserved between these two
+events at different replicas. Our framework folds all of this into a
+stability condition (\S\ref{sec:rely-guarantee}). Since any change to
+the global state during the execution of the operation is an
+interference, and $P$ is required to be stable with respect to any
+such interference, it follows that $P$ is valid on every replica, thus
+ensuring that assumptions made at the generation event are also valid
+at the merge event.
+
+\subsection{Example}
+
+\GK{Here, I plan to include the full example that we dropped from
+\S\ref{sec:motivation}.}
