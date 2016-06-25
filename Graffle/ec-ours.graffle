@@ -430,11 +430,11 @@
 					<key>Color</key>
 					<dict>
 						<key>b</key>
-						<string>0.765632</string>
+						<string>0.363302</string>
 						<key>g</key>
-						<string>0.986697</string>
-						<key>r</key>
 						<string>0.990275</string>
+						<key>r</key>
+						<string>0.875213</string>
 					</dict>
 				</dict>
 				<key>shadow</key>
@@ -587,7 +587,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2016-06-24 23:41:54 +0000</string>
+	<string>2016-06-25 00:16:47 +0000</string>
 	<key>Modifier</key>
 	<string>Gowtham Kaki</string>
 	<key>NotesVisible</key>
