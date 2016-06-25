@@ -92,39 +92,39 @@ acceptable weakening of $\I_s$ in case of a conflict with $\I_c$.  The
 principle requires the weakened consistency guarantee ($\I_s'$) of the
 store to enforce all visibility relationships imposed by the actual
 consistency guarantee ($\I_s$), unless enforcing such a relationship
-violates $\I_c$. The formal definition of the principle is relegated
-to the supplementary in the interest of space, but it can be
-understood in the context of an {\sc sc} store, where it weakens the
-store invariant to the following:
-% Formally:
-% \begin{definition}
-% $\I_s' : \E \rightarrow \Prop$ is said to be a maximum visibility
-% weakening of $\I_s : \E \rightarrow \Prop$ if and only if:
-% \begin{itemize}
-%   \item $\I_s'$ is weaker than $\I_s$: 
-%       $\forall\E.~ \I_s(\E) \Rightarrow \I_s'(\E)$, and
-%   \item In every trace $\E$ that satisfies $\I_c$, and for every pair
-%   of effects $\eta_1$ and $\eta_2$ in $\E$, if $\I_s(\E)$ requires
-%   $\eta_1$ to be visible to $\eta_2$, then so does $\I_s'(\E)$ unless
-%   extending $\E$ with $\visZ(\eta_1,\eta_2)$ violates
-%   $\I_c$\footnote{\GK{ToDo: consider other well-formedness conditions
-%   on trace, such as acyclicity of $\visZ$ and $\soZ$. Are they needed
-%   (considering that the machine never violates them)? Encode the
-%   specifications in Z3 and make sure they are consistent.}}:
-%   \begin{smathpar}
-%   \begin{array}{l}
-%   \forall\E,\eta_1,\eta_2.~ \I_c(\E) \Rightarrow (\I_s(\E)
-%     \Rightarrow \underE{\eta_1 \visar \eta_2}) \Rightarrow \\
-%     \hspace*{0.5in}(\I_s'(\E) \Rightarrow \underE{\eta_1 \visar
-%     \eta_2} \disj \neg\I_c(\E\,\cup\,(\emptyset,\{(\eta_1,\eta_2)\})))
-%   \end{array}
-%   \end{smathpar}
-% \end{itemize}
-% \end{definition}
-
-% Applying this principle, we can weaken {\sc sc} to obtain the
-% following store trace invariant ($\I_s$) for an {\sc sc} store whose
-% isolation constraints are captured by $\I_c$:
+violates $\I_c$. 
+% The formal definition of the principle is relegated
+% to the supplementary in the interest of space, but it can be
+% understood in the context of an {\sc sc} store, where it weakens the
+% store invariant to the following:
+Formally:
+\begin{definition}
+$\I_s' : \E \rightarrow \Prop$ is said to be a maximum visibility
+weakening of $\I_s : \E \rightarrow \Prop$ if and only if:
+\begin{itemize}
+  \item $\I_s'$ is weaker than $\I_s$: 
+      $\forall\E.~ \I_s(\E) \Rightarrow \I_s'(\E)$, and
+  \item In every trace $\E$ that satisfies $\I_c$, and for every pair
+  of effects $\eta_1$ and $\eta_2$ in $\E$, if $\I_s(\E)$ requires
+  $\eta_1$ to be visible to $\eta_2$, then so does $\I_s'(\E)$ unless
+  extending $\E$ with $\visZ(\eta_1,\eta_2)$ violates
+  $\I_c$\footnote{\GK{ToDo: consider other well-formedness conditions
+  on trace, such as acyclicity of $\visZ$ and $\soZ$. Are they needed
+  (considering that the machine never violates them)? Encode the
+  specifications in Z3 and make sure they are consistent.}}:
+  \begin{smathpar}
+  \begin{array}{l}
+  \forall\E,\eta_1,\eta_2.~ \I_c(\E) \Rightarrow (\I_s(\E)
+    \Rightarrow \underE{\eta_1 \visar \eta_2}) \Rightarrow \\
+    \hspace*{0.5in}(\I_s'(\E) \Rightarrow \underE{\eta_1 \visar
+    \eta_2} \disj \neg\I_c(\E\,\cup\,(\emptyset,\{(\eta_1,\eta_2)\})))
+  \end{array}
+  \end{smathpar}
+\end{itemize}
+\end{definition}
+Applying this principle, we can weaken {\sc sc} to obtain the
+following store trace invariant ($\I_s$) for an {\sc sc} store whose
+isolation constraints are captured by $\I_c$:
 \begin{smathpar}
 \begin{array}{lcl}
 \I_s(\E) & = & \forall \eta_1,\eta_2.\, \{\eta_1,\eta_2\},
@@ -180,7 +180,7 @@ principles.
 % violation of causal consistency if and only if the violation is
 % inevitable to enforce $\I_c$.
 
-\subsection{Eventually Consistent Replication}
+\subsection{Weakly Consistent Replication}
 
 \begin{figure}
 \centering
@@ -216,46 +216,52 @@ witnesses $S_1$ (i.e., $S_1 \subseteq S_2$). }
 \label{fig:ec-theirs-vs-ours}
 \end{figure}
 
-In this section, we present an intuitive explanation of the soundness
-result in context of eventually consistent replication. 
+Reasoning under weakly consistent replication has received special
+attention in the recent research~\cite{gotsmanpopl16}. Our operational
+semantics and proof system are however more general and admit
+replication as a special case. In this section, we explain how our
+reasoning approach works under weakly consistent replication by
+comparing our model with the standard model of replication.
 
-Existing approaches to reason about eventually consistent replication
-necessarily involve reasoning in terms of \emph{replicas} of data. The
-primary challenge in this setting is to ensure that the assumptions
-made and guarantees enforced by an operation at one replica carry over
-to other replicas that merge its effects, thus preserving the overall
-integrity of the system. Reasoning frameworks, such
-as~\cite{gotsmanpopl16}, address this challenge by imposing
-restrictions on how various replica states differ, i.e., by
-strengthening the consistency of the store. Our view of eventually
-consistent replication however does not explicitly involve replicas.
-Fig.~\ref{fig:ec-theirs-vs-ours} contrasts our model of EC replication
-with the conventional replica-based model.  Under our model, the
-notion of a replica is subsumed by the concept of visibility; a
-replica is defined by the subset ($S$) of global state ($\E.\A$) that
-an operation witnesses.  Constraints over replica states therefore
-manifest as constraints over the visibility relation. For example,
-instead of requiring the store to be causally consistent, an operation
-can request to witness a causally consistent subset of the state; such
-demands can be made via the trace invariant $\I$. For a precondition
-($P$) of the operation to be useful, it has to be an assertion over
-every causally consistent subset of the global state. Since any
-replica that eventually executes the operation has to expose one such
-subset ($S$), the precondition is guaranteed to hold regardless of the
-replica. There is however one problem with this explanation; by
-considering subsets of just one global state, it ignores the fact that
-the global state (hence, the replica states) change during the
-execution of the operation. Existing approaches account for this
-change by distinguishing between \emph{effect generation} event at one
-replica and \emph{effect merge} event at another replica, and
-requiring that certain invariants be preserved between these two
-events at different replicas. Our framework folds all of this into a
-stability condition (\S\ref{sec:rely-guarantee}). Since any change to
-the global state during the execution of the operation is an
-interference, and $P$ is required to be stable with respect to any
-such interference, it follows that $P$ is valid on every replica, thus
-ensuring that assumptions made at the generation event are also valid
-at the merge event.
+Reasoning about eventually consistent replication often involves
+reasoning in terms of \emph{replicas} of data. The primary challenge
+in this setting is to ensure that the assumptions made and guarantees
+enforced by an operation at one replica carry over to other replicas
+that merge its effects, thus preserving the overall integrity of the
+system. In~\cite{gotsmanpopl16}, this challenge is partly addressed by
+imposing restrictions on how various replica states differ, i.e., by
+fixing a system model with a stronger baseline consistency ({\sc cc})
+than {\sc ec}. This unfortunately restricts the applicability of
+reasoning approach from being extended to weaker stores such as
+Bayou~\cite{bayou} or Quelea~\cite{pldi15}. Our view of replication
+however does not explicitly involve replicas.
+Fig.~\ref{fig:ec-theirs-vs-ours} contrasts our model of weakly
+consistent replication with the conventional replica-based model.
+Under our model, the notion of a replica is subsumed by the concept of
+visibility; a replica is defined by the subset ($S$) of global state
+($\E.\A$) that an operation witnesses. Constraints over replica states
+therefore manifest as constraints over the visibility relation.  For
+example, instead of requiring the store to be causally consistent, an
+operation can request to witness a causally consistent subset of the
+state; such demands can be made via the trace invariant $\I$. For a
+precondition ($P$) of the operation to be useful, it has to be an
+assertion over every causally consistent subset of the global state.
+Since any replica that eventually executes the operation has to expose
+one such subset ($S$), the precondition is guaranteed to hold
+regardless of the replica. There is however one problem with this
+explanation; by considering subsets of just one global state, it
+ignores the fact that the global state (hence, the replica states)
+change during the execution of the operation. To account for this
+change,~\cite{gotsmanpopl16} distinguishes between \emph{effect
+generation} event at one replica and \emph{effect merge} event at
+another replica, and requires that certain invariants be preserved
+between these two events at different replicas. Our framework folds
+all of this into a stability condition (\S\ref{sec:rely-guarantee}).
+Since any change to the global state during the execution of the
+operation is an interference, and $P$ is required to be stable with
+respect to any such interference, it follows that $P$ is valid on
+every replica, thus ensuring that assumptions made at the generation
+event are also valid at the merge event.
 
 \subsection{Example}
 
