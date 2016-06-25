@@ -186,8 +186,8 @@ our proof system.
 We now formalize the semantics of the rely-guarantee judgment of
 Fig.~\ref{fig:rg-rules} through a series of definitions.
 
-\begin{definition}[Step-indexed reflexive transitive closure]
-Forall $A$, $R: A \rightarrow A \rightarrow \mathbb{P}$, and $n :
+\begin{definition}[\bfseries Step-indexed reflexive transitive closure]
+Forall $A:\text{Type}$, $R: A \rightarrow A \rightarrow \mathbb{P}$, and $n :
 \mathbb{N}$, step-indexed reflexive transitive closure $R^n$ of $R$ is
 the smallest relation satisfying the following
 properties:
@@ -198,7 +198,7 @@ R^{n+1}(x,z)$
 \end{itemize}
 \end{definition}
 
-\begin{definition}[Interleaved step and multi-step relations]
+\begin{definition}[\bfseries Interleaved step and multi-step relations]
 Interleaved step relation interleaves the thread-local reduction with
 the interference from concurrent threads captured as the rely relation
 ($R$).  It is defined as following:
@@ -215,7 +215,8 @@ Interleaved multi-step relation ($\stepssto{n}$) is the step-indexed
 reflexive transitive closure of the interleaved step relation.
 \end{definition}
 
-\begin{definition}[Semantics of the RG judgment]
+\begin{definition}[\bfseries Semantics of the RG judgment]
+\label{def:rg-semantics}
 Semantics of the RG sextuple $\rg{\mathbb{I},P,R}{c}{G,Q}$ is defined
 in terms of the interleaved step relation as following:
 \begin{smathpar}
@@ -266,10 +267,10 @@ available via its guarantee relation.
 Soundness of rely-guarantee judgments can now be stated
 thus\footnote{Supplementary contains a rigorous proof of the soundness
 theorem, and all relevant lemmas.}:
-\begin{theorem}[Soundness] 
+\begin{theorem}[\bfseries Soundness] 
 Rely-guarantee judgments defined by the rules in
-Fig.~\ref{fig:rg-rules} are sound with respect to their semantics
-defined above. 
+Fig.~\ref{fig:rg-rules} are sound with respect to
+Definition~\ref{def:rg-semantics}. 
 \end{theorem}
 \noindent In particular, if $\rg{\I,P,R}{c}{G,Q}$ can be derived using
 the rules of Fig.~\ref{fig:rg-rules}, then (a). every interleaved
