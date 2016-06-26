@@ -217,39 +217,38 @@ witnesses $S_1$ (i.e., $S_1 \subseteq S_2$). }
 Reasoning under weakly consistent replication has received special
 attention in the recent work~\cite{gotsmanpopl16}. Our operational
 semantics and proof system are general enough to admit replication as
-a special case. In this section, we explain how our reasoning approach
-works under weakly consistent replication by comparing our model with
-the standard model of replication.
+a special case. In this section, we explain how the standard artifacts
+of weakly consistent replication manifest in our reasoning framework.
 
-Reasoning about eventually consistent replication often involves
-reasoning in terms of \emph{replicas} of data. The primary challenge
-in this setting is to ensure that the assumptions made and guarantees
-enforced by an operation at one replica carry over to other replicas
-that merge its effects, thus preserving the overall integrity of the
-system. In~\cite{gotsmanpopl16}, this challenge is partly addressed by
+Reasoning about weakly consistent replication often involves reasoning
+in terms of \emph{replicas} of data. The primary challenge in this
+setting is to ensure that the assumptions made and guarantees enforced
+by an operation at one replica carry over to other replicas that merge
+its effects, thus preserving the overall integrity of the system.
+In~\cite{gotsmanpopl16}, this challenge is partly addressed by
 imposing restrictions on how various replica states differ, i.e., by
 fixing a system model with a stronger baseline consistency ({\sc cc})
-than {\sc ec}. This unfortunately restricts the applicability of
-reasoning approach from being extended to weaker stores such as
-Bayou~\cite{bayou} or Quelea~\cite{pldi15}. Our view of replication
-however does not explicitly involve replicas.
-Fig.~\ref{fig:ec-theirs-vs-ours} contrasts our model of weakly
-consistent replication with the conventional replica-based model.
-Under our model, the notion of a replica is subsumed by the concept of
-visibility; a replica is defined by the subset ($S$) of global state
-($\E.\A$) that an operation witnesses. Constraints over replica states
-therefore manifest as constraints over the visibility relation.  For
-example, instead of requiring the store to be causally consistent, an
-operation can request to witness a causally consistent subset of the
-state; such demands can be made via the trace invariant $\I$. For a
-precondition ($P$) of the operation to be useful, it has to be an
-assertion over every causally consistent subset of the global state.
-Since any replica that eventually executes the operation has to expose
-one such subset ($S$), the precondition is guaranteed to hold
-regardless of the replica. There is however one problem with this
-explanation; by considering subsets of just one global state, it
-ignores the fact that the global state (hence, the replica states)
-change during the execution of the operation. To account for this
+than {\sc ec}. This unfortunately restricts the reasoning approach
+from being applied to weaker stores such as Bayou~\cite{bayou} or
+Quelea~\cite{pldi15}. Our view of replication however does not
+explicitly involve replicas.  Fig.~\ref{fig:ec-theirs-vs-ours}
+contrasts our model of weakly consistent replication with the
+conventional replica-based model.  Under our model, the notion of a
+replica is subsumed by the concept of visibility; a replica is defined
+by the subset ($S$) of global state ($\E.\A$) that an operation
+witnesses. Constraints over replica states therefore manifest as
+constraints over the visibility relation.  For example, instead of
+requiring the store to be causally consistent, an operation can
+request to witness a causally consistent subset of the state; such
+demands can be made via the trace invariant $\I$. For a precondition
+($P$) of the operation to be useful, it has to be an assertion over
+every causally consistent subset of the global state.  Since any
+replica that eventually executes the operation has to expose one such
+subset ($S$), the precondition is guaranteed to hold regardless of the
+replica. There is however one problem with this explanation; by
+considering subsets of just one global state, it ignores the fact that
+the global state (hence, the replica states) change during the
+execution of the operation. To account for this
 change,~\cite{gotsmanpopl16} distinguishes between \emph{effect
 generation} event at one replica and \emph{effect merge} event at
 another replica, and requires that certain invariants be preserved
