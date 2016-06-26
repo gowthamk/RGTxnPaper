@@ -82,17 +82,16 @@ violated if (and only if) they are found to be in conflict with the
 constraints imposed by the isolation level. In the context of
 aforementioned example, $\eta_1$ is not made visible to $\eta_2$
 because doing so would violate $\I_c$. However, if $\I_c$ is true,
-then the store needs to make $\eta_1$ visible to $\eta_2$ to honor its
-consistency commitment\footnote{The term
-\emph{recency}~\cite{bailisvldb} is often used in place of consistency
-to capture the best-effort nature of the {\sc sc} guarantee on
-databases.}. We generalize this approach to any $\I_s$ and $\I_c$ by
-defining a \emph{maximum visiblity principle} to determine an
-acceptable weakening of $\I_s$ in case of a conflict with $\I_c$.  The
-principle requires the weakened consistency guarantee ($\I_s'$) of the
-store to enforce all visibility relationships imposed by the actual
-consistency guarantee ($\I_s$), unless enforcing such a relationship
-violates $\I_c$. 
+then the store makes $\eta_1$ visible to $\eta_2$ to honor its
+consistency commitment\footnote{The term \emph{recency
+commitment}~\cite{bailisvldb} is often used in practice, perhaps to
+capture the best-effort nature of {\sc sc}.}. We generalize this
+approach to any $\I_s$ and $\I_c$ by defining a \emph{maximum
+visiblity principle} to determine an acceptable weakening of $\I_s$ in
+case of a conflict with $\I_c$.  The principle requires the weakened
+consistency guarantee ($\I_s'$) of the store to enforce all visibility
+relationships imposed by the actual consistency guarantee ($\I_s$),
+unless enforcing such a relationship violates $\I_c$. 
 % The formal definition of the principle is relegated
 % to the supplementary in the interest of space, but it can be
 % understood in the context of an {\sc sc} store, where it weakens the
@@ -151,8 +150,7 @@ relegated to the supplementary in the interest of space.
 Note that the purpose of maximum visibility principle is to
 rationalize the observed behaviour of databases in practice. In
 particular, it is not intended to be a guiding principle to engineer
-data stores, and need not be objectively better than similar
-principles.
+data stores.
 \end{remark}
 
 % \paragraph{A CC store} A causally consistent data store~\cite{gotsmanpopl16,LBC16}
@@ -217,11 +215,11 @@ witnesses $S_1$ (i.e., $S_1 \subseteq S_2$). }
 \end{figure}
 
 Reasoning under weakly consistent replication has received special
-attention in the recent research~\cite{gotsmanpopl16}. Our operational
-semantics and proof system are however more general and admit
-replication as a special case. In this section, we explain how our
-reasoning approach works under weakly consistent replication by
-comparing our model with the standard model of replication.
+attention in the recent work~\cite{gotsmanpopl16}. Our operational
+semantics and proof system are general enough to admit replication as
+a special case. In this section, we explain how our reasoning approach
+works under weakly consistent replication by comparing our model with
+the standard model of replication.
 
 Reasoning about eventually consistent replication often involves
 reasoning in terms of \emph{replicas} of data. The primary challenge
@@ -265,5 +263,144 @@ event are also valid at the merge event.
 
 \subsection{Example}
 
-\GK{Here, I plan to include the full example that we dropped from
-\S\ref{sec:motivation}.}
+
+\begin{figure}
+\centering
+\begin{txnimpcode}
+ $\begin{decoration}
+ P_1:\{ {\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \conj\\
+        \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2}
+        \hboar \C{Wd1} \wedge \C{Wd2} \wrstoar \C{C} \wedge \C{C = k-a2} \}
+ \end{decoration}$
+  txn$\langle$'Wd1'$\rangle${
+   $\begin{decoration}
+    \phi_1 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \conj
+      {\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj\\
+       \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
+        {\C{Wd2} \hboar \C{Wd1}} 
+       \Rightarrow \C{C = k-a2} \}
+    \end{decoration}$ 
+    v1 = C
+   $\begin{decoration}
+    \phi_2 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \wedge \C{v1 = k} \conj\\
+       \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj \\
+       \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
+        {\C{Wd2} \hboar \C{Wd1}} 
+       \Rightarrow \C{C = k-a2} \wedge \C{v1 = k-a2}\}
+    \end{decoration}$ 
+    if (v1 $\ge$ a1) {
+      v2 = C;
+     $\begin{decoration}
+      \phi_3 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \wedge \C{v2 = k} \conj\\
+       \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj \\
+         \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
+          {\C{Wd2} \hboar \C{Wd1}} \Rightarrow \C{C = k-a2} \wedge \\
+          \hspace*{1.9in}\C{v2 = k-a2}\}
+      \end{decoration}$ 
+      v3 = v2 - a1;
+     $\begin{decoration}
+      \phi_4 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \wedge \C{v3 = k-a1} \conj\\
+         \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj \\
+         \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
+          {\C{Wd2} \hboar \C{Wd1}} 
+         \Rightarrow \C{C = k-a2} \wedge \\
+         \hspace*{1.9in}\C{v3 = k-a2-a1}\}
+      \end{decoration}$ 
+      C := v3
+     $\begin{decoration}
+      \phi_5 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k-a1}) 
+                \conj\\
+         \hspace*{0.3in}{\committed(\C{Wd2})} 
+                \Rightarrow \C{C = k-a1-a2}\}
+      \end{decoration}$ 
+    }
+  }
+ $\begin{decoration}
+  Q_1 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k-a1}
+            \conj \committed(\C{Wd1}) \conj\\
+      \hspace*{0.12in}{\committed(\C{Wd2})} 
+          \Rightarrow \C{C = k-a1-a2} \}
+  \end{decoration}$ 
+\end{txnimpcode}
+
+\caption{`Wd1' transaction decorated with assertions}
+\label{fig:wd1-decorated}
+\end{figure}
+
+The fully decorated implementation of transaction `Wd1' is shown in
+Fig.~\ref{fig:wd1-decorated}. Decorated `Wd2' is similar. Assignment
+statements are broken down and temporary local variables (\C{v1},
+\C{v2} and \C{v3}) are introduced so as to separate shared variable
+reads and writes.  Since we reason in terms of executions, all
+assertions implicitly refer to the current execution (just as hoare
+triples implicitly refer to the current state). Also implicit is the
+invariant \C{k $\ge$ a1+a2}. Proposition $\committed(T)$ indicates
+that the transaction $T$ is already committed. Precondition ($P_1$) of
+`Wd1' accounts for the possibility of `Wd2' committing before `Wd1',
+writing \C{k-a2} to \C{C}.  Precondition of `Wd2' is similar.  Since
+neither `Wd1' nor `Wd2' are committed at the beginning, the
+precondition in Fig.~\ref{fig:motiv-eg-1} is extended to include
+$\neg\committed(\C{Wd1}) \wedge \neg\committed(\C{Wd2})$, from which
+$P_1$ follows. Once the execution is inside `Wd1', commit of `Wd2'
+($\committed(\C{Wd2})$) may mean that either `Wd2' happened before
+`Wd1', or that it committed concurrently with `Wd1'. Since SI
+proscribes the latter possibility, we only consider the case when
+$\C{Wd2} \hboar \C{Wd1}$. A proof for $\C{Wd2} \hboar \C{Wd1}$ is
+obtained subsequently, allowing us to get rid of the special case.
+
+The first obligation is to show that the assertions that decorate
+`Wd1' are indeed valid. This entails proving that, for each statement
+of `Wd1', if evaluating the statement and extending an execution that
+satisfies its precondition results in a well-formed execution, then
+the extended execution must satisfy the postcondition. The
+well-formedness assumption lets us ignore the executions that violate
+the trace invariant lead the machine to a stuck state. This is useful
+in case of the assignment statement that writes \C{v3} to \C{C}. Since
+`Wd2' also writes to \C{C}, the trace invariant ($\I$) requires
+$\C{Wd2} \hboar \C{Wd1}$ if $\committed(\C{Wd2})$ (the alternative
+$\C{Wd1} \hboar \C{COMMIT}(\C{Wd2})$ allowed by \C{SI(Wd1)} is
+impossible in this case because \C{Wd2} has already committed, while
+\C{Wd1} is still in progress). This lets us treat the special case
+$\committed(\C{Wd2})\conj \C{Wd2} \hboar \C{Wd1}$ as being equivalent
+to the general case $\committed(\C{Wd2})$, which is required to prove
+the postcondition of `Wd1'. Observe that \C{RC(Wd1)} does not justify
+this generalization, hence replacing \C{SI(Wd1)} by \C{RC(Wd1)} is not
+sufficient to prove the postcondition of `Wd1'.
+
+The second obligation is to prove that assertions are valid despite
+the interference from the the concurrent thread executing `Wd2'. The
+interference is given by the following rely relation ($R_1$):
+\begin{smathpar}
+\begin{array}{lcl}
+  R_1 & = & \{ (\E,\E') \;|\; \neg\underE{\committed(\C{Wd2})} \conj 
+        \underE{\I} \conj \E'\Vdash \I \conj\\
+%       \conj (\E'-\E) \subseteq \C{Wd2} \conj \\
+%   & & \hspace*{0.5in} \E' \Vdash \committed(\C{Wd2}) ~\Rightarrow~ \E'
+%       \Vdash \C{Wd2} \wrstoar \C{C} \conj \\ 
+%   & & \hspace*{0.5in} \underE{\committed(\C{Wd1})} \conj \E' \Vdash
+%   \committed(\C{Wd2}) \Rightarrow \C{C=k-a1-a2} \\
+    & & \hspace*{0.5in} \neg\underE{\committed(\C{Wd1})} \conj
+        \C{COMMIT(Wd2)} \in (\E'-\E) \\
+    & & \hspace*{0.8in}\Rightarrow \C{C=k-a2} \conj 
+        \E' \Vdash \C{Wd2} \wrstoar \C{C} \conj \\
+    & & \hspace*{0.5in} \underE{\committed(\C{Wd1})} \conj
+        \C{COMMIT(Wd2)} \in (\E'-\E) \\
+    & & \hspace*{0.6in}\Rightarrow \C{C=k-a1-a2} \conj
+        \E' \Vdash \C{Wd2} \wrstoar \C{C} \}\\
+\end{array}
+\end{smathpar}
+The rely relation says the following about the concurrent thread: (1).
+It may interfere only if `Wd2' is not already committed, (2). Any
+interference takes well-formed executions to well-formed executions,
+(3). If the interference commits `Wd2', then `Wd2' should have already
+written to \C{C}, and (4). The value written is either $\C{k-a1-a2}$
+or $\C{k-a1}$ depending on whether or not `Wd1' has already committed.
+Interference from `Wd2' is allowed between any two operations of
+`Wd1', and assertions are required to be valid despite the
+interference. For instance, if the execution ($\E$) immediately after
+evaluating $\C{v1 = C}$ satisfies $\phi_2$ (i.e., $\underE{\phi_2}$),
+and an interference from `Wd2' extends $\E$ to $\E'$ (i.e.,
+$R_1(\E,\E')$), then the execution $\E'$ just before evaluating the
+condition must satisfy $\phi_2$ (i.e., $\E' \Vdash \phi_2$). Indeed,
+all $\phi_i$'s do satisfy this \emph{stability} condition, thus
+lending the validity to the proof.
