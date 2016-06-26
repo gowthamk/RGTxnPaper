@@ -2,12 +2,11 @@
 
   Serializability is a well-understood mechanism that simplifies
   reasoning about the behavior of concurrent transactions by ensuring
-  an executing transaction is \emph{isolated} from the effects of
-  other concurrenty executing transactions once it begins executing.
-  However, enforcing serializability comes at the cost in performance
-  because it necessarily restricts opportunities to exploit
-  concurrency even when such opportunities would not violate
-  application-specific invariants.
+  transactions are \emph{isolated} from each other's effects once they
+  begin executing.  However, enforcing serializability comes at a
+  steep cost in performance because it necessarily restricts
+  opportunities to exploit concurrency even when such opportunities
+  would not violate application-specific invariants.
   
   As a result, database systems (in practice) support, and often
   encourage, developers to use weaker alternatives.  These

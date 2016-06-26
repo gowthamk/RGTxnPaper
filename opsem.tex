@@ -3,9 +3,6 @@
 
 \label{sec:syntax}
 
-\subsection{\txnimp: Syntax and Semantics}
-\label{sec:opsem}
-
 \input{txnimp}
 
 Fig.~\ref{fig:txnimp} shows the syntax and small-step semantics of
@@ -43,27 +40,27 @@ property between effects among different transactions. The intent and
 mechanics of $\visZ$ is described in the sequel.
 
 Fundamental to our development is the notion of a trace invariant
-($\I$). $\I$ is a function from traces ($\E$) to propositions
-($\texttt{Prop}$) that define well-formedness constraints over traces.
-The machine takes a step only if the resulting trace satisfies the
-constraints imposed by $\I$. This behaviour is captured by the
-auxiliary reduction rule \rulelabel{E-Aux} that factors out the trace
-extension aspect of the evaluation by abstracting away the
-operation-specific behaviour as a function that generates an
-appropriate effect. We let $\mathcal{F}$ denote this function.
-\rulelabel{E-Aux} uses $\mathcal{F}$ to generate a new effect and
-extend the trace ($\E = (\A,\visZ)$) \emph{only if} the
-well-formedness constraints imposed by $\I$ on $\E$ (i.e., $\I(\E')$)
-are satisfied. Otherwise, it gets stuck. In an execution that runs to
-completion, every small-step preserves the well-formedness of a trace,
-thus ensuring the invariance of $\I$.  Note that the semantics makes
-no assumptions about $\I$ other than its type. As such, it can be
-instantiated with any trace-parametric proposition that expresses
-constraints over the given trace. For instance, consider the
-$\psi_{RC}$ specification from \S\ref{sec:motivation}, but with
-bounded $T_1$ and $T_2$ instantiated with \C{Wd1} and \C{Wd2},
-respectively. The instantiated specification is the following
-proposition:
+($\I$). $\I$ is a function from traces ($\E$) to first-order logical
+formula ($\texttt{Prop}$) that define well-formedness
+constraints over traces.  The machine takes a step only if the
+resulting trace satisfies the constraints imposed by $\I$. This
+behaviour is captured by the auxiliary reduction rule
+\rulelabel{E-Aux} that factors out the trace extension aspect of the
+evaluation by abstracting away the operation-specific behaviour as a
+function that generates an appropriate effect. We let $\mathcal{F}$
+denote this function.  \rulelabel{E-Aux} uses $\mathcal{F}$ to
+generate a new effect and extend the trace ($\E = (\A,\visZ)$)
+\emph{only if} the well-formedness constraints imposed by $\I$ on $\E$
+(i.e., $\I(\E')$) are satisfied. Otherwise, it gets stuck. In an
+execution that runs to completion, every small-step preserves the
+well-formedness of a trace, thus ensuring the invariance of $\I$.
+Note that the semantics makes no assumptions about $\I$ other than its
+type. As such, it can be instantiated with any trace-parametric
+proposition that expresses constraints over the given trace. For
+instance, consider the $\psi_{RC}$ specification from
+\S\ref{sec:motivation}, but with bounded $T_1$ and $T_2$ instantiated
+with \C{Wd1} and \C{Wd2}, respectively. The instantiated specification
+is the following term:
 
 \begin{smathpar}
 \begin{array}{l}
@@ -74,14 +71,14 @@ proposition:
 \end{array}
 \end{smathpar}
 
-\noindent It is easy to intepret the above proposition in the context of a trace
-$\E$ that captures an execution of the program in
-Fig.~\ref{fig:motiv-eg-1}. Such a trace-parametric proposition can be
+\noindent It is easy to interpret the above specification in the
+context of a trace $\E$ that captures an execution of the program in
+Fig.~\ref{fig:motiv-eg-1}. Such a trace-parametric formula can be
 used to instantiate the trace invariant $\I$ in Fig.~\ref{fig:txnimp}.
 The resultant operational semantics describes an abstract machine that
 gets stuck if an operation of \C{Wd2} is executed in a state that
 incorporates some, but not all the effects (including the \C{COMMIT})
-of \C{Wd1}. 
+of \C{Wd1}.
 % While the machine takes a step only if the constraints are
 % satisfied, it neither defines nor explicitly assumes an oracle to
 % check satisfaction.
@@ -106,37 +103,39 @@ across concurrent transactions.  Intuitively, $\visZ$ relates $\eta_1$
 to $\eta_2$ if and only if $\eta_1$ was \emph{visible} to the
 operation that generated $\eta_2$ during its execution, thus effecting
 its return value ($\rval(\eta_2)$). For example, a read operation over
-\C{X} may pick the value ($\rval$) of the write effect with highest id
-among the visible effects (this is made possible by appropriately
+\C{X} may pick the value ($\rval$) of the write effect with the highest id
+among its visible effects (this is made possible by appropriately
 defining $\interp{\cdot}$ in \rulelabel{E-Var}, as we show later).
 Thus, the value of a read depends on what write effects it can
 witness. An operation can only witness the effects of already
 concluded operations, which varies between executions due to the
 non-deterministic order of evaluating the parallel composition of
-transactions. A more notable source of non-determinism, however, is
-the \rulelabel{E-Aux} rule, which allows the machine to expose an
+transactions.
+
+A more notable source of non-determinism, however, is the
+\rulelabel{E-Aux} rule, which allows the machine to expose an
 arbitrary subset ($S$) of existing effects ($\A$) to the incoming
 operation. In other words, the machine is not obligated to reveal the
 effects of all previous operations to an incoming operation. This
 relaxation allows the abstract machine to model the semantics of
-weakly consistent data stores. For instance, operations issued to an
-eventually consistent (EC) replicated store could be dispatched to
-different replicas whose states may not be in any well-defined
+weakly-consistent data stores. For instance, operations issued to an
+eventually consistent ({\sc ec}) replicated store could be dispatched
+to different replicas whose states may not be in any well-defined
 relationship. By allowing operations to witness arbitrary subsets of
 the global state, the semantics models the weak visibility properties
-of such stores. Stronger visiblity properties needed for stronger
-isolation can however be recovered by imposing well-formedness
-constraints over $\visZ$ via the trace invariant ($\I$). Since the
-abstract machine is obligated to satisfy $\I$ at every step of the
-execution, operations are guaranteed to experience the level of
-isolation specified by $\I$.  Thus, in executions that run to
-completion, the abstract machine models a store that provides the
-required levels of isolation.  Notably, the machine achieves this
-without defining an operation semantics for isolation levels, solely
-by relying on their declarative characterization as trace
-well-formedness constraints.  \S\ref{sec:ansi-isolation} shows the
-specification of various ANSI SQL isolation levels stated as trace
-well-formedness constraints.
+of such stores; we elaborate on the implication of this style of
+definition in \S\ref{sec:store-consistency}.  Stronger visiblity
+properties can be expressed by imposing well-formedness constraints
+over $\visZ$ via the trace invariant ($\I$). Since the abstract
+machine is obligated to satisfy $\I$ at every step of the execution,
+operations are guaranteed to experience the level of isolation
+specified by $\I$.  Thus, in executions that run to completion, the
+abstract machine models a store that provides the required levels of
+isolation.  Notably, the machine achieves this without defining an
+operation semantics for isolation levels, solely by relying on their
+declarative characterization as trace well-formedness constraints.
+\S\ref{sec:ansi-isolation} shows the specification of various ANSI SQL
+isolation levels stated as trace well-formedness constraints.
 
 % However, a machine that lets operations witness arbitrary subset of
 % the global state offers no isolation whatsoever. For example, it may
@@ -164,18 +163,17 @@ The effect returned by the function in each case includes its
 transaction id ($T_i$) along with an arbitrarily chosen effect id
 ($j$) that is later verified to be unique in \rulelabel{E-Aux}. The
 $\rval$ for a write is the value being written, and for commit it is
-$\bot$. In case of a read, the value read depends on the how the read
+$\bot$. In case of a read, the value read depends on how the read
 operation chooses to interpret the given set ($S$) of visible effects.
-The interpretation may depend on the application semantics. For
-example, a monotonically increasing counter application may choose to
-let a write with the largest value determine the value of a
-read. A more straightforward interpretation has already been described
-before. To accommodate multiple interpretations, the semantics
-is made parametric over an interpretation function ($\interp{\cdot}$)
-that accepts a set of effects and a variable name, and returns the
-value associated with the variable. A straightforward interpretation
-function that chooses the last write (i.e., write with largest id) is
-shown below:
+The interpretation may depend on application semantics. For example, a
+monotonically increasing counter application may choose to let a write
+with the largest value determine the value of a read. A more
+straightforward interpretation has already been described before. To
+accommodate multiple interpretations, the semantics is made parametric
+over an interpretation function ($\interp{\cdot}$) that accepts a set
+of effects and a variable name, and returns the value associated with
+the variable. A straightforward interpretation function that chooses
+the last write (i.e., write with largest id) is shown below:
 
 \begin{smathpar}
 \begin{array}{lcl}

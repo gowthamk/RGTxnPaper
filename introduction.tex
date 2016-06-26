@@ -28,42 +28,42 @@ store \emph{unavailable} in the presence of network
 partitions~\cite{cap,sernotavlbl,bailishat,bernsigmod13}.
 
 The tension between serializable transactions, which are easy to
-reason about but difficult to implement, and more pragmatic goals but
-weaker variants that are driven by performance and availability
-considerations, has motivated the development of weaker forms of
-transaction isolation, beginning as early as 1976~\cite{gray1976}. The
-ANSI SQL 92 standard defines three such weak isolation levels which
-are now implemented in many relational and NoSQL databases. Not
-surprisingly, weakly-isolated transactions have been found to
-significantly outperform serializable transactions on benchmark
-suites, both on single-node databases and multi-node replicated
-stores~\cite{dbtuningbook,bailishat,bailisvldb}, leading to their
-overwhelming adoption. A 2013 study~\cite{bailishotos} of 18 popular
-ACID and ``NewSQL'' databases found that only three of them offer
-serializability by default, and half, including Oracle 11g, do not
-offer it at all.  A 2015 study~\cite{bailisferal} of a large corpus of
-database applications finds no evidence that applications manifestly
-change the default isolation level offered by the database. Taken
-together, these studies make clear that weakly-isolated transactions
-are quite prevalent in practice, and strongly-isolated (serializable)
-transactions are often eschewed.
+reason about but difficult to implement, and more pragmatic variants
+that are driven by performance and availability considerations, has
+motivated the development of weaker forms of transaction isolation,
+beginning as early as 1976~\cite{gray1976}. The ANSI SQL 92 standard
+defines three such weak isolation levels which are now implemented in
+many relational and NoSQL databases. Not surprisingly, weakly-isolated
+transactions have been found to significantly outperform serializable
+transactions on benchmark suites, both on single-node databases and
+multi-node replicated stores~\cite{dbtuningbook,bailishat,bailisvldb},
+leading to their overwhelming adoption. A 2013
+study~\cite{bailishotos} of 18 popular ACID and ``NewSQL'' databases
+found that only three of them offer serializability by default, and
+half, including Oracle 11g, do not offer it at all.  A 2015
+study~\cite{bailisferal} of a large corpus of database applications
+finds no evidence that applications manifestly change the default
+isolation level offered by the database. Taken together, these studies
+make clear that weakly-isolated transactions are quite prevalent in
+practice, and strongly-isolated (serializable) transactions are often
+eschewed altogether.
 
 Unfortunately, weak isolation admits behaviors that are difficult to
 comprehend~\cite{berenson}. To quantify weak isolation anomalies,
 Fekete \emph{et al.}~\cite{feketevldb09} have devised and experimented
-with a microbenchmark suite that executes transactions under a weakly
-isolated \emph{read committed} isolation level - the default level for
-8 of the 18 databases studied in~\cite{bailishotos}, and found that 25
-out of every 1000 rows in the database violate at least one integrity
-constraint. Bailis \emph{et al.}~\cite{bailisferal} rely on Rails'
-\emph{uniqueness validation} to maintain uniqueness of records while
-serving Linkbench's~\cite{linkbench} insertion workload (6400 records
-distributed over 1000 keys; 64 concurrent clients), and end up with
-more than 10 duplicate records. Rails relies on database transactions
-to validate uniqueness during insertions, which is sensible if
-transactions are serializable, but incorrect under the \emph{read
-  committed} isolation level used in the experiments. The same study
-has found that 13\% of all invariants among 67 open source
+with a microbenchmark suite that executes transactions under a
+weakly-isolated \emph{read committed} isolation level - the default
+level for 8 of the 18 databases studied in~\cite{bailishotos}, and
+found that 25 out of every 1000 rows in the database violate at least
+one integrity constraint. Bailis \emph{et al.}~\cite{bailisferal} rely
+on Rails' \emph{uniqueness validation} to maintain uniqueness of
+records while serving Linkbench's~\cite{linkbench} insertion workload
+(6400 records distributed over 1000 keys; 64 concurrent clients), and
+report discovering more than 10 duplicate records.  Rails relies on
+database transactions to validate uniqueness during insertions, which
+is sensible if transactions are serializable, but incorrect under the
+\emph{read committed} isolation level used in the experiments. The
+same study has found that 13\% of all invariants among 67 open source
 Ruby-on-Rails applications are at risk of being violated due to weak
 isolation. Indeed, incidents of safety violations due to executing
 applications in a weakly-isolated environment have been reported on
@@ -88,34 +88,33 @@ required to prevent. While this is an improvement, it requires
 programmers to be prescient about the possible ways various
 undesirable phenomena might manifest in their applications, and
 determine, in each case, if the phenomenon can be allowed without
-violating application invariants. This is understandably
-hard. Adya~\cite{adyaphd} presents the first formal definitions of
-some of well-known isolation levels in the context of a sequentially
-consistent (SC) database.  However, there has been little progress
-relating Adya's system model to a formal operational semantics or a
-proof system that can facilitate rigorous correctness arguments.
-Consequently, reasoning about weak isolation remains an error prone
-endeavor, with major database vendors continuing to document their
-isolation levels primarily in terms of the undesirable
+violating application invariants. This is understandably hard,
+especially in the absence of any formal underpinning to define weak
+isolation semantics.  Adya~\cite{adyaphd} presents the first formal
+definitions of some of well-known isolation levels in the context of a
+sequentially consistent (SC) database.  However, there has been little
+progress relating Adya's system model to a formal operational
+semantics or a proof system that can facilitate rigorous correctness
+arguments.  Consequently, reasoning about weak isolation remains an
+error prone endeavor, with major database vendors continuing to
+document their isolation levels primarily in terms of the undesirable
 phenomena~\cite{postgresiso, mysqliso, oracleiso} a particular
-isolation level may induce; it thus squarely becomes the programmer's
-responsibility to determine if their application can yield an
-execution which can trigger such phenomena.
+isolation level may induce, placing the burden squarely on the
+programmer to determine application correctness.
 
 Recent results on reasoning about application invariants in the
 presence of weak \emph{consistency}~\cite{burckhardt14, redblueosdi,
   redblueatc, ecinec, gotsmanpopl16} address broadly related concerns.
 At a high level, reasoning about weak consistency involves reasoning
-about the concurrent execution of strongly atomic and isolated
-operations against different but consistent states of the database or
-data store, where each operation locally preserves application
-invariants. In contrast, reasoning about weak isolation involves
-reasoning about the concurrent execution of transactions, whose
-operations witness different states which, although consistent
-individually, may not be obviously reconciled into a consistent global
-view.  Moreover, operations may violate invariants as long as the
-transaction as a whole preserves them.  Intuitively, the latter
-problem reduces to the former if all transactions contain a single
+about the concurrent execution of strongly atomic and fully isolated
+operations against different (potentially replicated), but consistent
+states of the database or data store, where each operation locally
+preserves application invariants. In contrast, reasoning about weak
+isolation involves reasoning about the concurrent execution of
+transactions, whose operations witness different states which,
+although consistent individually, may not be obviously reconciled into
+a consistent global view.  Intuitively, the latter problem reduces to
+the former if all transactions contain a single
 operation. Furthermore, weak isolation can exist independent of weak
 consistency, as evident from the presence of weakly isolated
 transactions on sequentially consistent relational databases; such
@@ -134,25 +133,26 @@ In this paper, we propose a program logic for weakly-isolated
 transactions that realizes this goal.  In particular, we develop a set
 of syntax-directed compositional proof rules that allow developers to
 build correctness proofs for transactional programs in the presence of
-a weakly isolated concurrency control mechanism A key novelty of our
+a weakly isolated concurrency control mechanism.  A key novelty of our
 approach is that it is parametric over the \emph{isolation semantics}
 of transactions in the program, as well as the \emph{consistency
   semantics} of the underlying store. In concrete terms, this means
 that, unlike recent work focussed on formalizing the semantics of weak
 consistency~\cite{gotsmanpopl16, redblueatc, ecinec}, our system model
 does not assume a minimum or predefined set of consistency or
-isolation levels. Instead, our operational semantics admits declarative
-specifications of transaction isolation and store consistency levels
-(\eg~\cite{pldi15,gotsmanconcur15}), and generates executions that are
-guaranteed to satisfy these specifications. The result is a flexible
-system model that is general enough to incorporate the semantics of a
-range of isolation levels on a variety of stores (\eg the sequentially
-consistent store of~\cite{adyaphd}, or the causally consistent store
-of~\cite{gotsmanpopl16}, etc).  Our key technical contribution is thus
-a set of proof rules that demonstrate that a program with a given
-selection of isolation levels for its transactions preserves its 
-invariants when executed on a store satisfying certain consistency
-guarantees (e.g., causal visibility).
+isolation levels. Instead, our operational semantics admits
+declarative specifications of transaction isolation and store
+consistency levels (\eg~\cite{pldi15,gotsmanconcur15}), and generates
+executions that are guaranteed to satisfy these specifications. The
+result is a flexible system model that is general enough to
+incorporate the semantics of a range of isolation levels on a variety
+of stores (\eg the sequentially consistent store of~\cite{adyaphd}, or
+the causally consistent store of~\cite{gotsmanpopl16}, etc).  Our key
+technical contribution is thus a set of proof rules that demonstrate
+that a program with a given selection of isolation levels for its
+transactions preserves its invariants when executed on a store
+equipped with certain consistency guarantees (e.g., causal
+visibility).
 
 The paper makes the following contributions:
 \begin{itemize}
@@ -173,21 +173,22 @@ The paper makes the following contributions:
     the applicability and utility of our proof methodology.
 \end{itemize}
 
-\noindent Our results thus provide the first (to the best of our knowledge)
-mechanism that precisely relates high-level program invariants to
-low-level weak isolation and store consistency guarantees, thereby
-allowing weakly-isolated transactions to enjoy the same rigorous
-reasoning capabilities as their strongly isolated (serializable)
-counterparts.
+\noindent Our results thus provide the first (to the best of our
+knowledge) mechanism that precisely relates high-level program
+invariants to low-level weak isolation and store consistency
+guarantees, thereby allowing weakly-isolated transactions to enjoy the
+same rigorous reasoning capabilities as their strongly isolated
+(serializable) counterparts.
 
 The remainder of the paper is organized as follows.  The next section
 provides motivation and background on serializable and weakly-isolated
 transactions. \S\ref{sec:opsem} presents an operational semantics for
-a core language that supports weakly-isolated transactions, and which
-is parameterized over different isolation and store-consistency
-notions. \S\ref{sec:proofrules} formalizes the proof systemt that we
-use to reason about program invariants, and establishes the soundness
-of these rules with respect to the semantics.  We describe the impact
-of our reasoning framework in the context of several real-world case
-studies in \S\ref{sec:casestudies}.  Related work and conclusions are
-given in \S\ref{sec:relatedwork}.
+a core language that supports weakly-isolated transactions,
+parameterized over different isolation notions. \S\ref{sec:proofrules}
+formalizes the proof systemt that we use to reason about program
+invariants, and establishes the soundness of these rules with respect
+to the semantics. \S\ref{sec:store-consistency} generalizes the
+framework to integrate support for weakly consistent data stores.  We
+describe the impact of our reasoning framework in the context of
+several real-world case studies in \S\ref{sec:casestudies}.  Related
+work and conclusions are given in \S\ref{sec:relatedwork}.

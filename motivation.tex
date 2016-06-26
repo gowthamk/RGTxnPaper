@@ -81,7 +81,7 @@ As an alternative, consider the execution of this transaction under a
 \end{figure}
 The figure depicts an execution as a series of read, write, and commit
 operations.  The subscript of an operation indicates the transaction
-that executes it\footnote{For clarity, the effects of different
+that executes it.\footnote{For clarity, the effects of different
   transactions are shown in different colored backgrounds.} In the
 first execution, transaction {\bf Wd1} reads the current balance
 (\C{k}) and writes the new balance (\C{k-a1}), but before it commits
@@ -104,7 +104,7 @@ during its commit.\footnote{{\sc si} is not functionally the same as
   of any write-write conflicts.}   Since {\sc si},
 unlike {\sc ser}, does not rely on expensive lock-based
 concurrency control, it is also more efficient, making it appropriate
-appropriate for both {\bf Wd} transactions.
+for both {\bf Wd} transactions.
 
 \begin{figure}
 \begin{smathpar}
@@ -129,7 +129,7 @@ programmers are often encouraged to reason about weak isolation.
 Unfortunately, such reasoning does not rest on any sound foundation,
 and is thus highly error-prone. Reasoning in terms of how weak
 isolation variants are implementated is no better since it requires
-application programmers to understand low-level implementation details
+programmers to understand low-level implementation details
 of the database that are naturally far removed from the application
 semantics. An attractive (and principled) alternative in this context
 is a formal proof system that combines declarative reasoning about
@@ -153,17 +153,18 @@ the current example.
 First, we note that the example in Fig.~\ref{fig:motiv-eg-1} is a
 concurrent program, and hence is amenable to \emph{rely-guarantee}
 style reasoning~\cite{rgjones}, a compositional proof technique that
-allows us to reason about one thread at a time by abstracting away
-interference induced by other threads (collectively called \emph{the
-  environment}) into a \emph{rely} relation. In an ordinary concurrent
-program, every environment step is a valid interference in the current
-thread. However, in the presence of transactions executing under weak
-isolation, determining what constitutes an interference is a
-non-trivial problem. For example, inside a serializable transaction
-there is no interference, whereas within a transaction executing under
-\iso{Read Uncommitted}, the weakest isolation level, all interferences
-are valid. Between these two extremes are various levels of isolation
-that admit some interferences while prohibiting others.  For example,
+allows us to reason about the behaviour of individual threads by
+abstracting away interference induced by other threads (collectively
+called \emph{the environment}) into a \emph{rely} relation. In an
+ordinary concurrent program, every environment step is a valid
+interference in the current thread. However, in the presence of
+transactions executing under weak isolation, determining what
+constitutes an interference is a non-trivial problem. For example,
+inside a serializable transaction there is no interference, whereas
+within a transaction executing under a \iso{Read Uncommitted}
+isolation level, the weakest isolation level, all interferences are
+valid. Between these two extremes are various levels of isolation that
+admit some interferences while prohibiting others.  For example,
 \iso{Read Committed} isolation admits interference of a committed
 transaction, but not that of an uncommitted transaction.
 \iso{Snapshot Isolation} admits interference from committed
@@ -171,24 +172,26 @@ non-conflicting transactions, and so on.
 
 For the rely-guarantee approach to be useful, it has to thus constrain
 allowed interference in accordance with the chosen level of isolation
-associated with a transaction. The first key observation we make is
+associated with a transaction. The first observation we make is
 that we can constrain interference by constraining the definition of
-the \emph{happens-before} ($\hbZ$) relation between transactions, or
-their respective constituents.  To do so, we axiomatize the $\hbZ$
-relation to capture the interference characteristics of different
-isolation levels as their specifications ($\psi$). For example, a
-\iso{Read Committed} specification allows an operation $\eta_1$ of
-$T_1$ to happen before an operation $\eta_2$ of $T_2$ only if every
-operation in $T_1$ (including its commit) happens before $\eta_2$ (we
-let $T_1 \hboar \eta_2$ denote this). The {\sc rc} specification
-does not require $T_1$ to execute and commit before all operations of
-$T_2$, thus allowing it to interfere in $T_2$. The \iso{Snapshot
-  Isolation} specification requires two transactions that write to the
-same variable to be related by happens-before.  This effectively
-prohibits interference due to actions in $T_1$ being interleaved in
-$T_2$ (or, vise versa).  We formalize these properties in Fig.~\ref{fig:interference-ex}\footnote{Note that specifications
-    presented here are solely for illustration. The actual
-    specifications described in \S\ref{sec:ansi-isolation} are more nuanced.}.
+the \emph{happens-before} ($\hbZ$) relation that dictates visibility
+actions between transactions, or their respective constituents.  To do
+so, we axiomatize the $\hbZ$ relation to capture the interference
+characteristics of different isolation levels as their specifications
+($\psi$). For example, a \iso{Read Committed} specification allows an
+operation $\eta_1$ of $T_1$ to happen before an operation $\eta_2$ of
+$T_2$ only if every operation in $T_1$ (including its commit) happens
+before $\eta_2$ (we let $T_1 \hboar \eta_2$ denote this). The 
+specification does not require $T_1$ to execute and commit before all
+operations of $T_2$, thus allowing it to interfere in $T_2$. The
+\iso{Snapshot Isolation} specification requires two transactions that
+write to the same variable to be related by happens-before.  This
+effectively prohibits interference due to actions in $T_1$ being
+interleaved in $T_2$ (or, vise versa).  We formalize these properties
+in Fig.~\ref{fig:interference-ex}.\footnote{Note that specifications
+  presented here are solely for illustration. The actual
+  specifications described in \S\ref{sec:ansi-isolation} are more
+  nuanced.}.
 
 
 Fig.~\ref{fig:motiv-eg-1-hb} is a visualization of $\hbZ$ 
@@ -211,19 +214,18 @@ post-condition.
 % violation. 
 
 The specification of an isolation level encodes its interference
-characteristic as constraints over the $\hbZ$ relation. However, for this
-to be useful in reasoning about programs, the rely-guarantee framework
-should be able to use the specification to determine if an
+characteristic as constraints over the $\hbZ$ relation. However, for
+this to be useful in reasoning about programs, the rely-guarantee
+framework should be able to use the specification to determine if an
 interference is valid or invalid, allowing the programmer to only
-focus on the former. Our second key observation is that this is
-possible if the reasoning framework adequately tracks $\hbZ$ at each
-program point, while preserving $\hbZ$ constraints as invariants
-between program points. An interference that leads to the violation of
-$\hbZ$ constraints (i.e., an invalid interference) is thus
-automatically prohibited. For instance, consider the program point
-after the write to \C{C} in {\bf Wd1}. The expected invariant ($\phi$) at
-that program point is shown below ($\committed$ stands for
-``committed''):
+focus on the former. Our second observation is that this is possible
+if the reasoning framework adequately tracks $\hbZ$ at each program
+point, while preserving $\hbZ$ constraints as invariants between
+program points. An interference that leads to the violation of $\hbZ$
+constraints (i.e., an invalid interference) is thus automatically
+prohibited. For instance, consider the program point after the write
+to \C{C} in {\bf Wd1}. The expected invariant ($\phi$) at that program
+point is shown below ($\committed$ stands for ``committed''):
 
 \begin{smathpar}
 \begin{array}{l}
@@ -258,21 +260,21 @@ informative to note that if the invariant is $\psi_{RC}$ instead of
 $\psi_{SI}$, we cannot derive a contradiction and we cannot rule out
 the interference, which (rightfully) causes  the proof to fail.
 
-We have thus far assumed a strongly consistent ({\sc SC}) store that,
+We have thus far assumed a strongly consistent ({\sc sc}) store that,
 in the absence of transactions with special isolation requirements,
 makes the effects of any operation immediately visible to all
-subsequent operations. The natural behavior of {\sc SC} to totally
+subsequent operations. The natural behavior of {\sc sc} to totally
 order all operations w.r.t the $\hbZ$ relation could be in conflict
 with the constraints imposed by weak isolation. To meet the
 requirements of weaker isolation levels, say {\sc rc}, the store has
 to adapt itself to \emph{hide} the effects of concurrent transactions
 until they are committed. Once committed though, effects need to be
-immediately and perennially visible to subsequent operations. This
-semantics can be built into the reasoning framework, leading to a proof
-system tailor-made for such stores. However, for the reasoning
-framework to be truly useful, it has to be parametric over different
-store consistency semantics, supporting stores that are weaker than
-{\sc sc} (e.g., eventually consistent), and should be able to
-reconcile conflicts between consistency and isolation
-constraints.  We demonstrate how our reasoning framework
-makes this possible in the following sections.
+immediately visible to subsequent operations. This semantics can be
+built into the reasoning framework, leading to a proof system
+tailor-made for such stores. However, for the reasoning framework to
+be truly useful, it has to be parametric over different store
+consistency semantics, supporting stores that are weaker than {\sc sc}
+(e.g., eventually consistent), and should be able to reconcile
+conflicts between consistency and isolation constraints.  We
+demonstrate how our reasoning framework makes this possible in the
+following sections.
