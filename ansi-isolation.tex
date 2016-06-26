@@ -100,7 +100,7 @@ needed. Otherwise, it is written as $\E$. Sometimes, the dot notation
 lift the operations on sets to pairs of sets when updating $\E$. For
 example, $\E' = \E \cup (\{\eta_2\},\{(\eta_1,\eta_2)\})$ expands to
 $\E' = (\E.\A \cup \{\eta_2\},\,\E.\visZ \cup \{(\eta_1,\eta_2)\})$.
-When $\psi$ is a proposition, $\underE{\psi}$ denotes the
+When $\psi$ is a formula, $\underE{\psi}$ denotes the
 interpretation of $\psi$ in the context of the trace $\E$. Such
 interpretations are defined on a case-by-case basis in
 Fig.~\ref{fig:ansi-isolation}. In the following, we give informal
@@ -110,15 +110,15 @@ In the context of a trace $(\A,\visZ)$, an effect $\eta$ is said to
 belong to a transaction $T_i$ if $\eta$ belongs to the effect set $A$
 and its transaction identifier is $T_i$. The containment relation is
 trivially lifted to the set of effects to define $\underE{S \subseteq
-T_i}$.  The interpretation of $\eta_1 \visar \eta_2$ and $\eta_1
-\soar \eta_2$ are straightforward and explained in \S\ref{sec:syntax}.
-A transaction $T_i$ is said to be visible to an effect $\eta$ if every
-effect $\eta_1$ of $T_i$ recorded by the trace is visible to $\eta$.
-$T_i$ may be visible to $\eta$ but may not be visible to every other
-effect in the transaction. For a transaction $T_i$ to be considered to
-be visible to a transaction $T_j$ in the context of a trace $\E$
-(written $\underE{T_i \visar T_j}$), every effect ($\eta_1$) of $T_i$
-present in $\E$ must be visible to every effect ($\eta_2$) of $T_j$ in
+  T_i}$.  The interpretation of $\eta_1 \visar \eta_2$ and $\eta_1
+\soar \eta_2$ are as explained earlier.  A transaction $T_i$ is said
+to be visible to an effect $\eta$ if every effect $\eta_1$ of $T_i$
+recorded by the trace is visible to $\eta$.  $T_i$ may be visible to
+$\eta$ but may not be visible to every other effect in the
+transaction. For a transaction $T_i$ to be considered to be visible to
+a transaction $T_j$ in the context of a trace $\E$ (written
+$\underE{T_i \visar T_j}$), every effect ($\eta_1$) of $T_i$ present
+in $\E$ must be visible to every effect ($\eta_2$) of $T_j$ in
 $\E$. Conversely, if none of the effects of $T_i$ present in $\E$ are
 visible to any effect of $T_j$, then $T_i$ is considered invisible to
 $T_j$ under $\E$ (written $\underE{T_i \invisar T_j}$). Transaction
@@ -249,17 +249,18 @@ by $T_1$. Visibility includes other operations of $T_4$ because of
 % while $T_1$ is still in progress, but {\sc rr} isolation prevents
 % $T_1$ from witnessing the writes of $T_2$. In the second execution,
 
-In contrast to recent proposals (\emph{e.g.},
-~\cite{gotsmanconcur15}), our specifications for {\sc si} and {\sc
-  ser} do not necessarily impose a total order among transactions
-(conflicting or otherwise). In reality, a total order under {\sc ser}
-(resp. {\sc si}) is guaranteed only if the store executes all
-transactions under {\sc ser} (resp. {\sc SI}) isolation. Our
-specifications admit this possibility, and derive a total order under
-the assumption of homogenity. However, databases almost always allow
-isolation levels to be configured on a per-transaction basis, allowing
-transactions at various isolation levels to coexist.  Specifications
-that assume homogenity are incorrect under this setting.
+%% SJ: Not sure this paragraph is necessary here.
+%% In contrast to recent proposals (\emph{e.g.},
+%% ~\cite{gotsmanconcur15}), our specifications for {\sc si} and {\sc
+%%   ser} do not necessarily impose a total order among transactions
+%% (conflicting or otherwise). In reality, a total order under {\sc ser}
+%% (resp. {\sc si}) is guaranteed only if the store executes all
+%% transactions under {\sc ser} (resp. {\sc si}) isolation. Our
+%% specifications admit this possibility, and derive a total order under
+%% the assumption of homogenity. However, databases almost always allow
+%% isolation levels to be configured on a per-transaction basis, allowing
+%% transactions at various isolation levels to coexist.  Specifications
+%% that assume homogenity are incorrect under this setting.
 
 % Having specified isolation levels as trace well-formedness
 % constraints, we can now construct trace invariants ($\I$) for
