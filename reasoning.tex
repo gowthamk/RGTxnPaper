@@ -265,12 +265,10 @@ atomically.  In the interest of modular verification, the transaction
 must therefore make its internal state available via its guarantee
 relation.
 
-\noindent The soundness of rely-guarantee judgments can be stated
-thus\footnote{Full proofs are provided in the supplementary material.}:
 \begin{theorem}[\bfseries Soundness] 
 The rely-guarantee judgments defined by the rules in
 Fig.~\ref{fig:rg-rules} are sound with respect to
-Definition~\ref{def:rg-semantics}. 
+the semantics of Definition~\ref{def:rg-semantics}.\footnote{Full proofs are provided in the supplementary material.}
 \end{theorem}
 \noindent In particular, if $\rg{\I,P,R}{c}{G,Q}$ can be derived using
 the rules of Fig.~\ref{fig:rg-rules}, then (a) every interleaved
