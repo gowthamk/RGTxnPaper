@@ -262,6 +262,12 @@ event are also valid at the merge event.
 
 \subsection{Example}
 
+We shall now consider the proof of the example in
+Fig.~\ref{fig:motiv-eg-1} in greater detail. We assume an {\sc sc}
+store, such as a relational database, whose store-specific trace
+invaraint ($\I_s$) was shown previously. Both transactions are run at
+{\sc si} isolation, hence $\I_c$ is $\lambda\E.~\underE{\C{SI(Wd1)}}
+\conj \underE{\C{SI(Wd1)}}$. As usual, $\I$ is $\I_s \conj \I_c$. 
 
 \begin{figure}
 \centering
@@ -269,14 +275,14 @@ event are also valid at the merge event.
  $\begin{decoration}
  P_1:\{ {\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \conj\\
         \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2}
-        \hboar \C{Wd1} \wedge \C{Wd2} \wrstoar \C{C} \wedge \C{C = k-a2} \}
+        \visar \C{Wd1} \wedge \C{Wd2} \wrstoar \C{C} \wedge \C{C = k-a2} \}
  \end{decoration}$
   txn$\langle$'Wd1'$\rangle${
    $\begin{decoration}
     \phi_1 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \conj
       {\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj\\
        \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
-        {\C{Wd2} \hboar \C{Wd1}} 
+        {\C{Wd2} \visar \C{Wd1}} 
        \Rightarrow \C{C = k-a2} \}
     \end{decoration}$ 
     v1 = C
@@ -284,7 +290,7 @@ event are also valid at the merge event.
     \phi_2 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \wedge \C{v1 = k} \conj\\
        \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj \\
        \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
-        {\C{Wd2} \hboar \C{Wd1}} 
+        {\C{Wd2} \visar \C{Wd1}} 
        \Rightarrow \C{C = k-a2} \wedge \C{v1 = k-a2}\}
     \end{decoration}$ 
     if (v1 $\ge$ a1) {
@@ -293,7 +299,7 @@ event are also valid at the merge event.
       \phi_3 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \wedge \C{v2 = k} \conj\\
        \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj \\
          \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
-          {\C{Wd2} \hboar \C{Wd1}} \Rightarrow \C{C = k-a2} \wedge \\
+          {\C{Wd2} \visar \C{Wd1}} \Rightarrow \C{C = k-a2} \wedge \\
           \hspace*{1.9in}\C{v2 = k-a2}\}
       \end{decoration}$ 
       v3 = v2 - a1;
@@ -301,7 +307,7 @@ event are also valid at the merge event.
       \phi_4 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \wedge \C{v3 = k-a1} \conj\\
          \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar \C{C} \conj \\
          \hspace*{0.3in}{\committed(\C{Wd2})} \wedge
-          {\C{Wd2} \hboar \C{Wd1}} 
+          {\C{Wd2} \visar \C{Wd1}} 
          \Rightarrow \C{C = k-a2} \wedge \\
          \hspace*{1.9in}\C{v3 = k-a2-a1}\}
       \end{decoration}$ 
@@ -322,53 +328,66 @@ event are also valid at the merge event.
   \end{decoration}$ 
 \end{txnimpcode}
 
-\caption{`Wd1' transaction decorated with assertions}
+\caption{\C{Wd1} transaction decorated with assertions}
 \label{fig:wd1-decorated}
 \end{figure}
 
-The fully decorated implementation of transaction `Wd1' is shown in
-Fig.~\ref{fig:wd1-decorated}. Decorated `Wd2' is similar. Assignment
-statements are broken down and temporary local variables (\C{v1},
-\C{v2} and \C{v3}) are introduced so as to separate shared variable
-reads and writes.  Since we reason in terms of executions, all
-assertions implicitly refer to the current execution (just as hoare
-triples implicitly refer to the current state). Also implicit is the
-invariant \C{k $\ge$ a1+a2}. Proposition $\committed(T)$ indicates
-that the transaction $T$ is already committed. Precondition ($P_1$) of
-`Wd1' accounts for the possibility of `Wd2' committing before `Wd1',
-writing \C{k-a2} to \C{C}.  Precondition of `Wd2' is similar.  Since
-neither `Wd1' nor `Wd2' are committed at the beginning, the
-precondition in Fig.~\ref{fig:motiv-eg-1} is extended to include
-$\neg\committed(\C{Wd1}) \wedge \neg\committed(\C{Wd2})$, from which
-$P_1$ follows. Once the execution is inside `Wd1', commit of `Wd2'
-($\committed(\C{Wd2})$) may mean that either `Wd2' happened before
-`Wd1', or that it committed concurrently with `Wd1'. Since SI
-proscribes the latter possibility, we only consider the case when
-$\C{Wd2} \hboar \C{Wd1}$. A proof for $\C{Wd2} \hboar \C{Wd1}$ is
-obtained subsequently, allowing us to get rid of the special case.
+The fully decorated implementation of transaction \C{Wd1} is shown in
+Fig.~\ref{fig:wd1-decorated}. Decorated \C{Wd2} is similar and not
+shown. Assignment statements are broken down and temporary local
+variables (\C{v1}, \C{v2} and \C{v3}) are introduced so as to separate
+shared variable reads and writes. All assertions implicitly refer to
+the current execution ($\E$), just as hoare triples implicitly refer
+to the current state. The context for propositions is also the
+implicit, i.e., we write $\psi$ instead of $\underE{\psi}$. The
+proposition \C{k $\ge$ a1+a2} remains an invariant, hence elided. The
+precondition ($P_1$) of \C{Wd1} accounts for the possibility of
+\C{Wd2} committing before \C{Wd1}, writing \C{k-a2} to \C{C}.
+Precondition of \C{Wd2} is similar.  Since neither \C{Wd1} nor \C{Wd2}
+are committed at the beginning, the execution-based assertion
+corresponding to the precondition ($P$) of Fig.~\ref{fig:motiv-eg-1}
+must include $\neg\committed(\C{Wd1}) \wedge \neg\committed(\C{Wd2})$,
+from which $P_1$ follows. Once the execution is inside \C{Wd1}, commit
+of \C{Wd2} ($\committed(\C{Wd2})$) may mean that either \C{Wd2}
+happened before \C{Wd1} (hence can be visible to all of \C{Wd1}), or
+that it committed concurrently with \C{Wd1} (hence cannot be visible
+to all of \C{Wd2}).  Since SI proscribes the latter possibility, we
+only consider the case when $\C{Wd2} \visar \C{Wd1}$. A proof for
+$\C{Wd2} \visar \C{Wd1}$ is obtained subsequently, allowing us to get
+rid of the special case.
 
-The first obligation is to show that the assertions that decorate
-`Wd1' are indeed valid. This entails proving that, for each statement
-of `Wd1', if evaluating the statement and extending an execution that
-satisfies its precondition results in a well-formed execution, then
-the extended execution must satisfy the postcondition. The
-well-formedness assumption lets us ignore the executions that violate
-the trace invariant lead the machine to a stuck state. This is useful
-in case of the assignment statement that writes \C{v3} to \C{C}. Since
-`Wd2' also writes to \C{C}, the trace invariant ($\I$) requires
-$\C{Wd2} \hboar \C{Wd1}$ if $\committed(\C{Wd2})$ (the alternative
-$\C{Wd1} \hboar \C{COMMIT}(\C{Wd2})$ allowed by \C{SI(Wd1)} is
-impossible in this case because \C{Wd2} has already committed, while
-\C{Wd1} is still in progress). This lets us treat the special case
-$\committed(\C{Wd2})\conj \C{Wd2} \hboar \C{Wd1}$ as being equivalent
-to the general case $\committed(\C{Wd2})$, which is required to prove
-the postcondition of `Wd1'. Observe that \C{RC(Wd1)} does not justify
-this generalization, hence replacing \C{SI(Wd1)} by \C{RC(Wd1)} is not
-sufficient to prove the postcondition of `Wd1'.
+First, we focus on the sequential aspect of the proof and show that
+the assertions that decorate \C{Wd1} are indeed valid. The proof for
+each triple follows from the rule for the corresponding term in
+Fig.~\ref{fig:rg-rules}. For illustration, we consider the triple
+corresponding to the assignment statement (line ??). The precondition
+($\phi_4$) asserts that \C{Wd2} writes to \C{C}, and the value of the
+temporary variable \C{v3} is \C{k-a2-a1}. The RG rule
+(\rulelabel{RG-Asgn}) for assignment statement allows us to easiliy
+conclude the following about the execution state after the assignment:
+\begin{smathpar}
+\begin{array}{l}
+    {\neg\committed(\C{Wd1}) \conj \C{Wd1} \wrstoar \C{C} 
+    \conj (\neg\committed(\C{Wd2})} \Rightarrow \C{C = k}) \conj\\
+    ({\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar
+    \C{C}) \conj \\
+    ({\committed(\C{Wd2})} \wedge {\C{Wd2} \visar \C{Wd1}} 
+    \Rightarrow \C{C = k-a2} \wedge \C{C = k-a2-a1})
+\end{array}
+\end{smathpar}
+The rule also lets us assume that the execution satisfies trace
+invariant ($\I$), which asserts {\sc si} for both transactions.  Since
+both transactions write to \C{C}, {\sc si} requires either $\C{Wd1}
+\visar \C{Wd2}$, or $\C{Wd2} \visar \C{Wd1}$. Since \C{Wd1} is not yet
+committed ($\neg\committed(\C{Wd1})$), {\sc si} prohibits the former
+possibility, allowing us the deduce the $\C{Wd2} \visar \C{Wd1}$. This
+lets us derive ${\committed(\C{Wd2})}  \Rightarrow \C{C = k-a2} \wedge
+\C{C = k-a2-a1}$, allowing us to prove the postcondition ($\phi_5$).
 
-The second obligation is to prove that assertions are valid despite
-the interference from the the concurrent thread executing `Wd2'. The
-interference is given by the following rely relation ($R_1$):
+The second part of the proof is to show that assertions are stable
+despite the interference from the the concurrent thread executing
+\C{Wd2}. The interference is given by the following rely relation
+($R_1$):
 \begin{smathpar}
 \begin{array}{lcl}
   R_1 & = & \{ (\E,\E') \;|\; \neg\underE{\committed(\C{Wd2})} \conj 
@@ -389,17 +408,19 @@ interference is given by the following rely relation ($R_1$):
 \end{array}
 \end{smathpar}
 The rely relation says the following about the concurrent thread: (1).
-It may interfere only if `Wd2' is not already committed, (2). Any
+It may interfere only if \C{Wd2} is not already committed, (2). Any
 interference takes well-formed executions to well-formed executions,
-(3). If the interference commits `Wd2', then `Wd2' should have already
+(3). If the interference commits \C{Wd2}, then \C{Wd2} should have already
 written to \C{C}, and (4). The value written is either $\C{k-a1-a2}$
-or $\C{k-a1}$ depending on whether or not `Wd1' has already committed.
-Interference from `Wd2' is allowed between any two operations of
-`Wd1', and assertions are required to be valid despite the
-interference. For instance, if the execution ($\E$) immediately after
-evaluating $\C{v1 = C}$ satisfies $\phi_2$ (i.e., $\underE{\phi_2}$),
-and an interference from `Wd2' extends $\E$ to $\E'$ (i.e.,
-$R_1(\E,\E')$), then the execution $\E'$ just before evaluating the
-condition must satisfy $\phi_2$ (i.e., $\E' \Vdash \phi_2$). Indeed,
-all $\phi_i$'s do satisfy this \emph{stability} condition, thus
-lending the validity to the proof.
+or $\C{k-a1}$ depending on whether or not \C{Wd1} has already committed.
+Stability for most assertions is straightforward. The only non-trivial
+proof is for $\phi_5$, where {\sc si} condition should be used to
+show that any interference from \C{Wd2} is invalid. The proof proceeds
+on the same lines as the Hoare proof discussed above; it is also
+discussed in \S\ref{sec:motivation}.
+
+The final aspect of the proof is to show that any interference from
+\C{Wd1} is contained in its guarantee relation $G_1$, which becomes
+the rely relation ($R_2$) for \C{Wd2}. $R_2$ (hence $G_1$) is same as
+$R_1$ shown above, but with \C{Wd2} and \C{Wd1} interchanged. $\ldots$
+
