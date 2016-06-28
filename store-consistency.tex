@@ -83,7 +83,7 @@ the aforementioned example, $\eta_1$ is not made visible to $\eta_2$
 because doing so would violate $\I_c$. However, if $\I_c$ is true,
 then the store makes $\eta_1$ visible to $\eta_2$ to honor its
 consistency commitment\footnote{The term \emph{recency
-    commitment}~\cite{bailisvldb} is often used in practice
+    commitment}~\cite{bailishat} is often used in practice
   to capture the best-effort nature of {\sc sc}.}. We generalize this
 approach to any $\I_s$ and $\I_c$ by defining a \emph{maximum
   visiblity principle} to determine an acceptable weakening of $\I_s$
@@ -229,8 +229,11 @@ In~\cite{gotsmanpopl16}, this challenge is partly addressed by
 imposing restrictions on how various replica states differ, i.e., by
 fixing a system model with a stronger baseline consistency ({\sc cc})
 than {\sc ec}. This unfortunately restricts the reasoning approach
-from being applied to stores that provide guarantees weaker than
-causal consistency (e.g., \cite{bayou,pldi15}).
+from being applied to stores (e.g., \cite{bayou,pldi15}) that provide
+guarantees weaker than causal consistency, such as causal visibility
+or read-my-writes~\cite{zoo}. Causal consistency is not baseline
+consistency in these stores because it is not \emph{highly
+available}~\cite{bailishat}.
 
 Notably, our view of replication however does not explicitly involve
 replicas.  Fig.~\ref{fig:ec-theirs-vs-ours} contrasts our model of
@@ -250,16 +253,17 @@ hold regardless of the replica. There is however one problem with this
 explanation - by considering subsets of just one global state, it
 ignores the fact that the global state (hence, the replica states)
 change during the execution of the operation. To account for this
-change,~\cite{gotsmanpopl16} distinguishes between an \emph{effect
-  generation} event at one replica and an \emph{effect merge} event at
-another replica, and requires that certain invariants be preserved
-between these two events at different replicas. Our framework folds
-all such machinery into a stability condition (\S\ref{sec:rely-guarantee}).
-Since any change to the global state during the execution of the
-operation is an interference, and $P$ is required to be stable with
-respect to any such interference, it follows that $P$ is valid on
-every replica, thus ensuring that assumptions made at the generation
-event are also valid at the merge event.
+change,~\cite{gotsmanpopl16} distinguishes between effect generation
+event at one replica $r_1$ and effect merge event at replica $r_2$,
+and requires that only \emph{non-conflicting} operations execute
+between these two events at $r_2$, and that they preserve certain
+invariants. Our framework folds all such machinery into a stability
+condition predicated on $\I$ (\S\ref{sec:rely-guarantee}).  Since any
+change to the global state during the execution of the operation is an
+interference, and $P$ is required to be stable with respect to any
+such interference, it follows that $P$ is valid on every replica, thus
+ensuring that assumptions made at the generation event are also valid
+at the merge event.
 
 \subsection{Example}
 

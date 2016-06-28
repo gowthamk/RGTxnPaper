@@ -53,12 +53,9 @@ consistency~\cite{bailisvldb, alvarocalm, gotsmanpopl16,redblueatc,
 redblueosdi, ecinec}. All of them assume a system model that offers a
 choice between a \emph{coordination-free} weak consistency level ({\sc
 ec} in~\cite{redblueosdi, redblueatc, ecinec, alvarocalm, bailisvldb};
-{\sc cc}\footnote{It is worth noting that, although causal consistency
-does not require global coordination, it is nonetheless not
-\emph{highly available}~\cite{bailishat}.} in~\cite{gotsmanpopl16})
-and strong consistency ({\sc sc}), which requires coordination.  They
-propose various conditions (\eg \emph{invariant
-confluence}~\cite{bailisvldb}, \emph{logical
+{\sc cc} in~\cite{gotsmanpopl16}) and strong consistency ({\sc sc}),
+which requires coordination.  They propose various conditions (\eg
+\emph{invariant confluence}~\cite{bailisvldb}, \emph{logical
 monotonicity}~\cite{alvarocalm}, \emph{invariant
 safety}~\cite{redblueatc}), or proof systems (\eg~rely-guarantee
 framework of~\cite{gotsmanpopl16}) to show that an allotment of atomic
