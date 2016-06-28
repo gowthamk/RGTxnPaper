@@ -145,9 +145,9 @@ transaction from being visible. This is addressed by \C{CommitVis},
 which requires the commit effect of $T_i$ to be visible whenever any
 effect of $T_i$ is visible.
 
-ANSI SQL 92 standard requires \iso{Read Committted} isolation to avoid
+The ANSI SQL 92 standard requires \iso{Read Committted} isolation to avoid
 the dirty reads phenomenon, which is achieved by enforcing
-$\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$ guarantees. {\sc rc}
+$\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$ guarantees. The {\sc rc}
 specification is therefore a combination of these two guarantees. The
 specification also agrees with the description and
 implementation~\cite{bailishat,pldi15} of {\sc rc} for highly
@@ -164,7 +164,7 @@ $\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$ do not imply
 $\mathtt{MonotonicVis}$. A stronger isolation level called
 \iso{Monotonic Atomic View} ({\sc mav} of
 Fig.~\ref{fig:ansi-isolation})~\cite{bailishat,pldi15} was proposed to
-explicitly extend {\sc rc} with monotonicity on such stores. Sample
+explicitly extend {\sc rc} with monotonicity on such stores. The sample
 {\sc rc} executions shown in Fig.~\ref{fig:rc-executions} are also
 {\sc mav}.
 
@@ -203,7 +203,7 @@ on the timeline mark the time when an operation is executed. Dotted
 A transaction $T_i$ is said to be snapshot-visible to a transaction
 $T_j$ if either it is visible to $T_j$, or it is invisible; it is
 forbidden for only a suffix (more generally, a subset) of $T_j$ to
-witness $T_i$. The specification of\iso{Repeatable Read} ({\sc rr})
+witness $T_i$.  \iso{Repeatable Read} ({\sc rr})
 isolation extends {\sc mav} with the snapshot visibility guarantee.
 Observe that snapshot visibility permits $T_i$ and $T_j$ to execute
 and commit while being oblivious of each other. This scenario is
@@ -220,7 +220,7 @@ execution where {\sc si} transaction $T_1$ witnesses a snapshot of the
 database that doesn't include $T_2$, but the conflicting write to $X$
 in $T_2$, and the subsequent operations (due to the monotonicity
 requirement of {\sc mav}) witness $T_1$. Thus, $T_2$ is aware of $T_1$
-when it committed. Lastly, \iso{Serializable} isolation extends
+when it commits. Lastly, \iso{Serializable} isolation extends
 $\mathtt{SnapshotSER}$ to also cover non-conflicting transactions that
 write to variables read in the current transaction.
 Fig.~\ref{fig:ansi-iso-eg-ser} shows an execution of an {\sc ser}
