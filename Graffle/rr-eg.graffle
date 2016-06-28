@@ -1215,7 +1215,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2016-06-26 13:16:31 +0000</string>
+	<string>2016-06-27 18:05:10 +0000</string>
 	<key>Modifier</key>
 	<string>Gowtham Kaki</string>
 	<key>NotesVisible</key>
@@ -1296,7 +1296,7 @@
 			</dict>
 		</array>
 		<key>Frame</key>
-		<string>{{371, 4}, {711, 774}}</string>
+		<string>{{371, 4}, {885, 774}}</string>
 		<key>ListView</key>
 		<true/>
 		<key>OutlineWidth</key>
@@ -1310,14 +1310,14 @@
 		<key>SidebarWidth</key>
 		<integer>120</integer>
 		<key>VisibleRegion</key>
-		<string>{{0, 79}, {576, 635}}</string>
+		<string>{{37.333333333333336, 128}, {500.00000000000006, 423.33333333333337}}</string>
 		<key>Zoom</key>
-		<real>1</real>
+		<real>1.5</real>
 		<key>ZoomValues</key>
 		<array>
 			<array>
 				<string>Canvas 1</string>
-				<real>1</real>
+				<real>1.5</real>
 				<real>1</real>
 			</array>
 		</array>

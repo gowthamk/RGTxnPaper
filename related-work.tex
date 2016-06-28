@@ -1,0 +1,95 @@
+\section{Related Work}
+
+\paragraph{Specifications of weak isolation}
+Adya~\cite{adyaphd} specified several isolation levels in terms of
+\emph{dependency graphs} between transactions, by specifying what
+dependency cycles are forbidden in each case. The operational nature
+of Adya's specifications make them suitable for runtime monitoring and
+anamoly detection~\cite{kemmevldb,feketesigmod08,pssi2011}, whereas
+declarative nature of our specifications make them suitable for
+reasoning about programs. Sivaramakrishnan et al.~\cite{pldi15} specify
+isolation levels declaratively as trace well-formedness conditions,
+but their specifications implicitly assume a complete trace with only
+committed transactions, hence not suitable to operationally reason
+about a program as it builds the trace. For instance, their {\sc rc}
+specification allows the effects of a not-yet-committed transaction to
+be visible to an {\sc rc} transaction.  Nonetheless, our
+specifications belong to the same fragment of first-order logic as
+theirs, which is known to be decidable. Cerone et
+al.~\cite{gotsmanconcur15} present a framework to specify isolation
+levels with atomic visibility, but their specifications are also for
+the complete traces.  Moreover, their specifications for {\sc si} and
+{\sc ser} implicitly assume homogenity, i.e., they require all
+transactions to execute at {\sc si} (resp.  {\sc ser}), which is often
+not the case in practice. Like ours, all the aforementioned
+specification frameworks, use the vocabulary introduced
+in~\cite{burckhardt14} to specify replicated data types and forms of
+eventual consistency. However, none of them come with an associated
+reasoning framework that can use such specifications productively
+towards verifying programs under weak isolation.
+
+\paragraph{Reasoning under weak isolation} In~\cite{feketessi}, Fekete
+et al. propose a theory to characterize non-serializable executions
+that arise under {\sc si}. Fekete~\cite{fekete2005} also proposes an
+algorithm that allocates either {\sc si} or {\sc ser} isolation levels
+to transactions while guaranteeing the serializability of the
+execution. In~\cite{gotsmanpodc16}, Cerone et al. improve on Adya's
+{\sc si} specification and use it to derive a static analysis that
+determines the safety of substituting {\sc si} with a weaker variant
+called \iso{Parallel Snapshot Isolation}~\cite{psi}. All of them focus
+on establishing the equivalence of executions between a pair of
+isolation levels, without taking application invariants into account.
+Bernstein et al.~\cite{bern2000} propose informal semantic conditions
+to ensure the satisfaction of application invariants under weaker
+isolation levels.  However, no formal proof system has been proposed.
+Furthermore, all the aforementioned approaches are tailor-made for a
+finite set of well-understood isolation levels (rooted
+in~\cite{berenson}) under a pre-defined consistency model (usually
+{\sc sc}). 
+
+\paragraph{Reasoning under weak consistency} There have been many
+recent proposals focusing on reasoning about programs under weak
+consistency~\cite{bailisvldb, alvarocalm, gotsmanpopl16,redblueatc,
+redblueosdi, ecinec}. All of them assume a system model that offers a
+choice between a \emph{coordination-free} weak consistency level ({\sc
+ec} in~\cite{redblueosdi, redblueatc, ecinec, alvarocalm, bailisvldb};
+{\sc cc}\footnote{It is worth noting that, although causal consistency
+does not require global coordination, it is nonetheless not
+\emph{highly available}~\cite{bailishat}.} in~\cite{gotsmanpopl16})
+and strong consistency ({\sc sc}), which requires coordination.  They
+propose various conditions (\eg \emph{invariant
+confluence}~\cite{bailisvldb}, \emph{logical
+monotonicity}~\cite{alvarocalm}, \emph{invariant
+safety}~\cite{redblueatc}), or proof systems (\eg~rely-guarantee
+framework of~\cite{gotsmanpopl16}) to show that an allotment of atomic
+and fully isolated operations to these levels preserves application
+invariants.  In contrast, we admit weakly isolated transactions (sets
+of atomic operations), and our system model accepts
+\emph{specifications} of consistency and isolation levels drawn from
+an expressive logic. Gotsman et al.~\cite{gotsmanpopl16} adapt
+\iso{Parallel Snapshot Isolation} to the aforementioned setting by
+interpreting it as a consistency level that serializes writes to
+objects. They subsequently propose a dedicated proof rule to prove
+program invaraints under this model. By parameterizing our proof
+system on isolation specifications, we avoid the need to define a
+separate proof rule for each new isolation level. 
+
+\paragraph{Reasoning under relaxed memory} Considering the
+correspondences between axiomatic models of relaxed
+memory~\cite{battycpp} and weakly consistent
+replication~\cite{burckhardt14}, it is reasonable to expect similar
+reasoning approaches to work in both the cases. Ridge~\cite{rgtso}
+generalizes rely-guarantee reasoning to x86-TSO relaxed memory model.
+Likewise, Vafeadis et al.~\cite{rsl13} generalize concurrent
+separation logic (CSL)~\cite{csl} to C11 relaxed memory model.
+Ferreira et al.~\cite{ferreira10} propose parameterized operational
+semantics for relaxed memory models, but the parameterization is over
+a relation between relaxed memory programs and related {\sc sc}
+programs. They also prove the soundness of CSL for the weakest memory
+model expressible in their semantics, but neither a parameterized (in
+the aforementioned sense) CSL, nor a CSL specialized for any relaxed
+memory model is proposed. In fact, to the best of our knowledge, there
+does not exist a proof system that combines axiomatic semantics of
+memory models and operational semantics of programs in a unified
+reasoning framework.
+
