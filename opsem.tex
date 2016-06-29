@@ -27,7 +27,7 @@ operation (\eg, value read or value written) is also documented, and
 can be accessed via $\rval$. Every effect has a unique identifier
 accessible via $\id$, and a transction identifier accessible via
 $\txn$.  The latter identifies the transaction that generated the
-effect. In every step of the evaluation, the machine reduces a \txnimp
+effect. In every step of the evaluation, the machine reduces a \txnimp\
 term by executing a read, write or commit operation, generating an
 effect, and extending the trace. Since effects include transaction
 identifiers, the semantics distinguishes between terms ($t$) of
@@ -132,8 +132,9 @@ operations are guaranteed to experience the level of isolation
 specified by $\I$.  Thus, in executions that run to completion, the
 abstract machine models a store that provides the required levels of
 isolation.  Notably, the machine achieves this without defining an
-operation semantics for isolation levels, solely by relying on their
-declarative characterization as trace well-formedness constraints.
+operationalsemantics for isolation levels, instead solely relying on
+their declarative characterization as trace well-formedness
+constraints to enforce isolation guarantees.
 \S\ref{sec:ansi-isolation} shows the specification of various ANSI SQL
 isolation levels stated as trace well-formedness constraints.
 

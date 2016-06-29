@@ -50,7 +50,7 @@ eschewed altogether.
 
 Unfortunately, weak isolation admits behaviors that are difficult to
 comprehend~\cite{berenson}. To quantify weak isolation anomalies,
-Fekete \emph{et al.}~\cite{feketevldb09} have devised and experimented
+Fekete \emph{et al.}~\cite{feketevldb09} devised and experimented
 with a microbenchmark suite that executes transactions under a
 weakly-isolated \emph{read committed} isolation level - the default
 level for 8 of the 18 databases studied in~\cite{bailishotos}, and
@@ -105,7 +105,7 @@ programmer to determine application correctness.
 Recent results on reasoning about application invariants in the
 presence of weak \emph{consistency}~\cite{burckhardt14, redblueosdi,
   redblueatc, ecinec, gotsmanpopl16} address broadly related concerns.
-At a high level, reasoning about weak consistency involves reasoning
+At a high-level, reasoning about weak consistency involves reasoning
 about the concurrent execution of strongly atomic and fully isolated
 operations against different (potentially replicated), but consistent
 states of the database or data store, where each operation locally
@@ -157,13 +157,13 @@ visibility).
 The paper makes the following contributions:
 \begin{itemize}
   \item We develop a semantics for a core language equipped with
-    weakly isolated transactions, demonstrating that a general
-    isolation semantics can be expressed as well-formedness constraints
-    on a program's execution.
+    weakly-isolated transactions, demonstrating that a general
+    parameteric isolation semantics can be expressed as
+    well-formedness constraints on a program's execution.
   \item We propose a compositional proof system for this language
     capable of relating high-level application invariants to the structure
     of traces induced by the operational semantics, in which transactions
-    are parameterized with specific weak isolation levels.
+    are associated with specific weak-isolation levels.
   \item We define a \emph{maximum visibility principle} to reconcile
     store consistency guarantees with transaction isolation
     requirements, and use it to instantiate our operational model and
@@ -177,15 +177,15 @@ The paper makes the following contributions:
 knowledge) mechanism that precisely relates high-level program
 invariants to low-level weak isolation and store consistency
 guarantees, thereby allowing weakly-isolated transactions to enjoy the
-same rigorous reasoning capabilities as their strongly isolated
+same rigorous reasoning capabilities as their strongly-isolated
 (serializable) counterparts.
 
 The remainder of the paper is organized as follows.  The next section
 provides motivation and background on serializable and weakly-isolated
 transactions. \S\ref{sec:opsem} presents an operational semantics for
 a core language that supports weakly-isolated transactions,
-parameterized over different isolation notions. \S\ref{sec:proofrules}
-formalizes the proof systemt that we use to reason about program
+parameterized over different isolation notions. \S\ref{sec:reasoning}
+formalizes the proof system that we use to reason about program
 invariants, and establishes the soundness of these rules with respect
 to the semantics. \S\ref{sec:store-consistency} generalizes the
 framework to integrate support for weakly consistent data stores.  We

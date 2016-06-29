@@ -1,9 +1,9 @@
 \section{Motivation}
 \label{sec:motivation}
 
-In this section, we motivate our proof system for weak isolation via
-an example written in \txnimp - a C-like imperative language equipped
-with a \C{txn} lexical block defining a transaction scope. Each
+In this section, we motivate our ideas via an example written in
+\txnimp - a C-like imperative language equipped with a \C{txn} lexical
+block defining a transaction scope.  For exposition convenience, each
 \C{txn} block is associated with a single-quoted string in angle
 braces that uniquely identifies the transaction. We use Hoare triple
 notation to annotate programs with pre- and post- conditions.
@@ -41,7 +41,7 @@ shown in Fig.~\ref{fig:motiv-eg-1}. If the initial balance (\C{k}) in
 the account is enough to perform both withdraws, then the final
 balance, after both transactions commit, is expected to reflect the
 effects of both withdraws. The pre- and post-conditions in
-Fig.~\ref{fig:motiv-eg-1} reflect our expectations. Indeed, invariants
+Fig.~\ref{fig:motiv-eg-1} reflect this expectation. Indeed, invariants
 are guaranteed to hold if both withdraw transactions are serialized,
 making \iso{Serializable} isolation ({\sc ser}) level a sufficent
 condition to preserve invaraints. But, is {\sc ser} necessary?
@@ -99,9 +99,8 @@ updates is required.  \iso{Snapshot Isolation} ({\sc
   si})~\cite{berenson} fits this requirement; {\sc si} effectively
 serializes transactions that update a shared data object by aborting
 and re-executing a transaction if write-write conflicts are detected
-during its commit.\footnote{{\sc si} is not functionally the same as
-  {\sc ser}, however; the differences in the two manifest in the \emph{absence}
-  of any write-write conflicts.}   Since {\sc si},
+during its commit.\footnote{{\sc si} exhibits different behaviour from
+  {\sc ser} in the absence of write-write conflicts.}   Since {\sc si},
 unlike {\sc ser}, does not rely on expensive lock-based
 concurrency control, it is also more efficient, making it appropriate
 for both {\bf Wd} transactions.
@@ -129,10 +128,10 @@ programmers are often encouraged to reason about weak isolation.
 Unfortunately, such reasoning does not rest on any sound foundation,
 and is thus highly error-prone. Reasoning in terms of how weak
 isolation variants are implementated is no better since it requires
-programmers to understand low-level implementation details
-of the database that are naturally far removed from the application
-semantics. An attractive (and principled) alternative in this context
-is a formal proof system that combines declarative reasoning about
+programmers to understand low-level implementation details of the
+database that are naturally far removed from application semantics. An
+attractive (and principled) alternative in this context would be a
+formal proof system that combines declarative reasoning about
 isolation guarantees with operational reasoning about programs. We
 demonstrate how our proof system makes this possible in the context of
 the current example.
@@ -154,7 +153,7 @@ First, we note that the example in Fig.~\ref{fig:motiv-eg-1} is a
 concurrent program, and hence is amenable to \emph{rely-guarantee}
 style reasoning~\cite{rgjones}, a compositional proof technique that
 allows us to reason about the behaviour of individual threads by
-abstracting away interference induced by other threads (collectively
+abstracting away interferences induced by other threads (collectively
 called \emph{the environment}) into a \emph{rely} relation. In an
 ordinary concurrent program, every environment step is a valid
 interference in the current thread. However, in the presence of
@@ -214,7 +213,7 @@ post-condition.
 % violation. 
 
 The specification of an isolation level encodes its interference
-characteristic as constraints over the $\hbZ$ relation. However, for
+characteristics as constraints over the $\hbZ$ relation. However, for
 this to be useful in reasoning about programs, the rely-guarantee
 framework should be able to use the specification to determine if an
 interference is valid or invalid, allowing the programmer to only
@@ -274,7 +273,7 @@ built into the reasoning framework, leading to a proof system
 tailor-made for such stores. However, for the reasoning framework to
 be truly useful, it has to be parametric over different store
 consistency semantics, supporting stores that are weaker than {\sc sc}
-(e.g., eventually consistent), and should be able to reconcile
-conflicts between consistency and isolation constraints.  We
+(e.g., causally or eventually consistent), and should be able to
+reconcile conflicts between consistency and isolation constraints.  We
 demonstrate how our reasoning framework makes this possible in the
 following sections.

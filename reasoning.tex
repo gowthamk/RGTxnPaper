@@ -121,7 +121,7 @@ separately. We call this the stability requirement on $\I$:
 \end{array}
 \end{smathpar}
 
-The rule \rulelabel{RG-Var} defines the rely-guarantee judgment for
+\noindent The rule \rulelabel{RG-Var} defines the rely-guarantee judgment for
 shared variable reads inside a transaction $T_i$. It requires $\I$ to
 be stable, and pre- and post- conditions to be stable relative to
 $\I$.  The quantified premise effectively requires a proof that if the
@@ -161,37 +161,34 @@ standard rely-guarantee formulation and hence elided.
 % (\rulelabel{RG-Par}) are straightforward, and more-or-less same as the
 % corresponding rules in classical rely-guarantee.
 
-The \rulelabel{RG-Conseq} rule define ways to strengthen or weaken
-relations and assertions associated with the RG judgment of
+The \rulelabel{RG-Conseq} rule define ways to strengthen or
+weaken relations and assertions associated with the RG judgment of
 transaction-bound expressions. Similar rules exist for
 transaction-bound and top-level commands, but are not
 shown.\footnote{The supplementary materials provide the complete set
   of rules.} As is the case with a standard rely-guarantee
 formulation,the rules allow the precondition $P$ and the rely relation
-$R$ to be strengthened\footnote{A stronger relation is a smaller set
-  than a weaker relation, hence a stronger $R$ admits fewer
-  interferences than a weaker one}, and the postcondition $Q$ (also,
-$C$ in the case of expressions) and the guarantee relation $G$ to be
-weakened.  The most notable aspect of the \rulelabel{RG-Conseq} rules
-is that they allow the trace invariant $\I$ to be
-strengthened. Considering that $\I$ captures isolation properties,
-this means that a program proven correct under weaker isolation levels
-is also correct under stronger ones.  Parametricity over the trace
-invariant $\I$, combined with the ability to strengthen $\I$ as
-needed, allows our proof system to support a highly flexible proof
-strategy to prove programs correct over various isolation
-variants. For example, programmers can \emph{define} isolation
-guarantees of their choice (by defining $\I$ appropriately) and then
-prove programs correct assuming the guarantees hold.  The soundness of
-strengthening $\I$ assures that the program can now be executed safely
-on any data store that offers isolation guarantees at least as strong
-as those assumed. 
+$R$ to be strengthened, and the postcondition $Q$ (also, $C$ in the
+case of expressions) and the guarantee relation $G$ to be weakened.
+The most notable aspect of the \rulelabel{RG-Conseq} rules is that
+they allow the trace invariant $\I$ to be strengthened. Considering
+that $\I$ captures isolation properties, this means that a program
+proven correct under weaker isolation levels is also correct under
+stronger ones.  Parametricity over the trace invariant $\I$, combined
+with the ability to strengthen $\I$ as needed, allows our proof system
+to support a highly flexible proof strategy to prove programs correct
+over various isolation variants. For example, programmers can
+\emph{define} isolation guarantees of their choice (by defining $\I$
+appropriately) and then prove programs correct assuming the guarantees
+hold.  The soundness of strengthening $\I$ ensures that a program can
+be executed safely on any data store that offers isolation guarantees
+at least as strong as those assumed.
 
 \subsection{Semantics and Soundness}
 
 \begin{definition}[\bfseries Step-indexed reflexive transitive closure]
-Forall $A:\text{Type}$, $R: A \rightarrow A \rightarrow \mathbb{P}$, and $n :
-\mathbb{N}$, step-indexed reflexive transitive closure $R^n$ of $R$ is
+For all $A:\text{Type}$, $R: A \rightarrow A \rightarrow \mathbb{P}$, and $n :
+\mathbb{N}$, the step-indexed reflexive transitive closure $R^n$ of $R$ is
 the smallest relation satisfying the following
 properties:
 \begin{itemize}
@@ -202,9 +199,10 @@ R^{n+1}(x,z)$
 \end{definition}
 
 \begin{definition}[\bfseries Interleaved step and multi-step relations]
-An Interleaved step relation interleaves thread-local reductions with
+An interleaved step relation interleaves thread-local reductions with
 interference from concurrent threads captured as the rely relation
 ($R$).  It is defined thus:
+
 \begin{smathpar}
 \begin{array}{lcl}
 \I \vdash (c,\E) \rstepsto (c',\E') & \defeq & \I \vdash 
@@ -212,9 +210,10 @@ interference from concurrent threads captured as the rely relation
   &   & \disj (c' = c \conj R(\E, \E') \conj \I(\E'))\\
 \end{array}
 \end{smathpar}
+
 The interleaved step relation for transaction bound expressions
 ($\txnbox{e}_i$) and commands ($\txnbox{c}_i$) is defined similarly.
-An Interleaved multi-step relation ($\stepssto{n}$) is the step-indexed
+An interleaved multi-step relation ($\stepssto{n}$) is the step-indexed
 reflexive transitive closure of the interleaved step relation.
 \end{definition}
 
@@ -222,6 +221,7 @@ reflexive transitive closure of the interleaved step relation.
 \label{def:rg-semantics}
 The semantics of the RG sextuple $\rg{\mathbb{I},P,R}{c}{G,Q}$ is defined
 in terms of the interleaved step relation thus:
+
 \begin{smathpar}
 \begin{array}{l}
 \hspace*{-0.3in}
@@ -232,10 +232,12 @@ in terms of the interleaved step relation thus:
 \hspace*{0.5in}\conj \texttt{step-guaranteed}(\I,R,G,c,\E)\\
 \end{array}
 \end{smathpar}
-The first conjunct in the consequent is called the \emph{Hoare
+
+\noindent The first conjunct in the consequent is called the \emph{Hoare
 consequent} since it ascribes Hoare triple semantics to an RG sextuple.
 The second conjunct, called the \emph{guarantee consequent}, uses the
 $\texttt{step-guaranteed}$ predicate defined below:
+
 \begin{smathpar}
 \begin{array}{l}
 \texttt{step-guaranteed}(\I,R,G,c,\E) \;\defeq\; \forall n,\E',c'',\E''.\\
@@ -243,7 +245,8 @@ $\texttt{step-guaranteed}$ predicate defined below:
   (c'',\E'') \Rightarrow G(\E',\E'')\\
 \end{array}
 \end{smathpar}
-The guarantee consequent requires $G$ to capture the trace effect of
+
+\noindent The guarantee consequent requires $G$ to capture the trace effect of
 every small-step of $c$, where the reduction can be interleaved by the
 interference ($R$) from concurrent threads. The semantics of the RG
 sextuple for transaction-bound commands ($\txnbox{c}_i$) is defined
@@ -270,6 +273,7 @@ The rely-guarantee judgments defined by the rules in
 Fig.~\ref{fig:rg-rules} are sound with respect to
 the semantics of Definition~\ref{def:rg-semantics}.\footnote{Full proofs are provided in the supplementary material.}
 \end{theorem}
+
 \noindent In particular, if $\rg{\I,P,R}{c}{G,Q}$ can be derived using
 the rules of Fig.~\ref{fig:rg-rules}, then (a) every interleaved
 multi-step reduction of $c$ starting from a trace that satisfies $P$

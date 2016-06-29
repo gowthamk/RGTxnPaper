@@ -51,7 +51,7 @@ straightforward $\I_s$ for this store is the \C{SC} property
 formalized below:
 \begin{smathpar}
 \begin{array}{l}
-  \C{sc}(\E) \;=\; \forall\eta_1,\eta_2.~\{\eta_1,\eta_2\}
+  \C{SC}(\E) \;=\; \forall\eta_1,\eta_2.~\{\eta_1,\eta_2\}
   \subseteq \E.\A \conj \id(\eta_1) < \id(\eta_2) \\
   \hspace*{2in}\Rightarrow \underE{\eta_1 \visar \eta_2}
 \end{array}
@@ -265,12 +265,12 @@ event.
 
 \subsection{Example}
 
-We shall now consider the proof of the example in
-Fig.~\ref{fig:motiv-eg-1} in greater detail. We assume an {\sc sc}
-store, such as a relational database, whose store-specific trace
-invaraint ($\I_s$) was shown previously. Both transactions are run at
-{\sc si} isolation, hence $\I_c$ is $\lambda\E.~\underE{\C{SI(Wd1)}}
-\conj \underE{\C{SI(Wd1)}}$. As usual, $\I$ is $\I_s \conj \I_c$. 
+We now consider the proof of the example in Fig.~\ref{fig:motiv-eg-1}
+in greater detail. We assume an {\sc sc} store, such as a relational
+database, whose store-specific trace invaraint ($\I_s$) was shown
+previously. Both transactions are run at {\sc si} isolation, hence
+$\I_c$ is $\lambda\E.~\underE{\C{SI(Wd1)}} \conj
+\underE{\C{SI(Wd1)}}$. As usual, $\I$ is $\I_s \conj \I_c$.
 
 \begin{figure}
 \centering
@@ -327,7 +327,7 @@ Decorated parts of \C{Wd1} relevant to the discussion are shown in
 Fig.~\ref{fig:wd1-decorated}.  \C{Wd2} is similar and not
 shown\footnote{Supplementary contains fully decorated program.}.
 Temporary name \C{v3} has been introduced to capture the result of the
-RHS expression \C{C-a2}.  Assertions implicitly refer to the current
+RHS expression \C{C-a1}.  Assertions implicitly refer to the current
 execution ($\E$), just as hoare triples implicitly refer to the
 current state.  The context for propositions is also the implicit,
 i.e., we write $\psi$ instead of $\underE{\psi}$. The proposition \C{k
@@ -358,9 +358,9 @@ considers the case when $\C{Wd2} \visar \C{Wd1}$. As we show below,
 this is sufficient to prove the postcondition $\phi_5$, which appears
 to make a stronger claim about the value of \C{C}. The proof follows
 from the RG rule \rulelabel{RG-Asgn} for assignments, which allows us
-to easiliy conclude the following about the execution state after the
+to easily conclude the following about the execution state after the
 assignment:
->>>>>>> 70ae6b11c8f648c323413d6fe8f8fb1c2cba75ae
+
 \begin{smathpar}
 \begin{array}{l}
     {\neg\committed(\C{Wd1}) \conj \C{Wd1} \wrstoar \C{C} 

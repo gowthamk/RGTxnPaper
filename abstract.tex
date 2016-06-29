@@ -12,11 +12,10 @@
   encourage, developers to use weaker alternatives.  These
   alternatives break the strong isolation guarantees offered by
   serializable transactions to permit greater concurrency.
-  Unfortunately, the semantics of weak isolation is often poorly
-  understood, and usually explained only informally in terms of
-  low-level implementation artifacts.  Consequently, verifying
-  high-level correctness properties in such environments is
-  problematic.
+  Unfortunately, the semantics of weak isolation is poorly understood,
+  and usually explained only informally in terms of low-level
+  implementation artifacts.  Consequently, verifying high-level
+  correctness properties in such environments is problematic.
 
   To address this issue, we present a program logic that enables
   compositional reasoning about the behavior of concurrently executing
