@@ -2,7 +2,7 @@
 \label{sec:store-consistency}
 
 The operational semantics of Fig.~\ref{fig:txnimp} allows operations
-to witness arbitrary subsets of the global state, effectively mimicing the
+to witness arbitrary subsets of the global state, effectively mimicking the
 behaviour of an eventually consistent ({\sc ec}) data
 store\footnote{Eventual consistency guarantees that in the absence of further
   updates, all reads witness the same global state
@@ -45,7 +45,7 @@ consistent store, $\I_s$ is simply \emph{true}. Stronger stores, such
 as those that support strong consistenty, have non-trivial definitions
 for $\I_s$.
 
-A strongly-consistent {\sc sc} store guarantees a total order of all
+A strongly-consistent {\sc sc} store guarantees a total order on all
 operations w.r.t $\visZ$ consistent with their chronological order. A
 straightforward $\I_s$ for this store is the \C{SC} property
 formalized below:
@@ -78,7 +78,7 @@ prioritizing weak isolation (thus, concurrency and performance) over
 strong consistency, so the execution traces do not necessarily satisfy
 {\sc sc}. In particular, visibility constraints imposed by {\sc sc}
 are violated iff they are found to be in conflict with the constraints
-imposed by a transaction isolation level. In the context of
+imposed by a transaction's isolation level. In the context of
 the aforementioned example, $\eta_1$ is not made visible to $\eta_2$
 because doing so would violate $\I_c$. However, if $\I_c$ is true,
 then the store makes $\eta_1$ visible to $\eta_2$ to honor its
@@ -134,16 +134,13 @@ isolation constraints are captured by $\I_c$:
 \end{array}
 \end{smathpar}
 $\I_s$ requires a trace $\E$ to satisfy the visibility constraints of
-{\sc sc} except in cases where they are in conflict with $\I_c$.
-Instantiating the parameter $\I$  with $\I_s \wedge \I_c$ in
-Fig.~\ref{fig:txnimp} results in an operational semantics that
-describes many kinds of relational database-like stores.
-
-For example, the semantics of a causally consistent data
-store~\cite{gotsmanpopl16,LBC16} can also be obtained by defining
-$\I_s$ to be the causal consistency ({\sc cc}) invariant that is
-appropriately weakened to resolve conflicts with $\I_c$.\footnote{Details
-of this instantiation are relegated to the supplementary in the interest of space.}
+    {\sc sc} except in cases where they are in conflict with $\I_c$.
+    Instantiating the parameter $\I$ with $\I_s \wedge \I_c$ in
+    Fig.~\ref{fig:txnimp} results in an operational semantics that
+    describes many kinds of relational database-like data stores,
+    including causally-consistent data stores, among
+    others.\footnote{Details of this instantiation are relegated to
+      the supplementary in the interest of space.}
 
 %% \begin{remark}
 %% Note that the purpose of maximum visibility principle is to
@@ -214,56 +211,57 @@ witnesses $S_1$ (i.e., $S_1 \subseteq S_2$). }
 \label{fig:ec-theirs-vs-ours}
 \end{figure}
 
-Reasoning under weakly consistent replication has received special
+Reasoning under weakly-consistent replication has received special
 attention in recent work~\cite{gotsmanpopl16}. Our operational
 semantics and proof system are general enough to admit replication as
-a special case. In this section, we explain how the standard artifacts
-of weakly-consistent replication manifest in our reasoning framework.
+a special case of our formulation. In this section, we explain how the
+standard artifacts of weakly-consistent replication manifest in our
+reasoning framework.
 
-Reasoning about weakly-consistent replication involves reasoning in
-terms of \emph{replicas} of data. The primary challenge in this
-setting is to ensure that the assumptions made and guarantees enforced
-by an operation at one replica carry over to other replicas that merge
-their effects, thus preserving the overall integrity of the system.
-In~\cite{gotsmanpopl16}, this challenge is partly addressed by
+The primary challenge in this setting is to ensure that the
+assumptions made and guarantees enforced by an operation at one
+replica carry over to other replicas that merge their effects, thus
+preserving the overall integrity of the system.  In prior
+work~\cite{lbc16,gotsmanpopl16}, this challenge is partly addressed by
 imposing restrictions on how various replica states differ, i.e., by
 fixing a system model with a stronger baseline consistency ({\sc cc})
 than {\sc ec}. This unfortunately restricts the reasoning approach
-from being applied to stores (e.g., \cite{bayou,pldi15}) that provide
+from being applied to data stores (e.g., \cite{bayou,pldi15}) that provide
 guarantees weaker than causal consistency, such as causal visibility
 or read-my-writes~\cite{zoo}. Causal consistency is not baseline
 consistency in these stores because it is not \emph{highly
-available}~\cite{bailishat}.
+  available}~\cite{bailishat}.
 
-Notably, our view of replication however does not explicitly involve
-replicas.  Fig.~\ref{fig:ec-theirs-vs-ours} contrasts our model of
-weakly-consistent replication with a conventional replica-based
-model.  Under our model, the notion of a replica is subsumed by the
-concept of visibility; a replica is defined by the subset ($S$) of
-global state ($\E.\A$) that an operation witnesses. Constraints over
-replica states therefore manifest as constraints over a specific visibility
-relation.  For example, instead of requiring the store to be causally
-consistent, an operation can request to witness a causally consistent
-subset of the state; such demands can be made via the trace invariant
-$\I$. For a precondition ($P$) of the operation to be useful, it has
-to be an assertion over every causally consistent subset of the global
-state.  Since any replica that eventually executes the operation has
-to expose one such subset ($S$), the precondition is guaranteed to
-hold regardless of the replica. There is however one problem with this
+Notably, our view of replication does not explicitly involve replicas.
+Fig.~\ref{fig:ec-theirs-vs-ours} contrasts our model of
+weakly-consistent replication with a conventional replica-based model.
+Under our model, the notion of a replica is subsumed by the concept of
+visibility; a replica is defined by the subset ($S$) of global state
+($\E.\A$) that an operation witnesses. Constraints over replica states
+therefore manifest as constraints over a specific visibility relation.
+For example, instead of requiring the store to be causally consistent,
+an operation can witness a causally consistent subset of the state;
+such demands can be made via the trace invariant $\I$. For a
+precondition ($P$) of the operation to be useful, it has to be an
+assertion over every causally consistent subset of the global state.
+Since any replica that eventually executes the operation has to expose
+one such subset ($S$), the precondition is guaranteed to hold
+regardless of the replica. There is however one problem with this
 explanation - by considering subsets of just one global state, it
 ignores the fact that the global state (hence, the replica states)
-change during the execution of the operation. To account for this
-change,~\cite{gotsmanpopl16} distinguishes between effect generation
+change during the execution of the operation. To account for such
+changes, we might choose to distinguish between effect generation
 event at one replica $r_1$ and effect merge event at replica $r_2$,
-and requires that only \emph{non-conflicting} operations execute
-between these two events at $r_2$, and that they preserve certain
-invariants. Our framework folds all such machinery into a stability
-condition predicated on $\I$ (\S\ref{sec:rely-guarantee}).  Since any
-change to the global state during the execution of the operation is an
-interference, and $P$ is required to be stable with respect to any
-such interference, it follows that $P$ is valid on every replica, thus
-ensuring that assumptions made at the generation event are also valid
-at the merge event.
+requiring that \emph{non-conflicting} operations execute between these
+two events at $r_2$, and that they preserve certain
+invariants~\cite{gotsmanpopl16}.  Instead, our framework folds all such
+machinery into a stability condition predicated on $\I$
+(\S\ref{sec:rely-guarantee}).  Since any change to the global state
+during the execution of the operation is an interference, and $P$ is
+required to be stable with respect to any such interference, it
+follows that $P$ is valid on every replica, thus ensuring that
+assumptions made at a generation event is also valid at the merge
+event.
 
 \subsection{Example}
 
@@ -370,6 +368,7 @@ corresponding to the assignment statement (line ??). The precondition
 temporary variable \C{v3} is \C{k-a2-a1}. The RG rule
 (\rulelabel{RG-Asgn}) for assignment statement allows us to easiliy
 conclude the following about the execution state after the assignment:
+
 \begin{smathpar}
 \begin{array}{l}
     {\neg\committed(\C{Wd1}) \conj \C{Wd1} \wrstoar \C{C} 
@@ -380,7 +379,8 @@ conclude the following about the execution state after the assignment:
     \Rightarrow \C{C = k-a2} \wedge \C{C = k-a2-a1})
 \end{array}
 \end{smathpar}
-The rule also lets us assume that the execution satisfies trace
+
+\noindent The rule also lets us assume that the execution satisfies trace
 invariant ($\I$), which asserts {\sc si} for both transactions.  Since
 both transactions write to \C{C}, {\sc si} requires either $\C{Wd1}
 \visar \C{Wd2}$, or $\C{Wd2} \visar \C{Wd1}$. Since \C{Wd1} is not yet
