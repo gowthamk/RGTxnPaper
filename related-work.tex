@@ -32,13 +32,13 @@ isolation.
 that arise under {\sc si}. Fekete~\cite{fekete2005} also proposes an
 algorithm that allocates either {\sc si} or {\sc ser} isolation levels
 to transactions while guaranteeing the serializability of the
-execution. In~\cite{gotsmanpodc16}, Cerone et al. improve on Adya's
+execution. In~\cite{gotsmanpodc16}, Cerone \emph{et al.} improve on Adya's
 {\sc si} specification and use it to derive a static analysis that
 determines the safety of substituting {\sc si} with a weaker variant
 called \iso{Parallel Snapshot Isolation}~\cite{psi}. All of them focus
 on establishing the equivalence of executions between a pair of
 isolation levels, without taking application invariants into account.
-Bernstein et al.~\cite{bern2000} propose informal semantic conditions
+Bernstein \emph{et al.}~\cite{bern2000} propose informal semantic conditions
 to ensure the satisfaction of application invariants under weaker
 isolation levels.  However, no formal proof system has been proposed.
 Furthermore, all the aforementioned approaches are tailor-made for a
@@ -75,14 +75,18 @@ reasoning approaches to work in both the cases. Ridge~\cite{rgtso}
 generalizes rely-guarantee reasoning to the x86-TSO memory model.
 Likewise, Vafeadis \emph{et al.}~\cite{rsl13} generalize concurrent
 separation logic (CSL)~\cite{csl} to the C11 relaxed memory model.
-Ferreira et al.~\cite{ferreira10} propose a parameterized operational
-semantics for relaxed memory models, but the parameterization is over
-a relation between relaxed memory programs and related {\sc sc}
-programs. They also prove the soundness of CSL for the weakest memory
-model expressible in their semantics, but neither a parameterized (in
-the aforementioned sense) CSL, nor a CSL specialized for any relaxed
-memory model is proposed. In fact, to the best of our knowledge, there
-does not exist a proof system that combines axiomatic semantics of
-memory models and operational semantics of programs in a unified
-reasoning framework.  \SJ{cite plan b: a buffered memory model for Java.}
+Ferreira \emph{et al.}~\cite{ferreira10} propose a parameterized
+operational semantics for relaxed memory models, but the
+parameterization is over a relation between relaxed memory programs
+and related {\sc sc} programs. They also prove the soundness of CSL
+for the weakest memory model expressible in their semantics, but
+neither a parameterized (in the aforementioned sense) CSL, nor a CSL
+specialized for any relaxed memory model is proposed.  ~\cite{DLZ+13}
+presents a \emph{buffered memory model} for Java that deines an
+axiomatic definition for the JMM in terms of memory reorderings, and
+an operational instantiation consistent with the total store ordering
+(TSO) memory model found on x86 processors, and demonstrates the
+equivalence of the two definitions.  However, there is no attempt to
+parameterize the model over different reordering or consistency
+definitions as we demonstrate here.
 
