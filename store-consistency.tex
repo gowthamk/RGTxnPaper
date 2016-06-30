@@ -174,6 +174,38 @@ $\I_s$ requires a trace $\E$ to satisfy the visibility constraints of
 % violation of causal consistency if and only if the violation is
 % inevitable to enforce $\I_c$.
 
+A distinguishing feature of our framework is that it is parameteric
+over different isolation and consistency instantiations, whose
+properties can be encapsulated within the trace invariant $\I$.  While
+it is true that most relational databases implement standard ANSI SQL
+isolation levels similar to the ones shown in
+Fig.~\ref{fig:ansi-isolation}, there is no clear agreement on the
+exact semantics of these isolation levels on various weakly-consistent
+stores.  Thus, what Oracle calls serializable isolation is a slightly
+stronger variant of snapshot isolation.  Having a parameterized
+semantics and proof framework built on this semantics allows us to
+support these variants without the need for semantics re-engineering
+every time an application is retargeted to a new platform.  Moreover,
+the need for high availability on geo-replicated stores is
+incentivizing the development of new isolation levels. \emph{Parallel
+  Snapshot Isolation}, for example, was proposed in 2011, and
+\emph{Non-Monotonic Snapshot Isolation}~\cite{...} in 2013, both for
+replicated stores. Commercial eventually-consistent stores have only
+just started adopting transactions (the first release of Cassandra
+with support for multi-key transactions is slated for later this
+year), and all indications are that we should expect to see new
+isolation instantiations in the future.
+
+Without parameterization, we would need to carefully engineer a
+reasoning framework for each isolation and consistency variant.
+Clearly, each such framework would be incomparable to one another. On
+the other hand, our treatment allows us to accommodate the myriad of
+different isolation and store-consistency instances without the need
+for bespoke specialization.
+
+
+
+    
 \subsection{Weakly Consistent Replication}
 \label{sec:replication}
 
@@ -455,3 +487,4 @@ finishes the proof for the triple in focus. The proofs for other
 triples of \C{Wd1} can also be constructed similarly. The combination
 of correctness proofs for \C{Wd1} and \C{Wd2} yeilds a correctness
 proof for the program.
+
