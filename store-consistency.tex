@@ -459,10 +459,10 @@ proof for the program.
 
 \paragraph{Discussion.} As evident from the example, instantiating the
 proof system for a specfic combination of consistency and isolation
-settings, and then deriving facts specific to that setting
-characterizes our reasoning approach. While intuition suggests that
-some instantiations, such as {\sc sc} with ANSI SQL isolation, are
-general enough to cover many practical cases, it not the case in
+settings, and then deriving facts specific to that setting is one of
+the characteristic our reasoning approach. While intuition suggests
+that some instantiations, such as {\sc sc} with ANSI SQL isolation,
+are general enough to cover many practical cases, it not the case in
 reality owing to the subtle differences in the semantics of isolation
 levels among databases. For instance, Postgres's \iso{Repeatable Read}
 isolation is stronger than ANSI SQL's or MySQL's in non-trivial ways.
@@ -476,7 +476,7 @@ transactions (like the \emph{lightweight transactions} of Cassandra),
 it is reasonable to expect novel forms of isolation to be proposed.
 While it is possible to carefully engineer a reasoning framework for
 each combination of consistency and isolation, it leads to multiple
-proof systems with no obvious to compare proofs.  Having a
+proof systems with no obvious way to compare proofs.  Having a
 parameterized semantics and proof framework built on this semantics
 allows us to support these variants as distinct, yet comparable
 instantiations, thus avoiding the need for semantics re-engineering
