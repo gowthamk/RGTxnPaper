@@ -463,24 +463,26 @@ settings, and then deriving facts specific to that setting
 characterizes our reasoning approach. While intuition suggests that
 some instantiations, such as {\sc sc} with ANSI SQL isolation, are
 general enough to cover many practical cases, it not the case in
-reality owing to the subtle differences in the semantics of isolation
-levels among databases. For instance, Postgres's \iso{Repeatable Read}
-isolation is stronger than ANSI SQL's or MySQL's in non-trivial ways.
-Furthermore, the need for high availability on geo-replicated stores
-has led to the development of of new isolation levels which are yet to
-be standardized. For example, \emph{Parallel Snapshot
-Isolation}~\cite{psi} was proposed in 2011, and \emph{Non-Monotonic
-Snapshot Isolation}~\cite{nmsi} in 2013, both targeted for replicated
-stores. As more commercial weakly consistent stores adopt variants of
-transactions (like the \emph{lightweight transactions} of Cassandra),
-it is reasonable to expect novel forms of isolation to be proposed.
-While it is possible to carefully engineer a reasoning framework for
-each combination of consistency and isolation, it leads to multiple
-proof systems with no obvious to compare proofs.  Having a
-parameterized semantics and proof framework built on this semantics
-allows us to support these variants as distinct, yet comparable
-instantiations, thus avoiding the need for semantics re-engineering
-every time an application is retargeted to a new platform
+reality given the subtle differences in the semantics of isolation
+levels among different database implementations. For instance,
+Postgres' \iso{Repeatable Read} isolation is stronger than ANSI SQL's
+or MySQL's in non-trivial ways.  Furthermore, the need for high
+availability on geo-replicated stores has led to the development of
+new isolation levels which are yet to be standardized. For example,
+\emph{Parallel Snapshot Isolation}~\cite{psi} was proposed in 2011,
+and \emph{Non-Monotonic Snapshot Isolation}~\cite{nmsi} in 2013, both
+targeted for replicated stores. As more commercial weakly consistent
+stores adopt variants of transactions, like the recently introduced
+\emph{lightweight transactions} of Cassandra, it is reasonable to
+expect new isolation definitions to continue to be proposed.  While it
+is possible to carefully engineer a reasoning framework for each
+combination of consistency and isolation, such a strategy would lead
+to multiple semantic definitions and proof systems with no obvious to
+compare and relate them.  Having a parameterized semantics and proof
+framework built on the framework defined above allows us to support
+these variants as distinct, yet comparable instantiations, thus
+avoiding the need for semantics re-engineering every time an
+application is retargeted to a new platform.
 
 %   A distinguishing feature of our framework is that it
 %   is parameteric over different isolation and consistency
