@@ -82,11 +82,11 @@ and related {\sc sc} programs. They also prove the soundness of CSL
 for the weakest memory model expressible in their semantics, but
 neither a parameterized (in the aforementioned sense) CSL, nor a CSL
 specialized for any relaxed memory model is proposed.  ~\cite{DLZ+13}
-presents a \emph{buffered memory model} for Java that deines an
+presents a \emph{buffered memory model} for Java that defines an
 axiomatic definition for the JMM in terms of memory reorderings, and
-an operational instantiation consistent with the total store ordering
-(TSO) memory model found on x86 processors, and demonstrates the
-equivalence of the two definitions.  However, there is no attempt to
-parameterize the model over different reordering or consistency
-definitions as we demonstrate here.
+an operational instantiation consistent with the TSO memory model
+found on x86 processors, and demonstrates the equivalence of the two
+definitions.  However, there is no attempt to parameterize the model
+over different reordering or consistency definitions, which is a central
+focus of this paper.
 
