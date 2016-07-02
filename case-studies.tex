@@ -1,0 +1,120 @@
+\section{Case Studies}
+\label{sec:case-studies}
+
+In this section, we present two case studies that demonstrate the
+applicability of our reasoning approach in varied settings, and the
+consequent practical utility.
+
+\paragraph{A video view counter} The view count of a video on a
+YouTube-like video-sharing website must never appear to be decreasing,
+although it may not necessarily reflect the actual number of views.
+We call this the monotonicity invariant of the counter. To understand
+whether a straightforward implementation of the view counter preserves
+the monotonicity invariant, we considered a \txnimp program that is
+representative of the counter application. In particular, we
+considered four concurrent transactions that operate on a shared
+counter: a reader transaction that reads the counter twice obtaining
+the values $k_1$ and $k_2$, respectively, and three writer
+transactions, each incrementing the counter once. If the reader
+witnesses a monotonically increasing view count, then $k_2\ge k_1$. We
+then instantiated our reasoning framework for an {\sc sc} store with
+{\sc rc} as the default isolation level (Postgres is one such store),
+with the aim of verifying the program under this instantiation.  Our
+attempts were however unsuccessful owing to our inability to prove
+that a writer transaction always commits a value no smaller than the
+current value of the counter. This points to the existence of
+anamolous executions where writers may commit a value smaller than the
+current value of the counter. To understand the prevalence of such
+anomalies, we implemented a view counter application in Ruby-on-Rails
+using standard templates and techniques\footnote{Source code of the
+applications, experiments, and the tools we developed to analyze Ruby
+can be found at the following anonymized url: \url{...}}. The
+application stores the video count in a Postgres database, and
+supports an increment operation and a read operation on the count. In
+our experiments with 16 (resp. 32) concurrent writers, readers
+observed 7 (17) violations of monotonicity, in 10 rounds of operation,
+thus confirming that anomalies are indeed possible. 
+
+To determine the weakest ANSI SQL isolation levels needed to restore
+the monotonicity invariant, we instantiated our reasoning framework
+for an {\sc sc} store with different isolation levels for readers and
+writers.  With half-a-day of effort, we were able to prove that
+\iso{Read Uncommmitted}, the weakest isolation level, is sufficient
+for readers, whereas \iso{Serializable} isolation is needed for
+writers. Our experiments with uncommitted reads and serializable
+writes resulted in no observed violations of monotonicity, confirming
+our judgment. While this exercise let us determine the appropriate
+isolation levels for an {\sc sc} store with ANSI SQL isolation levels,
+we were however surprised to learn from Postgres's
+documentation~\cite{postgres} that its isolation levels are stronger
+than ANSI SQL's in non-trivial ways. We subsequently formalized the
+guarantees and repeated the proof effort to discover that Postgres's
+\iso{Repeatable Read} is in fact sufficient for writers - an
+observation we confirmed through experiments. However, the same choice
+of isolation levels led to monotonicity violations on MySQL, because
+MySQL's {\sc rr} is weaker than Postgres's.
+
+To understand the effect of changing the store consistency, we
+reimplemented the counter application for Cassandra, an {\sc ec} store
+(We used the \emph{shim layer} of~\cite{pldi15} to equip Cassandra
+with {\sc cc} and {\sc sc} consistency levels, and {\sc rc}, {\sc
+mav}, and {\sc rr} isolation levels). We then repeated our experiments
+with uncommitted reads and serializable writes - a combination which
+was proved to preserve monotonicity on an {\sc sc} store, but
+nonetheless observed monotonicity violations. The reason for such
+violations became evident as we considered an instantiation our proof
+framework for an {\sc ec} store. Under this instantiation, it is
+impossible to derive the \C{MonotonicVis} (\S\ref{sec:ansi-isolation})
+property needed to show that successive reads in a session witness
+monotonically increasing state. We were however able to derive the
+property assuming either causal consistency or {\sc mav} isolation
+(both supported by the shim layer). We experimented with both these
+options and were able to recover the monotonicity invariant.
+
+
+\paragraph{Microblog}
+
+Next, we focus our attention on a Twitter-like microblogging site that
+is one the sample applications shipped with a popular textbook on
+Ruby-on-Rails~\cite{railsbook}. The application is built to
+demonstrate various capabilities of Rails' ORM framework, and, as
+such, is a good representative of Ruby-on-Rails applications.  For
+instance, instead of relying on database capabilities, it uses Rails's
+\emph{has\_many} association to describe the relationship between a
+user entity and a micropost entity. Further, it qualifies the
+association with \emph{dependent: destroy}, thus directing Rails to
+destroy all microposts if the corresponding author is deleted. Thus,
+the application entrusts Rails with the responsibility to enforce
+referential integrity between microposts and users. Rails in turn
+relies on database-backed transactions to enforce such constraints,
+thus making application semantics susceptible to the changes in
+isolation level.  For instance, deletion of a user is done within a
+transaction ($T_1$) that also deletes the microposts authored by
+(hence, \emph{dependent} on) the user. While this is effective if all
+transactions are {\sc ser}, under the default {\sc rc} isolation, it
+lets concurrent transactions witness referential integrity violations.
+For instance, consider a transaction ($T_2$) that populates a timeline
+by first reading microposts, and then reading the author information
+associated with each micropost. It is possible for an author to be
+deleted (due to the interference from $T_1$) between the two reads,
+leading $T_2$ to witness a referential integrity violation, although
+none really exists in the database.  Indeed, we have verified this
+hypothesis by instantiating our reasoning framework for {\sc sc}
+machine and {\sc rc} isolation, and extracting the aforementioned
+anomalous execution from our failure to prove referential
+integrity\footnote{We modeled referential integrity using two
+variables, $X$ and $Y$: $Y$ is 1 only if $X$ is 1.  Otherwise, both
+are 0.}. To measure the likelihood of such anomalies in practice, we
+first populated a Postgres database with 1000 user accounts, each user
+with 50 microposts and 20 followers, choosen uniformly at random. We
+then constructed experiments with 64 concurrent clients performing
+deletions and timeline reads of randomly choosen users in 1:7 ratio,
+and witnessed a maximum of 250 violations of referential integrity.
+
+Clearly, {\sc rc} is insufficient. In order to determine the weakest
+isolation levels needed to enforce referential integrity, we
+instantiated our framework for an {\sc sc} store with various Postgres
+isolation levels for user deletions and timeline reads, and obtained a
+proof that {\sc rc} is sufficient for deletions, whereas reads require
+{\sc rr}. Repeating the experiment with these isolation settings
+resulted in no violations, as expected.
