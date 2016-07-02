@@ -8,32 +8,32 @@ consequent practical utility.
 \paragraph{A video view counter} The view count of a video on a
 YouTube-like video-sharing website must never appear to be decreasing,
 although it may not necessarily reflect the actual number of views.
-We call this the monotonicity invariant of the counter. To understand
-whether a straightforward implementation of the view counter preserves
-the monotonicity invariant, we considered a \txnimp program that is
-representative of the counter application. In particular, we
-considered four concurrent transactions that operate on a shared
-counter: a reader transaction that reads the counter twice obtaining
-the values $k_1$ and $k_2$, respectively, and three writer
-transactions, each incrementing the counter once. If the reader
-witnesses a monotonically increasing view count, then $k_2\ge k_1$. We
-then instantiated our reasoning framework for an {\sc sc} store with
-{\sc rc} as the default isolation level (Postgres is one such store),
-with the aim of verifying the program under this instantiation.  Our
-attempts were however unsuccessful owing to our inability to prove
-that a writer transaction always commits a value no smaller than the
-current value of the counter. This points to the existence of
-anamolous executions where writers may commit a value smaller than the
-current value of the counter. To understand the prevalence of such
-anomalies, we implemented a view counter application in Ruby-on-Rails
-using standard templates and techniques\footnote{Source code of the
-applications, experiments, and the tools we developed to analyze Ruby
-can be found at the following anonymized url: \url{...}}. The
-application stores the video count in a Postgres database, and
-supports an increment operation and a read operation on the count. In
-our experiments with 16 (resp. 32) concurrent writers, readers
-observed 7 (17) violations of monotonicity, in 10 rounds of operation,
-thus confirming that anomalies are indeed possible. 
+We call this the monotonicity invariant. To understand whether a
+straightforward implementation of the view counter preserves the
+invariant, we considered a \txnimp program that is representative of
+the counter application. In particular, we considered four concurrent
+transactions that operate on a shared counter: a reader transaction
+that reads the counter twice obtaining the values $k_1$ and $k_2$,
+respectively, and three writer transactions, each incrementing the
+counter once. If the reader witnesses a monotonically increasing view
+count, then $k_2\ge k_1$. We then instantiated our reasoning framework
+for an {\sc sc} store with {\sc rc} as the default isolation level
+(Postgres is one such store), with the aim of verifying the program
+under this instantiation.  Our attempts were however unsuccessful
+owing to our inability to prove that a writer transaction always
+commits a value no smaller than the current value of the counter. This
+points to the existence of anamolous executions where writers may
+commit a value smaller than the current value of the counter. To
+understand the prevalence of such anomalies, we implemented a view
+counter application in Ruby-on-Rails using standard templates and
+techniques\footnote{Source code of the applications, experiments, and
+the tools we developed to analyze Ruby can be found at the following
+anonymized url: \url{...}}. The application stores the video count in
+a Postgres database, and supports an increment operation and a read
+operation on the count. In our experiments with 16 (resp. 32)
+concurrent writers, readers observed 7 (17) violations of
+monotonicity, in 10 rounds of operation, thus confirming that
+anomalies are indeed possible. 
 
 To determine the weakest ANSI SQL isolation levels needed to restore
 the monotonicity invariant, we instantiated our reasoning framework
@@ -69,7 +69,7 @@ property needed to show that successive reads in a session witness
 monotonically increasing state. We were however able to derive the
 property assuming either causal consistency or {\sc mav} isolation
 (both supported by the shim layer). We experimented with both these
-options and were able to recover the monotonicity invariant.
+options and were able to recover the invariant.
 
 
 \paragraph{Microblog}
