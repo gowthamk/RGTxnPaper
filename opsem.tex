@@ -25,7 +25,7 @@ a write (\C{WR(X)}), or a transaction commit (\C{COMMIT}) operation
 performed during the execution. Any value associated with the
 operation (\eg, value read or value written) is also documented, and
 can be accessed via $\rval$. Every effect has a unique identifier
-accessible via $\id$, and a transction identifier accessible via
+accessible via $\id$, and a transaction identifier accessible via
 $\txn$.  The latter identifies the transaction that generated the
 effect. In every step of the evaluation, the machine reduces a \txnimp\
 term by executing a read, write or commit operation, generating an
@@ -124,7 +124,7 @@ to different replicas whose states may not be in any well-defined
 relationship. By allowing operations to witness arbitrary subsets of
 the global state, the semantics models the weak visibility properties
 of such stores; we elaborate on the implication of this style of
-definition in \S\ref{sec:store-consistency}.  Stronger visiblity
+definition in \S\ref{sec:store-consistency}.  Stronger visibility
 properties can be expressed by imposing well-formedness constraints
 over $\visZ$ via the trace invariant ($\I$). Since the abstract
 machine is obligated to satisfy $\I$ at every step of the execution,
@@ -132,7 +132,7 @@ operations are guaranteed to experience the level of isolation
 specified by $\I$.  Thus, in executions that run to completion, the
 abstract machine models a store that provides the required levels of
 isolation.  Notably, the machine achieves this without defining an
-operationalsemantics for isolation levels, instead solely relying on
+operational semantics for isolation levels, instead solely relying on
 their declarative characterization as trace well-formedness
 constraints to enforce isolation guarantees.
 \S\ref{sec:ansi-isolation} shows the specification of various ANSI SQL

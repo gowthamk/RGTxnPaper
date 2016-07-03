@@ -40,9 +40,9 @@ simplified to $\I \,=\, \I_s\wedge\I_c$).  While the program-specific
 trace invariant ($\I_c$) remains an invariant regardless of the
 specific consistency and visibility features exposed by the underlying
 data store, the store specific invariant ($\I_s$) changes from store
-to store depending on the consisteny level.  For an eventually
+to store depending on the consistency level.  For an eventually
 consistent store, $\I_s$ is simply \emph{true}. Stronger stores, such
-as those that support strong consistenty, have non-trivial definitions
+as those that support strong consistent, have non-trivial definitions
 for $\I_s$.
 
 A strongly-consistent {\sc sc} store guarantees a total order on all
@@ -86,7 +86,7 @@ consistency commitment\footnote{The term \emph{recency
     commitment}~\cite{bailishat} is often used in practice
   to capture the best-effort nature of {\sc sc}.}. We generalize this
 approach to any $\I_s$ and $\I_c$ by defining a \emph{maximum
-  visiblity principle} to determine an acceptable weakening of $\I_s$
+  visibility principle} to determine an acceptable weakening of $\I_s$
 in case of a conflict with $\I_c$.  The principle requires the
 weakened consistency guarantee ($\I_s'$) of the store to enforce all
 visibility relationships imposed by the actual consistency guarantee
@@ -268,7 +268,7 @@ event.
 
 We now consider the proof of the example in Fig.~\ref{fig:motiv-eg-1}
 in greater detail. We assume an {\sc sc} store, such as a relational
-database, whose store-specific trace invaraint ($\I_s$) was shown
+database, whose store-specific trace invariant ($\I_s$) was shown
 previously. Both transactions are run at {\sc si} isolation, hence
 $\I_c$ is $\lambda\E.~\underE{\C{SI(Wd1)}} \conj
 \underE{\C{SI(Wd1)}}$. As usual, $\I$ is $\I_s \conj \I_c$.
@@ -329,7 +329,7 @@ Fig.~\ref{fig:wd1-decorated}.  \C{Wd2} is similar and not
 shown\footnote{Supplementary contains fully decorated program.}.
 Temporary name \C{v3} has been introduced to capture the result of the
 RHS expression \C{C-a1}.  Assertions implicitly refer to the current
-execution ($\E$), just as hoare triples implicitly refer to the
+execution ($\E$), just as Hoare triples implicitly refer to the
 current state.  The context for propositions is also the implicit,
 i.e., we write $\psi$ instead of $\underE{\psi}$. The proposition \C{k
 $\ge$ a1+a2} remains an invariant, hence elided. The precondition
@@ -337,12 +337,12 @@ $P_1$ of \C{Wd1} accounts for the possibility of \C{Wd2} committing
 before \C{Wd1}, writing \C{k-a2} to \C{C}. Since neither \C{Wd1} nor
 \C{Wd2} are committed at the beginning, the precondition $P$ of the
 program is extended with $\neg\committed(\C{Wd1}) \wedge
-\neg\committed(\C{Wd2})$, from which $P_1$ follows. The postcondition
+\neg\committed(\C{Wd2})$, from which $P_1$ follows. The post-condition
 $Q_1$ of \C{Wd1} asserts different values for \C{C} depending on
 whether or not \C{Wd2} has already committed.  It also asserts that
-\C{Wd1} has committed. The postcondition $Q_2$ of \C{Wd2} (not shown)
+\C{Wd1} has committed. The post-condition $Q_2$ of \C{Wd2} (not shown)
 is similar, but with the roles of \C{Wd1} and \C{Wd2} exchanged. The
-postcondition $Q$ follows from $Q_1 \wedge Q_2$, hence valid. It
+post-condition $Q$ follows from $Q_1 \wedge Q_2$, hence valid. It
 remains to show that \C{Wd1} satisfies its specification (\C{Wd2} must
 also satisfy its spec, but the proof is similar).
 
@@ -356,7 +356,7 @@ that either \C{Wd2} happened before \C{Wd1} (hence can be visible to
 all of \C{Wd1}), or that it committed concurrently with \C{Wd1} (hence
 cannot be visible to all of \C{Wd2}).  Nonetheless, $\phi_4$ only
 considers the case when $\C{Wd2} \visar \C{Wd1}$. As we show below,
-this is sufficient to prove the postcondition $\phi_5$, which appears
+this is sufficient to prove the post-condition $\phi_5$, which appears
 to make a stronger claim about the value of \C{C}. The proof follows
 from the RG rule \rulelabel{RG-Asgn} for assignments, which allows us
 to easily conclude the following about the execution state after the
@@ -381,7 +381,7 @@ is not yet committed ($\neg\committed(\C{Wd1})$), {\sc si} (which
 subsumes {\sc rc}) prohibits the former possibility, allowing us the
 deduce $\C{Wd2} \visar \C{Wd1}$. This lets us derive
 ${\committed(\C{Wd2})}  \Rightarrow \C{C = k-a2} \wedge \C{C =
-k-a2-a1}$, allowing us to prove the postcondition $\phi_5$.
+k-a2-a1}$, allowing us to prove the post-condition $\phi_5$.
 
 The second part of the proof is to show that assertions are stable
 despite the interference from the the concurrent thread executing
@@ -446,7 +446,7 @@ The final aspect of the proof is to show that any interference from
 the rely relation $R_2$ for \C{Wd2}. Since the implementation of
 \C{Wd2} is same as \C{Wd1}, $R_2$ (hence $G_1$) is same as $R_1$ shown
 above, but with \C{Wd2} and \C{Wd1} interchanged. Continuing our focus
-on the assigment statement, the guarantee proof requires us to show
+on the assignment statement, the guarantee proof requires us to show
 that if executing the assignment takes the execution from $\E$ to
 $\E'$, such that $\E'$ satisfies $\I$, then $(\E,\E') \in G_1$.  The
 proof follows from the \rulelabel{RG-Asgn} rule, which establishes
@@ -454,7 +454,7 @@ that (a). the assignment statement does not commit \C{Wd2}, and (b).
 it adds a write effect $\eta$ such that $\txn(\eta)=\C{Wd1}$. This
 finishes the proof for the triple in focus. The proofs for other
 triples of \C{Wd1} can also be constructed similarly. The combination
-of correctness proofs for \C{Wd1} and \C{Wd2} yeilds a correctness
+of correctness proofs for \C{Wd1} and \C{Wd2} yields a correctness
 proof for the program.
 
 % \paragraph{Discussion.} As evident from the example, instantiating the
