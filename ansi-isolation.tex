@@ -149,12 +149,15 @@ also witness $T_1$ because $T_2$ is executing under {\sc mav}).
 Lastly, \iso{Serializable} isolation extends $\mathtt{SnapshotSER}$ to
 also cover non-conflicting transactions that write to variables read
 in the current transaction.  Fig.~\ref{fig:ansi-iso-eg-ser} shows an
-execution of an {\sc ser} transaction $T_3$ and a {\sc mav
-transaction} $T_4$, which write to $X$ and $Y$, respectively. The
+execution of an {\sc ser} transaction $T_3$ and a {\sc mav}
+transaction $T_4$, which write to $X$ and $Y$, respectively. The
 snapshot witnessed by the {\sc ser} transaction $T_3$ does not include
 $T_4$, but the write to $Y$ in $T_4$, although non-conflicting,
 witnesses $T_1$ because $Y$ is read by $T_1$. Visibility includes
-other operations of $T_4$ because of {\sc mav}.
+other operations of $T_4$ because of {\sc mav}. Note that {\sc ser}
+does not guarantee total order of transactions w.r.t. $\visZ$ because,
+in reality, databases do not guarantee serializable execution unless
+\emph{all} transactions choose {\sc ser}.
 
 % Note that both $\mathtt{SnapshotVis}$ and $\mathtt{OneWaySER}$
 % are asymmetric definitions that guarantee complete visiblity or
