@@ -94,10 +94,12 @@ of referential integrity. We then instantiated our framework for an
 {\sc sc} store with various ANSI SQL isolation levels for user
 deletions and timeline reads, and obtained a proof that {\sc rc} is
 sufficient for deletions, whereas reads require {\sc rr}. The proof is
-applicable for MySQL, which implements ANSI isolation.  Since
-Postgres's isolation levels are stronger than corresponding ANSI
-levels, using \rulelabel{RG-Conseq} rule (Fig.~\ref{fig:rg-rules}), we
-also obtain a correctness proof for Postgres. 
+immediately applicable for MySQL, which implements ANSI SQL isolation
+levels. Since Postgres's isolation levels are stronger than the
+corresponding ANSI levels, \rulelabel{RG-Conseq} rule
+(Fig.~\ref{fig:rg-rules}) lets us deduce that the same choice of
+isolation levels also work on Postgres. Indeed, experiments confirmed
+this judgment.
 
 As evident from our case studies, the there already exists a
 significant diversity among the weak consistency and isolation
