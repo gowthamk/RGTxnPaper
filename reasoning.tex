@@ -14,16 +14,16 @@ the demonstration is a proof that the given selection of isolation
 levels for transactions is sufficient to enforce a program's invariants.
 
 As mentioned earlier, our proof system is a rely-guarantee framework
-that admits compositional reasoning by abstracting away 
-environmental interference as a rely relation. A conspicuous
-difference between a standard development of rely-guarantee and ours
-is that, while the former reasons in terms of program states (variable
-to value bindings), we reason in terms of executions as captured by
-their traces ($\E$). In particular, our rely ($R$) and guarantee ($G$)
+that admits compositional reasoning by abstracting away environmental
+interference as a rely relation. A conspicuous difference between a
+standard development of rely-guarantee and ours is that, while the
+former reasons in terms of program states (variable to value
+bindings), we reason in terms of executions as captured by their
+traces ($\E$). In particular, our rely ($R$) and guarantee ($G$)
 relations relate executions (i.e., $R,\,Q\,\subseteq\,\E\times\E$),
-and pre- ($P$) and post- ($Q$) conditions as assertions over executions
-(i.e., $P,\,Q\, : \E \rightarrow \Prop$). Our development nonetheless
-facilitates state-based reasoning via the interpretation function
+and our pre- ($P$) and post- ($Q$) conditions are assertions over
+executions (i.e., $P,\,Q\, : \E \rightarrow \Prop$). Our development
+also facilitates state-based reasoning via the interpretation function
 ($\interp{\cdot}$) introduced in \S\ref{sec:syntax}. For example, if a
 \emph{bi-state} rely relation relates every pair of states $\sigma$
 and $\sigma'$ such that $\sigma'(X) \ge \sigma(X) \ge 0$, the
@@ -72,23 +72,23 @@ the execution trace.
 \input{rg-rules}
 
 The standard rely-guarantee judgment is a quintuple
-$\rg{P,R}{c}{G,Q}$, which informally asserts that if a
-command $c$ is executed in a state that satisfies its pre-condition
-$P$, provided that every interference step during the execution is
-contained inside the rely relation $R$, then the effect that each step
-of executing $c$ has on the state is captured by $G$, and the final
-state of execution satisfies the post-condition $Q$. The terms
-``execution'' and ``step'' are defined with respect to an operational
-semantics, which, in our case, is parameterized on the trace invariant
-$\I$. Consequently, our rely-guarantee judgment for commands is the
-sextuple $\rg{\I,P,R}{c}{G,Q}$, whose semantics differs from the
-quintuple in that it requires every step of the execution to additionally preserve
-the trace invariant $\I$ for the post-condition to be valid.  As usual,
-if $c$ is inside a transaction $T_i$, we write $\txnbox{c}_i$. \txnimp
-expressions are side-effecting (they generate \C{RD} effects), and
-admit interference during their evaluation.  Therefore, like 
-commands, expressions need to be reasoned about explicitly.  In contrast to
-commands, however, expressions evaluate to values, and the reasoning
+$\rg{P,R}{c}{G,Q}$, which informally asserts that if a command $c$ is
+executed in a state that satisfies its pre-condition $P$, provided
+that every interference step during the execution is contained inside
+the rely relation $R$, then the effect that each step of executing $c$
+has on the state is captured by $G$, and the final state of execution
+satisfies the post-condition $Q$. The terms ``execution'' and ``step''
+are defined with respect to an operational semantics, which, in our
+case, is parameterized on the trace invariant $\I$. Consequently, our
+rely-guarantee judgment for commands is the sextuple
+$\rg{\I,P,R}{c}{G,Q}$, whose semantics differs from the quintuple in
+that it requires every step of the execution to additionally preserve
+the trace invariant $\I$ for the post-condition to be valid.  As
+usual, if $c$ is inside a transaction $T_i$, we write $\txnbox{c}_i$.
+\txnimp expressions are side-effecting (they generate \C{RD} effects),
+and admit interference during their evaluation.  Therefore, like
+commands, expressions need to be reasoned about explicitly. But,
+unlike commands, expressions evaluate to values, and the reasoning
 framework should also admit assertions on such values.  We therefore
 define a separate judgment for expressions - the septuple
 $\rg{\I,P,R}{e}{G,C,Q}$. The new entrant $C : \mathbb{N} \rightarrow
