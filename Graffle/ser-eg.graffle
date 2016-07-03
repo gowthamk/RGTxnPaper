@@ -1016,7 +1016,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{290.53654861450195, 231.52250829238912}, {55, 22}}</string>
+			<string>{{290.53654861450195, 300.10445788162303}, {55, 22}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -1116,7 +1116,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{275.03654861450195, 239.57167787849903}, {7, 7}}</string>
+			<string>{{275.03654861450195, 307.60446533560753}, {7, 7}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
@@ -1126,7 +1126,7 @@
 				<key>ID</key>
 				<integer>226</integer>
 				<key>Position</key>
-				<real>0.15818493068218231</real>
+				<real>0.43362131714820862</real>
 				<key>RotationType</key>
 				<integer>0</integer>
 			</dict>
@@ -1407,7 +1407,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2016-07-03 21:05:23 +0000</string>
+	<string>2016-07-03 21:29:45 +0000</string>
 	<key>Modifier</key>
 	<string>Gowtham Kaki</string>
 	<key>NotesVisible</key>
