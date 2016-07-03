@@ -411,8 +411,8 @@
 			<integer>249</integer>
 			<key>Points</key>
 			<array>
-				<string>{228.9855080376, 310.14492860788863}</string>
-				<string>{264.8550733789329, 323.91304459749114}</string>
+				<string>{233.51088897748164, 310.14492860788863}</string>
+				<string>{259.24145160249242, 323.91304459749114}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -1451,7 +1451,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{205.73770009327637, 225.40983077948607}, {25.409835374601926, 105.72196197509766}}</string>
+			<string>{{206.0409836642238, 225.40983077948607}, {30.024584401137702, 105.72196197509766}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
@@ -1484,7 +1484,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{263.39908770087845, 323.39204477308522}, {19.724417439118497, 97.017783661300143}}</string>
+			<string>{{257.02514458037001, 323.39204477308522}, {30.024584401137702, 97.017783661300143}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
@@ -1563,7 +1563,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2016-06-26 15:47:37 +0000</string>
+	<string>2016-07-03 21:03:54 +0000</string>
 	<key>Modifier</key>
 	<string>Gowtham Kaki</string>
 	<key>NotesVisible</key>
@@ -1644,7 +1644,7 @@
 			</dict>
 		</array>
 		<key>Frame</key>
-		<string>{{411, 4}, {711, 774}}</string>
+		<string>{{400, -17}, {711, 774}}</string>
 		<key>ListView</key>
 		<true/>
 		<key>OutlineWidth</key>
@@ -1658,7 +1658,7 @@
 		<key>SidebarWidth</key>
 		<integer>120</integer>
 		<key>VisibleRegion</key>
-		<string>{{36.06557292471777, 146.72130803464731}, {472.13113646903264, 520.49179107263149}}</string>
+		<string>{{35.245900812792371, 146.72130803464731}, {472.13113646903264, 520.49179107263149}}</string>
 		<key>Zoom</key>
 		<real>1.2200000286102295</real>
 		<key>ZoomValues</key>

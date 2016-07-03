@@ -46,7 +46,7 @@ as those that support strong consistent, have non-trivial definitions
 for $\I_s$.
 
 A strongly-consistent {\sc sc} store guarantees a total order on all
-operations w.r.t $\visZ$ consistent with their chronological order. A
+operations w.r.t. $\visZ$ consistent with their chronological order. A
 straightforward $\I_s$ for this store is the \C{SC} property
 formalized below:
 \begin{smathpar}
@@ -106,10 +106,7 @@ weakening of $\I_s : \E \rightarrow \Prop$ if and only if:
   of effects $\eta_1$ and $\eta_2$ in $\E$, if $\I_s(\E)$ requires
   $\eta_1$ to be visible to $\eta_2$, then so does $\I_s'(\E)$ unless
   extending $\E$ with $\visZ(\eta_1,\eta_2)$ violates
-  $\I_c$\footnote{\GK{ToDo: consider other well-formedness conditions
-  on trace, such as acyclicity of $\visZ$ and $\soZ$. Are they needed
-  (considering that the machine never violates them)? Encode the
-  specifications in Z3 and make sure they are consistent.}}:
+  $\I_c$:
   \begin{smathpar}
   \begin{array}{l}
   \forall\E,\eta_1,\eta_2.~ \I_c(\E) \Rightarrow (\I_s(\E)
@@ -206,7 +203,7 @@ later operation may witness $S_2 \subseteq \E.\A$, and if the
 witnesses $S_1$ (i.e., $S_1 \subseteq S_2$). } 
 % Moreover, Like $R_2 - R_1$, if all effects in $S_2 - S_1$ are
 % concurrent with $\eta$, i.e., $\not\exists\eta'.~\eta' \in S_2 - S_1
-% \conj % visZ(\eta,\eta')$, then any precondition $P$ that is valid
+% \conj % visZ(\eta,\eta')$, then any pre-condition $P$ that is valid
 % when $\op$ executed is also valid when $\eta$ is witnessed because
 % of the stability condition.
 \label{fig:ec-theirs-vs-ours}
@@ -243,10 +240,10 @@ therefore manifest as constraints over a specific visibility relation.
 For example, instead of requiring the store to be causally consistent,
 an operation can witness a causally consistent subset of the state;
 such demands can be made via the trace invariant $\I$. For a
-precondition ($P$) of the operation to be useful, it has to be an
+pre-condition ($P$) of the operation to be useful, it has to be an
 assertion over every causally consistent subset of the global state.
 Since any replica that eventually executes the operation has to expose
-one such subset ($S$), the precondition is guaranteed to hold
+one such subset ($S$), the pre-condition is guaranteed to hold
 regardless of the replica. There is however one problem with this
 explanation - by considering subsets of just one global state, it
 ignores the fact that the global state (hence, the replica states)
@@ -332,10 +329,10 @@ RHS expression \C{C-a1}.  Assertions implicitly refer to the current
 execution ($\E$), just as Hoare triples implicitly refer to the
 current state.  The context for propositions is also the implicit,
 i.e., we write $\psi$ instead of $\underE{\psi}$. The proposition \C{k
-$\ge$ a1+a2} remains an invariant, hence elided. The precondition
+$\ge$ a1+a2} remains an invariant, hence elided. The pre-condition
 $P_1$ of \C{Wd1} accounts for the possibility of \C{Wd2} committing
 before \C{Wd1}, writing \C{k-a2} to \C{C}. Since neither \C{Wd1} nor
-\C{Wd2} are committed at the beginning, the precondition $P$ of the
+\C{Wd2} are committed at the beginning, the pre-condition $P$ of the
 program is extended with $\neg\committed(\C{Wd1}) \wedge
 \neg\committed(\C{Wd2})$, from which $P_1$ follows. The post-condition
 $Q_1$ of \C{Wd1} asserts different values for \C{C} depending on
@@ -349,7 +346,7 @@ also satisfy its spec, but the proof is similar).
 First, we focus on the sequential aspect of the proof and show that
 the assertions that decorate \C{Wd1} are indeed valid. We consider the
 triple associated with the assignment to \C{C} for illustration. The
-precondition $\phi_4$ asserts different values for \C{C} and \C{v3}
+pre-condition $\phi_4$ asserts different values for \C{C} and \C{v3}
 (temporary alias of RHS expression) depending on whether or not
 \C{Wd2} is committed. Inside \C{Wd1}, $\committed(\C{Wd2})$ may mean
 that either \C{Wd2} happened before \C{Wd1} (hence can be visible to
@@ -433,7 +430,7 @@ that all the effects added by $R_1$ are of \C{Wd2}. This is needed to
 prove that an interference from \C{Wd2} does not affect the local
 state of \C{Wd1}.
 
-The stability for $\phi_4$ w.r.t $R_1$ is trivial to establish: if
+The stability for $\phi_4$ w.r.t. $R_1$ is trivial to establish: if
 $R_1$ does not commit \C{Wd2}, then the value of \C{C} is unaffected,
 and if it commits \C{Wd2}, then $\C{Wd2}\not\visar\C{Wd1}$, hence
 $\phi_4$ doesn't care. For $\phi_5$, {\sc si} condition should be used

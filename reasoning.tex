@@ -73,7 +73,7 @@ the execution trace.
 
 The standard rely-guarantee judgment is a quintuple
 $\rg{P,R}{c}{G,Q}$, which informally asserts that if a
-command $c$ is executed in a state that satisfies its precondition
+command $c$ is executed in a state that satisfies its pre-condition
 $P$, provided that every interference step during the execution is
 contained inside the rely relation $R$, then the effect that each step
 of executing $c$ has on the state is captured by $G$, and the final
@@ -126,7 +126,7 @@ shared variable reads inside a transaction $T_i$. It requires $\I$ to
 be stable, and pre- and post- conditions to be stable relative to
 $\I$.  The quantified premise effectively requires a proof that if the
 abstract machine of Fig.~\ref{fig:txnimp} takes a step starting from
-an execution $\E$ that satisfies the precondition $P$, then the
+an execution $\E$ that satisfies the pre-condition $P$, then the
 resultant execution $\E'$ satisfies the post-condition $Q$, and that
 the guarantee $G$ faithfully captures the transition from $\E$ to
 $\E'$. It is informative to compare this premise with the premise of
@@ -149,13 +149,13 @@ standard rely-guarantee formulation and hence elided.
 % judgment for the RHS expression $e$. The quantified premise asserts
 % that evaluating the assigment after evaluating $e$ to a value $v$ and
 % an execution $\E$, should result in an execution $\E'$ that satisfies
-% the postcondition $Q$, while being related to $\E$ via the guarantee
+% the post-condition $Q$, while being related to $\E$ via the guarantee
 % $G$. RG judgment for the \C{txn} lexical block is similar.  It uses
 % the judgment for the transaction-bound command $c$ (i.e.,
 % $\txnbox{c}_i$) to obtain an invariant $Q'$ for the execution $\E$
 % before the commit, and verifies that committing the transaction under
 % $\E$ results in an execution $\E'$ that satisfies transaction's
-% postcondition $Q$. As usual, $\E$ and $\E'$ need to be related by $G$.
+% post-condition $Q$. As usual, $\E$ and $\E'$ need to be related by $G$.
 % The rules for sequential composition of transaction-bound comands
 % (\rulelabel{RG-Seq}) and parallel composition of top-level commands
 % (\rulelabel{RG-Par}) are straightforward, and more-or-less same as the
@@ -167,7 +167,7 @@ transaction-bound expressions. Similar rules exist for
 transaction-bound and top-level commands, but are not
 shown.\footnote{The supplementary materials provide the complete set
   of rules.} As is the case with a standard rely-guarantee
-formulation,the rules allow the precondition $P$ and the rely relation
+formulation,the rules allow the pre-condition $P$ and the rely relation
 $R$ to be strengthened, and the post-condition $Q$ (also, $C$ in the
 case of expressions) and the guarantee relation $G$ to be weakened.
 The most notable aspect of the \rulelabel{RG-Conseq} rules is that
