@@ -227,10 +227,10 @@ work~\cite{lbc16,gotsmanpopl16}, this challenge is partly addressed by
 imposing restrictions on how various replica states differ, i.e., by
 fixing a system model with a stronger baseline consistency ({\sc cc})
 than {\sc ec}. This unfortunately restricts the reasoning approach
-from being applied to data stores (e.g., \cite{bayou,pldi15}) that provide
-guarantees weaker than causal consistency, such as causal visibility
-or read-my-writes~\cite{zoo}. Causal consistency is not baseline
-consistency in these stores because it is not \emph{highly
+from being applied to data stores (e.g., \cite{bayou,pldi15}) that
+provide guarantees weaker than causal consistency, such as causal
+visibility or read-my-writes~\cite{zoo}. Causal consistency is not
+baseline consistency in these stores because it is not \emph{highly
   available}~\cite{bailishat}.
 
 Notably, our view of replication does not explicitly involve replicas.
@@ -251,8 +251,8 @@ regardless of the replica. There is however one problem with this
 explanation - by considering subsets of just one global state, it
 ignores the fact that the global state (hence, the replica states)
 change during the execution of the operation. To account for such
-changes, we might choose to distinguish between effect generation
-event at one replica $r_1$ and effect merge event at replica $r_2$,
+changes, we might choose to distinguish between an effect generation
+event at one replica $r_1$ and an effect merge event at replica $r_2$,
 requiring that \emph{non-conflicting} operations execute between these
 two events at $r_2$, and that they preserve certain
 invariants~\cite{gotsmanpopl16}.  Instead, our framework folds all such

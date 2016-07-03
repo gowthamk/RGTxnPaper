@@ -2,16 +2,16 @@
 \label{sec:case-studies}
 
 In this section, we present two case studies that demonstrate the
-applicability of our reasoning approach in varied settings, and the
+applicability of our reasoning approach in varied settings, and its
 consequent practical utility.
 
 \paragraph{A video view counter} Our first application is a
 Ruby-on-Rails implementation of a counter to count the number of views
 a video has garnered on a video-sharing website like
 YouTube\footnote{Source code of the applications, experiments, and the
-tools we developed to analyze Ruby can be found at the following
-anonymized url: \url{...}}. The application stores the video count in
-a Postgres database, and supports a read operation (a database read
+  tools we developed to analyze Ruby can be found at the following
+  anonymized url: \url{...}}. The application stores the video count
+in a Postgres database, and supports a read operation (a database read
 transaction), and an increment operation (a read-increment-write
 sequence wrapped in a transaction). The application is expected to
 preserve the \emph{monotonicity invariant}, namely that the view count
@@ -24,16 +24,17 @@ an {\sc sc} store with Postgres isolation levels (which are stronger
 than ANSI SQL's and MySQL's), and spent 5 man hours determining
 appropriate isolation levels needed to enforce the
 invariant\footnote{The representative \txnimp programs we used to
-formally reason about scenarios described in this section can be found
-in the supplementary.} In particular, we were able to formally prove
-that to preserve the invariant, writers need to execute at
-\iso{Repeatable Read} isolation, while readers can continue at {\sc
-rc}. Repeating the experiments with this configuration led to no
-violations, as expected. While executing all transactions at {\sc ser}
-also prevents violations, it led to an additional 47\% increase in
-latency on an average (16 concurrent writers; 5 rounds). We repeated
-the exercise for MySQL, and found that its {\sc rr} is not sufficient
-to enforce monotonicity; {\sc ser} is needed. 
+  formally reason about scenarios described in this section can be
+  found in the supplementary material.} In particular, we were able to
+formally prove that to preserve the invariant, writers need to execute
+at a \iso{Repeatable Read} isolation level, while readers can continue
+to operate using \iso{Read Committed} isolation.  While executing all
+transactions at {\sc ser} also prevents violations, it led to an
+additional 47\% increase in latency on an average (16 concurrent
+writers; 5 rounds). We repeated the exercise for MySQL, and found that
+using {\sc rr} was not sufficient to enforce monotonicity, but that
+{\sc ser} was needed, due to differences in how {\sc rr} is
+implemented between the two systems.
 
 % To understand whether a straightforward implementation of the view
 % counter preserves the invariant, we considered a \txnimp program
@@ -53,7 +54,7 @@ to enforce monotonicity; {\sc ser} is needed.
 % prevalence of such anomalies, we implemented a view counter
 % application in Ruby-on-Rails using standard templates and
 % techniques.   
-To understand the effect of changing the store consistency, we
+To understand the effect of changing the store consistency level, we
 reimplemented the counter as a \emph{replicated data type}
 (RDT)~\cite{crdt,burckhardt14} on top of Cassandra
 \emph{bolted-on}~\cite{bailisbolton} with {\sc cc} and {\sc sc}
@@ -62,15 +63,16 @@ consistency level at {\sc ec}, we then repeated our experiments with
 committed reads and serializable increments - a combination which was
 proved to preserve monotonicity on an {\sc sc} store, but nonetheless
 observed monotonicity violations. On the other hand, instantiating the
-store consistency with {\sc cc} allowed us to obtain a proof, and
-recover the monotonicity invariant. We in fact obtained a proof after
-relaxing the serializability requirement for writes, by changing the
-definition of the $\interp{\E}(X)$ (\S\ref{sec:opsem}) to return the
-value of the largest write-to-$X$ instead of the latest write-to-$X$.
-We implemented this version of the counter RDT, and obtained a 52\%
-improvement in latency compared to the previous
+store consistency level with {\sc cc} allowed us to obtain a proof,
+and recover the monotonicity invariant. We in fact obtained a proof
+after relaxing the serializability requirement for writes, by changing
+the definition of the $\interp{\E}(X)$ (\S\ref{sec:opsem}) to return
+the value of the largest write-to-$X$ instead of the latest
+write-to-$X$.  We implemented this version of the counter RDT, and
+obtained a 52\% improvement in latency compared to the previous
 implementation\footnote{The tradeoff is that the view count is now no
-longer accurate, although it grows monotonically.}.
+  longer accurate, although it grows monotonically, thus preserving
+  the application invariant.}.
 
 \paragraph{Microblog}
 
