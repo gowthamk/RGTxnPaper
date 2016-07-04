@@ -30,9 +30,9 @@ $\{\texttt{C}=\texttt{k} \conj \texttt{k}\ge\texttt{a1+a2}\}$
 \\
 \end{tabular}
 $\{\texttt{C}=\texttt{k-a1-a2}\}$
-
-\caption{Concurrent withdraw transactions}
+\caption{\small Concurrent withdraw transactions}
 \label{fig:motiv-eg-1}
+\vspace*{-10pt}
 \end{figure}
 
 Consider an implementation of a banking application that admits
@@ -73,7 +73,7 @@ sc}) store, such as a relational database:
 }{
   \includegraphics[scale=0.5]{Figures/motiv-eg-1-b}
 }
-\caption{A possible execution of the program shown in Fig.~\ref{fig:motiv-eg-1} under
+\caption{\small A possible execution of the program shown in Fig.~\ref{fig:motiv-eg-1} under
   a read committed isolation level.}
 \label{fig:rc-ex}
 \end{figure}
@@ -114,7 +114,7 @@ control, it is also more efficient, making it appropriate for both
   &  & \hspace*{0.6in}\Rightarrow{T_1 \hboar T_2} \disj {T_2 \hboar T_1} \\
 \end{array}
 \end{smathpar}
-\caption{Visibility and interference properties for different weak isolation levels can be
+\caption{\small Visibility and interference properties for different weak isolation levels can be
   captured by different instantiations of their happens-before relation.}
 \label{fig:interference-ex}
 \end{figure}
@@ -136,13 +136,14 @@ example.
 \centering
   \includegraphics[scale=0.4]{Figures/motiv-eg-1-hb}
 
-\caption{$\visZ$ arrows allowed by {\sc si} (solid) and {\sc rc} (solid
+\caption{\small $\hbZ$ arrows allowed by {\sc si} (solid) and {\sc rc} (solid
   and dashed) isolation levels for the example in
-  Fig.~\ref{fig:motiv-eg-1}. Each arrow represents an $\visZ$ relationship
+  Fig.~\ref{fig:motiv-eg-1}. Each arrow represents an $\hbZ$ relationship
   among all operations of `Wd2' and operations in `Wd1' that follow
   the arrow head. Letters R, W and C stand for read, write and commit,
   respectively.}
 \label{fig:motiv-eg-1-hb}
+\vspace*{-8pt}
 \end{figure}
 
 First, we note that the example in Fig.~\ref{fig:motiv-eg-1} is a

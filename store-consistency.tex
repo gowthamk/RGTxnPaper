@@ -135,7 +135,7 @@ $\I_s$ requires a trace $\E$ to satisfy the visibility constraints of
 Instantiating the parameter $\I$ with $\I_s \wedge \I_c$ in
 Fig.~\ref{fig:txnimp} results in an operational semantics that
 describes {\sc sc} stores with on-demand weak isolation, such as
-off-the-shelf relational databases. Similar approach can be employed
+off-the-shelf relational databases. Similar approaches can be employed
 to capture the semantics of other kinds of stores, such as a causally
 consistent ({\sc cc}) data store, as specific instantiations of our
 operational semantics\footnote{Details of the {\sc cc} instantiation
@@ -185,7 +185,7 @@ are relegated to the supplementary in the interest of space.}.
 } [
   0.4\columnwidth
 ] {
-  \includegraphics[scale=0.7]{Figures/ec-theirs}
+  \includegraphics[scale=0.5]{Figures/ec-theirs}
  
 }
 \hspace*{0.1in}
@@ -193,8 +193,8 @@ are relegated to the supplementary in the interest of space.}.
   Subset model
   \label{fig:ec-ours}
 }{
-  \includegraphics[scale=0.45]{Figures/ec-ours}
-} \caption{In the replica model, operation $\op$ generates effect
+  \includegraphics[scale=0.35]{Figures/ec-ours}
+} \caption{\small In the replica model, operation $\op$ generates effect
 $\eta$ at replica $R_1$, which is then merged to $R_2$. If the
 \emph{store is {\sc cc}}, then $R_2$'s state at merge event is same or
 larger than $R_1$'s state at generation event (the difference is
@@ -318,9 +318,10 @@ $\begin{decoration}
                           \C{C} = \C{k-a1-a2}\}
 \end{decoration}$
 \end{txnimpcode}
-
-\caption{\C{Wd1} transaction decorated with assertions}
+\vspace*{-8pt}
+\caption{\small \C{Wd1} transaction decorated with assertions}
 \label{fig:wd1-decorated}
+\vspace*{-12pt}
 \end{figure}
 
 Decorated parts of \C{Wd1} relevant to the discussion are shown in
@@ -359,7 +360,7 @@ this is sufficient to prove the post-condition $\phi_5$, which appears
 to make a stronger claim about the value of \C{C}. The proof follows
 from the RG rule \rulelabel{RG-Asgn} for assignments, which allows us
 to easily conclude the following about the execution state after the
-assignment:
+assignment:\vspace*{-12pt}
 
 \begin{smathpar}
 \begin{array}{l}
