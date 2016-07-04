@@ -95,7 +95,7 @@ site, also written using Ruby-on-Rails~\cite{railsbook}.  An important
 invariant that must be preserved is referential
 integrity between microposts and authors. The application enforces
 this invariant entirely in user space by relying on database-backed
-transactions (this behavior is typical of Rails
+transactions (this behaviour is typical of Rails
 applications~\cite{bailisferal}).  For instance, deletion of a user is
 carried out in a transaction that also includes the deletion of
 microposts authored by the user.  However, it is possible for concurrent observers 
