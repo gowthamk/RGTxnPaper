@@ -47,18 +47,18 @@ consistency model (usually {\sc sc}).
 \paragraph{Reasoning under weak consistency} There have been several
 recent proposals to reason about programs executing under weak
 consistency~\cite{bailisvldb, alvarocalm, gotsmanpopl16,redblueatc,
-  redblueosdi, ecinec}. All of them assume a system model that offers
-a choice between a \emph{coordination-free} weak consistency level
+redblueosdi, ecinec}. All of them assume a system model that offers a
+choice between a \emph{coordination-free} weak consistency level
 (\emph{e.g.}, eventual consistency~\cite{redblueosdi, redblueatc,
-  ecinec, alvarocalm, bailisvldb}) or causal
-consistency~\cite{LBC16,gotsmanpopl16}). The key technical issue in
+ecinec, alvarocalm, bailisvldb}) or causal
+consistency~\cite{lbc16,gotsmanpopl16}). The key technical issue in
 these efforts involves proving that atomic and fully isolated
 operations preserve application invariants when executed on these
 consistency levels.  In contrast, we admit weakly isolated
 transactions, and our system model accepts \emph{specifications} of
 consistency and isolation levels drawn from an expressive logic.
 Gotsman \emph{et al.}~\cite{gotsmanpopl16} adapts \iso{Parallel
-  Snapshot Isolation} to the aforementioned setting by interpreting it
+Snapshot Isolation} to the aforementioned setting by interpreting it
 as a consistency level that serializes writes to objects; a dedicated
 proof rule is developed to help prove prove program invariants hold
 under this model. By parameterizing our proof system over a gamut of

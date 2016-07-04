@@ -131,7 +131,7 @@ resultant execution $\E'$ satisfies the post-condition $Q$, and that
 the guarantee $G$ faithfully captures the transition from $\E$ to
 $\E'$. It is informative to compare this premise with the premise of
 the \rulelabel{E-Aux} reduction rule of Fig.~\ref{fig:txnimp}. Similar
-premises also appear in \rulelabel{RG-Asgn} and \rulelabel{RG-Txn}
+premises also appear in the \rulelabel{RG-Asgn} and \rulelabel{RG-Txn}
 rules, which define rely-guarantee judgments for assignments and
 transactions, respectively. \rulelabel{RG-Var} however also requires
 the return value ($\interp{S}(X)$) of the read to satisfy the
@@ -181,7 +181,7 @@ over various isolation variants. For example, programmers can
 \emph{define} isolation guarantees of their choice (by defining $\I$
 appropriately) and then prove programs correct assuming the guarantees
 hold.  The soundness of strengthening $\I$ ensures that a program can
-be executed safely on any data store that offers isolation guarantees
+be safely executed on any system that offers isolation guarantees
 at least as strong as those assumed.
 
 \subsection{Semantics and Soundness}
@@ -211,7 +211,7 @@ interference from concurrent threads captured as the rely relation
 \end{array}
 \end{smathpar}
 
-The interleaved step relation for transaction bound expressions
+\noindent The interleaved step relation for transaction bound expressions
 ($\txnbox{e}_i$) and commands ($\txnbox{c}_i$) is defined similarly.
 An interleaved multi-step relation ($\stepssto{n}$) is the step-indexed
 reflexive transitive closure of the interleaved step relation.
