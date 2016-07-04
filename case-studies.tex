@@ -2,16 +2,16 @@
 \label{sec:case-studies}
 
 In this section, we present two case studies that demonstrate the
-applicability of our reasoning approach in varied settings, and its
-consequent practical utility. Both our case studies target
-Ruby-on-Rails applications. To analyze these, and other similar
-open-source applications, we developed a symbolic execution engine
-called {\sc MagLev} that compiles a Rails program to an abstract
-program in an extended version of \txnimp\footnote{The details of {\sc
-MagLev} can be found in the supplementary. Its source code, along with
-that of our applications and experiments, is available at the
-following anonymized url: \url{...}}. The focus of our formal
-verification efforts are such \txnimp programs.
+applicability of our framework in varied settings, and its consequent
+practical utility. Both our case studies target Ruby-on-Rails
+applications. To analyze these, and other similar open-source
+applications, we have developed a symbolic execution engine that
+compiles a Rails program to an abstract program in an extended version
+of \txnimp, along with some proof automation support.\footnote{Details
+  ( can be found in the supplementary material.  Source code for our
+  implementation, along with applications and experiments, are
+  available at the following anonymized url: \url{...}} The focus of
+our formal verification efforts are such translated \txnimp programs.
 
 \paragraph{A video view counter.} Our first application is a Rails
 implementation of a counter to count the number of views a video has
@@ -19,7 +19,7 @@ garnered on a video-sharing website like YouTube. The application
 stores the video count in a MySQL database, and supports a read
 operation (a database read transaction), and an increment operation (a
 read-increment-write sequence wrapped in a transaction).  The
-application is expected to preserve the \emph{monotonicity invariant},
+application is expected to preserve a \emph{monotonicity invariant},
 namely that the view count should never appear to be decreasing.
 However, the default \iso{Repeatable Read} isolation level of MySQL
 leads to anomalous executions - with 32 concurrent writers performing
@@ -41,9 +41,9 @@ Postgres' isolation levels~\cite{postgresiso} are stronger than ANSI
 SQL's in non-trivial ways. We therefore formalized Postgres'
 guarantees and repeated relevant parts of the proof to discover that
 \iso{Repeatable Read} is in fact sufficient for writers - an
-observation we confirmed through experiments. As usual, using {\sc
-ser} for all transactions also suffices, but on Postgres results in an
-additional 47\% increase in write latency.
+observation further validated through experiments. As usual, using
+{\sc ser} for all transactions also suffices, but on Postgres results
+in an additional 47\% increase in write latency.
 
 % To understand whether a straightforward implementation of the view
 % counter preserves the invariant, we considered a \txnimp program
@@ -96,48 +96,48 @@ latency compared to the version that uses serializable increments.
 
 \paragraph{Microblog.} Our second set of experiments focused on a
 Twitter-like microblogging application taken from~\cite{railsbook}.
-An important invariant that must be preserved is the referential
-integrity between microposts and authors. The application enforces
-this invariant entirely in user space by relying on database-backed
+An important invariant that must be preserved is referential integrity
+between microposts (tweets) and authors. The application enforces this
+invariant entirely in user space by relying on database-backed
 transactions (this behaviour is typical of Rails
-applications~\cite{bailisferal}).  For instance, deletion of a user is
-carried out in a transaction that also includes the deletion of
-microposts authored by the user.  However, it is possible for
+applications~\cite{bailisferal}).  For instance, the deletion of a
+user is carried out in a transaction that also includes the deletion
+of microposts authored by the user.  However, it is possible for
 concurrent observers to nonetheless witness invariant violations. To
-measure the likelihood of such anomalies, we first populated a
-Postgres database with 1000 user accounts, each user with 50
-microposts and 20 followers, chosen uniformly at random. We then
-constructed experiments with 64 concurrent clients performing
-deletions and timeline reads of randomly chosen users in a 1:7 ratio,
-and witnessed 250 violations of referential integrity (the isolation
-level was left at the default {\sc rc} level for experiments). To
-determine appropriate isolation levels, we then instantiated our
-framework for an {\sc sc} store with various ANSI SQL isolation levels
-for user deletions and timeline reads, and obtained a proof that {\sc
-rc} is sufficient for deletions, whereas reads require {\sc rr}. The
-proof is immediately applicable for MySQL, which implements ANSI SQL
-isolation levels. Repeating our experiments for MySQL with this
-configuration resulted in no violations (as expected), while yielding
-a 38\% reduction in latency than an {\sc ser} configuration.  Since
-Postgres's isolation levels are stronger than the corresponding ANSI
-levels, \rulelabel{RG-Conseq} rule (Fig.~\ref{fig:rg-rules}) lets us
-immediately deduce that the same choice of isolation levels also work
-on Postgres.
+quantify the likelihood of such anomalies, we first populated a
+Postgres database with 1000 user accounts, in which each user is
+associated with 50 microposts and 20 followers, chosen uniformly at
+random. We then constructed experiments with 64 concurrent clients
+performing deletions and timeline reads of randomly chosen users in a
+1:7 ratio, and witnessed 250 violations of referential integrity (the
+isolation level was left at the default {\sc rc} level for these
+experiments). To determine appropriate (correct) isolation levels, we
+then instantiated our framework for an {\sc sc} store with various
+ANSI SQL isolation levels for user deletions and timeline reads, and
+obtained a proof that {\sc rc} is sufficient for deletions, whereas
+reads require {\sc rr}. The proof is immediately applicable for MySQL,
+which implements ANSI SQL isolation levels. Repeating our experiments
+for MySQL with this configuration resulted in no violations (as
+expected), while yielding a 38\% reduction in latency than an {\sc
+  ser} configuration.  Since Postgres' isolation levels are stronger
+than the corresponding ANSI levels, \rulelabel{RG-Conseq} rule
+(Fig.~\ref{fig:rg-rules}) lets us immediately deduce that the same
+choice of isolation levels also work on Postgres.
 
-Clearly, there exists a significant diversity among the weak
-consistency and isolation variants implemented on various real-world
-data stores. More such variants have been developed in recent years to
-meet the need for high availability (\emph{e.g.}, \emph{Parallel
-  Snapshot Isolation}~\cite{psi} (2011) or \emph{Non-Monotonic
-  Snapshot Isolation}~\cite{nmsi} (2013)).  As more commercial
+Clearly, there exists significant diversity among the weak consistency
+and isolation variants implemented on various real-world data
+stores. More such variants have been developed in recent years to meet
+the need for high availability (\emph{e.g.}, \emph{Parallel Snapshot
+  Isolation}~\cite{psi} (2011) or \emph{Non-Monotonic Snapshot
+  Isolation}~\cite{nmsi} (2013)).  As more commercial
 weakly-consistent stores adopt various kinds of transactional
 semantics, like Cassandra's recently introduced \emph{lightweight
-  transactions}, it is reasonable to expect new isolation
-definitions to continue to be proposed.  While it may be possible to
-carefully engineer a reasoning framework for each combination of
-consistency and isolation, such a strategy would lead to multiple
-semantic definitions and proof systems with no obvious way to compare
-and relate them. As illustrated here, having a parameterized semantics
-and a proof framework built on top of it allows us to support these
-variants as distinct, yet comparable, instantiations.
+  transactions}, it is reasonable to expect new isolation definitions
+to continue to be proposed.  While it may be possible to carefully
+engineer a reasoning framework for each combination of consistency and
+isolation, such a strategy would lead to multiple semantic definitions
+and proof systems with no obvious way to compare and relate them. As
+illustrated here, having a parameterized semantics and a proof
+framework built on top of it allows us to support these variants as
+distinct, yet comparable, instantiations.
 

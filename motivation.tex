@@ -194,14 +194,15 @@ to \C{Wd1} allowed by $\psi_{RC}$ and $\psi_{SI}$. All arrows are
 legal under $\psi_{RC}$ because in no case does an operation $\eta_1$
 from \C{Wd1} happen-before $\eta_2$ of \C{Wd2} without the commit of
 \C{Wd1} also happening before $\eta_2$. $\psi_{SI}$ however disallows
-all dashed arrows, because dashed arrows establish $\hbZ$ between
-actions in \C{Wd2} and only a subset of the operations in \C{Wd1}.
-Since the result of an operation (\eg a read) depends on what happens
-before that operation, $\hbZ$ relation ultimately affects the result
-of the program. The solid arrow and the first (from left) dashed arrow
-in Fig.~\ref{fig:motiv-eg-1-hb} denote $\hbZ$ relationships that do
-not affect the value of \C{C} in a way that causes the program to
-violate its post-condition. The last two dashed arrows denote $\hbZ$
+all dashed arrows, because dashed arrows establish $\hbZ$ edges
+between actions in \C{Wd2} and only a subset of the operations in
+\C{Wd1}.  Since the result of an operation (\eg a read) depends on
+what happens before that operation, the structure of the $\hbZ$
+relation ultimately dictates the final result of the program. The
+solid arrow and the first (from left) dashed arrow in
+Fig.~\ref{fig:motiv-eg-1-hb} denote $\hbZ$ relationships that do not
+affect the value of \C{C} in a way that causes the program to violate
+its post-condition. The last two dashed arrows denote $\hbZ$
 relationships that lead to the violation of the post-condition. The
 task of the reasoning framework is to determine if all $\hbZ$
 relationships allowed by an isolation level lead to the satisfaction
