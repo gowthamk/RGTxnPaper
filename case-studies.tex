@@ -11,29 +11,36 @@ a video has garnered on a video-sharing website like
 YouTube\footnote{Source code of the applications, experiments, and the
 tools we developed to analyze Ruby can be found at the following
 anonymized url: \url{...}}. The application stores the video count in
-a Postgres database, and supports a read operation (a database read
+a MySQL database, and supports a read operation (a database read
 transaction), and an increment operation (a read-increment-write
 sequence wrapped in a transaction). The application is expected to
 preserve the \emph{monotonicity invariant}, namely that the view count
-should never appear to be decreasing. However, the default {\sc rc}
-isolation of Postgres may lead to anomalous executions as confirmed by
-our experiments; with 16 (resp.  32) concurrent writers performing
-single increments, we observed a total of 7 (17) violations of
-monotonicity. We subsequently instantiated our reasoning framework for
-an {\sc sc} store with Postgres isolation levels (which are stronger
-than ANSI SQL's and MySQL's), and spent 5 man hours determining
-appropriate isolation levels needed to enforce the
+should never appear to be decreasing. However, the default {\sc rr}
+isolation of MySQL may lead to anomalous executions as confirmed by
+our experiments; with 32 concurrent writers performing single
+increments, and one reader issuing a constant stream of reads, we
+observed a maximum of 12 violations of monotonicity in 10 rounds of
+operation. We subsequently instantiated our reasoning framework for an
+{\sc sc} store with ANSI SQL isolation levels, and spent 5 man hours
+determining appropriate isolation levels needed to enforce the
 invariant\footnote{The representative \txnimp programs we used to
 formally reason about scenarios described in this section can be found
 in the supplementary.} In particular, we were able to formally prove
 that to preserve the invariant, writers need to execute at
-\iso{Repeatable Read} isolation, while readers can continue at {\sc
-rc}. Repeating the experiments with this configuration led to no
-violations, as expected. While executing all transactions at {\sc ser}
-also prevents violations, it led to an additional 47\% increase in
-latency on an average (16 concurrent writers; 5 rounds). We repeated
-the exercise for MySQL, and found that its {\sc rr} is not sufficient
-to enforce monotonicity; {\sc ser} is needed. 
+\iso{Serializable} isolation, while readers can execute at \iso{Read
+Uncommitted}. Repeating the experiments with this configuration led to
+no violations, as expected. While executing all transactions at {\sc
+ser} also prevents violations, it led to an additional 113\% increase
+in the latency of writes on an average (32 concurrent writers; 5
+rounds). We repeated the experiments with the same configuration on
+Postgres, and found no violations. However, Postgres's isolation
+levels~\cite{postgresiso} are stronger than ANSI SQL's in non-trivial
+ways. We therefore formalized Postgres's guarantees and repeated
+relevant parts of the proof to discover that \iso{Repeatable Read} is
+in fact sufficient for writers - an observation we confirmed through
+experiments. As usual, using {\sc ser} for all transactions also
+suffices, but on Postgres it led to an additional 47\% increase in
+write latency.
 
 % To understand whether a straightforward implementation of the view
 % counter preserves the invariant, we considered a \txnimp program
@@ -54,23 +61,34 @@ to enforce monotonicity; {\sc ser} is needed.
 % application in Ruby-on-Rails using standard templates and
 % techniques.   
 To understand the effect of changing the store consistency, we
-re-implemented the counter as a \emph{replicated data type}
+re-implemented the counter as a op-based \emph{replicated data type}
 (RDT)~\cite{crdt,burckhardt14} on top of Cassandra
 \emph{bolted-on}~\cite{bailisbolton} with {\sc cc} and {\sc sc}
-consistency levels, and ANSI SQL isolation levels. Keeping the
-consistency level at {\sc ec}, we then repeated our experiments with
-committed reads and serializable increments - a combination which was
-proved to preserve monotonicity on an {\sc sc} store, but nonetheless
-observed monotonicity violations. On the other hand, instantiating the
-store consistency with {\sc cc} allowed us to obtain a proof, and
-recover the monotonicity invariant. We in fact obtained a proof after
-relaxing the serializability requirement for writes, by changing the
+consistency levels (both on-demand; {\sc ec} is default), and ANSI SQL
+isolation levels. Keeping the consistency level at {\sc ec}, we then
+repeated our experiments with committed reads and serializable
+increments - a combination which was proved to preserve monotonicity
+on an {\sc sc} store, but nonetheless observed monotonicity
+violations. The reason for such violations became evident as we
+considered an instantiation our proof framework for an {\sc ec} store.
+Under this instantiation, it is impossible to derive the
+\C{MonotonicVis} (\S\ref{sec:ansi-isolation}) property needed to show
+that successive reads in a session witness monotonically increasing
+state. However, assuming {\sc cc} store consistency for reads allowed
+us to complete the proof, and recover the monotonicity invariant. In
+fact, we were able to complete the proof even after relaxing the
+serializability requirement for increments, just by changing the
 definition of the $\interp{\E}(X)$ (\S\ref{sec:opsem}) to return the
 value of the largest write-to-$X$ instead of the latest write-to-$X$.
-We implemented this version of the counter RDT, and obtained a 52\%
-improvement in latency compared to the previous
-implementation\footnote{The trade-off is that the view count is now no
-longer accurate, although it grows monotonically.}.
+In other words, if the reads chose the largest valued write effect,
+instead of the latest write effect they witness, then counter
+increments need not be serializable for reads to witness a
+monotonically increasing count\footnote{The trade-off is that the view
+count is now no longer accurate, although it grows monotonically.}.
+We implemented this version of the counter as an op-based RDT, which
+uses {\sc cc} reads and {\sc ec} increments, both un-isolated (i.e.,
+\emph{Read Uncommitted}), and obtained a 52\% improvement in overall
+latency compared to the version that uses serializable increments.
 
 \paragraph{Microblog}
 
@@ -80,7 +98,7 @@ Ruby-on-Rails~\cite{railsbook}. One of the invariants that the
 application chooses to enforce is the referential integrity between
 microposts and authors. The application enforces this invariant
 entirely in the user space by relying on database-backed transactions
-(this behaviour is typical of Rails applications~\cite{bailisferal}).
+(this behavior is typical of Rails applications~\cite{bailisferal}).
 For instance, deletion of a user is carried out in a transaction that
 also includes the deletion of microposts authored by the user.
 However, concurrent observers can nonetheless witness violations of
@@ -90,16 +108,19 @@ accounts, each user with 50 microposts and 20 followers, chosen
 uniformly at random. We then constructed experiments with 64
 concurrent clients performing deletions and timeline reads of randomly
 chosen users in 1:7 ratio, and witnessed a maximum of 250 violations
-of referential integrity. We then instantiated our framework for an
-{\sc sc} store with various ANSI SQL isolation levels for user
-deletions and timeline reads, and obtained a proof that {\sc rc} is
-sufficient for deletions, whereas reads require {\sc rr}. The proof is
-immediately applicable for MySQL, which implements ANSI SQL isolation
-levels. Since Postgres's isolation levels are stronger than the
-corresponding ANSI levels, \rulelabel{RG-Conseq} rule
-(Fig.~\ref{fig:rg-rules}) lets us deduce that the same choice of
-isolation levels also work on Postgres. Indeed, experiments confirmed
-this judgment.
+of referential integrity. To determine appropriate isolation levels,
+we then instantiated our framework for an {\sc sc} store with various
+ANSI SQL isolation levels for user deletions and timeline reads, and
+obtained a proof that {\sc rc} is sufficient for deletions, whereas
+reads require {\sc rr}. The proof is immediately applicable for MySQL,
+which implements ANSI SQL isolation levels. Repeating our experiments
+for MySQL with this configuration resulted in no violations (as
+expectected), while yeilding a 38\% better overall latency than {\sc
+ser} configuration (96 concurrent clients; 5 rounds).  Since
+Postgres's isolation levels are stronger than the corresponding ANSI
+levels, \rulelabel{RG-Conseq} rule (Fig.~\ref{fig:rg-rules}) lets us
+deduce that the same choice of isolation levels also work on Postgres.
+Indeed, experiments confirm this judgment.
 
 As evident from our case studies, the there already exists a
 significant diversity among the weak consistency and isolation
