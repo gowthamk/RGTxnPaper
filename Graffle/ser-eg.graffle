@@ -500,8 +500,8 @@
 			<integer>249</integer>
 			<key>Points</key>
 			<array>
-				<string>{228.9855080376, 293.74998397063115}</string>
-				<string>{265.40748255944874, 322.24117754850317}</string>
+				<string>{231.8457390693217, 293.74998397063115}</string>
+				<string>{258.8654295524575, 322.24117754850317}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -1016,7 +1016,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{290.53654861450195, 231.52250829238912}, {55, 22}}</string>
+			<string>{{290.53654861450195, 300.10445788162303}, {55, 22}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -1116,7 +1116,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{275.03654861450195, 239.57167787849903}, {7, 7}}</string>
+			<string>{{275.03654861450195, 307.60446533560753}, {7, 7}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
@@ -1126,7 +1126,7 @@
 				<key>ID</key>
 				<integer>226</integer>
 				<key>Position</key>
-				<real>0.15818493068218231</real>
+				<real>0.43362131714820862</real>
 				<key>RotationType</key>
 				<integer>0</integer>
 			</dict>
@@ -1295,7 +1295,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{205.73770009327637, 225.40983077948601}, {25.409835374601926, 85.266380310058594}}</string>
+			<string>{{204.09835586942557, 225.40983077948601}, {30.32786750793457, 85.266380310058594}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
@@ -1328,7 +1328,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{263.95149688139429, 321.81323837535558}, {19.724417439118497, 79.688529968261719}}</string>
+			<string>{{256.62673526027982, 321.81323837535558}, {30.32786750793457, 79.688529968261719}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
@@ -1407,7 +1407,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2016-06-26 15:48:27 +0000</string>
+	<string>2016-07-03 21:29:45 +0000</string>
 	<key>Modifier</key>
 	<string>Gowtham Kaki</string>
 	<key>NotesVisible</key>

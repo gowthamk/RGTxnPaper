@@ -25,7 +25,7 @@ a write (\C{WR(X)}), or a transaction commit (\C{COMMIT}) operation
 performed during the execution. Any value associated with the
 operation (\eg, value read or value written) is also documented, and
 can be accessed via $\rval$. Every effect has a unique identifier
-accessible via $\id$, and a transction identifier accessible via
+accessible via $\id$, and a transaction identifier accessible via
 $\txn$.  The latter identifies the transaction that generated the
 effect. In every step of the evaluation, the machine reduces a \txnimp\
 term by executing a read, write or commit operation, generating an
@@ -41,7 +41,7 @@ mechanics of $\visZ$ is described in the sequel.
 
 Fundamental to our development is the notion of a trace invariant
 ($\I$). $\I$ is a function from traces ($\E$) to first-order logical
-formula ($\texttt{Prop}$) that define well-formedness
+formula ($\Prop$) that define well-formedness
 constraints over traces.  The machine takes a step only if the
 resulting trace satisfies the constraints imposed by $\I$. This
 behaviour is captured by the auxiliary reduction rule
@@ -124,7 +124,7 @@ to different replicas whose states may not be in any well-defined
 relationship. By allowing operations to witness arbitrary subsets of
 the global state, the semantics models the weak visibility properties
 of such stores; we elaborate on the implication of this style of
-definition in \S\ref{sec:store-consistency}.  Stronger visiblity
+definition in \S\ref{sec:store-consistency}.  Stronger visibility
 properties can be expressed by imposing well-formedness constraints
 over $\visZ$ via the trace invariant ($\I$). Since the abstract
 machine is obligated to satisfy $\I$ at every step of the execution,
@@ -132,11 +132,15 @@ operations are guaranteed to experience the level of isolation
 specified by $\I$.  Thus, in executions that run to completion, the
 abstract machine models a store that provides the required levels of
 isolation.  Notably, the machine achieves this without defining an
-operationalsemantics for isolation levels, instead solely relying on
+operational semantics for isolation levels, instead solely relying on
 their declarative characterization as trace well-formedness
 constraints to enforce isolation guarantees.
 \S\ref{sec:ansi-isolation} shows the specification of various ANSI SQL
 isolation levels stated as trace well-formedness constraints.
+
+% TRACE RELATIONS
+% ---------------
+\input{trace-relations}
 
 % However, a machine that lets operations witness arbitrary subset of
 % the global state offers no isolation whatsoever. For example, it may
@@ -156,7 +160,7 @@ isolation levels stated as trace well-formedness constraints.
 As described previously, \rulelabel{E-Aux} abstracts away the
 operation-specific behaviour of a machine step as a function ($\F$)
 that accepts a set ($S$) of effects chosen by the machine to make
-visible to the operation, interprets the operation w.r.t $S$, and
+visible to the operation, interprets the operation w.r.t. $S$, and
 returns an appropriate effect that encodes its return value. Rules
 \rulelabel{E-Var}, \rulelabel{E-Asgn} and \rulelabel{E-Commit} define
 such functions for read, write and commit operations, respectively.
@@ -168,13 +172,12 @@ $\bot$. In case of a read, the value read depends on how the read
 operation chooses to interpret the given set ($S$) of visible effects.
 The interpretation may depend on application semantics. For example, a
 monotonically increasing counter application may choose to let a write
-with the largest value determine the value of a read. A more
-straightforward interpretation has already been described before. To
-accommodate multiple interpretations, the semantics is made parametric
-over an interpretation function ($\interp{\cdot}$) that accepts a set
-of effects and a variable name, and returns the value associated with
-the variable. A straightforward interpretation function that chooses
-the last write (i.e., write with largest id) is shown below:
+with the largest value determine the value of a read. To accommodate
+multiple interpretations, the semantics is made parametric over an
+interpretation function ($\interp{\cdot}$) that accepts a set of
+effects and a variable name, and returns the value associated with the
+variable. A straightforward interpretation function that chooses the
+last write (i.e., write with largest id) is shown below:
 
 \begin{smathpar}
 \begin{array}{lcl}

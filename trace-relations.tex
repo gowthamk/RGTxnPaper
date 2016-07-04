@@ -1,0 +1,43 @@
+\begin{figure*}[t!]
+\begin{minipage}{\columnwidth}
+\begin{smathpar}
+\begin{array}{lcl}
+(\A,\visZ) \Vdash \eta \in T_i & \defeq & \eta \in \A \conj \txn(\eta) = T_i\\
+\E \Vdash S \subseteq T_i & \defeq & \forall \eta.~ \eta
+        \in S \Rightarrow \underE{\eta \in T_i} \\
+(\A,\visZ) \Vdash \eta_1 \visar \eta_2 & \defeq & \{\eta_1,\eta_2\}
+        \subseteq \A \conj (\eta_1,\eta_2) \in \visZ\\
+(\A,\visZ) \Vdash \eta_1 \soar \eta_2 & \defeq & \{\eta_1,\eta_2\}
+        \subseteq \A \conj \txn(\eta_1)=\txn(\eta_2) \\
+        &   & \hspace*{0.3in} \conj \id(\eta_1) < \id(\eta_2)\\
+\E \Vdash T_i \visar \eta & \defeq &\forall\eta_1
+        .\,(\E \Vdash \eta_1 \in T_i) \Rightarrow \E \Vdash \eta_1 \visar \eta \\
+\end{array}
+\end{smathpar}
+\end{minipage}
+\begin{minipage}{\columnwidth}
+\begin{smathpar}
+\begin{array}{lcl}
+\underE{T_i \visar T_j} & \defeq &  \forall\eta_1,\eta_2.\,
+    %\sameobj{\eta_1}{\eta_2}  \Rightarrow 
+    \underE{\eta_1\in T_i} \conj \underE{\eta_2 \in T_j} \\
+    &   & \hspace*{1in}\Rightarrow \underE{\eta_1 \visar \eta_2} \\
+\underE{T_i \invisar T_j} & \defeq &  \forall\eta_1,\eta_2.\,
+        %\sameobj{\eta_1}{\eta_2}\Rightarrow 
+        \underE{\eta_1\in T_i} \conj \underE{\eta_2 \in T_j}\\
+    &   & \hspace*{1in} \Rightarrow \neg (\underE{\eta_1 \visar \eta_2})\\
+\underE{T_i \wrstoar X} & \defeq & \exists\eta.~
+        \underE{\eta \in T_i} \conj \kind(\eta) = \C{WR}(X)\\
+\underE{T_i \rdsfmar X} & \defeq & \exists\eta.~
+        \underE{\eta \in T_i} \conj \kind(\eta) = \C{RD}(X)\\
+\underE{T_i \usesar X} & \defeq & \underE{T_i \wrstoar X} \disj
+      \underE{T_i \rdsfmar X}\\
+\end{array}
+\end{smathpar}
+\end{minipage}
+
+\caption{Relations defined over a trace}
+\label{fig:rel-defs}
+\end{figure*}
+
+

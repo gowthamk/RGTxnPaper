@@ -28,8 +28,8 @@ t & \in & \mathtt{Terms} & \coloneqq & e \ALT c\\
 \begin{array}{lclcl}
 \op& \in &  \mathtt{Op.\;Name} & \coloneqq & \C{RD}(X) \ALT \C{WR}(X) \ALT \C{COMMIT}\\
 \eta &  \in & \mathtt{Effect} & \coloneqq & (\C{Txn}_i,j,\op,\mathbb{N}\cup\{\bot\})\\
-\A & \in & \mathtt{Effect\;Set} & \coloneqq &  2^{\mathtt{Effect}}\\
-\llbracket \cdot \rrbracket &  \in & \mathtt{State} & \coloneqq & 2^{\mathtt{Effect}} \rightarrow \mathtt{Id} \rightarrow \mathbb{N}\\
+\A & \in & \mathtt{Effect\;Set} & \coloneqq &  \Pow{\mathtt{Effect}}\\
+\llbracket \cdot \rrbracket &  \in & \mathtt{State} & \coloneqq & \Pow{\mathtt{Effect}} \rightarrow \mathtt{Id} \rightarrow \mathbb{N}\\
 \end{array}
 \end{smathpar}
 \end{minipage}
@@ -38,11 +38,11 @@ t & \in & \mathtt{Terms} & \coloneqq & e \ALT c\\
 \begin{minipage}{2.25in}
 \begin{smathpar}
 \begin{array}{lclcl}
-\visZ & \in & \mathtt{Visibility} & \coloneqq & 2^{\mathtt{Effect}\times\mathtt{Effect}}\\
+\visZ & \in & \mathtt{Visibility} & \coloneqq & \Pow{\mathtt{Effect}\times\mathtt{Effect}}\\
 \E & \in & \mathtt{Execution} & \coloneqq &  (\A,\visZ)\\
-\I & \in & \mathtt{Invariant} & \coloneqq & \E \rightarrow \mathtt{Prop}\\
+\I & \in & \mathtt{Invariant} & \coloneqq & \E \rightarrow \Prop\\
 \mathcal{F} & \in & \mathtt{Op.\;Def.} & \coloneqq &
-2^{\mathtt{Effect}} \rightarrow \mathtt{Effect}\\
+\Pow{\mathtt{Effect}} \rightarrow \mathtt{Effect}\\
 \end{array}
 \end{smathpar}
 \end{minipage}

@@ -28,25 +28,24 @@ isolation can be captured in our operational model.
 % model the semantics of an {\sc sc} store, such as a relational
 % database, with variable (weak) isolation?
 
-First, we observe that the semantics of a weakly-consistent data store
-can be captured by store-specific consistency constraints, along with
+First, we observe that the consistency level of a data store can be
+captured by store-specific consistency constraints, along with
 transaction-specific isolation constraints, via the trace invariant
 $\I$. In particular, we can split $\I$ into two components: (1).
 $\I_s$, the store-specific invariant, and (2). $\I_c$, the
 program-specific (or, client-specific) invariant, to capture
-consistency and isolation constraints, resp.  $\I$ is now a
+consistency and isolation constraints, respectively.  $\I$ is now a
 conjunction: $\I \,=\, \lambda\E.~\I_s(\E) \wedge \I_c(\E)$ (often
 simplified to $\I \,=\, \I_s\wedge\I_c$).  While the program-specific
-trace invariant ($\I_c$) remains an invariant regardless of the
-specific consistency and visibility features exposed by the underlying
-data store, the store specific invariant ($\I_s$) changes from store
-to store depending on the consisteny level.  For an eventually
-consistent store, $\I_s$ is simply \emph{true}. Stronger stores, such
-as those that support strong consistenty, have non-trivial definitions
-for $\I_s$.
+trace invariant ($\I_c$) is independent of the underlying data store,
+the store specific invariant ($\I_s$) changes from store to store
+depending on the consistency level.  For an eventually consistent
+store, $\I_s$ is simply \emph{true}. Stronger stores, such as those
+that support strong consistency, have non-trivial definitions for
+$\I_s$.
 
 A strongly-consistent {\sc sc} store guarantees a total order on all
-operations w.r.t $\visZ$ consistent with their chronological order. A
+operations w.r.t. $\visZ$ consistent with their chronological order. A
 straightforward $\I_s$ for this store is the \C{SC} property
 formalized below:
 \begin{smathpar}
@@ -64,11 +63,11 @@ transactions execute under \iso{Read Committed} isolation. Imagine a
 sample execution where $\eta_1$'s transaction is not yet committed
 when $\eta_2$ is generated. Letting $\eta_1$ be visible to $\eta_2$
 violates $\I_c$, whereas not letting it be visible violates $\I_{s}$.
-The only way to satisfy both invariants is to rule out all 
-executions that interleave the operations of one transaction with the
-other, thereby enforcing serializability.  In general, when $\I_s$ conflicts (but is not
-inconsistent) with $\I_c$, the only way to enforce both invariant sets
-is to restrict concurrency. Clearly, this is unacceptable since it
+The only way to satisfy both invariants is to rule out all executions
+that interleave the operations of one transaction with the other,
+thereby enforcing serializability.  In general, when $\I_s$ conflicts
+(but is not inconsistent) with $\I_c$, the only way to enforce both is
+to restrict concurrency. Clearly, this is unacceptable since it
 defeats the very purpose of supporting weak isolation. 
 % How then do we enforce weak isolation on a strongly consistent
 % machine?
@@ -78,19 +77,19 @@ prioritizing weak isolation (thus, concurrency and performance) over
 strong consistency, so the execution traces do not necessarily satisfy
 {\sc sc}. In particular, visibility constraints imposed by {\sc sc}
 are violated iff they are found to be in conflict with the constraints
-imposed by a transaction's isolation level. In the context of
-the aforementioned example, $\eta_1$ is not made visible to $\eta_2$
-because doing so would violate $\I_c$. However, if $\I_c$ is true,
-then the store makes $\eta_1$ visible to $\eta_2$ to honor its
-consistency commitment\footnote{The term \emph{recency
-    commitment}~\cite{bailishat} is often used in practice
-  to capture the best-effort nature of {\sc sc}.}. We generalize this
-approach to any $\I_s$ and $\I_c$ by defining a \emph{maximum
-  visiblity principle} to determine an acceptable weakening of $\I_s$
-in case of a conflict with $\I_c$.  The principle requires the
-weakened consistency guarantee ($\I_s'$) of the store to enforce all
-visibility relationships imposed by the actual consistency guarantee
-($\I_s$), unless enforcing such a relationship violates $\I_c$.
+imposed by a transaction's isolation level. In the context of the
+aforementioned example, $\eta_1$ is not made visible to $\eta_2$
+because doing so would violate $\I_c$. However, if $\I_c$ is redefined
+to \emph{true}, then the store makes $\eta_1$ visible to $\eta_2$ to
+honor its consistency commitment\footnote{The term \emph{recency
+commitment}~\cite{bailishat} is often used in practice to capture the
+best-effort nature of {\sc sc}.}. We generalize this approach to any
+$\I_s$ and $\I_c$ by defining a \emph{maximum visibility principle} to
+determine an acceptable weakening of $\I_s$ in case of a conflict with
+$\I_c$.  The principle requires the weakened consistency guarantee
+($\I_s'$) of the store to enforce all visibility relationships imposed
+by the actual consistency guarantee ($\I_s$), unless enforcing such a
+relationship violates $\I_c$.
 % The formal definition of the principle is relegated
 % to the supplementary in the interest of space, but it can be
 % understood in the context of an {\sc sc} store, where it weakens the
@@ -106,10 +105,7 @@ weakening of $\I_s : \E \rightarrow \Prop$ if and only if:
   of effects $\eta_1$ and $\eta_2$ in $\E$, if $\I_s(\E)$ requires
   $\eta_1$ to be visible to $\eta_2$, then so does $\I_s'(\E)$ unless
   extending $\E$ with $\visZ(\eta_1,\eta_2)$ violates
-  $\I_c$\footnote{\GK{ToDo: consider other well-formedness conditions
-  on trace, such as acyclicity of $\visZ$ and $\soZ$. Are they needed
-  (considering that the machine never violates them)? Encode the
-  specifications in Z3 and make sure they are consistent.}}:
+  $\I_c$:
   \begin{smathpar}
   \begin{array}{l}
   \forall\E,\eta_1,\eta_2.~ \I_c(\E) \Rightarrow (\I_s(\E)
@@ -133,14 +129,17 @@ isolation constraints are captured by $\I_c$:
     \cup (\emptyset,\{(\eta_1,\eta_2)\}))\\
 \end{array}
 \end{smathpar}
+% GK : Please talk to me before changing the substance of the following paragraph.
 $\I_s$ requires a trace $\E$ to satisfy the visibility constraints of
-    {\sc sc} except in cases where they are in conflict with $\I_c$.
-    Instantiating the parameter $\I$ with $\I_s \wedge \I_c$ in
-    Fig.~\ref{fig:txnimp} results in an operational semantics that
-    describes many kinds of relational database-like data stores,
-    including causally-consistent data stores, among
-    others.\footnote{Details of this instantiation are relegated to
-      the supplementary in the interest of space.}
+{\sc sc} except in cases where they are in conflict with $\I_c$.
+Instantiating the parameter $\I$ with $\I_s \wedge \I_c$ in
+Fig.~\ref{fig:txnimp} results in an operational semantics that
+describes {\sc sc} stores with on-demand weak isolation, such as
+off-the-shelf relational databases. Similar approach can be employed
+to capture the semantics of other kinds of stores, such as a causally
+consistent ({\sc cc}) data store, as specific instantiations of our
+operational semantics\footnote{Details of the {\sc cc} instantiation
+are relegated to the supplementary in the interest of space.}.
 
 %% \begin{remark}
 %% Note that the purpose of maximum visibility principle is to
@@ -206,7 +205,7 @@ later operation may witness $S_2 \subseteq \E.\A$, and if the
 witnesses $S_1$ (i.e., $S_1 \subseteq S_2$). } 
 % Moreover, Like $R_2 - R_1$, if all effects in $S_2 - S_1$ are
 % concurrent with $\eta$, i.e., $\not\exists\eta'.~\eta' \in S_2 - S_1
-% \conj % visZ(\eta,\eta')$, then any precondition $P$ that is valid
+% \conj % visZ(\eta,\eta')$, then any pre-condition $P$ that is valid
 % when $\op$ executed is also valid when $\eta$ is witnessed because
 % of the stability condition.
 \label{fig:ec-theirs-vs-ours}
@@ -243,10 +242,10 @@ therefore manifest as constraints over a specific visibility relation.
 For example, instead of requiring the store to be causally consistent,
 an operation can witness a causally consistent subset of the state;
 such demands can be made via the trace invariant $\I$. For a
-precondition ($P$) of the operation to be useful, it has to be an
+pre-condition ($P$) of the operation to be useful, it has to be an
 assertion over every causally consistent subset of the global state.
 Since any replica that eventually executes the operation has to expose
-one such subset ($S$), the precondition is guaranteed to hold
+one such subset ($S$), the pre-condition is guaranteed to hold
 regardless of the replica. There is however one problem with this
 explanation - by considering subsets of just one global state, it
 ignores the fact that the global state (hence, the replica states)
@@ -268,7 +267,7 @@ event.
 
 We now consider the proof of the example in Fig.~\ref{fig:motiv-eg-1}
 in greater detail. We assume an {\sc sc} store, such as a relational
-database, whose store-specific trace invaraint ($\I_s$) was shown
+database, whose store-specific trace invariant ($\I_s$) was shown
 previously. Both transactions are run at {\sc si} isolation, hence
 $\I_c$ is $\lambda\E.~\underE{\C{SI(Wd1)}} \conj
 \underE{\C{SI(Wd1)}}$. As usual, $\I$ is $\I_s \conj \I_c$.
@@ -329,34 +328,34 @@ Fig.~\ref{fig:wd1-decorated}.  \C{Wd2} is similar and not
 shown\footnote{Supplementary contains fully decorated program.}.
 Temporary name \C{v3} has been introduced to capture the result of the
 RHS expression \C{C-a1}.  Assertions implicitly refer to the current
-execution ($\E$), just as hoare triples implicitly refer to the
+execution ($\E$), just as Hoare triples implicitly refer to the
 current state.  The context for propositions is also the implicit,
 i.e., we write $\psi$ instead of $\underE{\psi}$. The proposition \C{k
-$\ge$ a1+a2} remains an invariant, hence elided. The precondition
+$\ge$ a1+a2} remains an invariant, hence elided. The pre-condition
 $P_1$ of \C{Wd1} accounts for the possibility of \C{Wd2} committing
 before \C{Wd1}, writing \C{k-a2} to \C{C}. Since neither \C{Wd1} nor
-\C{Wd2} are committed at the beginning, the precondition $P$ of the
+\C{Wd2} are committed at the beginning, the pre-condition $P$ of the
 program is extended with $\neg\committed(\C{Wd1}) \wedge
-\neg\committed(\C{Wd2})$, from which $P_1$ follows. The postcondition
+\neg\committed(\C{Wd2})$, from which $P_1$ follows. The post-condition
 $Q_1$ of \C{Wd1} asserts different values for \C{C} depending on
 whether or not \C{Wd2} has already committed.  It also asserts that
-\C{Wd1} has committed. The postcondition $Q_2$ of \C{Wd2} (not shown)
+\C{Wd1} has committed. The post-condition $Q_2$ of \C{Wd2} (not shown)
 is similar, but with the roles of \C{Wd1} and \C{Wd2} exchanged. The
-postcondition $Q$ follows from $Q_1 \wedge Q_2$, hence valid. It
+post-condition $Q$ follows from $Q_1 \wedge Q_2$, hence valid. It
 remains to show that \C{Wd1} satisfies its specification (\C{Wd2} must
 also satisfy its spec, but the proof is similar).
 
 First, we focus on the sequential aspect of the proof and show that
 the assertions that decorate \C{Wd1} are indeed valid. We consider the
 triple associated with the assignment to \C{C} for illustration. The
-precondition $\phi_4$ asserts different values for \C{C} and \C{v3}
+pre-condition $\phi_4$ asserts different values for \C{C} and \C{v3}
 (temporary alias of RHS expression) depending on whether or not
 \C{Wd2} is committed. Inside \C{Wd1}, $\committed(\C{Wd2})$ may mean
 that either \C{Wd2} happened before \C{Wd1} (hence can be visible to
 all of \C{Wd1}), or that it committed concurrently with \C{Wd1} (hence
 cannot be visible to all of \C{Wd2}).  Nonetheless, $\phi_4$ only
 considers the case when $\C{Wd2} \visar \C{Wd1}$. As we show below,
-this is sufficient to prove the postcondition $\phi_5$, which appears
+this is sufficient to prove the post-condition $\phi_5$, which appears
 to make a stronger claim about the value of \C{C}. The proof follows
 from the RG rule \rulelabel{RG-Asgn} for assignments, which allows us
 to easily conclude the following about the execution state after the
@@ -381,7 +380,7 @@ is not yet committed ($\neg\committed(\C{Wd1})$), {\sc si} (which
 subsumes {\sc rc}) prohibits the former possibility, allowing us the
 deduce $\C{Wd2} \visar \C{Wd1}$. This lets us derive
 ${\committed(\C{Wd2})}  \Rightarrow \C{C = k-a2} \wedge \C{C =
-k-a2-a1}$, allowing us to prove the postcondition $\phi_5$.
+k-a2-a1}$, allowing us to prove the post-condition $\phi_5$.
 
 The second part of the proof is to show that assertions are stable
 despite the interference from the the concurrent thread executing
@@ -433,7 +432,7 @@ that all the effects added by $R_1$ are of \C{Wd2}. This is needed to
 prove that an interference from \C{Wd2} does not affect the local
 state of \C{Wd1}.
 
-The stability for $\phi_4$ w.r.t $R_1$ is trivial to establish: if
+The stability for $\phi_4$ w.r.t. $R_1$ is trivial to establish: if
 $R_1$ does not commit \C{Wd2}, then the value of \C{C} is unaffected,
 and if it commits \C{Wd2}, then $\C{Wd2}\not\visar\C{Wd1}$, hence
 $\phi_4$ doesn't care. For $\phi_5$, {\sc si} condition should be used
@@ -446,7 +445,7 @@ The final aspect of the proof is to show that any interference from
 the rely relation $R_2$ for \C{Wd2}. Since the implementation of
 \C{Wd2} is same as \C{Wd1}, $R_2$ (hence $G_1$) is same as $R_1$ shown
 above, but with \C{Wd2} and \C{Wd1} interchanged. Continuing our focus
-on the assigment statement, the guarantee proof requires us to show
+on the assignment statement, the guarantee proof requires us to show
 that if executing the assignment takes the execution from $\E$ to
 $\E'$, such that $\E'$ satisfies $\I$, then $(\E,\E') \in G_1$.  The
 proof follows from the \rulelabel{RG-Asgn} rule, which establishes
@@ -454,7 +453,7 @@ that (a). the assignment statement does not commit \C{Wd2}, and (b).
 it adds a write effect $\eta$ such that $\txn(\eta)=\C{Wd1}$. This
 finishes the proof for the triple in focus. The proofs for other
 triples of \C{Wd1} can also be constructed similarly. The combination
-of correctness proofs for \C{Wd1} and \C{Wd2} yeilds a correctness
+of correctness proofs for \C{Wd1} and \C{Wd2} yields a correctness
 proof for the program.
 
 % \paragraph{Discussion.} As evident from the example, instantiating the

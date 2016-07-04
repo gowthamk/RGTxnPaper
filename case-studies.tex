@@ -63,16 +63,15 @@ consistency level at {\sc ec}, we then repeated our experiments with
 committed reads and serializable increments - a combination which was
 proved to preserve monotonicity on an {\sc sc} store, but nonetheless
 observed monotonicity violations. On the other hand, instantiating the
-store consistency level with {\sc cc} allowed us to obtain a proof,
-and recover the monotonicity invariant. We in fact obtained a proof
-after relaxing the serializability requirement for writes, by changing
-the definition of the $\interp{\E}(X)$ (\S\ref{sec:opsem}) to return
-the value of the largest write-to-$X$ instead of the latest
-write-to-$X$.  We implemented this version of the counter RDT, and
-obtained a 52\% improvement in latency compared to the previous
-implementation\footnote{The tradeoff is that the view count is now no
-  longer accurate, although it grows monotonically, thus preserving
-  the application invariant.}.
+store consistency level with {\sc cc} allowed us to obtain a proof, and
+recover the monotonicity invariant. We in fact obtained a proof after
+relaxing the serializability requirement for writes, by changing the
+definition of the $\interp{\E}(X)$ (\S\ref{sec:opsem}) to return the
+value of the largest write-to-$X$ instead of the latest write-to-$X$.
+We implemented this version of the counter RDT, and obtained a 52\%
+improvement in latency compared to the previous
+implementation\footnote{The trade-off is that the view count is now no
+longer accurate, although it grows monotonically.}.
 
 \paragraph{Microblog}
 
@@ -88,10 +87,10 @@ also includes the deletion of microposts authored by the user.
 However, concurrent observers can nonetheless witness violations of
 referential integrity. To measure the likelihood of such anomalies in
 practice, we first populated a Postgres database with 1000 user
-accounts, each user with 50 microposts and 20 followers, choosen
+accounts, each user with 50 microposts and 20 followers, chosen
 uniformly at random. We then constructed experiments with 64
 concurrent clients performing deletions and timeline reads of randomly
-choosen users in 1:7 ratio, and witnessed a maximum of 250 violations
+chosen users in 1:7 ratio, and witnessed a maximum of 250 violations
 of referential integrity. We then instantiated our framework for an
 {\sc sc} store with various ANSI SQL isolation levels for user
 deletions and timeline reads, and obtained a proof that {\sc rc} is

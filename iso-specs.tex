@@ -1,0 +1,66 @@
+\begin{figure*}[t!]
+\begin{smathpar}
+\begin{array}{lcl}
+\underE{\C{RMWVis}(T_j)} & \defeq & \forall\eta_1,\eta_2.\,
+       \underE{\{\eta_1,\eta_2\} \subseteq T_j} \conj
+       \underE{\eta_1 \soar \eta_2} \Rightarrow \underE{\eta_1 \visar
+       \eta_2}\\
+\underE{\C{MonotonicVis}(T_j)} & \defeq & 
+       \underE{\C{RMWVis}(T_j)} \conj 
+       \forall\eta,\eta_1,\eta_2.\, \underE{\{\eta_1,\eta_2\} \in T_j} 
+          \conj \\
+  &   & \hspace*{1.2in}\underE{\eta \visar \eta_1} \conj
+        \underE{\eta_1 \soar \eta_2} \Rightarrow \underE{\eta \visar
+        \eta_2} \\
+%  \C{CausalVis}(T_i) & \defeq & 
+%         \C{MonotonicVis}(T_i) \conj \C{RMWVis}(T_i)\\
+\underE{\C{AtomicVis}(T_j)} & \defeq & 
+       \forall\eta_1,\eta_2.\, \neg(\underE{\eta_1 \in T_j}) \conj
+       \underE{\eta_2 \in T_j} \conj
+       \underE{\eta_1 \visar \eta_2} \Rightarrow \underE{\txn(\eta_1)
+       \visar \eta_2}\\
+\underE{\C{CommitVis}(T_j)} & \defeq & 
+       \forall\eta_1,\eta_2.~ \neg(\underE{\eta_1 \in T_j}) \conj 
+          \underE{\eta_2 \in T_j} \conj
+       \underE{\eta_1 \visar \eta_2} \Rightarrow\\
+  &   & \hspace*{1.2in}\exists\eta.\, \underE{\eta \in \txn(\eta_1)} 
+        \conj \kind(\eta) = \C{COMMIT} 
+        \conj \underE{\eta \visar \eta_2}\\
+% \underE{\C{TransVis}(T_j)} & \defeq &  \forall
+%        \eta_1,\eta_2,\eta_3.\, \underE{\eta_3 \in T_j} \conj
+%        \underE{\eta_1 \visar \eta_2} \conj
+%        \underE{\eta_2 \visar \eta_3} \Rightarrow \underE{\eta_1 \visar
+%        \eta_3} \\
+\underE{\C{RC}(T_j)} & \defeq & \underE{\C{AtomicVis}(T_j)} 
+        \conj \underE{\C{CommitVis}(T_j)}\\
+\underE{\C{MAV}(T_j)} & \defeq & \underE{\C{RC}(T_j)} \conj
+      \underE{\C{MonotonicVis}(T_j)} \\
+\underE{\C{SnapshotVis}(T_i,T_j)} & \defeq &  \underE{T_i
+       \visar T_j} \disj \underE{T_i \invisar T_j}\\
+\underE{\C{RR}(T_j)} & \defeq & \underE{\C{MAV}(T_j)}
+       \conj \forall T_i.\,T_i \neq T_j \Rightarrow 
+        \underE{\C{SnapshotVis}(T_i,T_j)} \\
+% &   & \hspace*{2in}\conj  \C{SnapshotVis}(T_i,T_j)\\
+\underE{\C{SnapshotSER}(T_i,T_j,X)} & \defeq &  \underE{T_i
+       \visar T_j} \disj (\underE{T_i \invisar T_j} \conj \\
+  &   &\hspace*{1.2in}\exists \eta.~\underE{\eta\in T_i} \conj \kind(\eta) =
+       \C{WR(X)} \Rightarrow \underE{T_j \visar \eta})\\
+\underE{\C{SI}(T_j)} & \defeq &  \underE{\C{RR}(T_j)}
+       \conj \forall T_i.\,(T_i \neq T_j \conj \exists X.\, \underE{T_i \wrstoar X} \conj 
+        \underE{T_j \wrstoar X})\\
+%      (\exists X.\, T_i \wrstoar X \conj T_j \wrstoar X)
+%      \Rightarrow  \C{TotalVis}(T_i,T_j)\\
+  &   & \hspace*{2in} \Rightarrow \underE{\C{SnapshotSER}(T_i,T_j,X)}\\
+\underE{\C{SER}(T_j)} & \defeq & \underE{\C{RR}(T_j)}
+        \conj \forall T_i.\,(T_i \neq T_j \conj \exists X.\, 
+        \underE{T_i \wrstoar X} \conj \underE{T_j \usesar X})\\
+  &   & \hspace*{2in} \Rightarrow \underE{\C{SnapshotSER}(T_i,T_j,X)}\\
+\end{array}
+\end{smathpar}
+
+\caption{Standard isolation guarantees expressed as trace
+well-formedness constraints}
+\label{fig:ansi-isolation}
+\end{figure*}
+
+
