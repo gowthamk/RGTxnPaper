@@ -40,9 +40,9 @@ effects of $T_i$ present in $\E$ are visible to any effect of $T_j$,
 then $T_i$ is considered invisible to $T_j$ under $\E$ (written
 $\underE{T_i \invisar T_j}$). Transaction $T_i$ is said to have
 written to a variable $X$ under $\E$ (i.e., $\underE{T_i \wrstoar X}$)
-if there exists a write-to-$X$ effect from $T_i$ in $\E$.
+if there exists a writes-to-$X$ effect from $T_i$ in $\E$.
 \emph{Reads-from} ($\underE{T_i \rdsfmar X}$) is defined similarly.
-$T_i \usesar X$ if it reads or writes $X$.
+$T_i \usesar X$ holds if $T_i$ reads or writes $X$.
 
 Fig.~\ref{fig:ansi-isolation} shows various isolation guarantees
 defined as propositions indexed by transaction identifiers.
@@ -50,7 +50,7 @@ Transaction $T_j$ is said to have experienced \emph{read-my-writes}
 visibility under $\E$ if every effect ($\eta_1$) of $T_j$ is visible
 to every subsequent effect ($\eta_2$) of the same transaction in $\E$.
 This lets $T_j$ to never lose its own updates. Monotonic visibility
-adds one more constraint to read-my-writes; besides requiring $\eta_1$
+adds one more constraint to \emph{read-my-writes}; besides requiring $\eta_1$
 to be visible to $\eta_2$, it also requires every effect ($\eta$)
 visible to $\eta_1$ in $\E$ to be visible to $\eta_2$ as well. Thus,
 later operations in a transaction witness at least the same set of
@@ -67,9 +67,11 @@ is visible.
 The ANSI SQL 92 standard requires \iso{Read Committed} isolation to
 avoid the dirty reads phenomenon, which is achieved by enforcing
 $\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$ guarantees. The {\sc rc}
-specification\footnote{Note the distinction in fonts: {\sc rc} is an
-abbreviation of \iso{Read Committted}, whereas \C{RC} is its
-specification.} (\C{RC}) is therefore a combination of these two
+specification (\C{RC})\footnote{In the following, we use small caps to abbreviate
+  isolation levels (\emph{e.g.,} {\sc rc} for \emph{Read Committed}), and
+  typewriter font for abbreviations of the specification of an isolation
+  level (\emph{e.g.,} \C{RC} denotes the specification for {\sc rc} as
+  given in Fig.~\ref{fig:ansi-isolation}).} is therefore a combination of these two
 guarantees. The specification also agrees with the description and
 implementation~\cite{bailishat,pldi15} of {\sc rc} for highly
 available replicated stores. On relational databases, however, {\sc
@@ -87,38 +89,6 @@ $\mathtt{MonotonicVis}$. A stronger isolation level called
 Fig.~\ref{fig:ansi-isolation})~\cite{bailishat} was proposed to
 explicitly extend {\sc rc} with monotonicity on such stores. 
 
-\begin{figure}
-\centering
-\subcaptionbox {
-  {\sc rr}($T_1$), {\sc rr}($T_2$).
-  \label{fig:ansi-iso-eg-rr}
-} [
-  0.33\columnwidth
-] {
-  \includegraphics[scale=0.36]{Figures/rr-eg}
-}
-\subcaptionbox {
-  {\sc si}($T_1$), {\sc mav}($T_2$)
-  \label{fig:ansi-iso-eg-si}
-} [
-  0.33\columnwidth
-] {
-  \includegraphics[scale=0.36]{Figures/si-eg-2}
-}
-\subcaptionbox {
-  {\sc ser}($T_3$), {\sc mav}($T_4$)
-  \label{fig:ansi-iso-eg-ser}
-}{
-  \includegraphics[scale=0.32]{Figures/ser-eg}
-}
-
-\caption{Sample executions of concurrent transactions at different
-isolation levels. Solid (black) arrows indicate the timeline. Points
-on the timeline mark the time when an operation is executed. Dotted
-(blue) arrows denote $\visZ$. }
-\label{fig:ansi-iso-eg}
-\vspace*{-12pt}
-\end{figure}
 
 Snapshot visibility (\C{SnapshotVis}) captures the scenario where a
 transaction executes against a static snapshot of the database.  A
@@ -126,7 +96,7 @@ transaction $T_i$ is said to be snapshot-visible to a transaction
 $T_j$ if either it is visible to $T_j$ (i.e., $T_i$ is included in the
 snapshot), or it is invisible (i.e., it is not included); it is
 forbidden for only a suffix (more generally, a subset) of $T_j$ to
-witness $T_i$. Specification of ANSI SQL \iso{Repeatable Read}
+witness $T_i$. The specification of ANSI SQL \iso{Repeatable Read}
 isolation (\C{RR}) extends \C{MAV} with the snapshot visibility
 guarantee.  Observe that snapshot visibility permits $T_i$ and $T_j$
 to execute and commit while being oblivious of each other. This
@@ -157,9 +127,42 @@ snapshot witnessed by the {\sc ser} transaction $T_3$ does not include
 $T_4$, but the write to $Y$ in $T_4$, although non-conflicting,
 witnesses $T_1$ because $Y$ is read by $T_1$. Visibility includes
 other operations of $T_4$ because of {\sc mav}. Note that {\sc ser}
-does not guarantee total order of transactions w.r.t. $\visZ$ because,
-in reality, databases do not guarantee serializable execution unless
-\emph{all} transactions choose {\sc ser}.
+does not guarantee a total order on transactions w.r.t. $\visZ$
+because, in practice, databases do not guarantee global serializable
+execution unless \emph{all} transactions choose {\sc ser}.
+
+\begin{figure}
+\centering
+\subcaptionbox {
+  {\sc rr}($T_1$), {\sc rr}($T_2$).
+  \label{fig:ansi-iso-eg-rr}
+} [
+  0.33\columnwidth
+] {
+  \includegraphics[scale=0.36]{Figures/rr-eg}
+}
+\subcaptionbox {
+  {\sc si}($T_1$), {\sc mav}($T_2$)
+  \label{fig:ansi-iso-eg-si}
+} [
+  0.33\columnwidth
+] {
+  \includegraphics[scale=0.36]{Figures/si-eg-2}
+}
+\subcaptionbox {
+  {\sc ser}($T_3$), {\sc mav}($T_4$)
+  \label{fig:ansi-iso-eg-ser}
+}{
+  \includegraphics[scale=0.32]{Figures/ser-eg}
+}
+
+\caption{\small Sample executions of concurrent transactions at different
+isolation levels. Solid (black) arrows indicate the timeline. Points
+on the timeline mark the time when an operation is executed. Dotted
+(blue) arrows denote $\visZ$. }
+\label{fig:ansi-iso-eg}
+\vspace*{-12pt}
+\end{figure}
 
 % Note that both $\mathtt{SnapshotVis}$ and $\mathtt{OneWaySER}$
 % are asymmetric definitions that guarantee complete visiblity or
