@@ -10,6 +10,8 @@
 (\A,\visZ) \Vdash \eta_1 \soar \eta_2 & \defeq & \{\eta_1,\eta_2\}
         \subseteq \A \conj \txn(\eta_1)=\txn(\eta_2) \\
         &   & \hspace*{0.3in} \conj \id(\eta_1) < \id(\eta_2)\\
+(\A,\visZ) \Vdash \eta_1 \hboar \eta_2 & \defeq & \{\eta_1,\eta_2\}
+        \subseteq \A \conj (\eta_1,\eta_2) \in (\visZ \cup \soZ)^{+}\\
 \E \Vdash T_i \visar \eta & \defeq &\forall\eta_1
         .\,(\E \Vdash \eta_1 \in T_i) \Rightarrow \E \Vdash \eta_1 \visar \eta \\
 \end{array}
