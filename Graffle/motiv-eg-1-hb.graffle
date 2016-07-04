@@ -125,6 +125,47 @@
 	<key>GraphicsList</key>
 	<array>
 		<dict>
+			<key>Class</key>
+			<string>LineGraphic</string>
+			<key>Head</key>
+			<dict>
+				<key>ID</key>
+				<integer>160</integer>
+				<key>Info</key>
+				<integer>1</integer>
+			</dict>
+			<key>ID</key>
+			<integer>191</integer>
+			<key>Layer</key>
+			<integer>0</integer>
+			<key>Points</key>
+			<array>
+				<string>{283.2921740541359, 240.63276441827509}</string>
+				<string>{147.49998474121094, 329.75}</string>
+			</array>
+			<key>Style</key>
+			<dict>
+				<key>stroke</key>
+				<dict>
+					<key>HeadArrow</key>
+					<string>FilledArrow</string>
+					<key>Legacy</key>
+					<true/>
+					<key>TailArrow</key>
+					<string>0</string>
+					<key>Width</key>
+					<real>2</real>
+				</dict>
+			</dict>
+			<key>Tail</key>
+			<dict>
+				<key>ID</key>
+				<integer>182</integer>
+				<key>Info</key>
+				<integer>1</integer>
+			</dict>
+		</dict>
+		<dict>
 			<key>Bounds</key>
 			<string>{{180.00003051757812, 316.5}, {38, 22}}</string>
 			<key>Class</key>
@@ -333,17 +374,8 @@
 			<dict>
 				<key>stroke</key>
 				<dict>
-					<key>Color</key>
-					<dict>
-						<key>b</key>
-						<string>1</string>
-						<key>g</key>
-						<string>0.4</string>
-						<key>r</key>
-						<string>0.4</string>
-					</dict>
 					<key>HeadArrow</key>
-					<string>Arrow</string>
+					<string>FilledArrow</string>
 					<key>Legacy</key>
 					<true/>
 					<key>Pattern</key>
@@ -678,33 +710,6 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{174.9999942779541, 302}, {340, 53}}</string>
-			<key>Class</key>
-			<string>ShapedGraphic</string>
-			<key>ID</key>
-			<integer>31</integer>
-			<key>Layer</key>
-			<integer>1</integer>
-			<key>Shape</key>
-			<string>Rectangle</string>
-			<key>Style</key>
-			<dict>
-				<key>fill</key>
-				<dict>
-					<key>Color</key>
-					<dict>
-						<key>b</key>
-						<string>0.788703</string>
-						<key>g</key>
-						<string>0.997543</string>
-						<key>r</key>
-						<string>0.933162</string>
-					</dict>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>Bounds</key>
 			<string>{{63, 142}, {308, 53}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
@@ -731,49 +736,30 @@
 			</dict>
 		</dict>
 		<dict>
+			<key>Bounds</key>
+			<string>{{174.9999942779541, 302}, {340, 53}}</string>
 			<key>Class</key>
-			<string>LineGraphic</string>
-			<key>Head</key>
-			<dict>
-				<key>ID</key>
-				<integer>160</integer>
-			</dict>
+			<string>ShapedGraphic</string>
 			<key>ID</key>
-			<integer>191</integer>
+			<integer>31</integer>
 			<key>Layer</key>
-			<integer>2</integer>
-			<key>Points</key>
-			<array>
-				<string>{281.11189851829693, 242.0636282223241}</string>
-				<string>{147.49998474121094, 329.75}</string>
-			</array>
+			<integer>1</integer>
+			<key>Shape</key>
+			<string>Rectangle</string>
 			<key>Style</key>
 			<dict>
-				<key>stroke</key>
+				<key>fill</key>
 				<dict>
 					<key>Color</key>
 					<dict>
 						<key>b</key>
-						<string>1</string>
+						<string>0.788703</string>
 						<key>g</key>
-						<string>0.4</string>
+						<string>0.997543</string>
 						<key>r</key>
-						<string>0.4</string>
+						<string>0.933162</string>
 					</dict>
-					<key>HeadArrow</key>
-					<string>Arrow</string>
-					<key>Legacy</key>
-					<true/>
-					<key>TailArrow</key>
-					<string>0</string>
-					<key>Width</key>
-					<real>2</real>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>182</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -875,7 +861,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2016-06-26 14:10:23 +0000</string>
+	<string>2016-07-04 19:24:15 +0000</string>
 	<key>Modifier</key>
 	<string>Gowtham Kaki</string>
 	<key>NotesVisible</key>
@@ -970,7 +956,7 @@
 		<key>SidebarWidth</key>
 		<integer>120</integer>
 		<key>VisibleRegion</key>
-		<string>{{15.333333333333334, 82}, {541.33333333333326, 423.33333333333331}}</string>
+		<string>{{14.666666666666666, 82}, {541.33333333333337, 423.33333333333331}}</string>
 		<key>Zoom</key>
 		<real>1.5</real>
 		<key>ZoomValues</key>

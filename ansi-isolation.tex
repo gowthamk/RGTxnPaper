@@ -26,23 +26,24 @@ in a trace. In the context of a trace $(\A,\visZ)$, an effect $\eta$
 is said to belong to a transaction $T_i$ if $\eta$ belongs to the
 effect set $A$ and its transaction identifier is $T_i$. The
 containment relation is trivially lifted to the set of effects to
-define $\underE{S \subseteq T_i}$.  Visibility and session order
-relations are denoted by $\eta_1 \visar \eta_2$ and $\eta_1 \soar
-\eta_2$, respectively. A transaction $T_i$ is said to be visible to an
-effect $\eta$ if every effect $\eta_1$ of $T_i$ recorded by the trace
-is visible to $\eta$.  $T_i$ may be visible to $\eta$ but may not be
-visible to every other effect in the $\txn(\eta)$. For a transaction
-$T_i$ to be considered to be visible to a transaction $T_j$ in the
-context of a trace $\E$ (written $\underE{T_i \visar T_j}$), every
-effect ($\eta_1$) of $T_i$ present in $\E$ must be visible to every
-effect ($\eta_2$) of $T_j$ in $\E$.  Conversely, if none of the
-effects of $T_i$ present in $\E$ are visible to any effect of $T_j$,
-then $T_i$ is considered invisible to $T_j$ under $\E$ (written
-$\underE{T_i \invisar T_j}$). Transaction $T_i$ is said to have
-written to a variable $X$ under $\E$ (i.e., $\underE{T_i \wrstoar X}$)
-if there exists a writes-to-$X$ effect from $T_i$ in $\E$.
-\emph{Reads-from} ($\underE{T_i \rdsfmar X}$) is defined similarly.
-$T_i \usesar X$ holds if $T_i$ reads or writes $X$.
+define $\underE{S \subseteq T_i}$.  Visibility, session order, and
+happens-before relations are denoted by $\eta_1 \visar \eta_2$,
+$\eta_1 \soar \eta_2$, and $\eta_1 \hboar \eta_2$, respectively. A
+transaction $T_i$ is said to be visible to an effect $\eta$ if every
+effect $\eta_1$ of $T_i$ recorded by the trace is visible to $\eta$.
+$T_i$ may be visible to $\eta$ but may not be visible to every other
+effect in the $\txn(\eta)$. For a transaction $T_i$ to be considered
+to be visible to a transaction $T_j$ in the context of a trace $\E$
+(written $\underE{T_i \visar T_j}$), every effect ($\eta_1$) of $T_i$
+present in $\E$ must be visible to every effect ($\eta_2$) of $T_j$ in
+$\E$.  Conversely, if none of the effects of $T_i$ present in $\E$ are
+visible to any effect of $T_j$, then $T_i$ is considered invisible to
+$T_j$ under $\E$ (written $\underE{T_i \invisar T_j}$). Transaction
+$T_i$ is said to have written to a variable $X$ under $\E$ (i.e.,
+$\underE{T_i \wrstoar X}$) if there exists a $\C{WR}(X)$ effect from
+$T_i$ in $\E$.  \emph{Reads-from} ($\underE{T_i \rdsfmar X}$) is
+defined similarly. $T_i$ \emph{uses} $X$ ($T_i \usesar X$) if it reads
+or writes $X$.
 
 Fig.~\ref{fig:ansi-isolation} shows various isolation guarantees
 defined as propositions indexed by transaction identifiers.

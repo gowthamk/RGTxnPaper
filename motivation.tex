@@ -52,9 +52,9 @@ a \emph{Read Committed} ({\sc rc}) isolation level, which is weaker than
 Postgres 9.5 and Oracle 11g databases.} An {\sc rc} transaction is
 isolated from the writes of uncommitted transactions, and is therefore
 free from \emph{dirty reads}~\cite{berenson} that read uncommitted
-data. In the current example, {\sc rc} isolation admits the following
-two executions (Fig.~\ref{fig:rc-ex}) on a strongly consistent ({\sc
-sc}) store, such as a relational database:
+data. In the current example, {\sc rc} isolation admits the two
+executions shown in Fig.~\ref{fig:rc-ex} on a strongly consistent
+({\sc sc}) store, such as a relational database.
 
 \begin{figure}[!h]
 \centering
@@ -64,19 +64,20 @@ sc}) store, such as a relational database:
 } [
   0.55\columnwidth
 ] {
-  \includegraphics[scale=0.5]{Figures/motiv-eg-1-a}
+  \includegraphics[scale=0.6]{Figures/motiv-eg-1-a}
 }
 %\hspace*{0.5in}
 \subcaptionbox {
   {\sc rc} Execution 2
   \label{fig:motiv-eg-1-b}
 }{
-  \includegraphics[scale=0.5]{Figures/motiv-eg-1-b}
+  \includegraphics[scale=0.6]{Figures/motiv-eg-1-b}
 }
 \caption{\small A possible execution of the program shown in Fig.~\ref{fig:motiv-eg-1} under
-  a read committed isolation level.}
+  \iso{Read Committed} isolation level.}
 \label{fig:rc-ex}
 \end{figure}
+
 The figure depicts an execution as a series of read, write, and commit
 operations.  The subscript of an operation indicates the transaction
 that executes it. In the first execution, transaction \C{Wd1} reads
@@ -101,24 +102,6 @@ unlike {\sc ser}, does not rely on expensive lock-based concurrency
 control, it is also more efficient, making it appropriate for both
 \C{Wd} transactions.
 
-\begin{figure}
-\begin{smathpar}
-\begin{array}{lcl}
-\psi_{RC} & \defeq & \forall T_1,T_2,\eta_1,\eta_2,.\; \txn(\eta_1) = T_1 
-  \conj \txn(\eta_2) = T_2 \\
-  & & \hspace*{0.6in}\conj T_1 \neq T_2 \conj \eta_1 \hboar
-  \eta_2 \Rightarrow T_1 \hboar \eta_2 \\
-\psi_{SI} & \defeq & \forall T_1,T_2.\; T_1 \neq T_2 \conj
-  (\exists \C{X}.~{T_1 \wrstoar \C{X}} \conj 
-                      {T_2 \wrstoar \C{X}})\\
-  &  & \hspace*{0.6in}\Rightarrow{T_1 \hboar T_2} \disj {T_2 \hboar T_1} \\
-\end{array}
-\end{smathpar}
-\caption{\small Visibility and interference properties for different weak isolation levels can be
-  captured by different instantiations of their happens-before relation.}
-\label{fig:interference-ex}
-\end{figure}
-
 Thinking in terms of anomalies, as described above, is how database
 programmers are often encouraged to reason about weak isolation.
 Unfortunately, such reasoning does not rest on any sound foundation,
@@ -131,20 +114,6 @@ reasoning approach that combines declarative reasoning about isolation
 guarantees with operational reasoning about programs. We demonstrate
 how our proof system makes this possible in the context of the current
 example.
-
-\begin{figure}
-\centering
-  \includegraphics[scale=0.4]{Figures/motiv-eg-1-hb}
-
-\caption{\small $\hbZ$ arrows allowed by {\sc si} (solid) and {\sc rc} (solid
-  and dashed) isolation levels for the example in
-  Fig.~\ref{fig:motiv-eg-1}. Each arrow represents an $\hbZ$ relationship
-  among all operations of `Wd2' and operations in `Wd1' that follow
-  the arrow head. Letters R, W and C stand for read, write and commit,
-  respectively.}
-\label{fig:motiv-eg-1-hb}
-\vspace*{-8pt}
-\end{figure}
 
 First, we note that the example in Fig.~\ref{fig:motiv-eg-1} is a
 concurrent program, and hence is amenable to \emph{rely-guarantee}
@@ -165,43 +134,78 @@ interference of a committed transaction, but not those from
 uncommitted transactions. \iso{Snapshot Isolation} admits interference
 from committed non-conflicting transactions, and so on.
 
+\begin{figure}
+\begin{smathpar}
+\begin{array}{lcl}
+\psi_{RC} & \defeq & \forall T_1,T_2,\eta_1,\eta_2,.\; \txn(\eta_1) = T_1 
+  \conj \txn(\eta_2) = T_2 \\
+  & & \hspace*{0.6in}\conj T_1 \neq T_2 \conj \eta_1 \hboar
+  \eta_2 \Rightarrow T_1 \hboar \eta_2 \\
+\psi_{SI} & \defeq & \forall T_1,T_2.\; T_1 \neq T_2 \conj
+  (\exists \C{X}.~{T_1 \wrstoar \C{X}} \conj 
+                      {T_2 \wrstoar \C{X}})\\
+  &  & \hspace*{0.6in}\Rightarrow{T_1 \hboar T_2} \disj {T_2 \hboar T_1} \\
+\end{array}
+\end{smathpar}
+\caption{\small Visibility and interference properties for different weak isolation levels can be
+  captured by different instantiations of their happens-before relation.}
+\label{fig:interference-ex}
+\end{figure}
+
+\begin{figure}
+\centering
+  \includegraphics[scale=0.4]{Figures/motiv-eg-1-hb}
+
+\caption{\small $\hbZ$ arrows allowed by {\sc si} (solid) and {\sc rc} (solid
+  and dashed) isolation levels for the example in
+  Fig.~\ref{fig:motiv-eg-1}. Each arrow represents an $\hbZ$ relationship
+  among all operations of \C{Wd2} and operations in \C{Wd1} that follow
+  the arrow head. Letters R, W and C stand for read, write and commit,
+  respectively.}
+\label{fig:motiv-eg-1-hb}
+\vspace*{-8pt}
+\end{figure}
+
 For the rely-guarantee approach to be useful, it has to thus constrain
 allowed interference in accordance with the chosen level of isolation
 associated with a transaction. The first observation we make is that
 we can constrain interference by constraining the definition of the
-\emph{happens-before} ($\hbZ$) relation that dictates visibility
-actions between transactions, or their respective constituents.  To do
-so, we axiomatize the $\hbZ$ relation to capture the interference
-characteristics of different isolation levels as their specifications.
-Two such specifications are shown\footnote{Note that specifications
-presented here are solely for illustration. The actual specifications
-described in \S\ref{sec:ansi-isolation} are more nuanced.} in
-Fig.~\ref{fig:interference-ex}.  The \iso{Read Committed} specification
-($\psi_{RC}$) allows an operation $\eta_1$ of $T_1$ to happen-before
-an operation $\eta_2$ of $T_2$ only if every operation in $T_1$
-(including its commit) happens-before $\eta_2$ (we let $T_1 \hboar
-\eta_2$ denote this). The specification does not require $T_1$ to
-execute and commit before all operations of $T_2$, thus allowing it to
-interfere in $T_2$. The \iso{Snapshot Isolation} specification
+\emph{happens-before} ($\hbZ$) relation, which ultimately dictates
+what actions become visible to a transaction, or its constituents, and
+when. To do so, we axiomatize the $\hbZ$ relation to capture the
+interference characteristics of different isolation levels as their
+specifications. Two such specifications are shown\footnote{Note that
+specifications presented here are solely for illustration. The actual
+specifications described in \S\ref{sec:ansi-isolation} are more
+nuanced.} in Fig.~\ref{fig:interference-ex}. The \iso{Read Committed}
+specification ($\psi_{RC}$) allows an operation $\eta_1$ of $T_1$ to
+happen-before an operation $\eta_2$ of $T_2$ only if every operation
+in $T_1$ (including its commit) happens-before $\eta_2$ (we let $T_1
+\hboar \eta_2$ denote this). The specification does not require $T_1$
+to execute and commit before all operations of $T_2$, thus allowing it
+to interfere in $T_2$. The \iso{Snapshot Isolation} specification
 ($\psi_{SI}$) requires two transactions that write to the same
 variable to be related by happens-before.  This effectively prohibits
 interference due to actions in $T_1$ being interleaved in $T_2$ (or,
 vise versa). 
 
-Fig.~\ref{fig:motiv-eg-1-hb} is a visualization of $\hbZ$ 
-from \C{Wd2} to \C{Wd1} allowed by $\psi_{RC}$ and $\psi_{SI}$. All
-arrows are legal under $\psi_{RC}$ because in no case does an operation
-$\eta_1$ from \C{Wd1} happen-before $\eta_2$ of \C{Wd2} without the commit
-of \C{Wd1} also happening before $\eta_2$. $\psi_{SI}$ however disallows
-all dashed arrows, because dashed arrows establish $\hbZ$ between actions in \C{Wd2}
-and only a subset of the operations in \C{Wd1}. Lighter (blue) arrows with
-hollow heads denote $\hbZ$ relationships that do not affect the value
-of \C{C} in a way that causes the program to violate its
-post-condition.  Darker (black) arrows with solid heads denote $\hbZ$
-relationships that lead to the violation of the post-condition. The task of
-the reasoning framework is to determine if all $\hbZ$ relationships
-allowed by an isolation level lead to the satisfaction of the
-post-condition.
+Fig.~\ref{fig:motiv-eg-1-hb} is a visualization of $\hbZ$ from \C{Wd2}
+to \C{Wd1} allowed by $\psi_{RC}$ and $\psi_{SI}$. All arrows are
+legal under $\psi_{RC}$ because in no case does an operation $\eta_1$
+from \C{Wd1} happen-before $\eta_2$ of \C{Wd2} without the commit of
+\C{Wd1} also happening before $\eta_2$. $\psi_{SI}$ however disallows
+all dashed arrows, because dashed arrows establish $\hbZ$ between
+actions in \C{Wd2} and only a subset of the operations in \C{Wd1}.
+Since the result of an operation (\eg a read) depends on what happens
+before that operation, $\hbZ$ relation ultimately affects the result
+of the program. The solid arrow and the first (from left) dashed arrow
+in Fig.~\ref{fig:motiv-eg-1-hb} denote $\hbZ$ relationships that do
+not affect the value of \C{C} in a way that causes the program to
+violate its post-condition. The last two dashed arrows denote $\hbZ$
+relationships that lead to the violation of the post-condition. The
+task of the reasoning framework is to determine if all $\hbZ$
+relationships allowed by an isolation level lead to the satisfaction
+of the post-condition.
 
 % There is a $\hb$ edge (first dashed) that is allowed by RC but
 % prohibited by SI, which nonetheless does not lead to invariant
@@ -219,39 +223,40 @@ program points. An interference that leads to the violation of $\hbZ$
 constraints (i.e., an invalid interference) is thus automatically
 prohibited. For instance, consider the program point after the write
 to \C{C} in \C{Wd1}. The expected invariant ($\phi$) at that program
-point is shown below ($\committed$ stands for ``committed''):\vspace*{-8pt}
+point is shown below ($\committed$ stands for ``committed''):
 
 \begin{smathpar}
 \begin{array}{c}
- \neg\committed(\C{Wd1}) \conj \C{Wd1} \wrstoar \C{C}  \conj  \\
-    (\neg\committed(\C{Wd2}) \Rightarrow \C{C = k-a1}) \conj (\committed(\C{Wd2})
+ \neg\committed(\C{Wd1}) \conj \C{Wd1} \wrstoar \C{C}  \conj 
+    (\neg\committed(\C{Wd2}) \Rightarrow \C{C = k-a1}) \\
+    \conj (\committed(\C{Wd2})
                 \Rightarrow \C{C = k-a1-a2})
 \end{array}
 \end{smathpar}
-\vspace*{-8pt}
 
-\noindent $\phi$ asserts that \C{Wd1} is not yet committed, and that it wrote to
-\C{C}, and the value of \C{C} is either \C{k-a1-a2} or \C{k-a1}
-depending on whether or not \C{Wd2} is committed. If $\phi$ remains
-invariant until \C{Wd1} commits, then the post-condition (\C{C =
-k-a1-a2}) can be established easily. However, an interference from
+\noindent $\phi$ asserts that \C{Wd1} is not yet committed, and that
+it wrote to \C{C}, and the value of \C{C} is either \C{k-a1-a2} or
+\C{k-a1} depending on whether or not \C{Wd2} is committed. If $\phi$
+remains invariant until \C{Wd1} commits, then the post-condition (\C{C
+= k-a1-a2}) can be established easily. However, an interference from
 \C{Wd2} at this stage (captured by the last dashed arrow in
 Fig.~\ref{fig:motiv-eg-1-hb}) may violate the invariant by writing
 $\C{k-a1}$ to \C{C} and committing \C{Wd2}, thus leading to
 $\committed(\C{Wd2}) \Rightarrow \C{C=k-a2}$. Fortunately,
 \iso{Snapshot Isolation} prevents this interference, and this can be
-shown by demonstrating that an interference from \C{Wd2} starting from an
-execution state that satisfies $\psi_{SI} \wedge \phi$ leads to an
+shown by demonstrating that an interference from \C{Wd2} starting from
+an execution state that satisfies $\psi_{SI} \wedge \phi$ leads to an
 execution state where neither $\C{Wd2} \hboar \C{Wd1}$ nor $\C{Wd1}
-\hboar \C{Wd2}$ holds (the former does not hold because at least one write
-from \C{Wd1} has happened before at least one operation of \C{Wd2}, and
-the latter does not hold because \C{Wd1} has not yet committed, and \C{Wd2}
-has already begun). Since \C{Wd2} also writes to \C{C}, this violates
-the $\psi_{SI}$ constraint which we assume to be an invariant. A proof
-that the post-condition holds now follows from the contradiction. It is
-informative to note that if the invariant is $\psi_{RC}$ instead of
-$\psi_{SI}$, we cannot derive a contradiction and we cannot rule out
-the interference, which (rightfully) causes  the proof to fail.
+\hboar \C{Wd2}$ holds ($\C{Wd2} \hboar \C{Wd1}$ does not hold because
+\C{Wd1}'s write to \C{C} clearly happened before \C{Wd2}'s commit, and
+$\C{Wd1} \hboar \C{Wd2}$ does not hold because \C{Wd1} has not yet
+committed, while \C{Wd2} has already begun). Since \C{Wd2} also writes
+to \C{C}, this violates the $\psi_{SI}$ constraint which we assume to
+be an invariant. A proof that the post-condition holds now follows
+from the contradiction. It is informative to note that if the
+invariant is $\psi_{RC}$ instead of $\psi_{SI}$, we cannot derive a
+contradiction and we cannot rule out the interference, which
+(rightfully) causes  the proof to fail.
 
 We have thus far assumed a strongly consistent ({\sc sc}) store that,
 in the absence of transactions with special isolation requirements,
