@@ -8,18 +8,18 @@
 
 We now describe specifications of standard isolation guarantees
 expressed as constraints over trace well-formedness. For brevity and
-convenience, we adopt few notations in this and subsequent sections.
-An execution trace is destructed as ($\A$,$\visZ$) whenever individual
-components of the pair are needed. Otherwise, it is written as $\E$.
-Sometimes, the dot notation (\eg~$\E.\A$) is also used. Since $\A$ and
-$\visZ$ are both sets, we lift the operations on sets to pairs of sets
-when updating $\E$. For example, $\E' = \E \cup
+convenience, we introduce some notations that are used in the following
+sections.  An execution trace is destructed as ($\A$,$\visZ$) whenever
+individual components of the pair are needed. Otherwise, it is written
+as $\E$.  Sometimes, the dot notation (\eg~$\E.\A$) is also
+used. Since $\A$ and $\visZ$ are both sets, we lift the operations on
+sets to pairs of sets when updating $\E$. For example, $\E' = \E \cup
 (\{\eta_2\},\{(\eta_1,\eta_2)\})$ expands to $\E' = (\E.\A \cup
 \{\eta_2\},\,\E.\visZ \cup \{(\eta_1,\eta_2)\})$.  When $\psi$ is a
 formula, $\underE{\psi}$ denotes the interpretation of $\psi$ in the
 context of the trace $\E$. Such interpretations are defined on a
 case-by-case basis in Figs.~\ref{fig:rel-defs}
-and~\ref{fig:ansi-isolation}. 
+and~\ref{fig:ansi-isolation}.
 
 Fig.~\ref{fig:rel-defs} shows various relations defined over elements
 in a trace. In the context of a trace $(\A,\visZ)$, an effect $\eta$

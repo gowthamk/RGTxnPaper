@@ -47,7 +47,7 @@ isolation level offered by the database. Taken together, these studies
 make clear that weakly-isolated transactions are quite prevalent in
 practice, whereas serializable transactions are often eschewed.
 
-Unfortunately, weak isolation admits behaviors that are difficult to
+Unfortunately, weak isolation admits behaviours that are difficult to
 comprehend~\cite{berenson}. To quantify weak isolation anomalies,
 Fekete \emph{et al.}~\cite{feketevldb09} devised and experimented
 with a microbenchmark suite that executes transactions under a
@@ -90,12 +90,12 @@ determine, in each case, if the phenomenon can be allowed without
 violating application invariants. This is understandably hard,
 especially in the absence of any formal underpinning to define weak
 isolation semantics.  Adya~\cite{adyaphd} presents the first formal
-definitions of some of well-known isolation levels in the context of a
+definitions of some well-known isolation levels in the context of a
 sequentially consistent (SC) database.  However, there has been little
 progress relating Adya's system model to a formal operational
 semantics or a proof system that can facilitate rigorous correctness
 arguments. Consequently, reasoning about weak isolation remains an
-error prone endeavor, with major database vendors~\cite{postgresiso,
+error prone endeavour, with major database vendors~\cite{postgresiso,
   mysqliso, oracleiso} continuing to document their isolation levels
 primarily in terms of the undesirable phenomena a particular isolation
 level may induce, placing the burden on the programmer to determine
@@ -210,7 +210,7 @@ parameterized over different isolation notions. \S\ref{sec:reasoning}
 formalizes the proof system that we use to reason about program
 invariants, and establishes the soundness of these rules with respect
 to the semantics. \S\ref{sec:store-consistency} generalizes the
-framework to integrate support for weakly consistent data stores. We
+framework to integrate support for weakly-consistent data stores. We
 describe the impact of our reasoning framework in the context of
 several real-world case studies in \S\ref{sec:case-studies}.  Related
 work and conclusions are given in \S\ref{sec:relatedwork}.
