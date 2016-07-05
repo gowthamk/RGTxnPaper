@@ -89,11 +89,11 @@ happens-before ($\hbZ$) relation. $\hbZ$ is however a derived relation
 in our model, composed of more fundamental \emph{session order}
 ($\soZ$) and \emph{visibility} ($\visZ$) relations. In particular,
 $\hbZ \,=\, (\soZ \cup \visZ)^{+}$. Unlike $\hbZ$, $\visZ$ (defined
-below) is not a transitive relation, hence lets us capture finer
-properties than $\hbZ$. We therefore let $\visZ$ replace $\hbZ$ in our
-discussion henceforth. The session order relation captures the
-sequential order of operations within a transaction. In particular, it
-relates two effects, $\eta_1$ and $\eta_2$, such that $\txn(\eta_1) =
+below) is not a transitive relation, and hence lets us capture
+finer-grained isolation properties than $\hbZ$, which we leverage in
+our development.  The session order relation captures the sequential
+order of operations within a transaction. In particular, it relates
+two effects, $\eta_1$ and $\eta_2$, such that $\txn(\eta_1) =
 \txn(\eta_2)$ and $\id(\eta_1) < \id(\eta_2)$.  The semantics assigns
 monotonically increasing identifiers to effects, as defined by the
 $\id(\eta) > \maxId(\A)$ condition of \rulelabel{E-Aux}. Evaluation
