@@ -101,29 +101,49 @@ primarily in terms of the undesirable phenomena a particular isolation
 level may induce, placing the burden on the programmer to determine
 application correctness.
 
+%%%SJ: tried to tighten this paragraph; the original now commented seemed overly
+%%complicated
 Recent results on reasoning about application invariants in the
 presence of weak consistency~\cite{burckhardt14, redblueosdi,
-redblueatc, ecinec, gotsmanpopl16} address broadly related concerns.
-Weak consistency is a phenomenon that usually manifests on replicated
-data stores, where operations are concurrently executed against
-different replicas, resulting in an order of execution inconsistent
-with their serial order. The operations, nonetheless, are atomic and
-fully isolated, and each operation is required to locally preserve
-application invariants. In contrast, weak isolation is a property of
-transactions, which are sets of atomic operations. Weak isolation
-manifests when successive atomic operations in a transaction witness
-different contemporary states of the database (or different replicas
-of the replicated store) which, although consistent individually, may
-not be obviously reconciled into a consistent global view.
-Intuitively, the latter problem reduces to the former if all
-transactions contain a single operation. Furthermore, weak isolation
-can exist independent of weak consistency, as evident from the
-presence of weakly-isolated transactions on conventional RDBS. With an
+  redblueatc, ecinec, gotsmanpopl16} address broadly related concerns.
+Weak consistency is a phenomenon that manifests on replicated data
+stores, where operations are concurrently executed against different
+replicas, resulting in an execution order inconsistent with any serial
+(sequentially consistent) ordering.  In contrast, weak isolation is a
+property of atomic transactions whose effects interfere with one
+another in ways inconsistent with serializability.  Unlike weak
+consistency, weak isolation can manifest even in an unreplicated
+setting, as evident from the support for weakly-isolated transactions
+on conventional (unreplicated) databases as mentioned above.  With the
 added complexity of replication, richer mechanisms are needed to
 reason about weak isolation in tandem with weak consistency. Thus,
 frameworks for reasoning about weak isolation will necessarily have to
 generalize the reasoning frameworks developed for weak consistency in
 new and important ways.
+
+%% Recent results on reasoning about application invariants in the
+%% presence of weak consistency~\cite{burckhardt14, redblueosdi,
+%% redblueatc, ecinec, gotsmanpopl16} address broadly related concerns.
+%% Weak consistency is a phenomenon that usually manifests on replicated
+%% data stores, where operations are concurrently executed against
+%% different replicas, resulting in an order of execution inconsistent
+%% with their serial order. The operations, nonetheless, are atomic and
+%% fully isolated, and each operation is required to locally preserve
+%% application invariants. In contrast, weak isolation is a property of
+%% transactions, which are sets of atomic operations. Weak isolation
+%% manifests when successive atomic operations in a transaction witness
+%% different contemporary states of the database (or different replicas
+%% of the replicated store) which, although consistent individually, may
+%% not be obviously reconciled into a consistent global view.
+%% Intuitively, the latter problem reduces to the former if all
+%% transactions contain a single operation. Furthermore, weak isolation
+%% can exist independent of weak consistency, as evident from the
+%% presence of weakly-isolated transactions on conventional RDBS. With an
+%% added complexity of replication, richer mechanisms are needed to
+%% reason about weak isolation in tandem with weak consistency. Thus,
+%% frameworks for reasoning about weak isolation will necessarily have to
+%% generalize the reasoning frameworks developed for weak consistency in
+%% new and important ways.
 
 % The framework should be general enough to reason about the semantics
 % of multiple isolation levels, including those proposed after the SQL

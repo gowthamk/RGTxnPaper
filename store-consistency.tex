@@ -350,16 +350,16 @@ First, we focus on the sequential aspect of the proof and show that
 the assertions that decorate \C{Wd1} are indeed valid. We consider the
 triple associated with the assignment to \C{B} for illustration. The
 pre-condition $\phi_4$ asserts different values for \C{B} and \C{v3}
-(temporary alias of RHS expression) depending on whether or not
-\C{Wd2} is committed. Inside \C{Wd1}, $\committed(\C{Wd2})$ may mean
-that either \C{Wd2} happened before \C{Wd1} (hence can be visible to
-all of \C{Wd1}), or that it committed concurrently with \C{Wd1} (hence
-cannot be visible to all of \C{Wd2}).  Nonetheless, $\phi_4$ only
-considers the case when $\C{Wd2} \visar \C{Wd1}$. As we show below,
-this is sufficient to prove the post-condition $\phi_5$, which appears
-to make a stronger claim about the value of \C{B}. The proof follows
-from the RG rule \rulelabel{RG-Asgn} for assignments, which allows us
-to easily conclude the following about the execution state after the
+depending on whether or not \C{Wd2} is committed. Inside \C{Wd1},
+$\committed(\C{Wd2})$ may mean that either \C{Wd2} happened before
+\C{Wd1} (hence can be visible to all of \C{Wd1}), or that it committed
+concurrently with \C{Wd1} (hence cannot be visible to all of \C{Wd2}).
+Nonetheless, $\phi_4$ only considers the case when $\C{Wd2} \visar
+\C{Wd1}$. As we show below, this is sufficient to prove the
+post-condition $\phi_5$, which appears to make a stronger claim about
+the value of \C{B}. The proof follows from the RG rule
+\rulelabel{RG-Asgn} for assignments, which allows us to easily
+conclude the following about the execution state after the
 assignment:\vspace*{-12pt}
 
 \begin{smathpar}
@@ -384,9 +384,9 @@ ${\committed(\C{Wd2})}  \Rightarrow \C{B = k-a2} \wedge \C{B =
 k-a2-a1}$, allowing us to prove the post-condition $\phi_5$.
 
 The second part of the proof is to show that assertions are stable
-despite the interference from the the concurrent thread executing
-\C{Wd2}. We formalize the interference as a rely relation that
-describes the semantics of \C{Wd2} at just the right level of
+despite the interference from the concurrent thread executing
+\C{Wd2}. We formalize such interference as a rely relation that
+describes the semantics of \C{Wd2} at the right level of
 abstraction. In particular, we would like to capture two important
 facts about \C{Wd2}: 
 \begin{itemize}
@@ -401,7 +401,7 @@ facts about \C{Wd2}:
   committed. This is clearly necessary to deduce the value of \C{B}
   before and after \C{Wd1} commits.
 \end{itemize}
- The resultant rely relation ($R_1$) is shown below (note: we
+The resultant rely relation ($R_1$) is shown below (note: we
 write $(\E'-\E) \Vdash {\committed(\C{Wd2})}$ to express that \C{Wd2}
 is not committed in $\E$, but committed in $\E'$.):
 
