@@ -105,16 +105,17 @@ application correctness.
 %%complicated
 Recent results on reasoning about application invariants in the
 presence of weak consistency~\cite{burckhardt14, redblueosdi,
-  redblueatc, ecinec, gotsmanpopl16} address broadly related concerns.
+redblueatc, ecinec, gotsmanpopl16} address broadly related concerns.
 Weak consistency is a phenomenon that manifests on replicated data
-stores, where operations are concurrently executed against different
-replicas, resulting in an execution order inconsistent with any serial
-(sequentially consistent) ordering.  In contrast, weak isolation is a
-property of atomic transactions whose effects interfere with one
-another in ways inconsistent with serializability.  Unlike weak
-consistency, weak isolation can manifest even in an unreplicated
-setting, as evident from the support for weakly-isolated transactions
-on conventional (unreplicated) databases as mentioned above.  With the
+stores, where atomic operations are concurrently executed against
+different replicas, resulting in an execution order inconsistent with
+%% We already say "inconsistent with.. ". 
+any sequential order. In contrast, weak isolation is a property of
+concurrent transactions interfering with one another resulting in an
+execution order that is not serializable. Unlike weak consistency,
+weak isolation can manifest even in an unreplicated setting, as
+evident from the support for weakly-isolated transactions on
+conventional (unreplicated) databases as mentioned above.  With the
 added complexity of replication, richer mechanisms are needed to
 reason about weak isolation in tandem with weak consistency. Thus,
 frameworks for reasoning about weak isolation will necessarily have to
@@ -167,13 +168,13 @@ declarative specifications of transaction isolation and store
 consistency, and generates executions that are guaranteed to satisfy
 these specifications. The result is a flexible system model that is
 general enough to incorporate the semantics of a range of isolation
-levels on a variety of stores (\eg the sequentially consistent store
+levels on a variety of stores (\eg~the sequentially consistent store
 of~\cite{adyaphd}, or the causally consistent store
 of~\cite{gotsmanpopl16}, etc).  Our key technical contribution is thus
 a set of proof rules that demonstrate that a program with a given
 selection of isolation levels for its transactions preserves its
 invariants when executed on a store equipped with certain consistency
-guarantees (\eg causal consistency).
+guarantees (\eg~causal consistency).
 
 The paper makes the following contributions:
 
