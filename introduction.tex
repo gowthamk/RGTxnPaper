@@ -115,12 +115,11 @@ concurrent transactions interfering with one another resulting in an
 execution order that is not serializable. Unlike weak consistency,
 weak isolation can manifest even in an unreplicated setting, as
 evident from the support for weakly-isolated transactions on
-conventional (unreplicated) databases as mentioned above.  With the
-added complexity of replication, richer mechanisms are needed to
-reason about weak isolation in tandem with weak consistency. Thus,
-frameworks for reasoning about weak isolation will necessarily have to
-generalize the reasoning frameworks developed for weak consistency in
-new and important ways.
+conventional (unreplicated) databases as mentioned above. In the
+presence of replication, however, the interaction between weak
+isolation and weak consistency can be subtle and non-trivial.
+Understanding weak isolation in these varied contexts thus requires
+new insights and substantial generalization of existing techniques.
 
 %% Recent results on reasoning about application invariants in the
 %% presence of weak consistency~\cite{burckhardt14, redblueosdi,

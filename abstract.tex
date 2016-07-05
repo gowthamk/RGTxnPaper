@@ -2,19 +2,19 @@
 
   Serializability is a well-understood correctness criterion that
   simplifies reasoning about the behavior of concurrent transactions
-  by ensuring that transactions are \emph{isolated} from each other.
-  However, enforcing serializable isolation comes at a steep cost in
-  performance because it necessarily restricts opportunities to
-  exploit concurrency even when such opportunities would not violate
-  application-specific invariants. As a result, database systems in
-  practice support, and often encourage, developers to use weaker
-  alternatives. These alternatives break the strong isolation
-  guarantees offered by serializable transactions to permit greater
-  concurrency. Unfortunately, the semantics of weak isolation is
-  poorly understood, and usually explained only informally in terms of
-  low-level implementation artifacts. Consequently, verifying
-  high-level correctness properties in such environments remains a
-  challenging problem.
+  by ensuring that transactions are \emph{isolated} from each other
+  while they execute.  However, enforcing serializable isolation comes
+  at a steep cost in performance because it necessarily restricts
+  opportunities to exploit concurrency even when such opportunities
+  would not violate application-specific invariants. As a result,
+  database systems in practice support, and often encourage,
+  developers to use weaker alternatives. These alternatives break the
+  strong isolation guarantees offered by serializable transactions to
+  permit greater concurrency. Unfortunately, the semantics of weak
+  isolation is poorly understood, and usually explained only
+  informally in terms of low-level implementation
+  artifacts. Consequently, verifying high-level correctness properties
+  in such environments remains a challenging problem.
 
   To address this issue, we present a program logic that enables
   compositional reasoning about the behavior of concurrently executing
