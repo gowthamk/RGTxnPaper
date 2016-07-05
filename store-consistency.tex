@@ -277,45 +277,45 @@ $\I_c$ is $\lambda\E.~\underE{\C{SI(Wd1)}} \conj
 \begin{txnimpcode}
 $\begin{decoration}
   \hspace*{0.3in}P : \{\neg\committed(\C{Wd1}) \conj \neg\committed(\C{Wd2}) \conj
-                          \C{C} = \C{k}\}
+                          \C{B} = \C{k}\}
 \end{decoration}$
 
  $\begin{decoration}
  P_1:\{ \neg\committed(\C{Wd1}) \conj
-        (\neg\committed(\C{Wd2}) \Rightarrow \C{C = k}) \conj\\
+        (\neg\committed(\C{Wd2}) \Rightarrow \C{B = k}) \conj\\
         \hspace*{0.3in}{\committed(\C{Wd2})} \Rightarrow 
-            \C{Wd2} \wrstoar \C{C} \wedge \C{C = k-a2} \}
+            \C{Wd2} \wrstoar \C{B} \wedge \C{B = k-a2} \}
  \end{decoration}$
   txn$\langle$'Wd1'$\rangle${
               $\vdots$ 
      $\begin{decoration}
-     \phi_4 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{C = k} \wedge \C{v3 = k-a1} \conj\\
+     \phi_4 : \{{\neg\committed(\C{Wd2})} \Rightarrow \C{B = k} \wedge \C{v3 = k-a1} \conj\\
         \hspace*{0.3in}({\committed(\C{Wd2})} \Rightarrow \C{Wd2}
-        \wrstoar \C{C}) \conj \neg\committed(\C{Wd1}) \conj \\
+        \wrstoar \C{B}) \conj \neg\committed(\C{Wd1}) \conj \\
         \hspace*{0.32in}{\committed(\C{Wd2})} \wedge
          {\C{Wd2} \visar \C{Wd1}} 
-        \Rightarrow \C{C = k-a2} \wedge \\
+        \Rightarrow \C{B = k-a2} \wedge \\
         \hspace*{1.9in}\C{v3 = k-a2-a1}\}
      \end{decoration}$ 
-     C := v3
+     B := v3
      $\begin{decoration}
-      \phi_5 : \{({\neg\committed(\C{Wd2})} \Rightarrow \C{C = k-a1}) 
+      \phi_5 : \{({\neg\committed(\C{Wd2})} \Rightarrow \C{B = k-a1}) 
           \conj \neg\committed(\C{Wd1}) \conj\\
          \hspace*{0.4in}{\committed(\C{Wd2})} 
-            \Rightarrow \C{Wd2} \wrstoar \C{C} \wedge \C{C = k-a1-a2}\}
+            \Rightarrow \C{Wd2} \wrstoar \C{B} \wedge \C{B = k-a1-a2}\}
       \end{decoration}$ 
               $\vdots$ 
   }
  $\begin{decoration}
-  Q_1 : \{{(\neg\committed(\C{Wd2})} \Rightarrow \C{C = k-a1})
+  Q_1 : \{{(\neg\committed(\C{Wd2})} \Rightarrow \C{B = k-a1})
             \conj \committed(\C{Wd1}) \conj\\
       \hspace*{0.4in}{\committed(\C{Wd2})} 
-          \Rightarrow \C{C = k-a1-a2} \}
+          \Rightarrow \C{B = k-a1-a2} \}
   \end{decoration}$ 
 
 $\begin{decoration}
   \hspace*{0.3in}Q : \{\committed(\C{Wd1}) \conj \committed(\C{Wd2}) \conj
-                          \C{C} = \C{k-a1-a2}\}
+                          \C{B} = \C{k-a1-a2}\}
 \end{decoration}$
 \end{txnimpcode}
 \vspace*{-8pt}
@@ -334,11 +334,11 @@ current state.  The context for propositions is also the implicit,
 i.e., we write $\psi$ instead of $\underE{\psi}$. The proposition \C{k
 $\ge$ a1+a2} remains an invariant, hence elided. The pre-condition
 $P_1$ of \C{Wd1} accounts for the possibility of \C{Wd2} committing
-before \C{Wd1}, writing \C{k-a2} to \C{C}. Since neither \C{Wd1} nor
+before \C{Wd1}, writing \C{k-a2} to \C{B}. Since neither \C{Wd1} nor
 \C{Wd2} are committed at the beginning, the pre-condition $P$ of the
 program is extended with $\neg\committed(\C{Wd1}) \wedge
 \neg\committed(\C{Wd2})$, from which $P_1$ follows. The post-condition
-$Q_1$ of \C{Wd1} asserts different values for \C{C} depending on
+$Q_1$ of \C{Wd1} asserts different values for \C{B} depending on
 whether or not \C{Wd2} has already committed.  It also asserts that
 \C{Wd1} has committed. The post-condition $Q_2$ of \C{Wd2} (not shown)
 is similar, but with the roles of \C{Wd1} and \C{Wd2} exchanged. The
@@ -348,8 +348,8 @@ also satisfy its spec, but the proof is similar).
 
 First, we focus on the sequential aspect of the proof and show that
 the assertions that decorate \C{Wd1} are indeed valid. We consider the
-triple associated with the assignment to \C{C} for illustration. The
-pre-condition $\phi_4$ asserts different values for \C{C} and \C{v3}
+triple associated with the assignment to \C{B} for illustration. The
+pre-condition $\phi_4$ asserts different values for \C{B} and \C{v3}
 (temporary alias of RHS expression) depending on whether or not
 \C{Wd2} is committed. Inside \C{Wd1}, $\committed(\C{Wd2})$ may mean
 that either \C{Wd2} happened before \C{Wd1} (hence can be visible to
@@ -357,30 +357,30 @@ all of \C{Wd1}), or that it committed concurrently with \C{Wd1} (hence
 cannot be visible to all of \C{Wd2}).  Nonetheless, $\phi_4$ only
 considers the case when $\C{Wd2} \visar \C{Wd1}$. As we show below,
 this is sufficient to prove the post-condition $\phi_5$, which appears
-to make a stronger claim about the value of \C{C}. The proof follows
+to make a stronger claim about the value of \C{B}. The proof follows
 from the RG rule \rulelabel{RG-Asgn} for assignments, which allows us
 to easily conclude the following about the execution state after the
 assignment:\vspace*{-12pt}
 
 \begin{smathpar}
 \begin{array}{l}
-    {\neg\committed(\C{Wd1}) \conj \C{Wd1} \wrstoar \C{C} 
-    \conj (\neg\committed(\C{Wd2})} \Rightarrow \C{C = k-a1}) \conj\\
+    {\neg\committed(\C{Wd1}) \conj \C{Wd1} \wrstoar \C{B} 
+    \conj (\neg\committed(\C{Wd2})} \Rightarrow \C{B = k-a1}) \conj\\
     ({\committed(\C{Wd2})} \Rightarrow \C{Wd2} \wrstoar
-    \C{C}) \conj \\
+    \C{B}) \conj \\
     ({\committed(\C{Wd2})} \wedge {\C{Wd2} \visar \C{Wd1}} 
-    \Rightarrow \C{C = k-a2} \wedge \C{C = k-a2-a1})
+    \Rightarrow \C{B = k-a2} \wedge \C{B = k-a2-a1})
 \end{array}
 \end{smathpar}
 
 \noindent The rule also lets us assume that the execution satisfies trace
 invariant ($\I$), which asserts {\sc si} for both transactions.  Since
-both transactions now write to \C{C}, {\sc si} requires either
+both transactions now write to \C{B}, {\sc si} requires either
 $\C{Wd1} \visar \C{Wd2}$, or $\C{Wd2} \visar \C{Wd1}$. Since \C{Wd1}
 is not yet committed ($\neg\committed(\C{Wd1})$), {\sc si} (which
 subsumes {\sc rc}) prohibits the former possibility, allowing us the
 deduce $\C{Wd2} \visar \C{Wd1}$. This lets us derive
-${\committed(\C{Wd2})}  \Rightarrow \C{C = k-a2} \wedge \C{C =
+${\committed(\C{Wd2})}  \Rightarrow \C{B = k-a2} \wedge \C{B =
 k-a2-a1}$, allowing us to prove the post-condition $\phi_5$.
 
 The second part of the proof is to show that assertions are stable
@@ -391,14 +391,14 @@ abstraction. In particular, we would like to capture two important
 facts about \C{Wd2}: 
 \begin{itemize}
   \item  If \C{Wd2} commits, then it should have already written to
-  \C{C}. This fact is needed to show that \C{Wd2} conflicts with
+  \C{B}. This fact is needed to show that \C{Wd2} conflicts with
   \C{Wd1}, so that \C{SI(Wd1)} property can be exploited to deduce
   $\C{Wd2} \visar \C{Wd1}$ from $\committed(\C{Wd2})$ in the
   sequential proof.
 
-  \item The value written to \C{C} is either $\C{k-a1-a2}$ or
+  \item The value written to \C{B} is either $\C{k-a1-a2}$ or
   $\C{k-a1}$ depending on whether or not \C{Wd1} has already
-  committed. This is clearly necessary to deduce the value of \C{C}
+  committed. This is clearly necessary to deduce the value of \C{B}
   before and after \C{Wd1} commits.
 \end{itemize}
  The resultant rely relation ($R_1$) is shown below (note: we
@@ -412,18 +412,18 @@ is not committed in $\E$, but committed in $\E'$.):
 %       \neg\underE{\committed(\C{Wd2})} \conj \I(\E) \conj \I(\E')\\
 %       \conj (\E'-\E) \subseteq \C{Wd2} \conj \\
 %   & & \hspace*{0.5in} \E' \Vdash \committed(\C{Wd2}) ~\Rightarrow~ \E'
-%       \Vdash \C{Wd2} \wrstoar \C{C} \conj \\ 
+%       \Vdash \C{Wd2} \wrstoar \C{B} \conj \\ 
 %   & & \hspace*{0.5in} \underE{\committed(\C{Wd1})} \conj \E' \Vdash
-%   \committed(\C{Wd2}) \Rightarrow \C{C=k-a1-a2} \\
+%   \committed(\C{Wd2}) \Rightarrow \C{B=k-a1-a2} \\
 %   & & \hspace*{0.5in} \neg\underE{\committed(\C{Wd1})} \conj
 %       (\E'-\E) \Vdash {\committed(\C{Wd2})}\\
-    & & \hspace*{0.8in}\Rightarrow \C{C=k-a2} \conj 
-        \E' \Vdash \C{Wd2} \wrstoar \C{C} \\
+    & & \hspace*{0.8in}\Rightarrow \C{B=k-a2} \conj 
+        \E' \Vdash \C{Wd2} \wrstoar \C{B} \\
     & & \hspace*{0.37in} \conj \underE{\committed(\C{Wd1})} \conj
         (\E'-\E) \Vdash {\committed(\C{Wd2})}\\
 %       \C{COMMIT(Wd2)} \in (\E'.\A-\E.\A) \\
-    & & \hspace*{0.6in}\Rightarrow \C{C=k-a1-a2} \conj
-        \E' \Vdash \C{Wd2} \wrstoar \C{C} \\
+    & & \hspace*{0.6in}\Rightarrow \C{B=k-a1-a2} \conj
+        \E' \Vdash \C{Wd2} \wrstoar \C{B} \\
     & & \hspace*{0.37in}\conj \forall(\eta \in \E'.\A - 
         \E.\A).~\txn(\eta) = \C{Wd2}\}\\
 \end{array}
@@ -434,7 +434,7 @@ prove that an interference from \C{Wd2} does not affect the local
 state of \C{Wd1}.
 
 The stability for $\phi_4$ w.r.t. $R_1$ is trivial to establish: if
-$R_1$ does not commit \C{Wd2}, then the value of \C{C} is unaffected,
+$R_1$ does not commit \C{Wd2}, then the value of \C{B} is unaffected,
 and if it commits \C{Wd2}, then $\C{Wd2}\not\visar\C{Wd1}$, hence
 $\phi_4$ doesn't care. For $\phi_5$, {\sc si} condition should be used
 to show that any interference from \C{Wd2} is invalid. The proof

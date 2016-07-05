@@ -3,40 +3,40 @@
 
 In this section, we motivate our ideas via an example written in
 \txnimp - a C-like imperative language equipped with a \C{txn} lexical
-block defining a transaction scope.  For exposition convenience, each
-\C{txn} block is associated with a single-quoted string in angle
+block defining a transaction scope.  For expositional convenience,
+each \C{txn} block is associated with a single-quoted string in angle
 braces that uniquely identifies the transaction. We use Hoare triple
 notation to annotate programs with pre- and post- conditions.
 
 \begin{figure}
 \centering
-$\{\texttt{C}=\texttt{k} \conj \texttt{k}\ge\texttt{a1+a2}\}$
+$\{\texttt{B}=\texttt{k} \conj \texttt{k}\ge\texttt{a1+a2}\}$
 \begin{tabular}{l||l}
 \begin{txnimpcode}
   txn$\langle$'Wd1'$\rangle${
-    if (C $\ge$ a1) {
-      C := C - a1
+    if (B $\ge$ a1) {
+      B := B - a1
     }
   }
 \end{txnimpcode}
 &
 \begin{txnimpcode}
   txn$\langle$'Wd2'$\rangle${
-    if (C $\ge$ a2) {
-      C := C - a2
+    if (B $\ge$ a2) {
+      B := B - a2
     }
   }
 \end{txnimpcode}
 \\
 \end{tabular}
-$\{\texttt{C}=\texttt{k-a1-a2}\}$
+$\{\texttt{B}=\texttt{k-a1-a2}\}$
 \caption{\small Concurrent withdraw transactions}
 \label{fig:motiv-eg-1}
 \vspace*{-10pt}
 \end{figure}
 
 Consider an implementation of a banking application that admits
-concurrent withdraw transactions on a checking account (\C{C}), as
+concurrent withdraw transactions on an account balance (\C{B}), as
 shown in Fig.~\ref{fig:motiv-eg-1}. If the initial balance (\C{k}) in
 the account is enough to perform both withdraws, then the final
 balance, after both transactions commit, is expected to reflect the
@@ -46,15 +46,15 @@ are guaranteed to hold if both withdraw transactions are serialized,
 making \iso{Serializable} isolation ({\sc ser}) level a sufficent
 condition to preserve invaraints. But, is {\sc ser} necessary?
 
-As an alternative, consider the execution of this transaction under
-a \emph{Read Committed} ({\sc rc}) isolation level, which is weaker than
+As an alternative, consider the execution of this transaction under a
+\emph{Read Committed} ({\sc rc}) isolation level, which is weaker than
 {\sc ser}.\footnote{{\sc rc} is in fact the default isolation level in
 Postgres 9.5 and Oracle 11g databases.} An {\sc rc} transaction is
 isolated from the writes of uncommitted transactions, and is therefore
 free from \emph{dirty reads}~\cite{berenson} that read uncommitted
 data. In the current example, {\sc rc} isolation admits the two
 executions shown in Fig.~\ref{fig:rc-ex} on a strongly consistent
-({\sc sc}) store, such as a relational database.
+({\sc sc}) store, such as a conventional RDBMS.
 
 \begin{figure}[!h]
 \centering
@@ -79,16 +79,17 @@ executions shown in Fig.~\ref{fig:rc-ex} on a strongly consistent
 \end{figure}
 
 The figure depicts an execution as a series of read, write, and commit
-operations.  The subscript of an operation indicates the transaction
-that executes it. In the first execution, transaction \C{Wd1} reads
-the current balance (\C{k}) and writes the new balance (\C{k-a1}), but
+operations. The subscript of an operation indicates the transaction
+that executes it (Both transactions read \C{B} twice, hence two read
+operations). In the execution on left, transaction \C{Wd1} reads the
+current balance (\C{k}) and writes the new balance (\C{k-a1}), but
 before it commits, transaction \C{Wd2} executes and commits, writing
 the new balance (\C{k-a2}). {\sc rc} isolation prevent \C{Wd2} from
 witnessing the uncommitted writes of transaction \C{Wd1}.
 Subsequently committing \C{Wd1} leads to the loss of \C{Wd2}'s updates
 (the so-called \emph{lost update anomaly}~\cite{berenson}), resulting
-in an incorrect balance of \C{k-a1}. The second execution describes a
-similar scenario with \C{Wd1} and \C{Wd2} exchanging their roles.
+in an incorrect balance of \C{k-a1}. The execution on right describes
+a similar scenario with \C{Wd1} and \C{Wd2} exchanging their roles.
 Clearly, {\sc rc} is an excessively weak isolation level for this
 program because it loses the updates of one transaction, resulting in
 the violation of the post-condition.  A stronger isolation level that
@@ -98,9 +99,9 @@ serializes transactions that update a shared data object by aborting
 and re-executing a transaction if write-write conflicts are detected
 during its commit.\footnote{{\sc si} however does not serialize
 transactions in the absence of write-write conflicts.} Since {\sc si},
-unlike {\sc ser}, does not rely on expensive lock-based concurrency
-control, it is also more efficient, making it appropriate for both
-\C{Wd} transactions.
+unlike {\sc ser}, does not need expensive mechanisms such as
+lock-based concurrency control or runtime monitoring, it is also more
+efficient, making it appropriate for both withdraw transactions.
 
 Thinking in terms of anomalies, as described above, is how database
 programmers are often encouraged to reason about weak isolation.
@@ -137,7 +138,7 @@ from committed non-conflicting transactions, and so on.
 \begin{figure}
 \begin{smathpar}
 \begin{array}{lcl}
-\psi_{RC} & \defeq & \forall T_1,T_2,\eta_1,\eta_2,.\; \txn(\eta_1) = T_1 
+\psi_{RC} & \defeq & \forall T_1,T_2,\eta_1,\eta_2.\; \txn(\eta_1) = T_1 
   \conj \txn(\eta_2) = T_2 \\
   & & \hspace*{0.6in}\conj T_1 \neq T_2 \conj \eta_1 \hboar
   \eta_2 \Rightarrow T_1 \hboar \eta_2 \\
@@ -185,9 +186,9 @@ in $T_1$ (including its commit) happens-before $\eta_2$ (we let $T_1
 to execute and commit before all operations of $T_2$, thus allowing it
 to interfere in $T_2$. The \iso{Snapshot Isolation} specification
 ($\psi_{SI}$) requires two transactions that write to the same
-variable to be related by happens-before.  This effectively prohibits
-interference due to actions in $T_1$ being interleaved in $T_2$ (or,
-vise versa). 
+variable (denoted $\wrstoar$)to be related by happens-before.  This
+effectively prohibits interference due to actions in $T_1$ being
+interleaved in $T_2$ (or, vise versa). 
 
 Fig.~\ref{fig:motiv-eg-1-hb} is a visualization of $\hbZ$ from \C{Wd2}
 to \C{Wd1} allowed by $\psi_{RC}$ and $\psi_{SI}$. All arrows are
@@ -201,7 +202,7 @@ what happens before that operation, the structure of the $\hbZ$
 relation ultimately dictates the final result of the program. The
 solid arrow and the first (from left) dashed arrow in
 Fig.~\ref{fig:motiv-eg-1-hb} denote $\hbZ$ relationships that do not
-affect the value of \C{C} in a way that causes the program to violate
+affect the value of \C{B} in a way that causes the program to violate
 its post-condition. The last two dashed arrows denote $\hbZ$
 relationships that lead to the violation of the post-condition. The
 task of the reasoning framework is to determine if all $\hbZ$
@@ -223,36 +224,36 @@ point, while preserving $\hbZ$ constraints as invariants between
 program points. An interference that leads to the violation of $\hbZ$
 constraints (i.e., an invalid interference) is thus automatically
 prohibited. For instance, consider the program point after the write
-to \C{C} in \C{Wd1}. The expected invariant ($\phi$) at that program
+to \C{B} in \C{Wd1}. The expected invariant ($\phi$) at that program
 point is shown below ($\committed$ stands for ``committed''):
 
 \begin{smathpar}
 \begin{array}{c}
- \neg\committed(\C{Wd1}) \conj \C{Wd1} \wrstoar \C{C}  \conj 
-    (\neg\committed(\C{Wd2}) \Rightarrow \C{C = k-a1}) \\
+ \neg\committed(\C{Wd1}) \conj \C{Wd1} \wrstoar \C{B}  \conj 
+    (\neg\committed(\C{Wd2}) \Rightarrow \C{B = k-a1}) \\
     \conj (\committed(\C{Wd2})
-                \Rightarrow \C{C = k-a1-a2})
+                \Rightarrow \C{B = k-a1-a2})
 \end{array}
 \end{smathpar}
 
 \noindent $\phi$ asserts that \C{Wd1} is not yet committed, and that
-it wrote to \C{C}, and the value of \C{C} is either \C{k-a1-a2} or
+it wrote to \C{B}, and the value of \C{B} is either \C{k-a1-a2} or
 \C{k-a1} depending on whether or not \C{Wd2} is committed. If $\phi$
-remains invariant until \C{Wd1} commits, then the post-condition (\C{C
+remains invariant until \C{Wd1} commits, then the post-condition (\C{B
 = k-a1-a2}) can be established easily. However, an interference from
 \C{Wd2} at this stage (captured by the last dashed arrow in
 Fig.~\ref{fig:motiv-eg-1-hb}) may violate the invariant by writing
-$\C{k-a1}$ to \C{C} and committing \C{Wd2}, thus leading to
-$\committed(\C{Wd2}) \Rightarrow \C{C=k-a2}$. Fortunately,
+$\C{k-a1}$ to \C{B} and committing \C{Wd2}, thus leading to
+$\committed(\C{Wd2}) \Rightarrow \C{B=k-a2}$. Fortunately,
 \iso{Snapshot Isolation} prevents this interference, and this can be
 shown by demonstrating that an interference from \C{Wd2} starting from
 an execution state that satisfies $\psi_{SI} \wedge \phi$ leads to an
 execution state where neither $\C{Wd2} \hboar \C{Wd1}$ nor $\C{Wd1}
-\hboar \C{Wd2}$ holds ($\C{Wd2} \hboar \C{Wd1}$ does not hold because
-\C{Wd1}'s write to \C{C} clearly happened before \C{Wd2}'s commit, and
+\hboar \C{Wd2}$ holds; $\C{Wd2} \hboar \C{Wd1}$ does not hold because
+\C{Wd1}'s write to \C{B} clearly happened before \C{Wd2}'s commit, and
 $\C{Wd1} \hboar \C{Wd2}$ does not hold because \C{Wd1} has not yet
-committed, while \C{Wd2} has already begun). Since \C{Wd2} also writes
-to \C{C}, this violates the $\psi_{SI}$ constraint which we assume to
+committed, while \C{Wd2} has already begun. Since \C{Wd2} also writes
+to \C{B}, this violates the $\psi_{SI}$ constraint which we assume to
 be an invariant. A proof that the post-condition holds now follows
 from the contradiction. It is informative to note that if the
 invariant is $\psi_{RC}$ instead of $\psi_{SI}$, we cannot derive a
@@ -271,9 +272,9 @@ until they are committed. Once committed though, effects need to be
 immediately visible to subsequent operations. This semantics can be
 built into the reasoning framework, leading to a proof system
 tailor-made for such stores. However, for the reasoning framework to
-be truly useful, it has to be parametric over different store
-consistency semantics, supporting stores that are weaker than {\sc sc}
-(e.g., causally or eventually consistent), and should be able to
-reconcile conflicts between consistency and isolation constraints.  We
+be truly useful, it has to be parametric over different consistency
+semantics, supporting stores that are weaker than {\sc sc} (e.g.,
+causally or eventually consistent), and should be able to reconcile
+conflicts between consistency and isolation constraints.  We
 demonstrate how our reasoning framework makes this possible in the
 following sections.

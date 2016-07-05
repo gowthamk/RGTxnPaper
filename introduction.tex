@@ -112,19 +112,18 @@ fully isolated, and each operation is required to locally preserve
 application invariants. In contrast, weak isolation is a property of
 transactions, which are sets of atomic operations. Weak isolation
 manifests when successive atomic operations in a transaction witness
-different contemporary states (or different replicas) of the database
-which, although consistent individually, may not be obviously
-reconciled into a consistent global view. Furthermore, operations may
-temporarily break invariants as long as transaction as a whole
-preserves them.  Intuitively, the latter problem reduces to the former
-if all transactions contain a single operation. Furthermore, weak
-isolation can exist independent of weak consistency, as evident from
-the presence of weakly-isolated transactions on sequentially
-consistent relational databases; such systems existed long before the
-advent of weakly consistent NoSQL stores.  Thus, frameworks for
-reasoning about weak isolation will necessarily have to generalize the
-reasoning frameworks developed for weak consistency in new and
-important ways.
+different contemporary states of the database (or different replicas
+of the replicated store) which, although consistent individually, may
+not be obviously reconciled into a consistent global view.
+Intuitively, the latter problem reduces to the former if all
+transactions contain a single operation. Furthermore, weak isolation
+can exist independent of weak consistency, as evident from the
+presence of weakly-isolated transactions on conventional RDBS. With an
+added complexity of replication, richer mechanisms are needed to
+reason about weak isolation in tandem with weak consistency. Thus,
+frameworks for reasoning about weak isolation will necessarily have to
+generalize the reasoning frameworks developed for weak consistency in
+new and important ways.
 
 % The framework should be general enough to reason about the semantics
 % of multiple isolation levels, including those proposed after the SQL
@@ -178,12 +177,12 @@ The paper makes the following contributions:
 
 \noindent Our results provide the first (to the best of our knowledge)
 mechanism that precisely and uniformly relates high-level program
-invariants to low-level weak isolation and store consistency
+invariants to low-level weak isolation and weak consistency
 guarantees, thereby allowing weakly-isolated transactions to enjoy the
 same rigorous reasoning capabilities as their strongly-isolated
 (serializable) counterparts.
 
-The remainder of the paper is organized as follows.  The next section
+The remainder of the paper is organized as follows. The next section
 provides motivation and background on serializable and weakly-isolated
 transactions. \S\ref{sec:opsem} presents an operational semantics for
 a core language that supports weakly-isolated transactions,

@@ -31,13 +31,13 @@ corresponding \emph{bi-execution} rely relation relates every pair of
 executions $\E$ and $\E'$ such that $\interp{\E}(X) \ge
 \interp{\E'}(X) \ge 0$.  Assertions on states are also written
 similarly. For instance, consider the post-condition
-$\C{C\,=\,k-a1-a2}$ of the program in Fig.~\ref{fig:motiv-eg-1}. The
+$\C{B\,=\,k-a1-a2}$ of the program in Fig.~\ref{fig:motiv-eg-1}. The
 corresponding assertion on the post-state
-($\lambda\sigma.~\sigma(\C{C}) \,=\, \C{k-a1-a2}$) asserts that in all
-states resulting from executing the program, the value of \C{C} is
+($\lambda\sigma.~\sigma(\C{B}) \,=\, \C{k-a1-a2}$) asserts that in all
+states resulting from executing the program, the value of \C{B} is
 \C{k-a1-a2}. The equivalent execution-based assertion
-($\lambda\E.~\interp{\E}(\C{C})\,=\,\C{k-a1-a2}$) asserts that in all
-executions of the program, the value of \C{C} is \C{k-a1-a2}.
+($\lambda\E.~\interp{\E}(\C{B})\,=\,\C{k-a1-a2}$) asserts that in all
+executions of the program, the value of \C{B} is \C{k-a1-a2}.
 However, having access to an execution facilitates assertions that go
 beyond the state. An example is an invariant of \C{Wd1} described
 abstractly in \S\ref{sec:motivation}, and reified as an
@@ -46,11 +46,11 @@ execution-based assertion below:
 \begin{smathpar}
 \begin{array}{l}
   \lambda\E.~ \neg(\underE{\committed(\C{Wd1}}) \conj 
-      \underE{\C{Wd1} \wrstoar \C{C}}\\
+      \underE{\C{Wd1} \wrstoar \C{B}}\\
   \hspace*{0.2in}\conj(\neg(\underE{\committed(\C{Wd2})}) \Rightarrow 
-      \C{\interp{\E}(C) = k-a1}) \\
+      \C{\interp{\E}(B) = k-a1}) \\
    \hspace*{0.2in}\conj (\underE{\committed(\C{Wd2})} \Rightarrow 
-      \C{\interp{\E}(C) = k-a1-a2})
+      \C{\interp{\E}(B) = k-a1-a2})
 \end{array}
 \end{smathpar}
 % Where, $\committed$ is defined as:
@@ -61,8 +61,8 @@ execution-based assertion below:
 % \end{array}
 % \end{smathpar}
 
-\noindent One of the conjuncts asserts that \C{Wd1} has written to \C{C} - a
-fact which cannot be deduced solely from the value of \C{C} (esp. in the
+\noindent One of the conjuncts asserts that \C{Wd1} has written to \C{B} - a
+fact which cannot be deduced solely from the value of \C{B} (esp. in the
 presence of interference), but can be expressed as a proposition over
 the execution trace.
 
