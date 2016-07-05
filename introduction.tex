@@ -2,7 +2,7 @@
 \section{Introduction}
 
 Database transactions allow users to group operations on multiple
-objects into a coherent unit, equipped with a set of four key
+objects into a single logical unit, equipped with a set of four key
 properties - atomicity, consistency, isolation, and durability (ACID).
 Concurrency control mechanisms provide specific instantiations of
 these properties to yield different ACID variants that characterize
@@ -13,18 +13,18 @@ constraints on transaction execution, ensuring that any permissible
 concurrent schedule yields results equivalent to a serial one in which
 there is no interleaving of actions from different transactions.
 
-The guarantees provided by serializability, and strong isolation in
-particular, do not come for free, however - pessimistic concurrency
-control methods that enforce serializability, for example, require
-databases to provide expensive techniques such as two-phase locking
-that incur overhead to deal with deadlocks, rollbacks, and
-re-execution~\cite{twopl,ullmanbook}.  Similar criticisms apply to
-optimistic multi-version concurrency control methods that must deal
-with timestamp and version management~\cite{BG81}.  Regardless of the
-particular concurrency control method employed, enforcing
-serializability in a replicated data store additionally requires
-global coordination among geo-distributed replicas, which makes the
-store \emph{unavailable} in the presence of network
+The guarantees provided by serializability do not come for free,
+however - pessimistic concurrency control methods that enforce
+serializability, for example, require databases to provide expensive
+techniques such as two-phase locking that incur overhead to deal with
+deadlocks, rollbacks, and re-execution~\cite{twopl,ullmanbook}.
+Similar criticisms apply to optimistic multi-version concurrency
+control methods that must deal with timestamp and version
+management~\cite{BG81}.  Regardless of the particular concurrency
+control method employed, enforcing serializability in a replicated
+data store additionally requires global coordination among
+geo-distributed replicas, which makes the store \emph{unavailable} in
+the presence of network
 partitions~\cite{cap,sernotavlbl,bailishat,bernsigmod13}.
 
 The tension between serializable transactions, which are easy to
@@ -45,8 +45,7 @@ study~\cite{bailisferal} of a large corpus of database applications
 finds no evidence that applications manifestly change the default
 isolation level offered by the database. Taken together, these studies
 make clear that weakly-isolated transactions are quite prevalent in
-practice, and strongly-isolated (serializable) transactions are often
-eschewed altogether.
+practice, whereas serializable transactions are often eschewed.
 
 Unfortunately, weak isolation admits behaviors that are difficult to
 comprehend~\cite{berenson}. To quantify weak isolation anomalies,
@@ -95,7 +94,7 @@ definitions of some of well-known isolation levels in the context of a
 sequentially consistent (SC) database.  However, there has been little
 progress relating Adya's system model to a formal operational
 semantics or a proof system that can facilitate rigorous correctness
-arguments.  Consequently, reasoning about weak isolation remains an
+arguments. Consequently, reasoning about weak isolation remains an
 error prone endeavor, with major database vendors~\cite{postgresiso,
   mysqliso, oracleiso} continuing to document their isolation levels
 primarily in terms of the undesirable phenomena a particular isolation
@@ -104,24 +103,28 @@ application correctness.
 
 Recent results on reasoning about application invariants in the
 presence of weak \emph{consistency}~\cite{burckhardt14, redblueosdi,
-  redblueatc, ecinec, gotsmanpopl16} address broadly related concerns.
-At a high-level, reasoning about weak consistency involves reasoning
-about the concurrent execution of strongly atomic and fully isolated
-operations against different (potentially replicated), but consistent
-states of the database or data store, where each operation locally
-preserves application invariants. In contrast, reasoning about weak
-isolation involves reasoning about the concurrent execution of
-transactions, whose operations witness different states which,
-although consistent individually, may not be obviously reconciled into
-a consistent global view.  Intuitively, the latter problem reduces to
-the former if all transactions contain a single
-operation. Furthermore, weak isolation can exist independent of weak
-consistency, as evident from the presence of weakly isolated
-transactions on sequentially consistent relational databases; such
-systems existed long before the advent of weakly consistent NoSQL
-stores.  Thus, frameworks for reasoning about weak isolation will
-necessarily have to generalize the reasoning frameworks developed for
-weak consistency in new and important ways.
+redblueatc, ecinec, gotsmanpopl16} address broadly related concerns.
+Weak consistency is a phenomenon that usually manifests on replicated
+data stores, where operations are concurrently executed against
+different replicas, resulting in an order of execution inconsistent
+with their serial order. The operations, nonetheless, are atomic and
+fully isolated, and each operation is required to locally preserve
+application invariants. In contrast, weak isolation is a property of
+transactions, which are sets of atomic operations. Weak isolation
+manifests when successive atomic operations in a transaction witness
+different contemporary states (or different replicas) of the database
+which, although consistent individually, may not be obviously
+reconciled into a consistent global view. Furthermore, operations may
+temporarily break invariants as long as transaction as a whole
+preserves them.  Intuitively, the latter problem reduces to the former
+if all transactions contain a single operation. Furthermore, weak
+isolation can exist independent of weak consistency, as evident from
+the presence of weakly isolated transactions on sequentially
+consistent relational databases; such systems existed long before the
+advent of weakly consistent NoSQL stores.  Thus, frameworks for
+reasoning about weak isolation will necessarily have to generalize the
+reasoning frameworks developed for weak consistency in new and
+important ways.
 
 % The framework should be general enough to reason about the semantics
 % of multiple isolation levels, including those proposed after the SQL
@@ -136,23 +139,22 @@ build correctness proofs for transactional programs in the presence of
 a weakly isolated concurrency control mechanism.  A key novelty of our
 approach is that it is parametric over the \emph{isolation semantics}
 of transactions in the program, as well as the \emph{consistency
-  semantics} of the underlying store. In concrete terms, this means
-that, unlike recent work focused on formalizing the semantics of weak
-consistency~\cite{gotsmanpopl16, redblueatc, ecinec}, our system model
-does not assume a minimum or predefined set of consistency or
+semantics} of the underlying store. In concrete terms, this means
+that, unlike recent work focused on reasoning about programs under
+weak consistency~\cite{gotsmanpopl16, redblueatc, ecinec}, our system
+model does not assume a minimum or predefined set of consistency or
 isolation levels. Instead, our operational semantics admits
 declarative specifications of transaction isolation and store
-consistency levels (\eg~\cite{pldi15,gotsmanconcur15}), and generates
-executions that are guaranteed to satisfy these specifications. The
-result is a flexible system model that is general enough to
-incorporate the semantics of a range of isolation levels on a variety
-of stores (\eg the sequentially consistent store of~\cite{adyaphd}, or
-the causally consistent store of~\cite{gotsmanpopl16}, etc).  Our key
-technical contribution is thus a set of proof rules that demonstrate
-that a program with a given selection of isolation levels for its
-transactions preserves its invariants when executed on a store
-equipped with certain consistency guarantees (e.g., causal
-visibility).
+consistency, and generates executions that are guaranteed to satisfy
+these specifications. The result is a flexible system model that is
+general enough to incorporate the semantics of a range of isolation
+levels on a variety of stores (\eg the sequentially consistent store
+of~\cite{adyaphd}, or the causally consistent store
+of~\cite{gotsmanpopl16}, etc).  Our key technical contribution is thus
+a set of proof rules that demonstrate that a program with a given
+selection of isolation levels for its transactions preserves its
+invariants when executed on a store equipped with certain consistency
+guarantees (\eg causal consistency).
 
 The paper makes the following contributions:
 \begin{itemize}
