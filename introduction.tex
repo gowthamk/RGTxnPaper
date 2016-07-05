@@ -151,10 +151,11 @@ the causally consistent store of~\cite{gotsmanpopl16}, etc).  Our key
 technical contribution is thus a set of proof rules that demonstrate
 that a program with a given selection of isolation levels for its
 transactions preserves its invariants when executed on a store
-equipped with certain consistency guarantees (e.g., causal
+equipped with appropriate consistency guarantees  (\emph{e.g.}, causal
 visibility).
 
 The paper makes the following contributions:
+
 \begin{itemize}
   \item We develop a semantics for a core language equipped with
     weakly-isolated transactions, demonstrating that a general
