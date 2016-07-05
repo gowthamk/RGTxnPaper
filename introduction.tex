@@ -116,7 +116,7 @@ although consistent individually, may not be obviously reconciled into
 a consistent global view.  Intuitively, the latter problem reduces to
 the former if all transactions contain a single
 operation. Furthermore, weak isolation can exist independent of weak
-consistency, as evident from the presence of weakly isolated
+consistency, as evident from the presence of weakly-isolated
 transactions on sequentially consistent relational databases; such
 systems existed long before the advent of weakly consistent NoSQL
 stores.  Thus, frameworks for reasoning about weak isolation will
@@ -133,7 +133,7 @@ In this paper, we propose a program logic for weakly-isolated
 transactions that realizes this goal.  In particular, we develop a set
 of syntax-directed compositional proof rules that allow developers to
 build correctness proofs for transactional programs in the presence of
-a weakly isolated concurrency control mechanism.  A key novelty of our
+a weakly-isolated concurrency control mechanism.  A key novelty of our
 approach is that it is parametric over the \emph{isolation semantics}
 of transactions in the program, as well as the \emph{consistency
   semantics} of the underlying store. In concrete terms, this means
@@ -160,7 +160,7 @@ The paper makes the following contributions:
     weakly-isolated transactions, demonstrating that a general
     parametric isolation semantics can be expressed as
     well-formedness constraints on a program's execution.
-  \item We propose a compositional proof system for this language
+  \item We present a compositional proof system for this language
     capable of relating high-level application invariants to the structure
     of traces induced by the operational semantics, in which transactions
     are associated with specific weak isolation levels.
@@ -173,8 +173,8 @@ The paper makes the following contributions:
     the applicability and utility of our proof methodology.
 \end{itemize}
 
-\noindent Our results provide the first (to the best of our
-knowledge) mechanism that precisely relates high-level program
+\noindent Our results provide the first (to the best of our knowledge)
+mechanism that precisely and uniformly relates high-level program
 invariants to low-level weak isolation and store consistency
 guarantees, thereby allowing weakly-isolated transactions to enjoy the
 same rigorous reasoning capabilities as their strongly-isolated
