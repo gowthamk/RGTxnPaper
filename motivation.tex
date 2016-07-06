@@ -51,10 +51,10 @@ As an alternative, consider the execution of this transaction under a
 {\sc ser}.\footnote{{\sc rc} is in fact the default isolation level in
 Postgres 9.5 and Oracle 11g databases.} An {\sc rc} transaction is
 isolated from the writes of uncommitted transactions, and is therefore
-free from \emph{dirty reads}~\cite{berenson} that read uncommitted
-data. In the current example, {\sc rc} isolation admits the two
-executions shown in Fig.~\ref{fig:rc-ex} on a strongly consistent
-({\sc sc}) store, such as a conventional RDBMS.
+free from \emph{dirty reads}~\cite{berenson} of uncommitted data. In
+the current example, {\sc rc} isolation admits the two executions
+shown in Fig.~\ref{fig:rc-ex} on a strongly consistent ({\sc sc})
+store, such as a conventional RDBMS.
 
 \begin{figure}[!h]
 \centering
@@ -148,8 +148,9 @@ from committed non-conflicting transactions, and so on.
   &  & \hspace*{0.6in}\Rightarrow{T_1 \hboar T_2} \disj {T_2 \hboar T_1} \\
 \end{array}
 \end{smathpar}
-\caption{\small Visibility and interference properties for different weak isolation levels can be
-  captured by different instantiations of their happens-before relation.}
+\caption{\small Interference properties for different weak isolation
+levels can be captured as constraints over the happens-before
+relation.}
 \label{fig:interference-ex}
 \end{figure}
 
@@ -170,25 +171,27 @@ from committed non-conflicting transactions, and so on.
 For the rely-guarantee approach to be useful, it has to thus constrain
 allowed interference in accordance with the chosen level of isolation
 associated with a transaction. The first observation we make is that
-we can constrain interference by constraining the definition of the
+we can constrain interference by constraining the nature of the
 \emph{happens-before} ($\hbZ$) relation, which ultimately dictates
-what actions become visible to a transaction, or its constituents, and
-when. To do so, we axiomatize the $\hbZ$ relation to capture the
-interference characteristics of different isolation levels as their
-specifications. Two such specifications are shown\footnote{Note that
-specifications presented here are solely for illustration. The actual
-specifications described in \S\ref{sec:ansi-isolation} are more
-nuanced.} in Fig.~\ref{fig:interference-ex}. The \iso{Read Committed}
-specification ($\psi_{RC}$) allows an operation $\eta_1$ of $T_1$ to
-happen-before an operation $\eta_2$ of $T_2$ only if every operation
-in $T_1$ (including its commit) happens-before $\eta_2$ (we let $T_1
-\hboar \eta_2$ denote this). The specification does not require $T_1$
-to execute and commit before all operations of $T_2$, thus allowing it
-to interfere in $T_2$. The \iso{Snapshot Isolation} specification
-($\psi_{SI}$) requires two transactions that write to the same
-variable (denoted $\wrstoar$)to be related by happens-before.  This
-effectively prohibits interference due to actions in $T_1$ being
-interleaved in $T_2$ (or, vise versa). 
+what other transactions become visible to a transaction, or its
+constituents, and when. To do so, we axiomatize the $\hbZ$ relation to
+capture the interference characteristics of different isolation levels
+as their specifications. Two such specifications are
+shown\footnote{Note that specifications presented here are solely for
+illustration. The actual specifications described in
+\S\ref{sec:ansi-isolation} are more nuanced.} in
+Fig.~\ref{fig:interference-ex}. The \iso{Read Committed} specification
+($\psi_{RC}$) allows an operation $\eta_1$ of a transaction $T_1$ to
+happen-before an operation $\eta_2$ of another transaction $T_2$ only
+if every operation in $T_1$ (including its commit) happens-before
+$\eta_2$ (we let $T_1 \hboar \eta_2$ denote this). The specification
+does not require $T_1$ to execute and commit before all operations of
+$T_2$, thus allowing it to interfere in $T_2$, just as \C{Wd2}
+interferes in \C{Wd1} in Fig.~\ref{fig:motiv-eg-1-a}. The
+\iso{Snapshot Isolation} specification ($\psi_{SI}$) requires two
+transactions that write to the same variable (denoted $\wrstoar$) to be
+related by happens-before.  This effectively prohibits interference
+due to actions in $T_1$ being interleaved in $T_2$ (or, vice versa). 
 
 Fig.~\ref{fig:motiv-eg-1-hb} is a visualization of $\hbZ$ from \C{Wd2}
 to \C{Wd1} allowed by $\psi_{RC}$ and $\psi_{SI}$. All arrows are
@@ -260,21 +263,13 @@ invariant is $\psi_{RC}$ instead of $\psi_{SI}$, we cannot derive a
 contradiction and we cannot rule out the interference, which
 (rightfully) causes  the proof to fail.
 
-We have thus far assumed a strongly consistent ({\sc sc}) store that,
-in the absence of transactions with special isolation requirements,
-makes the effects of any operation immediately visible to all
-subsequent operations. The natural behaviour of {\sc sc} to totally
-order all operations w.r.t. the $\hbZ$ relation could be in conflict
-with the constraints imposed by weak isolation. To meet the
-requirements of weaker isolation levels, say {\sc rc}, the store has
-to adapt itself to \emph{hide} the effects of concurrent transactions
-until they are committed. Once committed though, effects need to be
-immediately visible to subsequent operations. This semantics can be
-built into the reasoning framework, leading to a proof system
-tailor-made for such stores. However, for the reasoning framework to
-be truly useful, it has to be parametric over different consistency
-semantics, supporting stores that are weaker than {\sc sc} (e.g.,
-causally or eventually consistent), and should be able to reconcile
-conflicts between consistency and isolation constraints.  We
-demonstrate how our reasoning framework makes this possible in the
-following sections.
+Implicit in the above discussion is the assumption of a strongly
+consistent ({\sc sc}) store that guarantees the visibility of all
+previously committed transactions. {\sc sc} semantics can be built
+into the reasoning framework, leading to a proof system tailor-made
+for such stores. However, for the reasoning framework to be truly
+useful, it has to be parametric over different consistency semantics,
+supporting stores that are weaker than {\sc sc} (e.g., causally or
+eventually consistent), and should be able to reconcile conflicts
+between consistency and isolation constraints.  We demonstrate how our
+reasoning framework makes this possible in the following sections.
