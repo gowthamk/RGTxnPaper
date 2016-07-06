@@ -226,16 +226,16 @@ executions are legal under $\psi_{RC}$ because in no execution does an
 operation $\eta_1$ from \C{Wd1} happen-before $\eta_2$ of \C{Wd2}
 without the commit of \C{Wd1} also happening before $\eta_2$.
 $\psi_{SI}$ however disallows $\hbZ$ arrows (hence executions) in
-Figs.~\ref{fig:hb-eg-2},~\ref{fig:hb-eg-3},~\ref{fig:hb-eg-4} because
-such arrows establish $\hbZ$ edges
-between (operations in) \C{Wd2} and only a subset of the operations in
-\C{Wd1}. Since the result of an operation (\eg a read) depends on
-what happens before that operation, the structure of the $\hbZ$
-relation ultimately dictates the final result of the program. The
-arrows in Figs.~\ref{fig:hb-eg-1} and~\ref{fig:hb-eg-2} denote
-$\hbZ$ relationships that do not affect the value of \C{B} in a way
-that causes the program to violate its post-condition. In contrast,
-arrows in Figs.~\ref{fig:hb-eg-3} and~\ref{fig:hb-eg-4} denote $\hbZ$
+Figs.~\ref{fig:hb-eg-2},~\ref{fig:hb-eg-3}, and~\ref{fig:hb-eg-4}
+because such arrows establish $\hbZ$ edges between (operations in)
+\C{Wd2} and only a subset of the operations in \C{Wd1}. Since the
+result of an operation (\eg a read) depends on what happens before
+that operation, the structure of the $\hbZ$ relation ultimately
+dictates the final result of the program. The arrows in
+Figs.~\ref{fig:hb-eg-1} and~\ref{fig:hb-eg-2} denote $\hbZ$
+relationships that do not affect the value of \C{B} in a way that
+causes the program to violate its post-condition. In contrast, arrows
+in Figs.~\ref{fig:hb-eg-3} and~\ref{fig:hb-eg-4} denote $\hbZ$
 relationships that lead to the violation of the post-condition. The
 task of the reasoning framework is to determine if all $\hbZ$
 relationships allowed by an isolation level lead to the satisfaction
