@@ -260,21 +260,33 @@ invariant is $\psi_{RC}$ instead of $\psi_{SI}$, we cannot derive a
 contradiction and we cannot rule out the interference, which
 (rightfully) causes  the proof to fail.
 
-We have thus far assumed a strongly consistent ({\sc sc}) store that,
-in the absence of transactions with special isolation requirements,
-makes the effects of any operation immediately visible to all
-subsequent operations. The natural behaviour of {\sc sc} to totally
-order all operations w.r.t. the $\hbZ$ relation could be in conflict
-with the constraints imposed by weak isolation. To meet the
-requirements of weaker isolation levels, say {\sc rc}, the store has
-to adapt itself to \emph{hide} the effects of concurrent transactions
-until they are committed. Once committed though, effects need to be
-immediately visible to subsequent operations. This semantics can be
-built into the reasoning framework, leading to a proof system
-tailor-made for such stores. However, for the reasoning framework to
-be truly useful, it has to be parametric over different consistency
+Implicit in the above discussion is the assumption of a strongly
+consistent ({\sc sc}) store that guarantees the visibility of all
+previously committed transactions. An {\sc sc} semantics can be built
+into the reasoning framework, leading to a proof system tailor-made
+for such stores.  However, for the reasoning framework to be truly
+useful, it should be capable of handling different consistency
 semantics, supporting stores that are weaker than {\sc sc} (e.g.,
 causally or eventually consistent), and should be able to reconcile
 conflicts between consistency and isolation constraints.  We
 demonstrate how our reasoning framework makes this possible in the
 following sections.
+
+%% We have thus far assumed a strongly consistent ({\sc sc}) store that,
+%% in the absence of transactions with special isolation requirements,
+%% makes the effects of any operation immediately visible to all
+%% subsequent operations. The natural behaviour of {\sc sc} to totally
+%% order all operations w.r.t. the $\hbZ$ relation could be in conflict
+%% with the constraints imposed by weak isolation. To meet the
+%% requirements of weaker isolation levels, say {\sc rc}, the store has
+%% to adapt itself to \emph{hide} the effects of concurrent transactions
+%% until they are committed. Once committed though, effects need to be
+%% immediately visible to subsequent operations. This semantics can be
+%% built into the reasoning framework, leading to a proof system
+%% tailor-made for such stores. However, for the reasoning framework to
+%% be truly useful, it has to be parametric over different consistency
+%% semantics, supporting stores that are weaker than {\sc sc} (e.g.,
+%% causally or eventually consistent), and should be able to reconcile
+%% conflicts between consistency and isolation constraints.  We
+%% demonstrate how our reasoning framework makes this possible in the
+%% following sections.
