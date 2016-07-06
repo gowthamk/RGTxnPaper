@@ -65,28 +65,26 @@ from being visible. This is addressed by \C{CommitVis}, which requires
 the commit effect of $T_i$ to be visible whenever any effect of $T_i$
 is visible.
 
-Fig.~\ref{fig:ansi-isolation} shows specifications of various
-well-known isolation guarantees.  The ANSI SQL 92 standard requires
-\iso{Read Committed} isolation to avoid the dirty reads phenomenon,
-which is achieved by enforcing $\mathtt{AtomicVis}$ and
-$\mathtt{CommitVis}$ guarantees. The {\sc rc} specification
-(\C{RC})\footnote{In the following, we use small caps to abbreviate
-isolation levels (\emph{e.g.,} {\sc rc} for \emph{Read Committed}),
-and typewriter font for abbreviations of the specification of an
-isolation level (\emph{e.g.,} \C{RC} denotes the specification for
-{\sc rc} as given in Fig.~\ref{fig:ansi-isolation}).} is therefore a
-combination of these two guarantees. The specification also agrees
-with the description and implementation~\cite{bailishat,pldi15} of
-{\sc rc} for highly available replicated stores. On relational
-databases, however, {\sc rc} has also come to be associated with the
-$\mathtt{MonotonicVis}$ guarantee.  Nonetheless, $\mathtt{AtomicVis}$
-and $\mathtt{CommitVis}$ are sufficient to reason about {\sc rc}
-isolation on relational stores too. The combination of these
-guarantees with the {\sc sc} property of relational stores (formalized
-in \S\ref{sec:store-consistency}) automatically leads to the
-monotonicity guarantee, which explains why {\sc rc} comes with
-$\mathtt{MonotonicVis}$ on such stores regardless of the
-implementation. On weakly consistent stores however,
+The ANSI SQL 92 standard requires \iso{Read Committed} isolation to
+avoid the dirty reads phenomenon, which is achieved by enforcing
+$\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$ guarantees. The {\sc rc}
+specification (\C{RC})\footnote{In the following, we use small caps to
+abbreviate isolation levels (\emph{e.g.,} {\sc rc} for \emph{Read
+Committed}), and typewriter font for abbreviations of the
+specification of an isolation level (\emph{e.g.,} \C{RC} denotes the
+specification for {\sc rc} as given in
+Fig.~\ref{fig:ansi-isolation}).} is therefore a combination of these
+two guarantees. The specification also agrees with the description and
+implementation~\cite{bailishat,pldi15} of {\sc rc} for highly
+available replicated stores. On relational databases, however, {\sc
+rc} has also come to be associated with the $\mathtt{MonotonicVis}$
+guarantee.  Nonetheless, $\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$
+are sufficient to reason about {\sc rc} isolation on relational stores
+too. The combination of these guarantees with the {\sc sc} property of
+relational stores (formalized in \S\ref{sec:store-consistency})
+automatically leads to the monotonicity guarantee, which explains why
+{\sc rc} comes with $\mathtt{MonotonicVis}$ on such stores regardless
+of the implementation. On weakly consistent stores however,
 $\mathtt{AtomicVis}$ and $\mathtt{CommitVis}$ do not imply
 $\mathtt{MonotonicVis}$. A stronger isolation level called
 \iso{Monotonic Atomic View} ({\sc mav} of
