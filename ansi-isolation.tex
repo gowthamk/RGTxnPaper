@@ -48,22 +48,22 @@ or writes $X$.
 Fig.~\ref{fig:ansi-isolation} shows various isolation guarantees
 defined as propositions indexed by transaction identifiers.
 Transaction $T_j$ is said to have experienced \emph{read-my-writes}
-visibility under $\E$ if every effect ($\eta_1$) of $T_j$ is visible
-to every subsequent effect ($\eta_2$) of the same transaction in $\E$.
-This lets $T_j$ to never lose its own updates. Monotonic visibility
-adds one more constraint to \emph{read-my-writes}; besides requiring $\eta_1$
-to be visible to $\eta_2$, it also requires every effect ($\eta$)
-visible to $\eta_1$ in $\E$ to be visible to $\eta_2$ as well. Thus,
-later operations in a transaction witness at least the same set of
-effects witnessed by the earlier operations, if not more (hence,
-``monotonic'' visibility). Atomic visibility allows an effect
-$\eta_2$ of $T_j$ to witness an effect $\eta_1$ of $T_i$ only if all
-effects of $T_i$ in $\E$ are also visible to $\eta_2$. Atomic
-visibility thus prevents a transaction from being partially visible.
-However, atomic visibility does not prevent an uncommitted transaction
-from being visible. This is addressed by \C{CommitVis}, which requires
-the commit effect of $T_i$ to be visible whenever any effect of $T_i$
-is visible.
+visibility (\C{RMWVis}) under $\E$ if every effect ($\eta_1$) of $T_j$
+is visible to every subsequent effect ($\eta_2$) of the same
+transaction in $\E$.  This lets $T_j$ to never lose its own updates.
+Monotonic visibility (\C{MonotonicVis}) adds one more constraint to
+\emph{read-my-writes}; besides requiring $\eta_1$ to be visible to
+$\eta_2$, it also requires every effect ($\eta$) visible to $\eta_1$
+in $\E$ to be visible to $\eta_2$ as well. Thus, later operations in a
+transaction witness at least the same set of effects witnessed by the
+earlier operations, if not more (hence, ``monotonic'' visibility).
+Atomic visibility (\C{AtomicVis}) allows an effect $\eta_2$ of $T_j$
+to witness an effect $\eta_1$ of $T_i$ only if all effects of $T_i$ in
+$\E$ are also visible to $\eta_2$. Atomic visibility thus prevents a
+transaction from being partially visible.  However, atomic visibility
+does not prevent an uncommitted transaction from being visible. This
+is addressed by \C{CommitVis}, which requires the commit effect of
+$T_i$ to be visible whenever any effect of $T_i$ is visible.
 
 The ANSI SQL 92 standard requires \iso{Read Committed} isolation to
 avoid the dirty reads phenomenon, which is achieved by enforcing
