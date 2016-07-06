@@ -20,7 +20,7 @@ standard development of rely-guarantee and ours is that, while the
 former reasons in terms of program states (variable to value
 bindings), we reason in terms of executions as captured by their
 traces ($\E$). In particular, our rely ($R$) and guarantee ($G$)
-relations relate executions (i.e., $R,\,Q\,\subseteq\,\E\times\E$),
+relations relate executions (i.e., $R,\,G\,\subseteq\,\E\times\E$),
 and our pre- ($P$) and post- ($Q$) conditions are assertions over
 executions (i.e., $P,\,Q\, : \E \rightarrow \Prop$). Our development
 also facilitates state-based reasoning via the interpretation function
@@ -161,7 +161,7 @@ standard rely-guarantee formulation and hence elided.
 % (\rulelabel{RG-Par}) are straightforward, and more-or-less same as the
 % corresponding rules in classical rely-guarantee.
 
-The \rulelabel{RG-Conseq} rule define ways to strengthen or
+The \rulelabel{RG-Conseq} rule defines ways to strengthen or
 weaken relations and assertions associated with the RG judgment of
 transaction-bound expressions. Similar rules exist for
 transaction-bound and top-level commands, but are not
