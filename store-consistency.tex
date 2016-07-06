@@ -414,10 +414,10 @@ facts about \C{Wd2}:
   committed. This is clearly necessary to deduce the value of \C{B}
   before and after \C{Wd1} commits.
 \end{itemize}
-The resultant rely relation ($R_1$) is shown below (note: we
-write $(\E'-\E) \Vdash {\committed(\C{Wd2})}$ to express that \C{Wd2}
-is not committed in $\E$, but committed in $\E'$.):
-\vspace*{-1.5pt}
+The resultant rely relation ($R_1$) is shown below\footnote{We
+  write $(\E'-\E) \Vdash {\committed(\C{Wd2})}$ to express the property
+  that \C{Wd2} is not committed in $\E$, but committed in $\E'$.}:
+
 \begin{smathpar}
 \begin{array}{lcl}
   R_1 & = & \{ (\E,\E') \;|\; \neg\underE{\committed(\C{Wd1})} \conj
