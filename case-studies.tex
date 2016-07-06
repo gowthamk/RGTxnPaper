@@ -81,17 +81,18 @@ state. However, assuming {\sc cc} store consistency for reads allowed
 us to complete the proof, and recover the monotonicity invariant. In
 fact, we were able to complete the proof even after relaxing the
 serializability requirement for increments, just by changing the
-definition of the $\interp{\E}(X)$ (\S\ref{sec:opsem}) to return the
-value of the largest write-to-$X$ instead of the latest write-to-$X$.
-In other words, if the reads chose the largest valued write effect,
-instead of the latest write effect they witness, then counter
-increments need not be serializable for reads to witness a
-monotonically increasing count.\footnote{The trade-off is that the view
-count is now no longer accurate, although it grows monotonically.}
-We implemented this version of the counter as an op-based RDT, which
-uses {\sc cc} reads and {\sc ec} increments, both un-isolated (i.e.,
-\emph{Read Uncommitted}), and obtained a 52\% improvement in overall
-latency compared to the version that uses serializable increments.
+definition of the $\interp{S}(X)$ (\S\ref{sec:opsem}) to return
+the value of the largest write-to-$X$ instead of the latest
+write-to-$X$ in $S$.  In other words, if the reads chose the largest
+valued write effect, instead of the latest write effect they witness,
+then counter increments need not be serializable for reads to witness
+a monotonically increasing count.\footnote{The trade-off is that the
+view count is now no longer accurate, although it grows
+monotonically.} We implemented this version of the counter as an
+op-based RDT, which uses {\sc cc} reads and {\sc ec} increments, both
+un-isolated (i.e., \emph{Read Uncommitted}), and obtained a 52\%
+improvement in overall latency compared to the version that uses
+serializable increments.
 \vspace*{-3pt}
 
 \paragraph{Microblog.} Our second set of experiments focused on a
