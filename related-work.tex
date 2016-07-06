@@ -1,36 +1,35 @@
+\vspace*{-8pt}
 \section{Related Work}
 \label{sec:relatedwork}
 
 \paragraph{Specifying weak isolation.}
 Adya~\cite{adyaphd} specifies several weak isolation levels in terms
-of \emph{dependency graphs} between transactions, by defining the
-kinds of dependency cycles that are forbidden in each case. The
-operational nature of Adya's specifications make them suitable for
-runtime monitoring and anomaly
-detection~\cite{kemmevldb,feketesigmod08,pssi2011}, whereas the
-declarative nature of our specifications make them suitable for formal
-reasoning about program behaviour. Sivaramakrishnan \emph{et
+of \emph{dependency graphs} between transactions, and the kinds of
+dependencies that are forbidden in each case. The operational nature
+of Adya's specifications make them suitable for runtime monitoring and
+anomaly detection~\cite{kemmevldb,feketesigmod08,pssi2011}, whereas
+the declarative nature of our specifications make them suitable for
+formal reasoning about program behaviour. Sivaramakrishnan \emph{et
   al.}~\cite{pldi15} specify isolation levels declaratively as trace
 well-formedness conditions, but their specifications implicitly assume
-a complete trace with only committed transactions, and is thus not
-suitable to reason operationally about a program as it builds the
-trace; their framework also requires application invariants be
-expressed in terms of the visibility relations used to define
-isolation and consistency properties.  Cerone \emph{et
-  al.}~\cite{gotsmanconcur15} specify isolation levels with atomic
-visibility, but their specifications are also for complete traces, and
-assumes all transactions execute using either {\sc si} or {\sc ser},
-which is often not the case in practice. While all the aforementioned
-specification frameworks use the vocabulary introduced
-in~\cite{burckhardt14} to specify replicated data types, none of them
-are equipped with a reasoning framework that can use such
-specifications to verify programs under weak isolation.
+a complete trace with only committed transactions, making it difficult
+to reason about a program as it builds the trace; their framework also
+requires application invariants be expressed in terms of low-level
+visibility relations.  Cerone \emph{et al.}~\cite{gotsmanconcur15} specify
+isolation levels with atomic visibility, but their specifications are
+also for complete traces, and assumes all transactions execute using
+either {\sc si} or {\sc ser}, which is often not the case in
+practice. While all the aforementioned specification frameworks use
+the vocabulary introduced in~\cite{burckhardt14} to specify replicated
+data types, none of them are equipped with a reasoning framework that
+can use such specifications to verify programs under weak isolation.
 
+\vspace*{-4pt}
 \paragraph{Reasoning under weak isolation} In~\cite{feketessi}, Fekete
 \emph{et al.} propose a theory to characterize non-serializable
 executions that arise under {\sc si}. Fekete~\cite{fekete2005} also
 proposes an algorithm that allocates either {\sc si} or {\sc ser}
-isolation levels to transactions while guaranteeing the
+isolation levels to transactions while guaranteeing
 serializability. In~\cite{gotsmanpodc16}, Cerone \emph{et al.} improve
 on Adya's {\sc si} specification and use it to derive a static
 analysis that determines the safety of substituting {\sc si} with a
@@ -42,32 +41,34 @@ propose informal semantic conditions to ensure the satisfaction of
 application invariants under weaker isolation levels.  All these
 techniques are tailor-made for a finite set of well-understood
 isolation levels (rooted in~\cite{berenson}) under a pre-defined store
-consistency model (usually {\sc sc}).
+consistency model.
 
+\vspace*{-4pt}
 \paragraph{Reasoning under weak consistency} There have been several
 recent proposals to reason about programs executing under weak
 consistency~\cite{bailisvldb, alvarocalm, gotsmanpopl16,redblueatc,
-redblueosdi, ecinec}. All of them assume a system model that offers a
-choice between a \emph{coordination-free} weak consistency level
+  redblueosdi, ecinec}. All of them assume a system model that offers
+a choice between a \emph{coordination-free} weak consistency level
 (\emph{e.g.}, eventual consistency~\cite{redblueosdi, redblueatc,
-ecinec, alvarocalm, bailisvldb}) or causal
-consistency~\cite{lbc16,gotsmanpopl16}). The key technical issue in
-these efforts involves proving that atomic and fully isolated
-operations preserve application invariants when executed on these
-consistency levels.  In contrast, we admit weakly isolated
-transactions, and our system model accepts \emph{specifications} of
-consistency and isolation levels drawn from an expressive logic.
-Gotsman \emph{et al.}~\cite{gotsmanpopl16} adapts \iso{Parallel
-Snapshot Isolation} to the aforementioned setting by interpreting it
-as a consistency level that serializes writes to objects; a dedicated
-proof rule is developed to help prove prove program invariants hold
-under this model. By parameterizing our proof system over a gamut of
-weak isolation specifications, we avoid the need to define a separate
-proof rule for each new isolation level we may encounter.
+  ecinec, alvarocalm, bailisvldb}) or causal
+consistency~\cite{lbc16,gotsmanpopl16}). All these efforts involve
+proving that atomic and fully isolated operations preserve application
+invariants when executed under these consistency levels.  In contrast,
+we admit weakly-isolated transactions, and our system model accepts
+\emph{specifications} of consistency and isolation levels drawn from
+an expressive logic.  Gotsman \emph{et al.}~\cite{gotsmanpopl16}
+adapts \iso{Parallel Snapshot Isolation} to the aforementioned setting
+by interpreting it as a consistency level that serializes writes to
+objects; a dedicated proof rule is developed to help prove prove
+program invariants hold under this model. By parameterizing our proof
+system over a gamut of weak isolation specifications, we avoid the
+need to define a separate proof rule for each new isolation level we
+may encounter.
 
+\vspace*{-4pt}
 \paragraph{Reasoning under relaxed memory} The reasoning mechanisms
 used to describe and prove properties about weakly-isolated
-transactions bear resemblance to those used to formalize relaxed
+transactions bear some resemblance to those used to formalize relaxed
 memory behaviour~\cite{battycpp}.  Ridge~\cite{rgtso} generalizes
 rely-guarantee reasoning to the x86-TSO memory model.  Likewise,
 Vafeiadis \emph{et al.}~\cite{rsl13} generalize concurrent separation
@@ -78,6 +79,5 @@ a relation between relaxed memory programs and related {\sc sc}
 programs. Demange \emph{et al.}~\cite{DLZ+13} present a \emph{buffered
   memory model} for Java that defines an axiomatic definition for the
 JMM in terms of memory reorderings, and an operational instantiation
-consistent with the TSO memory model, and demonstrate the equivalence
-of the two definitions.  
+consistent with the TSO memory model.
 

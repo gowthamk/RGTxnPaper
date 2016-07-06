@@ -1,18 +1,19 @@
+\vspace*{-4pt}
 \section{Case Studies}
 \label{sec:case-studies}
 
-In this section, we present two case studies that demonstrate the
-applicability of our framework in varied settings, and its consequent
-practical utility. Both our case studies target Ruby-on-Rails
-applications. To analyze these, and other similar open-source
-applications, we have developed a symbolic execution engine that
-compiles a Rails program to an abstract program in an extended version
-of \txnimp, along with some proof automation support.\footnote{Details
-   can be found in the supplementary material.  Source code for our
-  implementation, along with applications and experiments, are
-  available at the following anonymized url:
-  \url{https://github.com/popl17/popl17-code}} The focus of
-our formal verification efforts are such translated \txnimp programs.
+We present two case studies below that demonstrate the applicability
+of our framework and its practical utility. Both examples
+target Ruby-on-Rails applications, which are commonly used to
+interface applications to database systems. To analyze these, and
+other similar open-source applications, we have developed a symbolic
+execution engine that compiles a Rails program to an abstract program
+in an extended version of \txnimp, along with some proof automation
+support.\footnote{Details can be found in the supplementary material.
+  Source code for our implementation, along with applications and
+  experiments, are available at the following anonymized url:
+  \url{...}} The focus of our formal verification efforts are such
+translated \txnimp programs.
 
 \paragraph{A video view counter.} Our first application is a Rails
 implementation of a counter to count the number of views a video has
@@ -73,27 +74,24 @@ isolation levels. Keeping the consistency level at {\sc ec}, we then
 repeated our experiments with committed reads and serializable
 increments - a combination which was proved to preserve monotonicity
 on an {\sc sc} store, but nonetheless observed monotonicity
-violations. The reason for such violations became evident when
-we instantiated our proof framework for an {\sc ec} store.
-Under this instantiation, it is impossible to derive the
+violations.  Under this instantiation, it is impossible to derive the
 \C{MonotonicVis} (\S\ref{sec:ansi-isolation}) property needed to show
 that successive reads in a session witness monotonically increasing
-state. However, assuming {\sc cc} store consistency for reads allowed
+state. However, assuming {\sc cc} for reads allowed
 us to complete the proof, and recover the monotonicity invariant. In
 fact, we were able to complete the proof even after relaxing the
 serializability requirement for increments, just by changing the
-definition of the $\interp{S}(X)$ (\S\ref{sec:opsem}) to return
-the value of the largest write-to-$X$ instead of the latest
-write-to-$X$ in $S$.  In other words, if the reads chose the largest
-valued write effect, instead of the latest write effect they witness,
-then counter increments need not be serializable for reads to witness
-a monotonically increasing count.\footnote{The trade-off is that the
-view count is now no longer accurate, although it grows
-monotonically.} We implemented this version of the counter as an
+definition of the $\interp{S}(X)$ (\S\ref{sec:opsem}) to return the
+value of the largest write-to-$X$ instead of the latest write-to-$X$
+in $S$.  Thus, if the reads chose the largest-valued write
+effect, instead of the latest write effect they witness, then counter
+increments need not be serializable for reads to witness a
+monotonically increasing count.\footnote{The trade-off is that the
+  view count is now no longer accurate, although it grows
+  monotonically.} We implemented this version of the counter as an
 op-based RDT, which uses {\sc cc} reads and {\sc ec} increments, both
 un-isolated (i.e., \emph{Read Uncommitted}), and obtained a 52\%
-improvement in overall latency compared to the version that uses
-serializable increments.
+improvement in overall latency compared to the serializable original.
 \vspace*{-3pt}
 
 \paragraph{Microblog.} Our second set of experiments focused on a
@@ -120,11 +118,11 @@ obtained a proof that {\sc rc} is sufficient for deletions, whereas
 reads require {\sc rr}. The proof is immediately applicable for MySQL,
 which implements ANSI SQL isolation levels. Repeating our experiments
 for MySQL with this configuration resulted in no violations (as
-expected), while yielding a 38\% reduction in latency than an {\sc
-  ser} configuration.  Since Postgres' isolation levels are stronger
-than the corresponding ANSI levels, \rulelabel{RG-Conseq} rule
-(Fig.~\ref{fig:rg-rules}) lets us immediately deduce that the same
-choice of isolation levels also work on Postgres.
+expected), while yielding a 38\% reduction in latency compared to an
+{\sc ser} configuration.  Since Postgres' isolation levels are
+stronger than the corresponding ANSI levels, the \rulelabel{RG-Conseq}
+rule (Fig.~\ref{fig:rg-rules}) lets us immediately deduce that the
+same choice of isolation levels also work on Postgres.
 
 Clearly, there exists significant diversity among the weak consistency
 and isolation variants implemented on various real-world data
