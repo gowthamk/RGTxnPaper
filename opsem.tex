@@ -14,7 +14,8 @@ statements, transaction (\C{txn}) lexical blocks, and their sequential
 and parallel composition. We let $T_i$ for $i \in \mathbb{N}$ range
 over transaction identifiers. When it is evident we are referring to a
 transaction, we use the number $i$ instead of $T_i$ for identification
-(\eg in $\C{txn}\langle i \rangle$). For notational convenience, we
+(\eg in $\C{txn}\langle i \rangle$). Like variables, transaction
+identifiers are globally accessible. For notational convenience, we
 let $t$ range over both expressions and commands.
 
 We define a small-step operational semantics for this language in
@@ -22,7 +23,7 @@ terms of an abstract machine that generates an execution trace ($\E$).
 The first component of the trace is a set ($\A$) of \emph{effects},
 where an effect ($\eta$) is a tuple of (a). the identifier ($T_i$) of
 the transaction that generated this effect, (b). the unique
-indentifier ($j$) of this effect, (c). the operation ($\op$)
+identifier ($j$) of this effect, (c). the operation ($\op$)
 documented by this effect, which can be either a read (\C{RD(X)}), a
 write (\C{WR(X)}), or a transaction commit (\C{COMMIT}), and (d). the
 value, if any, associated with the operation (\eg, value read or value

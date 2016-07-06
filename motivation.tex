@@ -4,7 +4,7 @@
 In this section, we motivate our ideas via an example written in
 \txnimp - a C-like imperative language equipped with a \C{txn} lexical
 block defining a transaction scope. Each \C{txn} block is associated
-with an indentifier in angle braces that uniquely identifies the
+with an identifier in angle braces that uniquely identifies the
 transaction. We use Hoare triple notation to annotate programs with
 pre- and post- conditions.
 
@@ -43,8 +43,8 @@ balance, after both transactions commit, is expected to reflect the
 effects of both withdraws. The pre- and post-conditions in
 Fig.~\ref{fig:motiv-eg-1} reflect this expectation. Indeed, invariants
 are guaranteed to hold if both withdraw transactions are serialized,
-making \iso{Serializable} isolation ({\sc ser}) level a sufficent
-condition to preserve invaraints. But, is {\sc ser} necessary?
+making \iso{Serializable} isolation ({\sc ser}) level a sufficient
+condition to preserve invariants. But, is {\sc ser} necessary?
 
 As an alternative, consider the execution of this transaction under a
 \emph{Read Committed} ({\sc rc}) isolation level, which is weaker than
@@ -107,7 +107,7 @@ Thinking in terms of anomalies, as described above, is how database
 programmers are often encouraged to reason about weak isolation.
 Unfortunately, such reasoning does not rest on any sound foundation,
 and is thus highly error-prone. Reasoning in terms of how weak
-isolation variants are implementated is no better since it requires
+isolation variants are implemented is no better since it requires
 programmers to understand low-level implementation details of the
 database that are far removed from the application semantics. An
 attractive  alternative in this context would be a principled
@@ -156,14 +156,41 @@ relation.}
 
 \begin{figure}
 \centering
-  \includegraphics[scale=0.4]{Figures/motiv-eg-1-hb}
+\subcaptionbox {
+  \label{fig:hb-eg-1}
+} [
+  0.25\columnwidth
+] {
+  \includegraphics[scale=0.6]{Figures/hb-eg-1}
+}
+\subcaptionbox {
+  \label{fig:hb-eg-2}
+} [
+  0.25\columnwidth
+] {
+  \includegraphics[scale=0.6]{Figures/hb-eg-2}
+}
+\subcaptionbox {
+  \label{fig:hb-eg-3}
+} [
+  0.25\columnwidth
+] {
+  \includegraphics[scale=0.6]{Figures/hb-eg-3}
+}
+\subcaptionbox {
+  \label{fig:hb-eg-4}
+}{
+  \includegraphics[scale=0.6]{Figures/hb-eg-4}
+}
 
-\caption{\small $\hbZ$ arrows allowed by {\sc si} (solid) and {\sc rc} (solid
-  and dashed) isolation levels for the example in
-  Fig.~\ref{fig:motiv-eg-1}. Each arrow represents an $\hbZ$ relationship
-  among all operations of \C{Wd2} and operations in \C{Wd1} that follow
-  the arrow head. Letters R, W and C stand for read, write and commit,
-  respectively.}
+
+\caption{\small $\hbZ$ arrows allowed by $\psi_{SI}$
+ and $\psi_{RC}$ specifications
+% (Figs.~\ref{fig:hb-eg-1},~\ref{fig:hb-eg-2},~\ref{fig:hb-eg-3},~\ref{fig:hb-eg-4})
+for the example in Fig.~\ref{fig:motiv-eg-1}. Each
+arrow represents an $\hbZ$ relationship between all operations of
+\C{Wd2} and an operation in \C{Wd1}. Letters R, W and C stand for
+read, write and commit, respectively.}
 \label{fig:motiv-eg-1-hb}
 \vspace*{-8pt}
 \end{figure}
@@ -194,19 +221,21 @@ related by happens-before.  This effectively prohibits interference
 due to actions in $T_1$ being interleaved in $T_2$ (or, vice versa). 
 
 Fig.~\ref{fig:motiv-eg-1-hb} is a visualization of $\hbZ$ from \C{Wd2}
-to \C{Wd1} allowed by $\psi_{RC}$ and $\psi_{SI}$. All arrows are
-legal under $\psi_{RC}$ because in no case does an operation $\eta_1$
-from \C{Wd1} happen-before $\eta_2$ of \C{Wd2} without the commit of
-\C{Wd1} also happening before $\eta_2$. $\psi_{SI}$ however disallows
-all dashed arrows, because dashed arrows establish $\hbZ$ edges
-between actions in \C{Wd2} and only a subset of the operations in
-\C{Wd1}.  Since the result of an operation (\eg a read) depends on
+to \C{Wd1} allowed by $\psi_{RC}$ and $\psi_{SI}$. Arrows in all
+executions are legal under $\psi_{RC}$ because in no execution does an
+operation $\eta_1$ from \C{Wd1} happen-before $\eta_2$ of \C{Wd2}
+without the commit of \C{Wd1} also happening before $\eta_2$.
+$\psi_{SI}$ however disallows $\hbZ$ arrows (hence executions) in
+Figs.~\ref{fig:hb-eg-2},~\ref{fig:hb-eg-3},~\ref{fig:hb-eg-4} because
+such arrows establish $\hbZ$ edges
+between (operations in) \C{Wd2} and only a subset of the operations in
+\C{Wd1}. Since the result of an operation (\eg a read) depends on
 what happens before that operation, the structure of the $\hbZ$
 relation ultimately dictates the final result of the program. The
-solid arrow and the first (from left) dashed arrow in
-Fig.~\ref{fig:motiv-eg-1-hb} denote $\hbZ$ relationships that do not
-affect the value of \C{B} in a way that causes the program to violate
-its post-condition. The last two dashed arrows denote $\hbZ$
+arrows in Figs.~\ref{fig:hb-eg-1} and~\ref{fig:hb-eg-2} denote
+$\hbZ$ relationships that do not affect the value of \C{B} in a way
+that causes the program to violate its post-condition. In contrast,
+arrows in Figs.~\ref{hb-eg-3} and~\ref{hb-eg-4} denote $\hbZ$
 relationships that lead to the violation of the post-condition. The
 task of the reasoning framework is to determine if all $\hbZ$
 relationships allowed by an isolation level lead to the satisfaction

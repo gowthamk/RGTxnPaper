@@ -107,7 +107,7 @@ transactions $T_1$ and $T_2$, which perform conflicting writes,
 execute against a snapshot of the database and commit concurrently.
 While the actual values read and written by $T_1$ and $T_2$ are
 unimportant (hence, elided), it is important to note the
-\emph{absence} of visiblity arrows from $T_2$ to $T_1$, although $T_2$
+\emph{absence} of visibility arrows from $T_2$ to $T_1$, although $T_2$
 commits before $T_1$'s read-from-$Y$.
 
 \iso{Snapshot Isolation} ({\sc si}) proscribes this possibility. If
