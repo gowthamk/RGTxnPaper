@@ -3,7 +3,7 @@
 
 The operational semantics of Fig.~\ref{fig:txnimp} allows operations
 to witness arbitrary subsets of the global state, effectively mimicking the
-behavior of an eventually consistent ({\sc ec}) data
+behaviour of an eventually consistent ({\sc ec}) data
 store\footnote{Eventual consistency guarantees that in the absence of further
   updates, all reads witness the same global state
   \emph{eventually}. In any finite trace, however, there are no
@@ -197,8 +197,8 @@ are given in the supplementary material.}.
   \includegraphics[scale=0.35]{Figures/ec-ours}
 } \caption{\small In the replica model, operation $\op$ generates effect
 $\eta$ at replica $R_1$, which is then merged to $R_2$. If the
-\emph{store is {\sc cc}}, then $R_2$'s state at merge event is same or
-larger than $R_1$'s state at generation event (the difference is
+\emph{store is {\sc cc}}, then $R_2$'s state at the merge event is same or
+larger than $R_1$'s state at the generation event (the difference is
 highlighted). In our subset model, $\op$ witnesses $S_1 \subseteq
 \E.\A$ and generates $\eta$, which is immediately added to $\E.\A$. A
 later operation may witness $S_2 \subseteq \E.\A$, and if the
@@ -338,7 +338,7 @@ $\begin{decoration}
 \end{figure}
 
 Decorated parts of \C{Wd1} relevant to the discussion are shown in
-Fig.~\ref{fig:wd1-decorated}.  \C{Wd2} is similar and not shown.
+Fig.~\ref{fig:wd1-decorated}. \C{Wd2} is similar and not shown.
 Temporary name \C{v3} has been introduced to capture the result of the
 RHS expression \C{B-a1}.  Assertions implicitly refer to the current
 execution ($\E$), just as Hoare triples implicitly refer to the

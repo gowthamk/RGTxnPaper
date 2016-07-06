@@ -119,7 +119,7 @@ example.
 First, we note that the example in Fig.~\ref{fig:motiv-eg-1} is a
 concurrent program, and hence is amenable to \emph{rely-guarantee}
 style reasoning~\cite{rgjones}, a compositional proof technique that
-allows us to reason about the behavior of individual threads by
+allows us to reason about the behaviour of individual threads by
 abstracting away interferences induced by other threads (collectively
 called \emph{the environment}) into a \emph{rely} relation. In an
 ordinary concurrent program, every environment step is a valid
@@ -263,7 +263,7 @@ contradiction and we cannot rule out the interference, which
 We have thus far assumed a strongly consistent ({\sc sc}) store that,
 in the absence of transactions with special isolation requirements,
 makes the effects of any operation immediately visible to all
-subsequent operations. The natural behavior of {\sc sc} to totally
+subsequent operations. The natural behaviour of {\sc sc} to totally
 order all operations w.r.t. the $\hbZ$ relation could be in conflict
 with the constraints imposed by weak isolation. To meet the
 requirements of weaker isolation levels, say {\sc rc}, the store has
