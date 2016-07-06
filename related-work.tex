@@ -10,19 +10,16 @@ of Adya's specifications make them suitable for runtime monitoring and
 anomaly detection~\cite{kemmevldb,feketesigmod08,pssi2011}, whereas
 the declarative nature of our specifications make them suitable for
 formal reasoning about program behaviour. Sivaramakrishnan \emph{et
-  al.}~\cite{pldi15} specify isolation levels declaratively as trace
+al.}~\cite{pldi15} specify isolation levels declaratively as trace
 well-formedness conditions, but their specifications implicitly assume
 a complete trace with only committed transactions, making it difficult
-to reason about a program as it builds the trace; their framework also
-requires application invariants be expressed in terms of low-level
-visibility relations.  Cerone \emph{et al.}~\cite{gotsmanconcur15} specify
-isolation levels with atomic visibility, but their specifications are
-also for complete traces, and assumes all transactions execute using
-either {\sc si} or {\sc ser}, which is often not the case in
-practice. While all the aforementioned specification frameworks use
-the vocabulary introduced in~\cite{burckhardt14} to specify replicated
-data types, none of them are equipped with a reasoning framework that
-can use such specifications to verify programs under weak isolation.
+to reason about a program as it builds the trace. Cerone \emph{et
+al.}~\cite{gotsmanconcur15} specify isolation levels with atomic
+visibility, but their specifications are also for complete traces.
+Like ours, all the aforementioned specification frameworks use the
+vocabulary introduced in~\cite{burckhardt14}. However, none of them
+are equipped with a reasoning framework that can use such
+specifications to verify programs under weak isolation.
 
 \vspace*{-4pt}
 \paragraph{Reasoning under weak isolation} In~\cite{feketessi}, Fekete
@@ -57,7 +54,7 @@ invariants when executed under these consistency levels.  In contrast,
 we admit weakly-isolated transactions, and our system model accepts
 \emph{specifications} of consistency and isolation levels drawn from
 an expressive logic.  Gotsman \emph{et al.}~\cite{gotsmanpopl16}
-adapts \iso{Parallel Snapshot Isolation} to the aforementioned setting
+adapt \iso{Parallel Snapshot Isolation} to a transaction-less setting
 by interpreting it as a consistency level that serializes writes to
 objects; a dedicated proof rule is developed to help prove prove
 program invariants hold under this model. By parameterizing our proof

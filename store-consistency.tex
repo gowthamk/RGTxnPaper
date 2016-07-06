@@ -34,15 +34,16 @@ transaction-specific isolation constraints, via the trace invariant
 $\I$. In particular, we can split $\I$ into two components: (1).
 $\I_s$, the store-specific invariant, and (2). $\I_c$, the
 program-specific (or, client-specific) invariant, to capture
-consistency and isolation constraints, respectively.  $\I$ is now a
-conjunction: $\I \,=\, \lambda\E.~\I_s(\E) \wedge \I_c(\E)$ (often
-simplified to $\I \,=\, \I_s\wedge\I_c$).  While the program-specific
-trace invariant ($\I_c$) is independent of the underlying data store,
-the store specific invariant ($\I_s$) changes from store to store
-depending on the consistency level.  For an eventually consistent
-store, $\I_s$ is simply \emph{true}. Stronger stores, such as those
-that support strong consistency, have non-trivial definitions for
-$\I_s$.
+consistency and isolation constraints\footnote{$\I_c$ captures the
+combination of transaction-specific isolation constraints.},
+respectively.  $\I$ is now a conjunction: $\I \,=\,
+\lambda\E.~\I_s(\E) \wedge \I_c(\E)$ (often simplified to $\I \,=\,
+\I_s\wedge\I_c$). While the program-specific trace invariant ($\I_c$)
+is independent of the underlying data store, the store specific
+invariant ($\I_s$) changes from store to store depending on the
+consistency level.  For an eventually consistent store, $\I_s$ is
+simply \emph{true}. Stronger stores, such as those that support strong
+consistency, have non-trivial definitions for $\I_s$.
 
 A strongly-consistent {\sc sc} store guarantees a total order on all
 operations w.r.t. $\visZ$ consistent with their chronological order. A
@@ -237,24 +238,24 @@ weakly-consistent replication with a conventional replica-based model.
 Under our model, the notion of a replica is subsumed by the concept of
 visibility; a replica is defined by the subset ($S$) of global state
 ($\E.\A$) that an operation witnesses. Constraints over replica states
-therefore manifest as constraints over a specific visibility relation.
-For example, instead of requiring the store to be causally consistent,
-an operation can witness a causally consistent subset of the state;
-such demands can be made via the trace invariant $\I$. For a
-pre-condition ($P$) of the operation to be useful, it has to be an
-assertion over every causally consistent subset of the global state.
-Since any replica that eventually executes the operation has to expose
-one such subset ($S$), the pre-condition is guaranteed to hold
-regardless of the replica. There is however one problem with this
-explanation - by considering subsets of just one global state, it
-ignores the fact that the global state (hence, the replica states)
-change during the execution of the operation. To account for such
-changes, we might choose to distinguish between an effect generation
-event at one replica $r_1$ and an effect merge event at replica $r_2$,
-requiring that \emph{non-conflicting} operations execute between these
-two events at $r_2$, and that they preserve certain
-invariants~\cite{gotsmanpopl16}.  Instead, our framework folds all such
-machinery into a stability condition predicated on $\I$
+therefore manifest as constraints over the visibility relation.  For
+example, instead of requiring the store to be causally consistent, an
+operation can witness a causally consistent subset of the state; such
+demands can be made via the trace invariant $\I$. For a pre-condition
+($P$) of the operation to be useful, it has to be an assertion over
+every causally consistent subset of the global state.  Since any
+replica that eventually executes the operation has to expose one such
+subset ($S$), the pre-condition is guaranteed to hold regardless of
+the replica. There is however one problem with this explanation - by
+considering subsets of just one global state, it ignores the fact that
+the global state (hence, the replica states) change during the
+execution of the operation. To account for such changes, we might
+choose to distinguish between an effect generation event at one
+replica $r_1$ and an effect merge event at replica $r_2$, requiring
+that \emph{non-conflicting} operations execute between these two
+events at $r_2$, and that they preserve certain
+invariants~\cite{gotsmanpopl16}.  Instead, our framework folds all
+such machinery into a stability condition predicated on $\I$
 (\S\ref{sec:rely-guarantee}).  Since any change to the global state
 during the execution of the operation is an interference, and $P$ is
 required to be stable with respect to any such interference, it
@@ -269,19 +270,18 @@ in greater detail. Both withdraw transactions are run at {\sc si}
 isolation, hence $\I_c$ is $\lambda\E.~\underE{\C{SI(Wd1)}} \conj
 \underE{\C{SI(Wd2)}}$. We assume an {\sc sc} store, such as a
 conventional RDBMS, whose store-specific trace invariant ($\I_s$) is
-the maximal visibility weakening (Def.~\ref{def:maxvis}) of {\sc sc}
-w.r.t. $\I_c$, as described in \S\ref{sec:store-consistency}. In
-concrete terms, this means that an effect added to $\E.\A$ by the
-current thread or a concurrent thread immediately becomes visible to
-the subsequent operations unless we produce a witness that such
-visibility violates $\I_c$. As usual, $\I$ is $\I_s \conj \I_c$. Note
-that the language of our specifications is a decidable subset of the
-first-order logic. In particular, our specifications and
-rely-guarantee rules are carefully crafted to avoid transitive
-closures and quantification over infinite domains. The domain of
-assertions is drawn from linear arithmetic, which is also decidable.
-Consequently, the proof obligations generated by the application of
-our rules can often be discharged via an SMT solver. 
+the maximum visibility weakening of {\sc sc} w.r.t. $\I_c$, as
+described in \S\ref{sec:store-consistency}. In concrete terms, this
+means that an effect added to $\E.\A$ by the current thread or a
+concurrent thread immediately becomes visible to the subsequent
+operations unless we produce a witness that such visibility violates
+$\I_c$. As usual, $\I$ is $\I_s \conj \I_c$. Note that the language of
+our specifications is a decidable subset of the first-order logic. In
+particular, our specifications and rely-guarantee rules are carefully
+crafted to avoid generating proof obligations with transitive closures
+and quantification over infinite domains. The domain of assertions is
+often linear arithmetic, which is also decidable. Consequently, the
+generated proof obligations can often be discharged via an SMT solver.
 
 \begin{figure}
 \centering
@@ -340,8 +340,8 @@ Fig.~\ref{fig:wd1-decorated}. \C{Wd2} is similar and not shown.
 Temporary name \C{v3} has been introduced to capture the result of the
 RHS expression \C{B-a1}.  Assertions implicitly refer to the current
 execution ($\E$), just as Hoare triples implicitly refer to the
-current state. The context for propositions the value computation of
-shared variables is also the implicit, i.e., we write $\psi$ instead
+current state. The context for propositions and the state for shared 
+variables is also the implicit, i.e., we write $\psi$ instead
 of $\underE{\psi}$ and $\C{B = k}$ instead of $\C{\interp{\E.\A}(B) =
 k}$. The proposition \C{k $\ge$ a1+a2} remains an invariant, hence
 elided. The pre-condition $P_1$ of \C{Wd1} accounts for the

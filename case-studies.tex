@@ -11,8 +11,8 @@ in an extended version of \txnimp, along with some proof automation
 support.\footnote{Details can be found in the supplementary material.
   Source code for our implementation, along with applications and
   experiments, are available at the following anonymized url:
-  \url{...}} The focus of our formal verification efforts are such
-translated \txnimp programs.
+  \url{https://github.com/popl17/popl17-code}} The focus of our formal
+verification efforts are such translated \txnimp programs.
 
 \paragraph{A video view counter.} Our first application is a Rails
 implementation of a counter to count the number of views a video has
@@ -41,7 +41,7 @@ the same configuration on Postgres, and found no violations. However,
 Postgres' isolation levels~\cite{postgresiso} are stronger than ANSI
 SQL's in non-trivial ways. We therefore formalized Postgres'
 guarantees and repeated relevant parts of the proof to discover that
-\iso{Repeatable Read} is in fact sufficient for writers - an
+Postgres' \iso{Repeatable Read} is in fact sufficient for writers - an
 observation further validated through experiments. As usual, using
 {\sc ser} for all transactions also suffices, but on Postgres results
 in an additional 47\% increase in write latency.
