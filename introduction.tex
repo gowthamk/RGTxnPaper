@@ -85,21 +85,21 @@ four levels of isolation (including serializability) in terms of
 various undesirable \emph{phenomena} (\eg \emph{dirty reads}) each is
 required to prevent. While this is an improvement, it requires
 programmers to be prescient about the possible ways various
-undesirable phenomena might manifest in their applications, and
-determine, in each case, if the phenomenon can be allowed without
-violating application invariants. This is understandably hard,
-especially in the absence of any formal underpinning to define weak
-isolation semantics.  Adya~\cite{adyaphd} presents the first formal
-definitions of some well-known isolation levels in the context of a
-sequentially consistent (SC) database.  However, there has been little
-progress relating Adya's system model to a formal operational
-semantics or a proof system that can facilitate rigorous correctness
-arguments. Consequently, reasoning about weak isolation remains an
-error prone endeavour, with major database vendors~\cite{postgresiso,
-  mysqliso, oracleiso} continuing to document their isolation levels
-primarily in terms of the undesirable phenomena a particular isolation
-level may induce, placing the burden on the programmer to determine
-application correctness.
+undesirable phenomena might manifest in their applications, and in
+each case determine if the phenomenon can be allowed without violating
+application invariants. This is understandably hard, especially in the
+absence of any formal underpinning to define weak isolation semantics.
+Adya~\cite{adyaphd} presents the first formal definitions of some
+well-known isolation levels in the context of a sequentially
+consistent (SC) database.  However, there has been little progress
+relating Adya's system model to a formal operational semantics or a
+proof system that can facilitate rigorous correctness arguments.
+Consequently, reasoning about weak isolation remains an error prone
+endeavour, with major database vendors~\cite{postgresiso, mysqliso,
+oracleiso} continuing to document their isolation levels primarily in
+terms of the undesirable phenomena a particular isolation level may
+induce, placing the burden on the programmer to determine application
+correctness.
 
 %%%SJ: tried to tighten this paragraph; the original now commented seemed overly
 %%complicated

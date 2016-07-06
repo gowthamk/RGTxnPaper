@@ -14,7 +14,7 @@ statements, transaction (\C{txn}) lexical blocks, and their sequential
 and parallel composition. We let $T_i$ for $i \in \mathbb{N}$ range
 over transaction identifiers. When it is evident we are referring to a
 transaction, we use the number $i$ instead of $T_i$ for identification
-(\eg, in $\C{txn}\langle i \rangle$). For notational convenience, we
+(\eg in $\C{txn}\langle i \rangle$). For notational convenience, we
 let $t$ range over both expressions and commands.
 
 We define a small-step operational semantics for this language in
@@ -42,7 +42,7 @@ mechanics of $\visZ$ is described in the sequel.
 
 Fundamental to our development is the notion of a trace invariant
 ($\I$). $\I$ is a function from traces ($\E$) to first-order logical
-formula ($\Prop$) that define well-formedness
+formulas ($\Prop$) that define well-formedness
 constraints over traces.  The machine takes a step only if the
 resulting trace satisfies the constraints imposed by $\I$. This
 behaviour is captured by the auxiliary reduction rule
@@ -140,8 +140,8 @@ isolation.  Notably, the machine achieves this without defining an
 operational semantics for isolation levels, instead solely relying on
 their declarative characterization as trace well-formedness
 constraints to enforce isolation guarantees.
-\S\ref{sec:ansi-isolation} shows the specification of various ANSI SQL
-isolation levels stated as trace well-formedness constraints.
+\S\ref{sec:ansi-isolation} specifies various ANSI SQL isolation levels
+stated as trace well-formedness constraints.
 
 % TRACE RELATIONS
 % ---------------
