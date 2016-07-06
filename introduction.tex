@@ -172,12 +172,10 @@ of~\cite{adyaphd}, or the causally consistent store
 of~\cite{gotsmanpopl16}, etc).  Our key technical contribution is thus
 a set of proof rules that demonstrate that a program with a given
 selection of isolation levels for its transactions preserves its
-invariants when executed on a store equipped with certain consistency
-guarantees (\eg~causal consistency).
-
-The paper makes the following contributions:
-
-\begin{itemize}
+invariants when executed on a store equipped with appropriate consistency
+guarantees.  The paper makes the following contributions:
+\vspace*{-6pt}
+\begin{enumerate}
   \item We develop a semantics for a core language equipped with
     weakly-isolated transactions, demonstrating that a general
     parametric isolation semantics can be expressed as
@@ -193,8 +191,7 @@ The paper makes the following contributions:
     stores.
   \item Case studies modeled after real-world scenarios demonstrate
     the applicability and utility of our proof methodology.
-\end{itemize}
-
+\end{enumerate}
 \noindent Our results provide the first (to the best of our knowledge)
 mechanism that precisely and uniformly relates high-level program
 invariants to low-level weak isolation and weak consistency
