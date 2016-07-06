@@ -24,20 +24,20 @@ relations relate executions (i.e., $R,\,Q\,\subseteq\,\E\times\E$),
 and our pre- ($P$) and post- ($Q$) conditions are assertions over
 executions (i.e., $P,\,Q\, : \E \rightarrow \Prop$). Our development
 also facilitates state-based reasoning via the interpretation function
-($\interp{\cdot}$) introduced in \S\ref{sec:syntax}. For example, if a
-\emph{bi-state} rely relation relates every pair of states $\sigma$
-and $\sigma'$ such that $\sigma'(X) \ge \sigma(X) \ge 0$, the
-corresponding \emph{bi-execution} rely relation relates every pair of
-executions $\E$ and $\E'$ such that $\interp{\E}(X) \ge
-\interp{\E'}(X) \ge 0$.  Assertions on states are also written
-similarly. For instance, consider the post-condition
-$\C{B\,=\,k-a1-a2}$ of the program in Fig.~\ref{fig:motiv-eg-1}. The
-corresponding assertion on the post-state
-($\lambda\sigma.~\sigma(\C{B}) \,=\, \C{k-a1-a2}$) asserts that in all
-states resulting from executing the program, the value of \C{B} is
-\C{k-a1-a2}. The equivalent execution-based assertion
-($\lambda\E.~\interp{\E}(\C{B})\,=\,\C{k-a1-a2}$) asserts that in all
-executions of the program, the value of \C{B} is \C{k-a1-a2}.
+($\interp{\cdot}$) introduced in \S\ref{sec:syntax}, which interprets
+the given set of effects as a state. For example, if a \emph{bi-state}
+rely relation relates every pair of states $\sigma$ and $\sigma'$ such
+that $\sigma'(X) \ge \sigma(X) \ge 0$, the corresponding
+\emph{bi-execution} rely relation relates every pair of executions
+$\E$ and $\E'$ such that $\interp{\E.\A}(X) \ge \interp{\E'.\A}(X) \ge
+0$ . Assertions on states are also written similarly. For instance,
+consider the post-condition $\C{B\,=\,k-a1-a2}$ of the program in
+Fig.~\ref{fig:motiv-eg-1}. The corresponding assertion on the
+post-state ($\lambda\sigma.~\sigma(\C{B}) \,=\, \C{k-a1-a2}$) asserts
+that in all states resulting from executing the program, the value of
+\C{B} is \C{k-a1-a2}. The equivalent execution-based assertion
+($\lambda\E.~\interp{\E.\A}(\C{B})\,=\,\C{k-a1-a2}$) asserts that in
+all executions of the program, the value of \C{B} is \C{k-a1-a2}.
 However, having access to an execution facilitates assertions that go
 beyond the state. An example is an invariant of \C{Wd1} described
 abstractly in \S\ref{sec:motivation}, and reified as an
@@ -48,9 +48,9 @@ execution-based assertion below:
   \lambda\E.~ \neg(\underE{\committed(\C{Wd1}}) \conj 
       \underE{\C{Wd1} \wrstoar \C{B}}\\
   \hspace*{0.2in}\conj(\neg(\underE{\committed(\C{Wd2})}) \Rightarrow 
-      \C{\interp{\E}(B) = k-a1}) \\
+      \C{\interp{\E.\A}(B) = k-a1}) \\
    \hspace*{0.2in}\conj (\underE{\committed(\C{Wd2})} \Rightarrow 
-      \C{\interp{\E}(B) = k-a1-a2})
+      \C{\interp{\E.\A}(B) = k-a1-a2})
 \end{array}
 \end{smathpar}
 % Where, $\committed$ is defined as:
@@ -270,8 +270,9 @@ relation.
 
 \begin{theorem}[\bfseries Soundness] 
 The rely-guarantee judgments defined by the rules in
-Fig.~\ref{fig:rg-rules} are sound with respect to
-the semantics of Definition~\ref{def:rg-semantics}.\footnote{Full proofs are provided in the supplementary material.}
+Fig.~\ref{fig:rg-rules} are sound with respect to the semantics of
+Definition~\ref{def:rg-semantics}.\footnote{Formal proof of soundness
+is provided in the supplementary material.}
 \end{theorem}
 
 \noindent In particular, if $\rg{\I,P,R}{c}{G,Q}$ can be derived using

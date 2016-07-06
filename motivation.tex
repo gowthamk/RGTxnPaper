@@ -243,7 +243,7 @@ remains invariant until \C{Wd1} commits, then the post-condition (\C{B
 = k-a1-a2}) can be established easily. However, an interference from
 \C{Wd2} at this stage (captured by the last dashed arrow in
 Fig.~\ref{fig:motiv-eg-1-hb}) may violate the invariant by writing
-$\C{k-a1}$ to \C{B} and committing \C{Wd2}, thus leading to
+$\C{k-a2}$ to \C{B} and committing \C{Wd2}, thus leading to
 $\committed(\C{Wd2}) \Rightarrow \C{B=k-a2}$. Fortunately,
 \iso{Snapshot Isolation} prevents this interference, and this can be
 shown by demonstrating that an interference from \C{Wd2} starting from

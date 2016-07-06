@@ -18,18 +18,19 @@ transaction, we use the number $i$ instead of $T_i$ for identification
 let $t$ range over both expressions and commands.
 
 We define a small-step operational semantics for this language in
-terms of an abstract machine that generates an execution trace
-($\E$). The first component of the trace is a set ($\A$) of
-\emph{effects}, where an effect ($\eta$) documents a read (\C{RD(X)}),
-a write (\C{WR(X)}), or a transaction commit (\C{COMMIT}) operation
-performed during the execution. Any value associated with the
-operation (\eg, value read or value written) is also documented, and
-can be accessed via $\rval$. Every effect has a unique identifier
-accessible via $\id$, and a transaction identifier accessible via
-$\txn$.  The latter identifies the transaction that generated the
-effect. In every step of the evaluation, the machine reduces a \txnimp\
-term by executing a read, write or commit operation, generating an
-effect, and extending the trace. Since effects include transaction
+terms of an abstract machine that generates an execution trace ($\E$).
+The first component of the trace is a set ($\A$) of \emph{effects},
+where an effect ($\eta$) is a tuple of (a). the identifier ($T_i$) of
+the transaction that generated this effect, (b). an indentifier ($j$)
+that uniquely identifies this effect, (c). the operation ($\op$)
+documented by this effect, which can be either a read (\C{RD(X)}), a
+write (\C{WR(X)}), or a transaction commit (\C{COMMIT}), and (d). the
+value, if any, associated with the operation (\eg, value read or value
+written). Functions $\txn$, $\id$, $\oper$, and $\rval$ project each
+of the four aforementioned individual components of the tuple.
+In every step of the evaluation, the machine reduces a \txnimp\ term
+by executing a read, write or commit operation, generating an effect,
+and extending the trace. Since effects include transaction
 identifiers, the semantics distinguishes between terms ($t$) of
 different transactions. For example, $\txnbox{t}_i$ denotes a term $t$
 inside a transaction $T_i$.  Evaluation contexts are also
@@ -96,7 +97,8 @@ order of operations within a transaction. In particular, it relates
 two effects, $\eta_1$ and $\eta_2$, such that $\txn(\eta_1) =
 \txn(\eta_2)$ and $\id(\eta_1) < \id(\eta_2)$.  The semantics assigns
 monotonically increasing identifiers to effects, as defined by the
-$\id(\eta) > \maxId(\A)$ condition of \rulelabel{E-Aux}. Evaluation
+$\id(\eta) > \maxId(\A)$ condition of \rulelabel{E-Aux} ($\maxId(\A)$
+returns the maximum number identifying an effect in $\A$). Evaluation
 contexts ($\ectx_i$) for transaction-bound terms are defined so as to
 enforce a deterministic sequential order of execution within a
 transaction, leading to a deterministic total order among effect ids,
