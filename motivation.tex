@@ -74,34 +74,36 @@ store, such as a conventional RDBMS.
   \includegraphics[scale=0.6]{Figures/motiv-eg-1-b}
 }
 \caption{\small A possible execution of the program shown in Fig.~\ref{fig:motiv-eg-1} under
-  \iso{Read Committed} isolation level.}
+  \iso{Read Committed} isolation level. Transaction \C{Wd1} is shown
+  against lighter green background, and transaction \C{Wd2} against
+  darker red background. Each transaction reads the balance (\C{B})
+  twice, hence two \C{Reads}.}
 \label{fig:rc-ex}
 \end{figure}
 
 The figure depicts an execution as a series of read, write, and commit
-operations. The subscript of an operation indicates the transaction
-that executes it (Both transactions read \C{B} twice, hence two read
-operations). In the execution on left, transaction \C{Wd1} reads the
-current balance (\C{k}) and writes the new balance (\C{k-a1}), but
-before it commits, transaction \C{Wd2} executes and commits, writing
-the new balance (\C{k-a2}). {\sc rc} isolation prevent \C{Wd2} from
-witnessing the uncommitted writes of transaction \C{Wd1}.
-Subsequently committing \C{Wd1} leads to the loss of \C{Wd2}'s updates
-(the so-called \emph{lost update anomaly}~\cite{berenson}), resulting
-in an incorrect balance of \C{k-a1}. The execution on right describes
-a similar scenario with \C{Wd1} and \C{Wd2} exchanging their roles.
-Clearly, {\sc rc} is an excessively weak isolation level for this
-program because it loses the updates of one transaction, resulting in
-the violation of the post-condition.  A stronger isolation level that
-prevents lost updates is required. \iso{Snapshot Isolation} ({\sc
-si})~\cite{berenson} fits this requirement; {\sc si} effectively
-serializes transactions that update a shared data object by aborting
-and re-executing a transaction if write-write conflicts are detected
-during its commit.\footnote{{\sc si} however does not serialize
-transactions in the absence of write-write conflicts.} Since {\sc si},
-unlike {\sc ser}, does not need expensive mechanisms such as
-lock-based concurrency control or runtime monitoring, it is also more
-efficient, making it appropriate for both withdraw transactions.
+operations. In the execution on left, transaction \C{Wd1} (green)
+reads the current balance (\C{k}) and writes the new balance
+(\C{k-a1}), but before it commits, transaction \C{Wd2} (red) executes
+and commits, writing the new balance (\C{k-a2}). {\sc rc} isolation
+prevent \C{Wd2} from witnessing the uncommitted writes of transaction
+\C{Wd1}.  Subsequently committing \C{Wd1} leads to the loss of
+\C{Wd2}'s updates (the so-called \emph{lost update
+anomaly}~\cite{berenson}), resulting in an incorrect balance of
+\C{k-a1}. The execution on right describes a similar scenario with
+\C{Wd1} and \C{Wd2} exchanging their roles.  Clearly, {\sc rc} is an
+excessively weak isolation level for this program because it loses the
+updates of one transaction, resulting in the violation of the
+post-condition.  A stronger isolation level that prevents lost updates
+is required. \iso{Snapshot Isolation} ({\sc si})~\cite{berenson} fits
+this requirement; {\sc si} effectively serializes transactions that
+update a shared data object by aborting and re-executing a transaction
+if write-write conflicts are detected during its commit.\footnote{{\sc
+si} however does not serialize transactions in the absence of
+write-write conflicts.} Since {\sc si}, unlike {\sc ser}, does not
+need expensive mechanisms such as lock-based concurrency control or
+runtime monitoring, it is also more efficient, making it appropriate
+for both withdraw transactions.
 
 Thinking in terms of anomalies, as described above, is how database
 programmers are often encouraged to reason about weak isolation.
@@ -184,13 +186,13 @@ relation.}
 }
 
 
-\caption{\small $\hbZ$ arrows allowed by $\psi_{SI}$
- and $\psi_{RC}$ specifications
-% (Figs.~\ref{fig:hb-eg-1},~\ref{fig:hb-eg-2},~\ref{fig:hb-eg-3},~\ref{fig:hb-eg-4})
-for the example in Fig.~\ref{fig:motiv-eg-1}. Each
-arrow represents an $\hbZ$ relationship between all operations of
-\C{Wd2} and an operation in \C{Wd1}. Letters R, W and C stand for
-read, write and commit, respectively.}
+\caption{\small For the example in Fig.~\ref{fig:motiv-eg-1},
+$\psi_{SI}$ specification allows $\hbZ$ arrows (hence the execution)
+in Fig.~\ref{fig:hb-eg-1}. $\psi_{RC}$ specification allows
+Figs.~\ref{fig:hb-eg-1},~\ref{fig:hb-eg-2},~\ref{fig:hb-eg-3}, and
+~\ref{fig:hb-eg-4}. Each arrow represents an $\hbZ$ relationship
+between all operations of \C{Wd2} and an operation in \C{Wd1}. Letters
+R, W and C stand for read, write and commit, respectively.}
 \label{fig:motiv-eg-1-hb}
 \vspace*{-8pt}
 \end{figure}
