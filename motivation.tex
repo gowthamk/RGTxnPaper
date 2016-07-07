@@ -227,8 +227,8 @@ due to actions in $T_1$ being interleaved in $T_2$ (or, vice versa).
 Fig.~\ref{fig:motiv-eg-1-hb} is a visualization of $\hbZ$ from \C{Wd2}
 to \C{Wd1} allowed by $\psi_{RC}$ and $\psi_{SI}$. Arrows in all
 executions are legal under $\psi_{RC}$ because in no execution does an
-operation $\eta_1$ from \C{Wd1} happen-before $\eta_2$ of \C{Wd2}
-without the commit of \C{Wd1} also happening before $\eta_2$.
+operation from \C{Wd2} happen-before an operation of \C{Wd1} without
+the commit of \C{Wd2} also happening before the operation of \C{Wd1}.
 $\psi_{SI}$ however disallows $\hbZ$ arrows (hence executions) in
 Figs.~\ref{fig:hb-eg-2},~\ref{fig:hb-eg-3}, and~\ref{fig:hb-eg-4}
 because such arrows establish $\hbZ$ edges between (operations in)
