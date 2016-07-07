@@ -5,10 +5,11 @@ We now describe a proof system that lets us demonstrate that a \txnimp
 program satisfies its high-level invariants in all small-step
 executions that satisfy a chosen trace invariant ($\I$).\footnote{It is
 important to keep in mind the distinction between high-level invariants
-(\eg~\C{X$\ge$0}) and trace invariants (\eg~\C{RC}). The former
+(\eg~\C{X$\ge$0}) and trace invariants (\eg~$\I =
+\lambda\E.\,\C{RC}(\C{Wd1})\wedge \C{SI}(\C{Wd2})$). The former
 constitute \emph{proof} \emph{obligations} for the programmer, whereas
-the latter captures \emph{assumptions} about the operational characteristics
-of transactions and the underlying data store. } 
+the latter is a combination of transaction-specific \emph{assumptions} about 
+operational characteristics of the underlying data store. } 
 Since the trace invariant captures transaction-isolation constraints,
 the demonstration is a proof that the given selection of isolation
 levels for transactions is sufficient to enforce a program's invariants.
