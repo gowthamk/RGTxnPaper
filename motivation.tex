@@ -9,43 +9,27 @@ executes a database computation and returns the result.
 
 \begin{figure}
 \centering
-\begin{tabular}{l||l}
 \begin{ocaml}
 let new_order_txn d_id c_d_id c_id
       (ireqs: item_req list) = atomically do
-  dist <- SQL.select1 District
-               (fun d -> d.d_id = d_id);
+  dist <- SQL.select1 District (fun d -> d.d_id = d_id);
   let o_id = dist.d_next_o_id;
-  SQL.update District 
-    (fun d -> 
-      {d with d_next_o_id =d_next_o_id + 1})
-    (fun d -> d.d_id = d_id );
+  SQL.update District (fun d -> {d with d_next_o_id =d_next_o_id + 1})
+                      (fun d -> d.d_id = d_id );
   SQL.insert Order {o_id=o_id;  o_d_id=d_id; 
                     o_c_id=c_id; o_ol_cnt=S.size ireqs; };
   SQL.insert New_order {no_o_id=o_id; no_d_id=d_id};
   foreach ireqs @@ fun ireq -> do
-    stk <- SQL.select1 Stock
-             (fun s -> s.s_i_id = ireq.ol_i_id);
+    stk <- SQL.select1 Stock (fun s -> s.s_i_id = ireq.ol_i_id);
     let s_qty' = if stk.s_qty >= ireq.ol_qty + 10 
-                then stk.s_qty - ireq.ol_qty
+                then stk.s_qty - ireq.ol_qty 
                 else stk.s_qty - ireq.ol_qty + 91;
-    SQL.update Stock
-       (fun s -> {s with s_qty = s_qty'})
-       (fun s -> s.s_i_id = ireq.ol_i_id);
+    SQL.update Stock (fun s -> {s with s_qty = s_qty'}) 
+                     (fun s -> s.s_i_id = ireq.ol_i_id);
     SQL.insert Order_line {ol_o_id=o_id; ol_d_id=d_id; 
-        ol_i_id=ireq.ol_i_id; ol_qty=ireq.ol_qty}
+                           ol_i_id=ireq.ol_i_id; ol_qty=ireq.ol_qty}
  
 \end{ocaml}
-&
-\begin{ocaml}
-  txn$\langle$'Wd2'$\rangle${
-    if (B $\ge$ a2) {
-      B := B - a2
-    }
-  }
-\end{ocaml}
-\\
-\end{tabular}
 \caption{\small Concurrent withdraw transactions}
 \label{fig:motiv-eg-1}
 \vspace*{-10pt}
