@@ -4,38 +4,99 @@
 In this section, we motivate our ideas via an example written in
 \txnimp - a functional language equipped with a \C{DB} monad to
 compose database computations. Besides the usual \C{bind} and
-\C{return} combinators, monad offers a \C{txn\_do} combinator that
+\C{return} combinators, monad offers an \C{atomically} combinator that
 executes a database computation and returns the result. 
 
 \begin{figure}
 \centering
 \begin{ocaml}
-let new_order_txn d_id c_d_id c_id
-      (ireqs: item_req list) = atomically do
+let new_order_ d_id c_id item_reqs = atomically do
   dist <- SQL.select1 District (fun d -> d.d_id = d_id);
   let o_id = dist.d_next_o_id;
   SQL.update District (fun d -> {d with d_next_o_id =d_next_o_id + 1})
                       (fun d -> d.d_id = d_id );
   SQL.insert Order {o_id=o_id;  o_d_id=d_id; 
-                    o_c_id=c_id; o_ol_cnt=S.size ireqs; };
-  SQL.insert New_order {no_o_id=o_id; no_d_id=d_id};
-  foreach ireqs @@ fun ireq -> do
-    stk <- SQL.select1 Stock (fun s -> s.s_i_id = ireq.ol_i_id);
-    let s_qty' = if stk.s_qty >= ireq.ol_qty + 10 
-                then stk.s_qty - ireq.ol_qty 
-                else stk.s_qty - ireq.ol_qty + 91;
+                    o_c_id=c_id; o_ol_cnt=S.size item_reqs; };
+  foreach item_reqs @@ fun item_req -> do
+    stk <- SQL.select1 Stock (fun s -> s.s_i_id = item_req.ol_i_id);
+    let s_qty' = if stk.s_qty >= item_req.ol_qty + 10 
+                then stk.s_qty - item_req.ol_qty 
+                else stk.s_qty - item_req.ol_qty + 91;
     SQL.update Stock (fun s -> {s with s_qty = s_qty'}) 
-                     (fun s -> s.s_i_id = ireq.ol_i_id);
+                     (fun s -> s.s_i_id = item_req.ol_i_id);
     SQL.insert Order_line {ol_o_id=o_id; ol_d_id=d_id; 
-                           ol_i_id=ireq.ol_i_id; ol_qty=ireq.ol_qty}
+                           ol_i_id=item_req.ol_i_id; ol_qty=item_req.ol_qty}
  
 \end{ocaml}
 \caption{\small Concurrent withdraw transactions}
-\label{fig:motiv-eg-1}
+\label{fig:new_order_code}
 \vspace*{-10pt}
 \end{figure}
 
-Consider an implementation of a banking application that admits
+Fig.~\ref{fig:new_order_code} shows a simplified version of the TPC-C
+\C{new\_order} transaction written in \txnimp (the \C{do} syntax ala
+Haskell is used for convenience). TPC-C is an Online Transaction
+Processing (OLTP) benchmark that models an order-processing system for
+a wholesale parts supply business. The business logic is captured in 5
+database transactions that operate on 9 tables. \C{new\_order} is one
+such trasaction that operates on \C{District}, \C{Order},
+{New\_order}, \C{Stock}, and \C{Order\_line} tables. The transaction
+acts on the behalf of a customer, whose id is \C{c\_id}, to place a
+new order for the given set of items (\C{item\_reqs}), to be served by
+a warehouse under the district identified by \C{d\_id}. The
+transaction does so by invoking appropriate SQL functionality,
+captured in Fig.~\ref{fig:new_order_code} by various calls to
+functions under the \C{SQL} module. All \C{SQL} functions take the
+table name (a nullary constructor) as their first argument. The
+higher-order \C{SQL.select1} function accepts a boolean function that
+describes the selection criteria, and returns any record that meets
+the criteria (it models the SQL query \C{SELECT \ldots\xspace LIMIT
+1}). \C{SQL.update} also accepts a boolean function (3rd argument) to
+select the records to be updated. Its 2nd argument is a function that
+maps each selected record to a new (updated) record. \C{SQL.insert}
+inserts a given record into the specified table in the database.
+
+The \C{new\_order} transaction inserts a new \C{Order} record, whose
+id is the sequence number of the next order under the given district
+(\C{d\_id}). The sequence number is stored in the corresponding
+\C{District} record, and updated each time a new order added to the
+system. Since each order may request multiple items (\C{item\_reqs}),
+an \C{Order\_line} record is created for each requested item to relate
+the order with the item. Each item has a corresponding record in the
+\C{Stock} table, which keeps track of the quantity of the item left in
+stock (\C{s\_qty}). The quantity is updated by the transaction to
+reflect the processing of new order (if the stock quantity falls below
+10, it is automatically replenished by 91).
+
+TPC-C defines multiple invariants, called \emph{consistency
+conditions}, over the state of the application in the database. One
+such consistency condition is the requirement that for a given order
+\C{o}, the order-line-count field (\C{o.o\_ol\_cnt}) should reflect
+the number of order lines under the order, i.e., the number of
+\C{Order\_line} records whose \C{ol\_o\_id} is equal to \C{o.o\_id}.
+In a sequential exectution, it is more-or-less easy to see how this
+condition condition is preserved by the \C{new\_order} transaction by
+examining Fig.~\ref{fig:new_order_code}. A new \C{Order} record is
+added with its \C{o\_id} distinct from the existing order ids, and its
+\C{o\_ol\_cnt} set equal to the size of \C{item\_reqs} set. The
+\C{foreach} loop runs once for each \C{item\_req}, adding a new
+\C{Order\_line} record for each requested item, with its \C{ol\_o\_id}
+field set to \C{o\_id}. Thus, by the end of the loop, the number of
+\C{Order\_line} records in the database, whose \C{ol\_o\_id} is equal
+to \C{o\_id}, is equal to the size of the \C{item\_req} set, which
+inturn is equal to the \C{Order} record's \C{o\_ol\_cnt} field. Thus
+the consistency condition is preserved. 
+
+While the aforementioned reasoning is simple to perform manually, the
+sequential verification of database programs, such as the one in
+Fig.~\ref{fig:new_order_code}, is difficult to automate owing to the
+presence of loops and collections. Thus verifying serializable
+transactions is at least as difficult as reasoning about sequential
+imperative programs. Nonetheless, program logics and automation
+techniques developed to reason about imperative programs can be used
+to reason about sequential transactions, perhaps with reasonable
+success.
+
 concurrent withdraw transactions on an account balance (\C{B}), as
 shown in Fig.~\ref{fig:motiv-eg-1}. If the initial balance (\C{k}) in
 the account is enough to perform both withdraws, then the final
