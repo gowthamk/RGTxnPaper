@@ -182,8 +182,92 @@ identify grounds for promoting the isolation level of \C{new\_order}.
 Yet, if we take the semantics of the application into account, it is
 clear that RC is not an appropriate isolation level for
 \C{new\_order}. Clearly, there is a need for a high-level verification
-framework that lets us reason about transaction semantics under weak
-isolation.
+framework that lets us reason about transaction semantics in
+conjunction with the semantics of weak isolation.
+
+Facilitating high-level reasoning about weak isolation is however not
+easy owing to the low-level nature of its specification, either in
+terms of the implementation details~\cite{gray}, allowed
+anomalies~\cite{berenson}, or well-formedness condition on program
+traces~\cite{adyaphd,gotsmanconcur15}. For instance, does promoting
+the isolation level of \C{new\_order} to Repeatable Read (RR) help in
+preserving the consistency condition? To answer this question, one has
+to relate the low-level specification of RR given in terms of
+trace-based relations~\cite{adyaphd,gotsmanconcur15} to the semantics
+of TPC-C, which is difficult. Alternatively, one could reason about
+how RR is implemented, say on Postgres, and reason about the
+\C{new\_order} implementation in conjunction with Postgres's RR
+implementation. However, this is not any easier, considering that
+Postgres employs a host of techniques, including Multiversion, locks
+and rollbacks, to implement RR. The verification problem becomes even
+more difficult if the aim is to facilitate automation. Our experience
+suggests that a proof framework that requires programmers to relate
+trace-based isolation specifications to program semantics necessarily
+imposes heavy annotation burden, requires painstakingly long and
+verbose proofs, and does not lend itself to automation. Weak isolation
+aside, there are also the conventional challenges that face
+(automatic) verification of concurrent programs: facilitating modular
+proofs, inferring intermediary assertions and loop invariants that are
+stable w.r.t interference, etc. A proof system for weakly isolated
+transactions has to necessarily address these challenges, along with
+those that arise due to weak isolation.
+
+The proof system and the automation framework proposed in this paper
+overcomes or circumvents the aforementioned problems. The first
+observation that underlies our approach is that, while databases
+implement weak isolation employing a host of techniques to facilitate
+maximum concurrency despite the isolation, the operational semantics
+of such implementations can nonetheless be captured using a simple
+abstraction of the database state exposed to the application. For
+instance, consider how Postgres executes an RR transaction. A
+(conceptual) snapshot of the database state is created at the
+beginning of the transaction against which its reads are executed.
+When the transaction attempts to update a record, Postgres first
+checks if the current version of the record in the database is same as
+the snapshot version. If yes, then an exclusive lock is obtained on
+the record, and the updatation is carried out. If the record is
+already locked, Postgres waits (blocks the transaction) until the lock
+is released. Once obtained, an exclusive lock is held until the
+transaction commits or rolls back. If the aforementioned version check
+fails (i.e., database has a later version than the snapshot), then the
+transaction is rolled back and re-executed. Thus, the implementation
+of RR on Postgres is fairly involved. Nonetheless, its operational
+semantics can be described straightforwardly in terms of the legal
+transitions of the database state (denoted, $\Delta \longrightarrow
+\Delta'$) allowed while an RR transaction is in progress. Since
+transaction's reads are always served from a snapshot, no state
+changes are witnessed while the execution is in progress. Thus,
+insofar as an RR transaction is concerned, the database state doesn't
+change (i.e., $\Delta' = \Delta$) during the execution. Note that the
+uncommitted writes of the transaction are not part of $\Delta$;
+instead we imagine a transaction-local state ($\delta$) that is
+populated with only the uncommitted local writes. When the transaction
+commits, the local state ($\delta$) is flushed to the global state
+($\Delta$) to yeild a committed state. However, unlike reads, commit
+is performed against the current state of the database (call it
+$\Delta_c$); not the snapshot. Thus, after the transaction finishes
+execution, but before it commits, the transaction witnesses the
+effects of all concurrent transactions in a single database state
+transition $\Delta \longrightarrow \Delta_c$. Postgres's RR
+implementation effectively constrains this transition. Firstly, due to
+the version check, the current transaction cannot update a data item
+that was already updated by a concurrent transaction. Secondly, due to
+exclusive write locks, a data item updated by the current transaction
+cannot be overwritten by a concurrent transaction. Putting these two
+together, we know that the transition $\Delta \longrightarrow
+\Delta_c$ does not involve any concurrent transactions that write to
+the same data items as the current RR transaction. Since $\delta$
+records the writes of the current transaction, intuitively, forall
+$x\in\delta$, $\Delta_c(x) = \Delta(x)$. To summarize, the operational
+semantics of Postgres's RR implementation can be captured as
+constraints on the transitions of the database state ($\Delta
+\longrightarrow \Delta'$) during the lifetime an RR
+transaction ($T$):
+\begin{itemize}
+  \item While $T$ executes, $\Delta' = \Delta$.
+  \item After $T$ finishes execution, but before it commits its local
+    state $\delta$, $\forall(x\in\delta).~\Delta'(x) = \Delta(x)$.
+\end{itemize}
 
 
 
