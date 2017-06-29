@@ -269,8 +269,33 @@ transaction ($T$):
     state $\delta$, $\forall(x\in\delta).~\Delta'(x) = \Delta(x)$.
 \end{itemize}
 
+Let us now see how the above simple characterization of Postgres's RR
+lets us verify \C{new\_order}. Firstly, since the database doesn't
+change ($\Delta' = \Delta$) during the execution of the transaction's
+body, we can reason about \C{new\_order} as if it is executing in
+complete isolation until it is ready to commit. This reasoning is same
+as the reasoning about sequential execution we performed earlier,
+except that it now also includes a local state ($\delta$) that stores
+local writes. Thus, when \C{new\_order} finishes execution and becomes
+ready to commit, immediately flushing its local writes ($\delta$) to
+the unchanged database state ($\Delta$) preserves the TPC-C invariant.
+However, we are required to consider the  interference from concurrent
+transitions at this point, which might change the database state from
+$\Delta$ to $\Delta'$. If this interference includes the effects of a
+concurrent \C{new\_order} transaction (with the same \C{d\_id}), then
+verification fails as described previously
+(Fig.~\ref{fig:new_order_execs}). Fortunately, we can show that this
+is impossible; RR pre-empts a concurrent \C{new\_order} transaction
+that modifies the same \C{District} record as the current transaction
+(concretely, since the record is already present in current
+transaction's $\delta$, transition from $\Delta$ to $\Delta'$ cannot
+change this record). Thus \C{new\_order} preserves the TPC-C
+invariant when executed under RR isolation on Postgres. Our proof
+framework generalizes this style of reasoning to various isolation
+levels on databases.
 
-
+The second observation that informs our approach is one that pertains
+to automation.
 
 \newpage
 
