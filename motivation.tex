@@ -294,250 +294,88 @@ invariant when executed under RR isolation on Postgres. Our proof
 framework generalizes this style of reasoning to various isolation
 levels on databases.
 
+ 
 The second observation that informs our approach is one that pertains
-to automation.
+to automation. Program verification, even when machine-aided, often
+entails significant annotation burden in the form of intermediary
+assertions and loop invariants required to prove a program correct.
+Even with concurrent program logics, such as Rely-Gurantee, which
+extend Hoare logic with additional artifacts, (stable) intermediary
+assertions and loop invariants remain a major source of annotation
+burden. Since database transactions inherently deal with the mutable
+state of the database, it is natural to formulate them as concurrent
+imperative programs. An advantage with this formulation is that it
+lets us immediately apply existing concurrent program logics to
+database transactions, albeit with necessary customizations to deal
+with weak isolation. The downside, however, is that there hardly is
+any automation support to apply such program logics on concurrent
+imperative programs. Attemps at automation face the problem of
+inferring stable and inductive loop invariants in its full generality,
+which, while being undecidable in theory, and hard in practice, also
+takes our focus away from weak isolation.
 
-\newpage
+In the light of aforementioned reservations, we refrain from
+formulating database transactions as concurrent imperative programs.
+Instead, we see value in viewing them as essentially functional
+programs that manage the database state via a monad akin to the
+\C{State} monad~\cite{statemonad}. We find it useful to reason about
+statements that mutate the database state, not in terms of a pre- and
+post-condition pair, but in terms of a state transformer that relates
+the pre- and post-states of a statement. Loops are substituted with
+higher-order combinators that have a well-defined control flow, and
+facilitate well-founded recursion. The static semantics of these
+combinators let us lift the state transformer of its higher-order
+argument (i.e., the loop body) to the state transformer of the
+combined expression (i.e., the loop). This is made possible due to the
+characteristic structure of database programs, which also gets
+reflected in the structure of the state transformer. We illustrate
+this point through a simple example that doesn't involve transactions,
+but is nonetheless relevant.
 
-(\C{k-a1}), but before it commits, transaction \C{Wd2} (red) executes
-and commits, writing the new balance (\C{k-a2}). {\sc rc} isolation
-prevent \C{Wd2} from witnessing the uncommitted writes of transaction
-\C{Wd1}.  Subsequently committing \C{Wd1} leads to the loss of
-\C{Wd2}'s updates (the so-called \emph{lost update
-anomaly}~\cite{berenson}), resulting in an incorrect balance of
-\C{k-a1}. The execution on right describes a similar scenario with
-\C{Wd1} and \C{Wd2} exchanging their roles.  Clearly, {\sc rc} is an
-excessively weak isolation level for this program because it loses the
-updates of one transaction, resulting in the violation of the
-post-condition.  A stronger isolation level that prevents lost updates
-is required. \iso{Snapshot Isolation} ({\sc si})~\cite{berenson} fits
-this requirement; {\sc si} effectively serializes transactions that
-update a shared data object by aborting and re-executing a transaction
-if write-write conflicts are detected during its commit.\footnote{{\sc
-si} however does not serialize transactions in the absence of
-write-write conflicts.} Since {\sc si}, unlike {\sc ser}, does not
-need expensive mechanisms such as lock-based concurrency control or
-runtime monitoring, it is also more efficient, making it appropriate
-for both withdraw transactions.
-
-Thinking in terms of anomalies, as described above, is how database
-programmers are often encouraged to reason about weak isolation.
-Unfortunately, such reasoning does not rest on any sound foundation,
-and is thus highly error-prone. Reasoning in terms of how weak
-isolation variants are implemented is no better since it requires
-programmers to understand low-level implementation details of the
-database that are far removed from the application semantics. An
-attractive  alternative in this context would be a principled
-reasoning approach that combines declarative reasoning about isolation
-guarantees with operational reasoning about programs. We demonstrate
-how our proof system makes this possible in the context of the current
-example.
-
-First, we note that the example in Fig.~\ref{fig:motiv-eg-1} is a
-concurrent program, and hence is amenable to \emph{rely-guarantee}
-style reasoning~\cite{rgjones}, a compositional proof technique that
-allows us to reason about the behaviour of individual threads by
-abstracting away interferences induced by other threads (collectively
-called \emph{the environment}) into a \emph{rely} relation. In an
-ordinary concurrent program, every environment step is a valid
-interference in the current thread. However, in the presence of
-transactions executing under various levels of weak isolation,
-determining what constitutes an interference is a non-trivial problem.
-For example, a \iso{Serializable} transaction admits no interference,
-whereas within a transaction executing under \iso{Read Uncommitted}
-isolation, all interferences are valid. Between these two extremes are
-various levels of isolation that admit some interferences while
-prohibiting others. For example, \iso{Read Committed} isolation admits
-interference of a committed transaction, but not those from
-uncommitted transactions. \iso{Snapshot Isolation} admits interference
-from committed non-conflicting transactions, and so on.
-
-\begin{figure}
-\begin{smathpar}
-\begin{array}{lcl}
-\psi_{RC} & \defeq & \forall T_1,T_2,\eta_1,\eta_2.\; \txn(\eta_1) = T_1 
-  \conj \txn(\eta_2) = T_2 \\
-  & & \hspace*{0.6in}\conj T_1 \neq T_2 \conj \eta_1 \hboar
-  \eta_2 \Rightarrow T_1 \hboar \eta_2 \\
-\psi_{SI} & \defeq & \forall T_1,T_2.\; T_1 \neq T_2 \conj
-  (\exists \C{X}.~{T_1 \wrstoar \C{X}} \conj 
-                      {T_2 \wrstoar \C{X}})\\
-  &  & \hspace*{0.6in}\Rightarrow{T_1 \hboar T_2} \disj {T_2 \hboar T_1} \\
-\end{array}
-\end{smathpar}
-\caption{\small Interference properties for different weak isolation
-levels can be captured as constraints over the happens-before
-relation.}
-\label{fig:interference-ex}
+% \begin{figure}[!t]
+% \centering
+% %
+% \begin{subfigure}[b]{0.46\textwidth}
+% \begin{ocaml}
+% Set s' = $\emptyset$;
+% foreach x in s {
+%   s'.add(f(x)); 
+% }
+% \end{ocaml}
+% \caption{}
+% \end{subfigure}
+% %
+% \begin{subfigure}[b]{0.5\textwidth}
+% \begin{ocaml}
+% let s' = ref [];
+% foreach s (fun x -> s' := x::(!s'));
+% \end{ocaml}
+% \caption{Lorem ipsum, lorem ipsum,Lorem ipsum, lorem ipsum,Lorem ipsum}
+% \end{subfigure}
+% \caption{Caption place holder}
+% %
+% \caption{New versions are created from existing versions either
+% through \C{push} or \C{merge}.}
+% \label{fig:syntactic-ancestors}
+% \end{figure}
+\begin{figure}[!h]
+\begin{ocaml}
+let l' = ref [];
+foreach l (fun x -> l' := x::(!l'));
+\end{ocaml}
+\caption{A program that uses mutable state to reverse a list of elements}
+\label{fig:mutable-rev}
 \end{figure}
 
-\begin{figure}
-\centering
-\subcaptionbox {
-  \label{fig:hb-eg-1}
-} [
-  0.25\columnwidth
-] {
-  \includegraphics[scale=0.45]{Figures/hb-eg-1}
-}
-\subcaptionbox {
-  \label{fig:hb-eg-2}
-} [
-  0.25\columnwidth
-] {
-  \includegraphics[scale=0.45]{Figures/hb-eg-2}
-}
-\subcaptionbox {
-  \label{fig:hb-eg-3}
-} [
-  0.25\columnwidth
-] {
-  \includegraphics[scale=0.45]{Figures/hb-eg-3}
-}
-\subcaptionbox {
-  \label{fig:hb-eg-4}
-}{
-  \includegraphics[scale=0.45]{Figures/hb-eg-4}
-}
+Consider the program in Fig.~\ref{fig:mutable-rev} that populates a
+mutable list (\C{l'}) with elements from other list (\C{l}), reversing
+their order. The aim is to show that, when the program ends, both
+\C{l'} and \C{l} contain the same set of elements. If we were to
+attempt Hoare-style verification, we are obligated to define an
+inductive invariant for the \C{foreach} loop. Unfortunately, none
+exists for the loop, as such. The reason is that there is no way in
+the program to refer to the elements in the list that have already
+been added to the list \C{l'}. This problem can be easily rectified by
+introducing an integer \C{i} that keeps track of the index of \C{x} in
+\C{l}. 
 
-
-\caption{\small Possible executions for the example in
-Fig.~\ref{fig:motiv-eg-1}. Letters R, W and C stand for read, write
-and commit, respectively. Each blue dashed arrow represents a $\hbZ$
-relationship between all operations of \C{Wd2} and an operation in
-\C{Wd1}. $\psi_{SI}$ specification allows $\hbZ$ arrows (hence the
-execution) in Fig.~\ref{fig:hb-eg-1}. $\psi_{RC}$ specification allows
-$\hbZ$ arrows in
-Figs.~\ref{fig:hb-eg-1},~\ref{fig:hb-eg-2},~\ref{fig:hb-eg-3}, and
-~\ref{fig:hb-eg-4}.  }
-\label{fig:motiv-eg-1-hb}
-\vspace*{-8pt}
-\end{figure}
-
-For the rely-guarantee approach to be useful, it has to thus constrain
-allowed interference in accordance with the chosen level of isolation
-associated with a transaction. The first observation we make is that
-we can constrain interference by constraining the nature of the
-\emph{happens-before} ($\hbZ$) relation, which ultimately dictates
-what other transactions become visible to a transaction, or its
-constituents, and when. To do so, we axiomatize the $\hbZ$ relation to
-capture the interference characteristics of different isolation levels
-as their specifications. Two such specifications are
-shown\footnote{Note that specifications presented here are solely for
-illustration. The actual specifications described in
-\S\ref{sec:ansi-isolation} are more nuanced.} in
-Fig.~\ref{fig:interference-ex}. The \iso{Read Committed} specification
-($\psi_{RC}$) allows an operation $\eta_1$ of a transaction $T_1$ to
-happen-before an operation $\eta_2$ of another transaction $T_2$ only
-if every operation in $T_1$ (including its commit) happens-before
-$\eta_2$ (we let $T_1 \hboar \eta_2$ denote this). The specification
-does not require $T_1$ to execute and commit before all operations of
-$T_2$, thus allowing it to interfere in $T_2$, just as \C{Wd2}
-interferes in \C{Wd1} in Fig.~\ref{fig:motiv-eg-1-a}. The
-\iso{Snapshot Isolation} specification ($\psi_{SI}$) requires two
-transactions that write to the same variable (denoted $\wrstoar$) to be
-related by happens-before.  This effectively prohibits interference
-due to actions in $T_1$ being interleaved in $T_2$ (or, vice versa). 
-
-Fig.~\ref{fig:motiv-eg-1-hb} is a visualization of $\hbZ$ from \C{Wd2}
-to \C{Wd1} allowed by $\psi_{RC}$ and $\psi_{SI}$. Arrows in all
-executions are legal under $\psi_{RC}$ because in no execution does an
-operation from \C{Wd2} happen-before an operation of \C{Wd1} without
-the commit of \C{Wd2} also happening before the operation of \C{Wd1}.
-$\psi_{SI}$ however disallows $\hbZ$ arrows (hence executions) in
-Figs.~\ref{fig:hb-eg-2},~\ref{fig:hb-eg-3}, and~\ref{fig:hb-eg-4}
-because such arrows establish $\hbZ$ edges between (operations in)
-\C{Wd2} and only a subset of the operations in \C{Wd1}. Since the
-result of an operation (\eg a read) depends on what happens before
-that operation, the structure of the $\hbZ$ relation ultimately
-dictates the final result of the program. The arrows in
-Figs.~\ref{fig:hb-eg-1} and~\ref{fig:hb-eg-2} denote $\hbZ$
-relationships that do not affect the value of \C{B} in a way that
-causes the program to violate its post-condition. In contrast, arrows
-in Figs.~\ref{fig:hb-eg-3} and~\ref{fig:hb-eg-4} denote $\hbZ$
-relationships that lead to the violation of the post-condition. The
-task of the reasoning framework is to determine if \emph{all} $\hbZ$
-relationships allowed by an isolation level lead to the satisfaction
-of the post-condition.
-
-% There is a $\hb$ edge (first dashed) that is allowed by RC but
-% prohibited by SI, which nonetheless does not lead to invariant
-% violation. 
-
-The specification of an isolation level encodes its interference
-characteristics as constraints over the $\hbZ$ relation. However, for
-this to be useful in reasoning about programs, the rely-guarantee
-framework should be able to use the specification to determine if an
-interference is valid or not, allowing the programmer to only focus on
-valid interferences. Our second observation is that this is possible
-if the reasoning framework adequately tracks $\hbZ$ at each program
-point, while preserving $\hbZ$ constraints as invariants between
-program points. An interference that leads to the violation of $\hbZ$
-constraints (i.e., an invalid interference) is thus automatically
-prohibited. For instance, consider the program point after the write
-to \C{B} in \C{Wd1}. The expected invariant ($\phi$) at that program
-point is shown below ($\committed$ stands for ``committed''):
-
-\begin{smathpar}
-\begin{array}{c}
- \neg\committed(\C{Wd1}) \conj \C{Wd1} \wrstoar \C{B}  \conj 
-    (\neg\committed(\C{Wd2}) \Rightarrow \C{B = k-a1}) \\
-    \conj (\committed(\C{Wd2})
-                \Rightarrow \C{B = k-a1-a2})
-\end{array}
-\end{smathpar}
-
-\noindent $\phi$ asserts that \C{Wd1} is not yet committed, and that
-it wrote to \C{B}, and the value of \C{B} is either \C{k-a1-a2} or
-\C{k-a1} depending on whether or not \C{Wd2} is committed. If $\phi$
-remains invariant until \C{Wd1} commits, then the post-condition (\C{B
-= k-a1-a2}) can be established easily. However, an interference from
-\C{Wd2} at this stage (captured by the last dashed arrow in
-Fig.~\ref{fig:motiv-eg-1-hb}) may violate the invariant by writing
-$\C{k-a2}$ to \C{B} and committing \C{Wd2}, thus leading to
-$\committed(\C{Wd2}) \Rightarrow \C{B=k-a2}$. Fortunately,
-\iso{Snapshot Isolation} prevents this interference, and this can be
-shown by demonstrating that an interference from \C{Wd2} starting from
-an execution state that satisfies $\psi_{SI} \wedge \phi$ leads to an
-execution state where neither $\C{Wd2} \hboar \C{Wd1}$ nor $\C{Wd1}
-\hboar \C{Wd2}$ holds; $\C{Wd2} \hboar \C{Wd1}$ does not hold because
-\C{Wd1}'s write to \C{B} clearly happened before \C{Wd2}'s commit, and
-$\C{Wd1} \hboar \C{Wd2}$ does not hold because \C{Wd1} has not yet
-committed, while \C{Wd2} has already begun. Since \C{Wd2} also writes
-to \C{B}, this violates the $\psi_{SI}$ constraint which we assume to
-be an invariant. A proof that the post-condition holds now follows
-from the contradiction. It is informative to note that if the
-invariant is $\psi_{RC}$ instead of $\psi_{SI}$, we cannot derive a
-contradiction and we cannot rule out the interference, which
-(rightfully) causes  the proof to fail.
-
-Implicit in the above discussion is the assumption of a strongly
-consistent ({\sc sc}) store that guarantees the visibility of all
-previously committed transactions. An {\sc sc} semantics can be built
-into the reasoning framework, leading to a proof system tailor-made
-for such stores.  However, for the reasoning framework to be truly
-useful, it should be capable of handling different consistency
-semantics, supporting stores that are weaker than {\sc sc} (e.g.,
-causally or eventually consistent), and should be able to reconcile
-conflicts between consistency and isolation constraints.  We
-demonstrate how our reasoning framework makes this possible in the
-following sections.
-
-%% We have thus far assumed a strongly consistent ({\sc sc}) store that,
-%% in the absence of transactions with special isolation requirements,
-%% makes the effects of any operation immediately visible to all
-%% subsequent operations. The natural behaviour of {\sc sc} to totally
-%% order all operations w.r.t. the $\hbZ$ relation could be in conflict
-%% with the constraints imposed by weak isolation. To meet the
-%% requirements of weaker isolation levels, say {\sc rc}, the store has
-%% to adapt itself to \emph{hide} the effects of concurrent transactions
-%% until they are committed. Once committed though, effects need to be
-%% immediately visible to subsequent operations. This semantics can be
-%% built into the reasoning framework, leading to a proof system
-%% tailor-made for such stores. However, for the reasoning framework to
-%% be truly useful, it has to be parametric over different consistency
-%% semantics, supporting stores that are weaker than {\sc sc} (e.g.,
-%% causally or eventually consistent), and should be able to reconcile
-%% conflicts between consistency and isolation constraints.  We
-%% demonstrate how our reasoning framework makes this possible in the
-%% following sections.
