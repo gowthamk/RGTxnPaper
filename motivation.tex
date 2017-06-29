@@ -90,32 +90,36 @@ the consistency condition is preserved.
 While the aforementioned reasoning is simple to perform manually, the
 sequential verification of database programs, such as the one in
 Fig.~\ref{fig:new_order_code}, is difficult to automate owing to the
-presence of loops and collections. Thus verifying serializable
-transactions is at least as difficult as reasoning about sequential
-imperative programs. Nonetheless, program logics and automation
-techniques developed to reason about imperative programs can be used
-to reason about sequential transactions, perhaps with reasonable
-success.
+presence of loops and collections. Thus verification of serializable
+transactions is comparable to the verification of sequential
+(imperative) programs in terms of difficulty. It is therefore not
+unreasonable to expect the reasoning machinery (i.e., program logics
+and inference techniques) developed for imperative programs to be
+equally effective on serializable transactions.
 
-concurrent withdraw transactions on an account balance (\C{B}), as
-shown in Fig.~\ref{fig:motiv-eg-1}. If the initial balance (\C{k}) in
-the account is enough to perform both withdraws, then the final
-balance, after both transactions commit, is expected to reflect the
-effects of both withdraws. The pre- and post-conditions in
-Fig.~\ref{fig:motiv-eg-1} reflect this expectation. Indeed, invariants
-are guaranteed to hold if both withdraw transactions are serialized,
-making \iso{Serializable} isolation ({\sc ser}) level a sufficient
-condition to preserve invariants. But, is {\sc ser} necessary?
+Unfortunately, transactions are rarely serializable in practice, and
+presence of weak isolation significantly complicates the reasoning
+about database programs. Weak isolation allows a transaction to
+witness the effects of concurrent transactions during its
+execution\footnote{Weak isolation doesn't violate atomicity as long as
+the witnessed effects are those of the committed transactions}.
+Various levels of weak isolation differ in what effects each allows
+the transaction to witness, and when. Admitting interference from
+concurrent transactions may violate the invariants that would
+otherwise hold under a fully isolated execution. 
 
-As an alternative, consider the execution of this transaction under a
-\emph{Read Committed} ({\sc rc}) isolation level, which is weaker than
-{\sc ser}.\footnote{{\sc rc} is in fact the default isolation level in
-Postgres 9.5 and Oracle 11g databases.} An {\sc rc} transaction is
-isolated from the writes of uncommitted transactions, and is therefore
-free from \emph{dirty reads}~\cite{berenson} of uncommitted data. In
-the current example, {\sc rc} isolation admits the two executions
-shown in Fig.~\ref{fig:rc-ex} on a strongly consistent ({\sc sc})
-store, such as a conventional RDBMS.
+Let us reconsider the \C{new\_order} transaction, which has been
+previously shown to preserve TPC-C's consistency condition under a
+serializable execution. However, serializability is rarely the default
+isolation level on databases. For instance, the default on Postgres is
+Read Committed (RC), which is considerably weaker than
+serializability. An RC transaction is isolated from \emph{dirty
+writes}, i.e., writes of uncommitted transactions, but is allowed to
+witness the writes of concurrent transactions as soon as they are
+committed. Thus, with two concurrent instances of the \C{new\_order}
+transaction (call them $T_1$ and $T_2$) trying to place new orders for
+different customers under the same district (\C{d\_id}), executions
+shown in Fig.~\ref{fig:new_order_execs} are possible on Postgres.
 
 \begin{figure}[!h]
 \centering
@@ -143,8 +147,49 @@ store, such as a conventional RDBMS.
 \end{figure}
 
 The figure depicts an execution as a series of read, write, and commit
-operations. In the execution on left, transaction \C{Wd1} (green)
-reads the current balance (\C{k}) and writes the new balance
+operations. In the execution on left, the \C{new\_order} instance
+$T_1$ (green) reads the \C{d\_next\_o\_id} field of the district
+record for \C{d\_id}, but before it increments the field, another
+\C{new\_order} instance ($T_2$) begins its execution and commits. Note
+that $T_2$ reads the same \C{d\_next\_o\_id} value as $T_1$, and
+inserts new \C{Order} and \C{Order\_line} records with their \C{o\_id}
+and \C{ol\_o\_id} fields (resp.) equal to \C{d\_next\_o\_id}. $T_2$
+also increments the \C{d\_next\_o\_id} field, which $T_1$ has already
+acccessed. This is allowed because reads do not obtain a mutually
+exclusive lock on most databases, including Postgres. Post $T_2$'s
+commit, $T_1$ resumes execution and adds new \C{Order} and
+\C{Order\_line} fields with the same order id as $T_1$. Thus, by the
+end of the execution, \C{Order\_line} records inserted by $T_1$ and
+$T_2$ all bear the same order id. There are also two \C{Order} records
+with the same district id (\C{d\_id}) and order id, none of whose
+\C{o\_ol\_cnt} reflects the actual number of \C{Order\_line} records
+inserted with that order id. This clearly violates TPC-C's consistency
+condition.
+
+Note that, in the above example, there is no Write-Write conflict, or
+the \emph{lost update} anomaly that often characterizes concurrency
+bugs, such as illegal concurrent withdraws on a bank
+account~\cite{poloniexbug}. While $T_1$ and $T_2$ both increment the
+\C{d\_next\_o\_id} field of the district record, they do so atomically
+(Line 4 of Fig.~\ref{fig:new_order_code}), allowing both updates to be
+present in the final state. Likewise, four other well-known anomalies
+that characterize RC isolation~\cite{berenson}, namely, \emph{fuzzy
+reads}, \emph{phantom reads}, \emph{read skew}, and \emph{write skew},
+are also not exhibited by the example. Thus, any program analysis,
+static or dynamic, that aims to determine appropriate isolation by
+checking for possible manifestations of known anomalies fails to
+identify grounds for promoting the isolation level of \C{new\_order}.
+Yet, if we take the semantics of the application into account, it is
+clear that RC is not an appropriate isolation level for
+\C{new\_order}. Clearly, there is a need for a high-level verification
+framework that lets us reason about transaction semantics under weak
+isolation.
+
+
+
+
+\newpage
+
 (\C{k-a1}), but before it commits, transaction \C{Wd2} (red) executes
 and commits, writing the new balance (\C{k-a2}). {\sc rc} isolation
 prevent \C{Wd2} from witnessing the uncommitted writes of transaction
