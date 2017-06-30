@@ -12,7 +12,7 @@ the result.
 \begin{figure}
 \centering
 \begin{ocaml}
-let new_order_ d_id c_id item_reqs = atomically do
+let new_order d_id c_id item_reqs = atomically do
   dist <- SQL.select1 District (fun d -> d.d_id = d_id);
   let o_id = dist.d_next_o_id;
   SQL.update District (fun d -> {d with d_next_o_id =d_next_o_id + 1})
@@ -20,7 +20,8 @@ let new_order_ d_id c_id item_reqs = atomically do
   SQL.insert Order {o_id=o_id;  o_d_id=d_id; 
                     o_c_id=c_id; o_ol_cnt=S.size item_reqs; };
   foreach item_reqs @@ fun item_req -> do
-    stk <- SQL.select1 Stock (fun s -> s.s_i_id = item_req.ol_i_id);
+    stk <- SQL.select1 Stock (fun s -> s.s_i_id = item_req.ol_i_id &&
+                                       s.s_d_id = d_id);
     let s_qty' = if stk.s_qty >= item_req.ol_qty + 10 
                 then stk.s_qty - item_req.ol_qty 
                 else stk.s_qty - item_req.ol_qty + 91;
@@ -30,7 +31,7 @@ let new_order_ d_id c_id item_reqs = atomically do
                            ol_i_id=item_req.ol_i_id; ol_qty=item_req.ol_qty}
  
 \end{ocaml}
-\caption{\small Concurrent withdraw transactions}
+\caption{TPC-C \C{new\_order} transaction}
 \label{fig:new_order_code}
 \vspace*{-10pt}
 \end{figure}
@@ -56,6 +57,14 @@ function (3rd argument) to select the records to be updated. Its
 2$^{nd}$ argument is a function that maps each selected record to a new
 (updated) record. \C{SQL.insert} inserts a given record into the
 specified table in the database.
+
+\begin{figure}[!t]
+\includegraphics[scale=0.5]{Figures/schema}
+\caption{Database schema of TPC-C's order management system.
+  Columns against highlighted background are primary keys. Arrows denote
+  foreign key relationships.}
+\label{fig:schema}
+\end{figure}
 
 The \C{new\_order} transaction inserts a new \C{Order} record, whose
 id is the sequence number of the next order under the given district
@@ -120,24 +129,24 @@ Fig.~\ref{fig:new_order_execs}.
 \centering
 \subcaptionbox {
   {\sc rc} Execution 1
-  \label{fig:motiv-eg-1-a}
+  \label{fig:motiv-eg-1-b}
 } [
   0.55\columnwidth
 ] {
-  \includegraphics[scale=0.6]{Figures/motiv-eg-1-a}
+  \includegraphics[scale=0.45]{Figures/motiv-eg-1-b}
 }
 %\hspace*{0.5in}
 \subcaptionbox {
   {\sc rc} Execution 2
-  \label{fig:motiv-eg-1-b}
+  \label{fig:motiv-eg-1-a}
 }{
-  \includegraphics[scale=0.6]{Figures/motiv-eg-1-b}
+  \includegraphics[scale=0.45]{Figures/motiv-eg-1-a}
 }
-\caption{\small A possible execution of the program shown in Fig.~\ref{fig:motiv-eg-1} under
-  \iso{Read Committed} isolation level. Transaction \C{Wd1} is shown
-  against lighter green background, and transaction \C{Wd2} against
-  darker red background. Each transaction reads the balance (\C{B})
-  twice, hence two \C{Reads}.}
+  \caption{\small RC executions involving two instances ($T_1$ and
+  $T_2$) of the \C{new\_order} transaction of
+  Fig.~\ref{fig:new_order_code}. 
+  Each instance reads the \C{d\_id} \C{District} record twice, second
+  time to (atomically) update the \C{d\_next\_o\_id} field.}
 \label{fig:rc-ex}
 \end{figure}
 
