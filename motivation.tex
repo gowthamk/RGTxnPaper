@@ -53,7 +53,7 @@ boolean function that describes the selection criteria, and returns
 any record that meets the criteria (it models the SQL query \C{SELECT
   \ldots\xspace LIMIT 1}). \C{SQL.update} also accepts a Boolean
 function (3rd argument) to select the records to be updated. Its
-2$%nd$ argument is a function that maps each selected record to a new
+2$^{nd}$ argument is a function that maps each selected record to a new
 (updated) record. \C{SQL.insert} inserts a given record into the
 specified table in the database.
 
@@ -88,28 +88,32 @@ the \C{Order} record's \C{o\_ol\_cnt} field, thus preserving the
 consistency condition.
 
 Because the aforementioned reasoning is reasonably simple to perform
-manually, it may be feasible to apply techniques for concurrent
-program verification~\cite{....} to automate much of this effort.
-Serializability aids the tractability of verification by preventing
-any interference among concurrently executing transactions.  Under
-weak isolation\footnote{Weak isolation doesn't violate atomicity as
-  long as the witnessed effects are those of committed transactions},
-interferences of various kinds are permitted.  Although various forms
-of weak isolation differ in the kinds of effects they allow and when
-those effects are made visible, admitting interference of any kind
-from concurrent atomic transactions makes verifying program invariants
-significantly harder than under a serializable execution.
+manually, verfiying that soundess of TPC-C's consistency conditions
+would appear to be feasible.  Serializability aids the tractability of
+verification by preventing any interference among concurrently
+executing transactions.  Under weak isolation\footnote{Weak isolation
+  doesn't violate atomicity as long as the witnessed effects are those
+  of committed transactions}, however, interferences of various kinds
+are permitted.  Although the verification problem for weakly isolated
+transactions would appear to be superficially similar to the
+verification of (racy) concurrent programs~\cite{concurrentGC...},
+weak isolation introduces new challenges arising from the use of
+transactions, and new opportunities arising from the fact that the
+store abstraction used by transaction is a relational database, not
+low-level memory.  Our proof framework addresses these challenges and
+exploits these opportunities to facilitiate fully automated
+correctness proofs.
 
-To illustrate, reconsider the behavior of the \C{new\_order}
-transaction when executed with a \emph{Read Committed} (RC) isolation
-level, the default isolation level in PostgreSQL, a widely used
-open-source database system.  An RC transaction is isolated from
-\emph{dirty writes}, i.e., writes of uncommitted transactions, but is
-allowed to witness the writes of concurrent transactions as soon as
-they are committed. Thus, with two concurrent instances of the
-\C{new\_order} transaction (call them $T_1$ and $T_2$), both
-concurrently placing new orders for different customers under the same
-district (\C{d\_id}), PostgreSQL admits the two executions shown in
+To illustrate, consider the behavior of the \C{new\_order} transaction
+when executed with a \emph{Read Committed} (RC) isolation level, the
+default isolation level in PostgreSQL, a widely used open-source
+database system.  An RC transaction is isolated from \emph{dirty
+  writes}, i.e., writes of uncommitted transactions, but is allowed to
+witness the writes of concurrent transactions as soon as they are
+committed. Thus, with two concurrent instances of the \C{new\_order}
+transaction (call them $T_1$ and $T_2$), both concurrently placing new
+orders for different customers under the same district (\C{d\_id}),
+PostgreSQL admits the two executions shown in
 Fig.~\ref{fig:new_order_execs}.
 
 \begin{figure}[!h]
@@ -157,7 +161,7 @@ with the same district id (\C{d\_id}) and order id, none of whose
 inserted with that order id.  This clearly violates TPC-C's consistency
 condition.
 
-Notably, this example does not exhibit many common concurrency bugs
+Notably, this example does not exhibit any common concurrency bugs
 that arise from incorrect use of weak isolation such as
 \emph{write-write} conflicts, or \emph{lost updates}.  While $T_1$ and
 $T_2$ both increment the \C{d\_next\_o\_id} field of the district
@@ -172,24 +176,26 @@ manifestations of these anomalies would fail to identify grounds for
 promoting the isolation level of \C{new\_order} to something stronger.
 Yet, if we take the semantics of the application into account, it is
 quite clear that RC is not an appropriate isolation level for
-\C{new\_order}. Clearly, the demonstrates the need for a high-level
-verification framework that lets us reason about application semantics
-in conjunction with the semantics of weak isolation.
+\C{new\_order}.
 
 While reasoning in terms of anomalies is cumbersome, and as the above
 example shows often inadequate, reasoning about weak isolation in
-terms of low-level operational details faces similar hurdles given the
-conceptual gap between properties defined by consistency conditions
-and data structures and state maintained by implementations.  To
-overcome these challenges, we develop a framework that axiomatizes the
-behavior of weak isolation implementations to enable modular reasoning
-using well-established techniques such as Rely-Guarantee~\cite{...}
-augmented to deal with weakly-isolated transactions.
+terms of low-level traces~\cite{adyaphd,gotsmanconcur15} confounds
+high-level reasoning and automation.  Another alternative would
+interleave weak isolation implementation details within the program,
+yielding a (more-or-less) conventional concurrent program that can be
+then subject to classical concurrent verification methods.
+Considering the size and complexity of real-world transaction systems,
+this approach is unlikely to scale.
 
-To illustrate, consider how we might verify that \C{new_order} is
-sound when executed under a \emph{Repeatable Read} (RR) isolation
-level.  PostgreSQL executes an RR transaction by taking a
-(conceptual) snapshot of the database state before the transaction
+In this paper, we adopt a different approach that \emph{lifts}
+isolation semantics (\emph{not} their implementations) to the
+application layer, providing a unified framework to simultaneously
+reason about application invariants and isolation properties.  To
+illustrate this idea informally, consider how we might verify that
+\C{new_order} is sound when executed under a \emph{Repeatable Read}
+(RR) isolation level.  PostgreSQL executes an RR transaction by taking
+a (conceptual) snapshot of the database state before the transaction
 begins that is used by reads performing the transaction.  When the
 transaction attempts to update a record, a check is made to determine
 if the current version of the record in the database is same as the
@@ -202,20 +208,21 @@ has a later version than the snapshot), the transaction is rolled back
 and re-executed.
 
 Although this implementation, comprising many thousands of lines code,
-is highly involved, its behavior in terms of state transitions on the
-database is fairly simple.  Since transaction's reads are always
-served from a snapshot, no state changes are witnessed while the
-execution is in progress. Thus, insofar as an RR transaction is
-concerned, the database state does not change during the execution.
-Uncommitted writes are recorded in a transaction-local state.  When
-the transaction commits, the local state is atomically written to the
-global state to yield a global state that reflects the transaction's
-updates.  However, unlike a strongly isolated serializable
-transaction, the commit operation is performed against the current
-state of the database, not the snapshot. Thus, after the transaction
-finishes execution, but before it commits, the transaction is able to
-witness the effects of all concurrent transactions.  The PostgreSQL RR
-implementation effectively constrains this transition.
+is highly involved, its semantic behavior in terms of how it effects
+transitions on the database state is fairly simple.  Since a
+transaction's reads are always served from a snapshot, no state
+changes are witnessed while the execution is in progress. Thus,
+insofar as an RR transaction is concerned, the database state does not
+change during the execution.  Uncommitted writes are recorded in a
+transaction-local state.  When the transaction commits, the local
+state is atomically written to the global state to yield a global
+state that reflects the transaction's updates.  However, unlike a
+strongly isolated serializable transaction, the commit operation is
+performed against the current state of the database, not the
+snapshot. Thus, after the transaction finishes execution, but before
+it commits, the transaction is able to witness the effects of all
+concurrent transactions.  The PostgreSQL RR implementation effectively
+constrains this transition.
 
 We can axiomatize this operational description by observing that (a)
 due to the version check, the current transaction cannot update a data
@@ -266,242 +273,99 @@ that the TPC-C invariant holds when the transaction is executed under
 PostgreSQL's RR isolation.  Our proof framework generalizes this style
 of reasoning to various isolation levels on databases.
 
-
-
-
-
-
-
-
 The second observation that informs our approach is one that pertains
-to automation.
+to automation. Program verification, even when machine-aided, often
+entails significant annotation burden in the form of intermediary
+assertions and loop invariants required to prove a program correct.
+This is certainly true for concurrent program logics, such as
+Rely-Gurantee, which extend Hoare logic with additional artifacts and
+where (stable) intermediary assertions and loop invariants remain a
+major source of annotation burden.  Since database transactions
+inherently deal with mutable state, it is natural to formulate them as
+concurrent imperative programs.  An advantage with this formulation is
+that it lets us immediately apply existing concurrent program logics
+to database transactions, albeit with necessary customizations to deal
+with weak isolation. The significant downside is that complicates
+automation given the need to infer stable assertions and invariants.
 
-\newpage
+However, a relational database is a significantly simpler abstraction
+than shared memory. There are no pointers, or linked data structures,
+or aliasing. While a database essentially abstracts a mutable state,
+the state is mutated in through a finite number of interfaces (SQL
+statements) in a well-defined way (e.g., SQL UPDATE and DELETE
+statements are tagged with a logical formula describing what records
+are updated). Thus, database programs enforce structure on operations
+and the objects they manipulate.  This structure is key to realizing
+automated verification.
 
-(\C{k-a1}), but before it commits, transaction \C{Wd2} (red) executes
-and commits, writing the new balance (\C{k-a2}). {\sc rc} isolation
-prevent \C{Wd2} from witnessing the uncommitted writes of transaction
-\C{Wd1}.  Subsequently committing \C{Wd1} leads to the loss of
-\C{Wd2}'s updates (the so-called \emph{lost update
-anomaly}~\cite{berenson}), resulting in an incorrect balance of
-\C{k-a1}. The execution on right describes a similar scenario with
-\C{Wd1} and \C{Wd2} exchanging their roles.  Clearly, {\sc rc} is an
-excessively weak isolation level for this program because it loses the
-updates of one transaction, resulting in the violation of the
-post-condition.  A stronger isolation level that prevents lost updates
-is required. \iso{Snapshot Isolation} ({\sc si})~\cite{berenson} fits
-this requirement; {\sc si} effectively serializes transactions that
-update a shared data object by aborting and re-executing a transaction
-if write-write conflicts are detected during its commit.\footnote{{\sc
-si} however does not serialize transactions in the absence of
-write-write conflicts.} Since {\sc si}, unlike {\sc ser}, does not
-need expensive mechanisms such as lock-based concurrency control or
-runtime monitoring, it is also more efficient, making it appropriate
-for both withdraw transactions.
 
-Thinking in terms of anomalies, as described above, is how database
-programmers are often encouraged to reason about weak isolation.
-Unfortunately, such reasoning does not rest on any sound foundation,
-and is thus highly error-prone. Reasoning in terms of how weak
-isolation variants are implemented is no better since it requires
-programmers to understand low-level implementation details of the
-database that are far removed from the application semantics. An
-attractive  alternative in this context would be a principled
-reasoning approach that combines declarative reasoning about isolation
-guarantees with operational reasoning about programs. We demonstrate
-how our proof system makes this possible in the context of the current
-example.
+--------------------------------------------
+However, In the light of aforementioned reservations, we refrain from
+formulating database transactions as concurrent imperative programs.
+Instead, we see value in viewing them as essentially functional
+programs that manage the database state via a monad akin to the
+\C{State} monad~\cite{statemonad}. We find it useful to reason about
+statements that mutate the database state, not in terms of a pre- and
+post-condition pair, but in terms of a state transformer that relates
+the pre- and post-states of a statement. Loops are substituted with
+higher-order combinators that have a well-defined control flow, and
+facilitate well-founded recursion. The static semantics of these
+combinators let us lift the state transformer of its higher-order
+argument (i.e., the loop body) to the state transformer of the
+combined expression (i.e., the loop). This is made possible due to the
+characteristic structure of database programs, which also gets
+reflected in the structure of the state transformer. We illustrate
+this point through a simple example that doesn't involve transactions,
+but is nonetheless relevant.
 
-First, we note that the example in Fig.~\ref{fig:motiv-eg-1} is a
-concurrent program, and hence is amenable to \emph{rely-guarantee}
-style reasoning~\cite{rgjones}, a compositional proof technique that
-allows us to reason about the behaviour of individual threads by
-abstracting away interferences induced by other threads (collectively
-called \emph{the environment}) into a \emph{rely} relation. In an
-ordinary concurrent program, every environment step is a valid
-interference in the current thread. However, in the presence of
-transactions executing under various levels of weak isolation,
-determining what constitutes an interference is a non-trivial problem.
-For example, a \iso{Serializable} transaction admits no interference,
-whereas within a transaction executing under \iso{Read Uncommitted}
-isolation, all interferences are valid. Between these two extremes are
-various levels of isolation that admit some interferences while
-prohibiting others. For example, \iso{Read Committed} isolation admits
-interference of a committed transaction, but not those from
-uncommitted transactions. \iso{Snapshot Isolation} admits interference
-from committed non-conflicting transactions, and so on.
-
-\begin{figure}
-\begin{smathpar}
-\begin{array}{lcl}
-\psi_{RC} & \defeq & \forall T_1,T_2,\eta_1,\eta_2.\; \txn(\eta_1) = T_1 
-  \conj \txn(\eta_2) = T_2 \\
-  & & \hspace*{0.6in}\conj T_1 \neq T_2 \conj \eta_1 \hboar
-  \eta_2 \Rightarrow T_1 \hboar \eta_2 \\
-\psi_{SI} & \defeq & \forall T_1,T_2.\; T_1 \neq T_2 \conj
-  (\exists \C{X}.~{T_1 \wrstoar \C{X}} \conj 
-                      {T_2 \wrstoar \C{X}})\\
-  &  & \hspace*{0.6in}\Rightarrow{T_1 \hboar T_2} \disj {T_2 \hboar T_1} \\
-\end{array}
-\end{smathpar}
-\caption{\small Interference properties for different weak isolation
-levels can be captured as constraints over the happens-before
-relation.}
-\label{fig:interference-ex}
+% \begin{figure}[!t]
+% \centering
+% %
+% \begin{subfigure}[b]{0.46\textwidth}
+% \begin{ocaml}
+% Set s' = $\emptyset$;
+% foreach x in s {
+%   s'.add(f(x)); 
+% }
+% \end{ocaml}
+% \caption{}
+% \end{subfigure}
+% %
+% \begin{subfigure}[b]{0.5\textwidth}
+% \begin{ocaml}
+% let s' = ref [];
+% foreach s (fun x -> s' := x::(!s'));
+% \end{ocaml}
+% \caption{Lorem ipsum, lorem ipsum,Lorem ipsum, lorem ipsum,Lorem ipsum}
+% \end{subfigure}
+% \caption{Caption place holder}
+% %
+% \caption{New versions are created from existing versions either
+% through \C{push} or \C{merge}.}
+% \label{fig:syntactic-ancestors}
+% \end{figure}
+\begin{figure}[!h]
+\begin{ocaml}
+let l' = ref [];
+foreach l (fun x -> l' := x::(!l'));
+\end{ocaml}
+\caption{A program that uses mutable state to reverse a list of elements}
+\label{fig:mutable-rev}
 \end{figure}
 
-\begin{figure}
-\centering
-\subcaptionbox {
-  \label{fig:hb-eg-1}
-} [
-  0.25\columnwidth
-] {
-  \includegraphics[scale=0.45]{Figures/hb-eg-1}
-}
-\subcaptionbox {
-  \label{fig:hb-eg-2}
-} [
-  0.25\columnwidth
-] {
-  \includegraphics[scale=0.45]{Figures/hb-eg-2}
-}
-\subcaptionbox {
-  \label{fig:hb-eg-3}
-} [
-  0.25\columnwidth
-] {
-  \includegraphics[scale=0.45]{Figures/hb-eg-3}
-}
-\subcaptionbox {
-  \label{fig:hb-eg-4}
-}{
-  \includegraphics[scale=0.45]{Figures/hb-eg-4}
-}
+Consider the program in Fig.~\ref{fig:mutable-rev} that populates a
+mutable list (\C{l'}) with elements from other list (\C{l}), reversing
+their order. The aim is to show that, when the program ends, both
+\C{l'} and \C{l} contain the same set of elements. If we were to
+attempt Hoare-style verification, we are obligated to define an
+inductive invariant for the \C{foreach} loop. Unfortunately, none
+exists for the loop, as such. The reason is that there is no way in
+the program to refer to the elements in the list that have already
+been added to the list \C{l'}. This problem can be easily rectified by
+introducing an integer \C{i} that keeps track of the index of \C{x} in
+\C{l}. 
 
-
-\caption{\small Possible executions for the example in
-Fig.~\ref{fig:motiv-eg-1}. Letters R, W and C stand for read, write
-and commit, respectively. Each blue dashed arrow represents a $\hbZ$
-relationship between all operations of \C{Wd2} and an operation in
-\C{Wd1}. $\psi_{SI}$ specification allows $\hbZ$ arrows (hence the
-execution) in Fig.~\ref{fig:hb-eg-1}. $\psi_{RC}$ specification allows
-$\hbZ$ arrows in
-Figs.~\ref{fig:hb-eg-1},~\ref{fig:hb-eg-2},~\ref{fig:hb-eg-3}, and
-~\ref{fig:hb-eg-4}.  }
-\label{fig:motiv-eg-1-hb}
-\vspace*{-8pt}
-\end{figure}
-
-For the rely-guarantee approach to be useful, it has to thus constrain
-allowed interference in accordance with the chosen level of isolation
-associated with a transaction. The first observation we make is that
-we can constrain interference by constraining the nature of the
-\emph{happens-before} ($\hbZ$) relation, which ultimately dictates
-what other transactions become visible to a transaction, or its
-constituents, and when. To do so, we axiomatize the $\hbZ$ relation to
-capture the interference characteristics of different isolation levels
-as their specifications. Two such specifications are
-shown\footnote{Note that specifications presented here are solely for
-illustration. The actual specifications described in
-\S\ref{sec:ansi-isolation} are more nuanced.} in
-Fig.~\ref{fig:interference-ex}. The \iso{Read Committed} specification
-($\psi_{RC}$) allows an operation $\eta_1$ of a transaction $T_1$ to
-happen-before an operation $\eta_2$ of another transaction $T_2$ only
-if every operation in $T_1$ (including its commit) happens-before
-$\eta_2$ (we let $T_1 \hboar \eta_2$ denote this). The specification
-does not require $T_1$ to execute and commit before all operations of
-$T_2$, thus allowing it to interfere in $T_2$, just as \C{Wd2}
-interferes in \C{Wd1} in Fig.~\ref{fig:motiv-eg-1-a}. The
-\iso{Snapshot Isolation} specification ($\psi_{SI}$) requires two
-transactions that write to the same variable (denoted $\wrstoar$) to be
-related by happens-before.  This effectively prohibits interference
-due to actions in $T_1$ being interleaved in $T_2$ (or, vice versa). 
-
-Fig.~\ref{fig:motiv-eg-1-hb} is a visualization of $\hbZ$ from \C{Wd2}
-to \C{Wd1} allowed by $\psi_{RC}$ and $\psi_{SI}$. Arrows in all
-executions are legal under $\psi_{RC}$ because in no execution does an
-operation from \C{Wd2} happen-before an operation of \C{Wd1} without
-the commit of \C{Wd2} also happening before the operation of \C{Wd1}.
-$\psi_{SI}$ however disallows $\hbZ$ arrows (hence executions) in
-Figs.~\ref{fig:hb-eg-2},~\ref{fig:hb-eg-3}, and~\ref{fig:hb-eg-4}
-because such arrows establish $\hbZ$ edges between (operations in)
-\C{Wd2} and only a subset of the operations in \C{Wd1}. Since the
-result of an operation (\eg a read) depends on what happens before
-that operation, the structure of the $\hbZ$ relation ultimately
-dictates the final result of the program. The arrows in
-Figs.~\ref{fig:hb-eg-1} and~\ref{fig:hb-eg-2} denote $\hbZ$
-relationships that do not affect the value of \C{B} in a way that
-causes the program to violate its post-condition. In contrast, arrows
-in Figs.~\ref{fig:hb-eg-3} and~\ref{fig:hb-eg-4} denote $\hbZ$
-relationships that lead to the violation of the post-condition. The
-task of the reasoning framework is to determine if \emph{all} $\hbZ$
-relationships allowed by an isolation level lead to the satisfaction
-of the post-condition.
-
-% There is a $\hb$ edge (first dashed) that is allowed by RC but
-% prohibited by SI, which nonetheless does not lead to invariant
-% violation. 
-
-The specification of an isolation level encodes its interference
-characteristics as constraints over the $\hbZ$ relation. However, for
-this to be useful in reasoning about programs, the rely-guarantee
-framework should be able to use the specification to determine if an
-interference is valid or not, allowing the programmer to only focus on
-valid interferences. Our second observation is that this is possible
-if the reasoning framework adequately tracks $\hbZ$ at each program
-point, while preserving $\hbZ$ constraints as invariants between
-program points. An interference that leads to the violation of $\hbZ$
-constraints (i.e., an invalid interference) is thus automatically
-prohibited. For instance, consider the program point after the write
-to \C{B} in \C{Wd1}. The expected invariant ($\phi$) at that program
-point is shown below ($\committed$ stands for ``committed''):
-
-\begin{smathpar}
-\begin{array}{c}
- \neg\committed(\C{Wd1}) \conj \C{Wd1} \wrstoar \C{B}  \conj 
-    (\neg\committed(\C{Wd2}) \Rightarrow \C{B = k-a1}) \\
-    \conj (\committed(\C{Wd2})
-                \Rightarrow \C{B = k-a1-a2})
-\end{array}
-\end{smathpar}
-
-\noindent $\phi$ asserts that \C{Wd1} is not yet committed, and that
-it wrote to \C{B}, and the value of \C{B} is either \C{k-a1-a2} or
-\C{k-a1} depending on whether or not \C{Wd2} is committed. If $\phi$
-remains invariant until \C{Wd1} commits, then the post-condition (\C{B
-= k-a1-a2}) can be established easily. However, an interference from
-\C{Wd2} at this stage (captured by the last dashed arrow in
-Fig.~\ref{fig:motiv-eg-1-hb}) may violate the invariant by writing
-$\C{k-a2}$ to \C{B} and committing \C{Wd2}, thus leading to
-$\committed(\C{Wd2}) \Rightarrow \C{B=k-a2}$. Fortunately,
-\iso{Snapshot Isolation} prevents this interference, and this can be
-shown by demonstrating that an interference from \C{Wd2} starting from
-an execution state that satisfies $\psi_{SI} \wedge \phi$ leads to an
-execution state where neither $\C{Wd2} \hboar \C{Wd1}$ nor $\C{Wd1}
-\hboar \C{Wd2}$ holds; $\C{Wd2} \hboar \C{Wd1}$ does not hold because
-\C{Wd1}'s write to \C{B} clearly happened before \C{Wd2}'s commit, and
-$\C{Wd1} \hboar \C{Wd2}$ does not hold because \C{Wd1} has not yet
-committed, while \C{Wd2} has already begun. Since \C{Wd2} also writes
-to \C{B}, this violates the $\psi_{SI}$ constraint which we assume to
-be an invariant. A proof that the post-condition holds now follows
-from the contradiction. It is informative to note that if the
-invariant is $\psi_{RC}$ instead of $\psi_{SI}$, we cannot derive a
-contradiction and we cannot rule out the interference, which
-(rightfully) causes  the proof to fail.
-
-Implicit in the above discussion is the assumption of a strongly
-consistent ({\sc sc}) store that guarantees the visibility of all
-previously committed transactions. An {\sc sc} semantics can be built
-into the reasoning framework, leading to a proof system tailor-made
-for such stores.  However, for the reasoning framework to be truly
-useful, it should be capable of handling different consistency
-semantics, supporting stores that are weaker than {\sc sc} (e.g.,
-causally or eventually consistent), and should be able to reconcile
-conflicts between consistency and isolation constraints.  We
-demonstrate how our reasoning framework makes this possible in the
-following sections.
-
+<<<<<<< HEAD
 %% We have thus far assumed a strongly consistent ({\sc sc}) store that,
 %% in the absence of transactions with special isolation requirements,
 %% makes the effects of any operation immediately visible to all
@@ -546,3 +410,5 @@ proofs, inferring intermediary assertions and loop invariants that are
 stable w.r.t interference, etc. A proof system for weakly isolated
 transactions has to necessarily address these challenges, along with
 those that arise due to weak isolation.
+=======
+>>>>>>> e392b4f8e54a903398fa34703952e2e919268d5b
