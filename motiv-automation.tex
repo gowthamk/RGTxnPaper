@@ -1,0 +1,150 @@
+The second observation that informs our approach is one that pertains
+to automation. Program verification, even when machine-aided, often
+entails significant annotation burden in the form of intermediary
+assertions and loop invariants required to prove a program correct.
+Even with concurrent program logics, such as Rely-Gurantee, which
+extend Hoare logic with additional artifacts, (stable) intermediary
+assertions and loop invariants remain a major source of annotation
+burden. Since database transactions inherently deal with the mutable
+state of the database, it is natural to formulate them as concurrent
+imperative programs. An advantage with this formulation is that it
+lets us immediately apply existing concurrent program logics to
+database transactions, albeit with necessary customizations to deal
+with weak isolation. The downside, however, is that there hardly is
+any automation support to apply such program logics on concurrent
+imperative programs. Attemps at automation face the problem of
+inferring stable and inductive loop invariants in its full generality,
+which, while being undecidable in theory, and hard in practice, also
+takes our focus away from weak isolation.
+
+In the light of the above observations, we refrain from thinking of
+database transactions as concurrent imperative programs insofar as
+automation is concerned.  Instead, we see value in viewing them as
+essentially functional programs that manage the database state via a
+monad akin to the \C{State} monad~\cite{statemonad}. We find it useful
+to reason about statements that mutate the database state, not in
+terms of a pre- and post-condition pair, but in terms of a state
+transformer that relates the pre- and post-states of a statement. The
+state transformer semantics is defined algorithmically, just like the
+predicate transformer semantics (e.g., strongest post-condition), but
+the semantic domain doesn't admit arbitrary logical formulas. Instead,
+it is the domain of sets equipped with a (set) monad bind ($\bind$)
+operator.  Thus, a state transformer interprets a SQL statement in the
+set domain, taking advantage of the fact that a a database is
+essentially a set of tuples, and a SQL statement a set transformer.
+The benefit of this approach is that loops can now be substituted with
+higher-order combinators that automatically lift the state transformer
+of its higher-order argument (i.e., the loop body) to the state
+transformer of the combined expression (i.e., the loop).  Thus the
+semantics of a \C{foreach} loop, for instance, can be captured as a
+state transformer, where the state is a set, and the transformation
+involves a bind operation. We illustrate this intuition on a simple
+example.
+
+
+% \begin{figure}[!t]
+% \centering
+% %
+% \begin{subfigure}[b]{0.46\textwidth}
+% \begin{ocaml}
+% Set s' = $\emptyset$;
+% foreach x in s {
+%   s'.add(f(x)); 
+% }
+% \end{ocaml}
+% \caption{}
+% \end{subfigure}
+% %
+% \begin{subfigure}[b]{0.5\textwidth}
+% \begin{ocaml}
+% let s' = ref [];
+% foreach s (fun x -> s' := x::(!s'));
+% \end{ocaml}
+% \caption{Lorem ipsum, lorem ipsum,Lorem ipsum, lorem ipsum,Lorem ipsum}
+% \end{subfigure}
+% \caption{Caption place holder}
+% %
+% \caption{New versions are created from existing versions either
+% through \C{push} or \C{merge}.}
+% \label{fig:syntactic-ancestors}
+% \end{figure}
+% let s' = ref (Set.empty) in
+% foreach xs @@ fun x -> 
+%   begin
+%     s' := Set.union !s' @@ 
+%             Set.map_selected s (fun y -> y<x)
+%                                (fun y -> y+x);
+%     s' := Set.add !s' x;
+%   end
+\begin{figure}[!h]
+\begin{ocaml}
+foreach item_reqs @@ fun item_req -> do
+  SQL.update Stock (fun s -> {s with s_qty = k1}) 
+                   (fun s -> s.s_i_id = item_req.ol_i_id);
+  SQL.insert Order_line {ol_o_id=k2; ol_d_id=k3; 
+                         ol_i_id=item_req.ol_i_id; ol_qty=item_req.ol_qty}
+\end{ocaml}
+\caption{Foreach loop from Fig.~\ref{fig:new_order_code}}
+\label{fig:foreach_code}
+\end{figure}
+
+Fig.~\ref{fig:foreach_code} shows a (simplified) snippet of code taken
+from Fig.~\ref{fig:new_order_code}. Few irrelevant expressions have
+been replaced with constants (\C{k1} to \C{k3}). Body of the loop
+executes a SQL update followed by an insert. Recall that a transaction
+reads from the global database ($\Delta$), and writes to a
+transaction-local database ($\delta$). An update
+statement filters the tuples that match the search criteria from the
+global database ($\Delta$), and computes the updated tuples to be
+added to the local database. Thus, its state transformer (call it
+$T_U$) is the following function on sets (Ocaml syntax is used when
+convenient; $\bind$ has higher precedence than $\cup$):
+\begin{ocaml}
+  fun ($\Delta$,$\delta$) -> $\delta$ $\cup$ $\Delta$$\bind$(fun s -> if table(s) = stock && s.s_i_id = item_req.ol_i_id 
+                                 then {{s with s_qty = k1}} (* a singleton set *)
+                                 else $\emptyset$)
+\end{ocaml}
+% \begin{smathpar}
+% \begin{array}{c}
+%   \lambda\Delta.\lambda\delta.\, \delta \;\cup\; 
+%       \Delta \,\bind\, (\lambda s.\, 
+%           \C{if}\;{\C{stock}(s) \conj 
+%                    \C{s.s\_i\_id} = \C{item\_req.ol\_i\_id}}\\
+%            \hspace*{0.9in}
+%            \C{then}\;{\{\{s \;\C{with}\; \C{s\_qty} = \C{k1}\}\}}\;
+%            \C{else}\;{\emptyset})
+% \end{array}
+% \end{smathpar}
+% \begin{verbatim}
+%   Rmem(σ'(s')) = Rmem(σ(s')) U 
+%                  Rmem[\x. Rmem[\y. if y<x then {y+x} else {}](σ(s)) U {x}](xs)
+% \end{verbatim}
+The transformer maps the current global ($\Delta$) and local
+($\delta$) databases to the new local database. Observe that
+$T_U(\Delta,\delta)$ is of the form $\delta \,\cup\,
+F_U(\Delta)$. The transformer ($T_I(\Delta,\delta)$)
+for the subsequent \C{insert} statement can be similarly calculated to
+be of the form $\delta \cup F_I(\Delta)$.
+Their composition gives the state transformer of the loop body:
+\begin{ocaml}
+  fun ($\Delta$,$\delta$) -> $\delta$ $\cup$ $F_U(\Delta) \,\cup\, F_I(\Delta)$
+\end{ocaml}
+Let $F_{body}(\Delta) = F_U(\Delta) \,\cup\, F_I(\Delta)$.  Observe
+that the loop variable \C{item\_req} occurs free in $F_{body}$. The
+transformer for the \C{foreach} loop can now be computed as following:
+\begin{ocaml}
+  fun ($\Delta$,$\delta$) -> $\delta$ $\cup$ item_reqs$\bind$(fun item_req -> $F_{body}(\Delta)$)
+\end{ocaml}
+Observe that the transformer captures the precise semantics of the
+\C{foeach} loop as a formula in the domain of sets extended with a
+bind function. The advantage of doing so is that we can now make use
+of a  semantics-preserving translation from this domain to the
+first-order logic, allowing us to leverage SMT solvers for automatic
+proofs without having to infer a loop invariant.
+Sec.~\ref{sec:automation} describes this translation. In the
+exposition, we assumed the global database state ($\Delta$) to remain
+invaraint, which is clearly not the case when we admit concurrency.
+The concurrency extension of the state transformer semantics is also
+covered in Sec.~\ref{sec:automation}. The immediate two sections,
+however, focus on laying theoretical foundations for reasoning about
+weak isolation.
