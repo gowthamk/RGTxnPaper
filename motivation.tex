@@ -193,7 +193,7 @@ isolation semantics (\emph{not} their implementations) to the
 application layer, providing a unified framework to simultaneously
 reason about application invariants and isolation properties.  To
 illustrate this idea informally, consider how we might verify that
-\C{new_order} is sound when executed under a \emph{Repeatable Read}
+$\C{new_order}$ is sound when executed under a \emph{Repeatable Read}
 (RR) isolation level.  PostgreSQL executes an RR transaction by taking
 a (conceptual) snapshot of the database state before the transaction
 begins that is used by reads performing the transaction.  When the
@@ -280,43 +280,34 @@ assertions and loop invariants required to prove a program correct.
 This is certainly true for concurrent program logics, such as
 Rely-Gurantee, which extend Hoare logic with additional artifacts and
 where (stable) intermediary assertions and loop invariants remain a
-major source of annotation burden.  Since database transactions
-inherently deal with mutable state, it is natural to formulate them as
-concurrent imperative programs.  An advantage with this formulation is
-that it lets us immediately apply existing concurrent program logics
-to database transactions, albeit with necessary customizations to deal
-with weak isolation. The significant downside is that complicates
-automation given the need to infer stable assertions and invariants.
+major source of annotation burden.  However, a relational database is
+a significantly simpler abstraction than shared memory. There are no
+pointers, or linked data structures, or aliasing.  Although a database
+essentially abstracts a mutable state, the state is mutated through a
+well-defined fixed number of interfaces (SQL statements), each tagged
+with a logical formula describing what records are accessed and
+updated. 
 
-However, a relational database is a significantly simpler abstraction
-than shared memory. There are no pointers, or linked data structures,
-or aliasing. While a database essentially abstracts a mutable state,
-the state is mutated in through a finite number of interfaces (SQL
-statements) in a well-defined way (e.g., SQL UPDATE and DELETE
-statements are tagged with a logical formula describing what records
-are updated). Thus, database programs enforce structure on operations
-and the objects they manipulate.  This structure is key to realizing
-automated verification.
-
-
---------------------------------------------
-However, In the light of aforementioned reservations, we refrain from
-formulating database transactions as concurrent imperative programs.
-Instead, we see value in viewing them as essentially functional
-programs that manage the database state via a monad akin to the
-\C{State} monad~\cite{statemonad}. We find it useful to reason about
+This observation leads us away from thinking of database transactions
+as concurrent imperative programs.  Instead, we see value in viewing
+them as essentially functional computations that manage database state
+monadically~\cite{statemonad}. We find it useful to reason about
 statements that mutate the database state, not in terms of a pre- and
 post-condition pair, but in terms of a state transformer that relates
-the pre- and post-states of a statement. Loops are substituted with
-higher-order combinators that have a well-defined control flow, and
-facilitate well-founded recursion. The static semantics of these
-combinators let us lift the state transformer of its higher-order
-argument (i.e., the loop body) to the state transformer of the
-combined expression (i.e., the loop). This is made possible due to the
-characteristic structure of database programs, which also gets
-reflected in the structure of the state transformer. We illustrate
-this point through a simple example that doesn't involve transactions,
-but is nonetheless relevant.
+the pre- and post-states of a statement. This state transformer
+semantics can be defined algorithmically, just like predicate
+transformer semantics (e.g., strongest post-condition).  Here, a state
+transformer interprets a SQL statement in the set domain, taking
+advantage of the fact that a a database is essentially a set of
+tuples, and a SQL statement is a transformer over these sets.  The
+benefit of this approach is that low-level loops can now be
+substituted with higher-order combinators that automatically lift the
+state transformer of its higher-order argument (i.e., the loop body)
+to the state transformer of the combined expression (i.e., the loop).
+Thus the semantics of a \C{foreach} loop, for instance, can be
+captured as a state transformer, where the state is a set, and the
+transformation defines a bind operation. We illustrate this intuition
+on a simple example.
 
 % \begin{figure}[!t]
 % \centering
@@ -344,71 +335,80 @@ but is nonetheless relevant.
 % through \C{push} or \C{merge}.}
 % \label{fig:syntactic-ancestors}
 % \end{figure}
+% let s' = ref (Set.empty) in
+% foreach xs @@ fun x -> 
+%   begin
+%     s' := Set.union !s' @@ 
+%             Set.map_selected s (fun y -> y<x)
+%                                (fun y -> y+x);
+%     s' := Set.add !s' x;
+%   end
 \begin{figure}[!h]
 \begin{ocaml}
-let l' = ref [];
-foreach l (fun x -> l' := x::(!l'));
+foreach item_reqs @@ fun item_req -> do
+  SQL.update Stock (fun s -> {s with s_qty = k1}) 
+                   (fun s -> s.s_i_id = item_req.ol_i_id);
+  SQL.insert Order_line {ol_o_id=k2; ol_d_id=k3; 
+                         ol_i_id=item_req.ol_i_id; ol_qty=item_req.ol_qty}
 \end{ocaml}
-\caption{A program that uses mutable state to reverse a list of elements}
-\label{fig:mutable-rev}
+\caption{Foreach loop from Fig.~\ref{fig:new_order_code}}
+\label{fig:foreach_code}
 \end{figure}
 
-Consider the program in Fig.~\ref{fig:mutable-rev} that populates a
-mutable list (\C{l'}) with elements from other list (\C{l}), reversing
-their order. The aim is to show that, when the program ends, both
-\C{l'} and \C{l} contain the same set of elements. If we were to
-attempt Hoare-style verification, we are obligated to define an
-inductive invariant for the \C{foreach} loop. Unfortunately, none
-exists for the loop, as such. The reason is that there is no way in
-the program to refer to the elements in the list that have already
-been added to the list \C{l'}. This problem can be easily rectified by
-introducing an integer \C{i} that keeps track of the index of \C{x} in
-\C{l}. 
-
-<<<<<<< HEAD
-%% We have thus far assumed a strongly consistent ({\sc sc}) store that,
-%% in the absence of transactions with special isolation requirements,
-%% makes the effects of any operation immediately visible to all
-%% subsequent operations. The natural behaviour of {\sc sc} to totally
-%% order all operations w.r.t. the $\hbZ$ relation could be in conflict
-%% with the constraints imposed by weak isolation. To meet the
-%% requirements of weaker isolation levels, say {\sc rc}, the store has
-%% to adapt itself to \emph{hide} the effects of concurrent transactions
-%% until they are committed. Once committed though, effects need to be
-%% immediately visible to subsequent operations. This semantics can be
-%% built into the reasoning framework, leading to a proof system
-%% tailor-made for such stores. However, for the reasoning framework to
-%% be truly useful, it has to be parametric over different consistency
-%% semantics, supporting stores that are weaker than {\sc sc} (e.g.,
-%% causally or eventually consistent), and should be able to reconcile
-%% conflicts between consistency and isolation constraints.  We
-%% demonstrate how our reasoning framework makes this possible in the
-%% following sections.
-
-
-For example, \emph{Repeatable
-  Read} is a stronger isolation level that RC; we might ask whether
-executing the \C{new_order} transaction under this isolation level
-would preserve the consistency conditions of the transaction.  To
-answer this question, we must relate the low-level specification of RR
-given in terms of e.g., trace-based
-relations~\cite{adyaphd,gotsmanconcur15} to the semantics of TPC-C,
-which is difficult.   Alternatively, one could reason about how RR is
-implemented, say on PostgresSQL, and reason about the \C{new\_order}
-implementation in conjunction with Postgres's RR
-implementation. However, this is not any easier, considering that
-Postgres employs a host of techniques, including Multiversion, locks
-and rollbacks, to implement RR. The verification problem becomes even
-more difficult if the aim is to facilitate automation. Our experience
-suggests that a proof framework that requires programmers to relate
-trace-based isolation specifications to program semantics necessarily
-imposes heavy annotation burden, requires painstakingly long and
-verbose proofs, and does not lend itself to automation. Weak isolation
-aside, there are also the conventional challenges that face
-(automatic) verification of concurrent programs: facilitating modular
-proofs, inferring intermediary assertions and loop invariants that are
-stable w.r.t interference, etc. A proof system for weakly isolated
-transactions has to necessarily address these challenges, along with
-those that arise due to weak isolation.
-=======
->>>>>>> e392b4f8e54a903398fa34703952e2e919268d5b
+Fig.~\ref{fig:foreach_code} shows a (simplified) snippet of code taken
+from Fig.~\ref{fig:new_order_code}. Some irrelevant expressions have
+been replaced with constants (\C{k1} to \C{k3}).  The body of the loop
+executes a SQL update followed by an insert.  Recall that a transaction
+reads from the global database ($\Delta$), and writes to a
+transaction-local database ($\delta$) before committing these updates. An update
+statement filters the tuples that match the search criteria from $\Delta$
+and computes the updated tuples that are to be
+added to the local database. Thus, its state transformer (call it
+$T_U$) is the following function on sets\footnote{$\bind$ has higher precedence than $\cup$.}:
+\begin{ocaml}
+  fun ($\Delta$,$\delta$) -> $\delta$ $\cup$ $\Delta$$\bind$(fun s -> if table(s) = stock && s.s_i_id = item_req.ol_i_id 
+                                 then {{s with s_qty = k1}} (* a singleton set *)
+                                 else $\emptyset$)
+\end{ocaml}
+% \begin{smathpar}
+% \begin{array}{c}
+%   \lambda\Delta.\lambda\delta.\, \delta \;\cup\; 
+%       \Delta \,\bind\, (\lambda s.\, 
+%           \C{if}\;{\C{stock}(s) \conj 
+%                    \C{s.s\_i\_id} = \C{item\_req.ol\_i\_id}}\\
+%            \hspace*{0.9in}
+%            \C{then}\;{\{\{s \;\C{with}\; \C{s\_qty} = \C{k1}\}\}}\;
+%            \C{else}\;{\emptyset})
+% \end{array}
+% \end{smathpar}
+% \begin{verbatim}
+%   Rmem(σ'(s')) = Rmem(σ(s')) U 
+%                  Rmem[\x. Rmem[\y. if y<x then {y+x} else {}](σ(s)) U {x}](xs)
+% \end{verbatim}
+Observe that
+$T_U(\Delta,\delta)$ is of the form $\delta \,\cup\,
+F_U(\Delta)$. The transformer ($T_I(\Delta,\delta)$)
+for the subsequent \C{insert} statement can be similarly calculated to
+be of the form $\delta \cup F_I(\Delta)$.
+Their composition gives the state transformer of the loop body:
+\begin{ocaml}
+  fun ($\Delta$,$\delta$) -> $\delta$ $\cup$ $F_U(\Delta) \,\cup\, F_I(\Delta)$
+\end{ocaml}
+Let $F_{body}(\Delta) = F_U(\Delta) \,\cup\, F_I(\Delta)$.   The
+transformer for the \C{foreach} loop can now be computed as following:
+\begin{ocaml}
+  fun ($\Delta$,$\delta$) -> $\delta$ $\cup$ item_reqs$\bind$(fun item_req -> $F_{body}(\Delta)$)
+\end{ocaml}
+Observe that the transformer captures the precise semantics of the
+loop as a formula in the domain of sets extended with a bind
+function. The advantage in doing so is that we can now make use of a
+semantics-preserving translation from this domain to first-order
+logic, allowing us to leverage SMT solvers for automatic proofs
+without having to infer loop invariant, or provide intermediate
+assertions.  Sec.~\ref{sec:automation} describes this translation. In
+the exposition thus far, we assumed $\Delta$ remains invaraint, which
+is clearly not the case when we admit concurrency.  Necessary
+concurrency extensions of the state transformer semantics is also
+covered in Sec.~\ref{sec:automation}.  The immediate two sections,
+however, focus on laying theoretical foundations for reasoning about
+weak isolation.
