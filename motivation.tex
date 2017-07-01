@@ -1,13 +1,12 @@
 \section{Motivation}
 \label{sec:motivation}
 
-We have developed and implemented our ideas in an OCaml embedded DSL
-that supports a \C{DB} monad to define and compose database
-computations given in terms of SQL operations; the monadic \C{do}
-syntax is borrowed from Haskell.  Besides the usual \C{bind} and
-\C{return} combinators, monad offers an \C{atomically} combinator that
-executes a database computation as an atomic transaction and returns
-the result.
+We have developed and implemented our ideas in an embedded DSL in
+OCaml that supports a \C{DB} monad to define and compose database
+computations given in terms of SQL operations.  Besides the usual
+\C{bind} and \C{return} combinators, the monad offers an
+\C{atomically} combinator that executes a database computation as an
+atomic transaction and returns the result.
 
 \begin{figure}
 \centering
@@ -37,26 +36,33 @@ let new_order d_id c_id item_reqs = atomically do
 \end{figure}
 
 Fig.~\ref{fig:new_order_code} shows a simplified version of the TPC-C
-\C{new\_order} transaction.  TPC-C is a well-known Online Transaction
-Processing (OLTP) benchmark that models an order-processing system for
-a wholesale parts supply business. The business logic is captured in 5
-database transactions that operate on 9 tables. \C{new\_order} is one
-such transaction that operates on \C{District}, \C{Order},
-\C{New\_order}, \C{Stock}, and \C{Order\_line} tables. The transaction
-acts on the behalf of a customer, whose id is \C{c\_id}, to place a
-new order for the given set of items (\C{item\_reqs}), to be served by
-a warehouse under the district identified by \C{d\_id}. The
-transaction does so by invoking appropriate SQL functionality,
-captured by various calls to functions under the \C{SQL} module. All
-\C{SQL} functions take the table name (a nullary constructor) as their
-first argument. The higher-order \C{SQL.select1} function accepts a
-boolean function that describes the selection criteria, and returns
-any record that meets the criteria (it models the SQL query \C{SELECT
-  \ldots\xspace LIMIT 1}). \C{SQL.update} also accepts a Boolean
-function (3rd argument) to select the records to be updated. Its
-2$^{nd}$ argument is a function that maps each selected record to a new
-(updated) record. \C{SQL.insert} inserts a given record into the
-specified table in the database.
+\C{new\_order} transaction written in this language.  TPC-C is a
+well-known Online Transaction Processing (OLTP) benchmark that models
+an order-processing system for a wholesale parts supply business. The
+business logic is captured in 5 database transactions that operate on
+9 tables; \C{new\_order} is one such transaction that operates on
+\C{District}, \C{Order}, \C{New\_order}, \C{Stock}, and
+\C{Order\_line} tables. The transaction acts on the behalf of a
+customer, whose id is \C{c\_id}, to place a new order for the given
+set of items (\C{item\_reqs}), to be served by a warehouse under the
+district identified by \C{d\_id}.  Fig.~\ref{fig:scheme} illustrates
+the relationship among these different tables.
+
+The transaction manages order placement by invoking appropriate SQL
+functionality, captured by various calls to functions defined by the
+\C{SQL} module. All \C{SQL} functions take the table name (a nullary
+constructor) as their first argument. The higher-order \C{SQL.select1}
+function accepts a boolean function that describes the selection
+criteria, and returns any record that meets the criteria (it models
+the SQL query \C{SELECT \ldots\xspace LIMIT 1}). \C{SQL.update} also
+accepts a Boolean function (its 3$^{rd}$ argument) to select the records to be
+updated. Its 2$^{nd}$ argument is a function that maps each selected
+record to a new (updated) record. \C{SQL.insert} inserts a given
+record into the specified table in the database.
+
+%%%SJ: Reviewers may not understand what primary and foreign keys are,
+%%%or why they are important.  There are also some fields (e.g., ol_i_id)
+%%%that are not described either in the caption or the text.
 
 \begin{figure}[!t]
 \includegraphics[scale=0.5]{Figures/schema}
@@ -82,48 +88,47 @@ TPC-C defines multiple invariants, called \emph{consistency
   conditions}, over the state of the application in the database. One
 such consistency condition is the requirement that for a given order
 \C{o}, the \emph{order-line-count} field (\C{o.o\_ol\_cnt}) should
-reflect the number of order lines under the order, i.e., the number of
-\C{Order\_line} records whose \C{ol\_o\_id} is equal to \C{o.o\_id}.
-In a sequential execution, it is easy to see how this condition is
-preserved.  A new \C{Order} record is added with its \C{o\_id}
-distinct from the existing order ids, and its \C{o\_ol\_cnt} is set to
-be equal to the size of \C{item\_reqs} set. The \C{foreach} loop runs
-once for each \C{item\_req}, adding a new \C{Order\_line} record for
-each requested item, with its \C{ol\_o\_id} field set to
+reflect the number of order lines under the order; this is the number
+of \C{Order\_line} records whose \C{ol\_o\_id} field is the same as
+\C{o.o\_id}.  In a sequential execution, it is easy to see how this
+condition is preserved.  A new \C{Order} record is added with its
+\C{o\_id} distinct from existing order ids, and its \C{o\_ol\_cnt} is
+set to be equal to the size of the \C{item\_reqs} set. The \C{foreach}
+loop runs once for each \C{item\_req}, adding a new \C{Order\_line}
+record for each requested item, with its \C{ol\_o\_id} field set to
 \C{o\_id}. Thus, at the end of the loop, the number of \C{Order\_line}
-records in the database, whose \C{ol\_o\_id} is equal to \C{o\_id}, is
+records in the database, whose \C{ol\_o\_id} is equal to \C{o\_id} is
 equal to the size of the \C{item\_req} set, which in turn is equal to
 the \C{Order} record's \C{o\_ol\_cnt} field, thus preserving the
 consistency condition.
 
 Because the aforementioned reasoning is reasonably simple to perform
-manually, verfiying that soundess of TPC-C's consistency conditions
+manually, verfiying the soundess of TPC-C's consistency conditions
 would appear to be feasible.  Serializability aids the tractability of
 verification by preventing any interference among concurrently
-executing transactions.  Under weak isolation\footnote{Weak isolation
-  doesn't violate atomicity as long as the witnessed effects are those
-  of committed transactions}, however, interferences of various kinds
-are permitted.  Although the verification problem for weakly isolated
+executing transactions while the \C{new\_order} transaction executes.
+Under weak isolation\footnote{Weak isolation doesn't violate atomicity
+  as long as the witnessed effects are those of committed
+  transactions}, however, interferences of various kinds are
+permitted.  Although the verification problem for weakly isolated
 transactions would appear to be superficially similar to the
 verification of (racy) concurrent programs~\cite{concurrentGC...},
 weak isolation introduces new challenges arising from the use of
 transactions, and new opportunities arising from the fact that the
-store abstraction used by transaction is a relational database, not
-low-level memory.  Our proof framework addresses these challenges and
-exploits these opportunities to facilitiate fully automated
-correctness proofs.
+store abstraction used by transactions is a relational database, not
+low-level memory.  
 
-To illustrate, consider the behavior of the \C{new\_order} transaction
-when executed with a \emph{Read Committed} (RC) isolation level, the
-default isolation level in PostgreSQL, a widely used open-source
-database system.  An RC transaction is isolated from \emph{dirty
-  writes}, i.e., writes of uncommitted transactions, but is allowed to
-witness the writes of concurrent transactions as soon as they are
-committed. Thus, with two concurrent instances of the \C{new\_order}
-transaction (call them $T_1$ and $T_2$), both concurrently placing new
-orders for different customers under the same district (\C{d\_id}),
-PostgreSQL admits the two executions shown in
-Fig.~\ref{fig:new_order_execs}.
+To illustrate some of these challenges, consider the behavior of the
+\C{new\_order} transaction when executed with a \emph{Read Committed}
+(RC) isolation level, the default isolation level in PostgreSQL, a
+widely used open-source database system.  An RC transaction is
+isolated from \emph{dirty writes}, i.e., writes of uncommitted
+transactions, but is allowed to witness the writes of concurrent
+transactions as soon as they are committed. Thus, with two concurrent
+instances of the \C{new\_order} transaction (call them $T_1$ and
+$T_2$), both concurrently placing new orders for different customers
+under the same district (\C{d\_id}), PostgreSQL admits the two
+executions shown in Fig.~\ref{fig:new_order_execs}.
 
 \begin{figure}[!h]
 \centering
@@ -143,13 +148,14 @@ Fig.~\ref{fig:new_order_execs}.
   \includegraphics[scale=0.45]{Figures/motiv-eg-1-a}
 }
   \caption{\small RC executions involving two instances ($T_1$ and
-  $T_2$) of the \C{new\_order} transaction of
-  Fig.~\ref{fig:new_order_code}. Only the first two statements, and
-  the commit, are shown.}
-\label{fig:rc-ex}
+  $T_2$) of the \C{new\_order} transaction depicted in
+  Fig.~\ref{fig:new_order_code}. 
+  Each instance reads the \C{d\_id} \C{District} record twice, the second
+  time to (atomically) update the \C{d\_next\_o\_id} field.}
+\label{fig:new_order_execs}
 \end{figure}
 
-The figure depicts an execution as a series of read, write, and commit
+The figure depicts an execution as a series of transactional read, write, and commit
 operations. In the execution on the left, the \C{new\_order} instance
 $T_1$ (green) reads the \C{d\_next\_o\_id} field of the district
 record for \C{d\_id}, but before it increments the field, another
@@ -188,25 +194,25 @@ quite clear that RC is not an appropriate isolation level for
 
 While reasoning in terms of anomalies is cumbersome, and as the above
 example shows often inadequate, reasoning about weak isolation in
-terms of low-level traces~\cite{adyaphd,gotsmanconcur15} confounds
-high-level reasoning and automation.  Another alternative would
-interleave weak isolation implementation details within the program,
-yielding a (more-or-less) conventional concurrent program that can be
-then subject to classical concurrent verification methods.
-Considering the size and complexity of real-world transaction systems,
-this approach is unlikely to scale.
+terms of low-level traces~\cite{adyaphd,gotsmanconcur15} complicates
+high-level reasoning.  A possible alternative would interleave weak
+isolation implementation details within the program, yielding a
+(more-or-less) conventional concurrent program that can be then
+subject to classical concurrent verification methods.  Considering the
+size and complexity of real-world transaction systems, this strategy
+is unlikely to scale.
 
 In this paper, we adopt a different approach that \emph{lifts}
 isolation semantics (\emph{not} their implementations) to the
-application layer, providing a unified framework to simultaneously
+application layer, providing a principled framework to simultaneously
 reason about application invariants and isolation properties.  To
 illustrate this idea informally, consider how we might verify that
-$\C{new_order}$ is sound when executed under a \emph{Repeatable Read}
+\C{new\_order} is sound when executed under a \emph{Repeatable Read}
 (RR) isolation level.  PostgreSQL executes an RR transaction by taking
 a (conceptual) snapshot of the database state before the transaction
 begins that is used by reads performing the transaction.  When the
 transaction attempts to update a record, a check is made to determine
-if the current version of the record in the database is same as the
+if the current version of the record in the database is the same as the
 snapshot version. If it is, an exclusive lock is obtained on the
 record, and the update is performed. If the record is already locked,
 the transaction blocks until the lock is released.  When the lock is
@@ -218,8 +224,8 @@ and re-executed.
 \begin{figure}[t]
 \includegraphics[scale=0.5]{Figures/RR-postgres}
 \caption{Database state transitions corresponding to an execution of
-  an RR transaction $T_1$ on Postgres. $T_2$ and $T_3$ are concurrent
-  transactions. State has three data items, $a$, $b$ and $c$. }
+  an RR transaction $T_1$ on PostgresSQL. $T_2$ and $T_3$ are concurrent
+  transactions. The database state has three data items, $a$, $b$ and $c$. }
 \label{fig:rr-postgres}
 \end{figure}
 \begin{figure}[t]
@@ -230,9 +236,9 @@ and re-executed.
 \label{fig:rr-abstract}
 \end{figure}
 
-Although this implementation, comprising many thousands of lines code,
-is highly involved, its semantic behavior in terms of how it effects
-transitions on the database state is fairly simple.  Since a
+Although this implementation, comprising many thousands of lines of
+code, is highly involved, its semantic behavior in terms of how it
+effects transitions on the database state is fairly simple.  Since a
 transaction's reads are always served from a snapshot, no state
 changes are witnessed while the execution is in progress. Thus,
 insofar as an RR transaction is concerned, the database state does not
@@ -244,15 +250,15 @@ strongly isolated serializable transaction, the commit operation is
 performed against the current state of the database, not the
 snapshot. Thus, after the transaction finishes execution, but before
 it commits, the transaction is able to witness the effects of all
-concurrent transactions.  The PostgreSQL RR implementation effectively
-constrains this transition.
+concurrent transactions that committed before it.  The PostgreSQL RR
+implementation effectively constrains this transition.
 
 We can axiomatize this operational description by observing that (a)
 due to the version check, the current transaction cannot update a data
 item that was already updated by a concurrent transaction, and (b) due
 to the use of exclusive write locks, a data item updated by the
 current transaction cannot be overwritten by a concurrent transaction.
-If $\Delta$ is the state of the database when an RR transactions
+If $\Delta$ is the state of the database when an RR transaction
 finishes, and $\Delta_c$ is the state visible to the transaction at
 the point of commit, we know the transition from $\Delta$ to
 $\Delta_c$ (written $\Delta \longrightarrow \Delta_c$) cannot exhibit
@@ -432,6 +438,6 @@ assertions.  Sec.~\ref{sec:automation} describes this translation. In
 the exposition thus far, we assumed $\Delta$ remains invaraint, which
 is clearly not the case when we admit concurrency.  Necessary
 concurrency extensions of the state transformer semantics is also
-covered in Sec.~\ref{sec:automation}.  The immediate two sections,
+covered in Sec.~\ref{sec:automation}.  The following two sections,
 however, focus on laying theoretical foundations for reasoning about
 weak isolation.
