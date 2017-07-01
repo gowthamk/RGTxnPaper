@@ -230,10 +230,9 @@ and re-executed.
 \end{figure}
 \begin{figure}[t]
 \includegraphics[scale=0.5]{Figures/RR-abstract}
-  \caption{An abstract execution equivalent to the one in
-  Fig.~\ref{fig:rr-postgres}. The database state remains invariant as long as
-  $T_1$ executes. The effects of concurrent transactions ($T_2$ and
-  $T_3$) are witnessed just before the commit.}
+  \caption{An abstract execution that includes the concrete execution
+  shown in Fig.~\ref{fig:rr-postgres}. It has no locks or snapshots,
+  admits fewer interleavings, yet results in the same post-state.  }
 \label{fig:rr-abstract}
 \end{figure}
 
