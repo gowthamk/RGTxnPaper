@@ -45,7 +45,7 @@ business logic is captured in 5 database transactions that operate on
 \C{Order\_line} tables. The transaction acts on the behalf of a
 customer, whose id is \C{c\_id}, to place a new order for the given
 set of items (\C{item\_reqs}), to be served by a warehouse under the
-district identified by \C{d\_id}.  Fig.~\ef{fig:scheme} illustrates
+district identified by \C{d\_id}.  Fig.~\ref{fig:scheme} illustrates
 the relationship among these different tables.
 
 The transaction manages order placement by invoking appropriate SQL
