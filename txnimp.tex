@@ -15,7 +15,7 @@
   {\odot} \in \{+,-,\le,\ge,=\}\qquad
 }\\
 \multicolumn{5}{c}{
-  {k} \in \mathbb{Z} \qquad
+  {k} \in \mathbb{Z}\cup\mathbb{B} \qquad
   {\rec} \in \{\bar{f}=\bar{k}\}\qquad
   {\stl,\stg,s} \in \Pow{\rec} \qquad
   \I \in \mathbb{B}\times\Pow{\rec}\times\Pow{\rec}\times\Pow{\rec}
@@ -28,10 +28,10 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
     \ALT \ite{e}{c_1}{c_2}\ALT c_1;c_2 \ALT \inserte{e}  \\
 &&&&\ALT \deletee{\lambda x.e}
     \ALT \lete{x}{\selecte{\lambda x.e}}{c}
-    \ALT \updatee{\bar{f}=\bar{e}}{\lambda x.e}\\
+    \ALT \updatee{\lambda x.e_1}{\lambda x.e_2}\\
 &&&&\ALT \foreache{e_1}{\lambda x.\lambda y. e_2} 
-    \ALT \foreache{s_1 \cup s_2}{\lambda x.\lambda y. e}
-    \ALT \ctxn{i}{\I}{ c } \ALT \ctxn{i}{\I,\stl,\stg}{c} \ALT c1 || c2\\
+    \ALT \foreachr{s_1}{s_2}{\lambda x.\lambda y. e}\\
+&&&&\ALT \ctxn{i}{\I}{ c } \ALT \ctxn{i}{\I,\stl,\stg}{c} \ALT c1 || c2\\
 % t & \in & \mathtt{Terms} & \coloneqq & e \ALT c\\
 \ectx & \in & \mathtt{Eval\;Ctx} & ::= & \bullet \ALT  
   \bullet || c_2 \ALT c_1 || \bullet \ALT \bullet;\,c_2 
@@ -54,7 +54,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \RULE
 {
   i \not\in \dom(\stl \cup \stg)\\
-  r = \{\bar{f}=\bar{k};\,\idf=i;\,\delf=0\}
+  r = \{\bar{f}=\bar{k};\,\idf=i;\,\delf=\C{false}\}
 }
 {
   \stg \vdash (\inserte{\{\bar{f}=\bar{k}\}},\stl) \stepsto
@@ -71,108 +71,107 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \begin{array}{c}
 \RULE
 {
-  S = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e)=\C{true} \\
-        \hspace*{0.7in}\conj r'=\{\bar{f}=r.\bar{f}; \idf=r.\idf; \delf=1\}\}
+  s = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e)=\C{true} \\
+        \hspace*{0.7in}\conj r'=\{\bar{f}=r.\bar{f}; \idf=r.\idf;
+        \delf=\C{true}\}\}\\
+% \dom(s) \cap \dom(\delta) = \emptyset
 }
 {
-  \stg \vdash (\deletee{\lambda x.e},\stl) \stepsto (\cskip,\stl \cup S)
+  \stg \vdash (\deletee{\lambda x.e},\stl) \stepsto (\cskip,\stl \cup s)
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+\bigskip
+
+%
+\begin{minipage}{2.8in}
+\rulelabel{E-Select}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  s = \{r\in\Delta \,|\, \eval([r/x]e)=\C{true}\}\spc
+  c' = [s/x]c
+}
+{
+  \stg \vdash (\lete{x}{\selecte{\lambda x.e}}{c}, \stl) \stepsto 
+              (c',\stl)
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+%
+\begin{minipage}{2.8in}
+\rulelabel{E-Update}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  s = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e_2)=\C{true} \conj r'=[r/x]e_1\}\\
+}
+{
+  \stg \vdash (\updatee{\lambda x.e_1}{\lambda x.e_2},\stl) \stepsto 
+              (\cskip,\stl \cup s)
 }
 \end{array}
 \end{smathpar}
 \end{minipage}
 %
 
-%
-\begin{minipage}{1.75in}
-\rulelabel{E-Top-Ctx}
 \begin{smathpar}
-\begin{array}{c}
-\RULE
-{
-  \\
-  \underI{(t,\E) \stepsto (t',\E')}
-}
-{
-  \I \vdash (\ectx\lbrack t \rbrack,\E) \tstepsto 
-      (\ectx\lbrack t' \rbrack,\E')
-}
+\begin{array}{ll}
+  \rulelabel{E-Foreach1} & \stg \vdash (\foreache{e}{\lambda x.\lambda
+  y.c},\stl) \stepsto (\foreachr{\emptyset}{\eval(e)}{\lambda x.\lambda y. c})\\
+  \rulelabel{E-Foreach2} & \stg \vdash (\foreachr{s_1}{\{r\} \cup s_2}{\lambda x.\lambda
+  y.c},\stl) \stepsto ([r/y][s_1/x]c;\,\foreachr{s_1 \cup \{r\}}{s_2}{\lambda x.\lambda y. c})\\
+  \rulelabel{E-Foreach3} & \stg \vdash (\foreachr{s}{\emptyset}{\lambda x.\lambda
+  y.c},\stl) \stepsto (\cskip,\stl)\\
 \end{array}
 \end{smathpar}
-\end{minipage}
 %
-%
-\begin{minipage}{1.4in}
-\rulelabel{E-Txn-Ctx}
-\begin{smathpar}
-\begin{array}{c}
-\RULE
-{
-  \\
-  \underI{(\txnbox{t}_i,\E) \stepsto (t',\E')}
-}
-{
-  \I \vdash (\ectx_i\lbrack t \rbrack,\E) \tstepsto 
-      (\ectx_i\lbrack t' \rbrack,\E')
-}
-\end{array}
-\end{smathpar}
-\end{minipage}
-%
+\bigskip
 
 %
-\begin{minipage}{2.3in}
-\vspace*{.2in}
-\rulelabel{E-Var}
+\textbf{Top-Level Reduction} \quad 
+\fbox {\((c,\stg) \stepsto (c',\stg')\)}\\
+%
+\begin{minipage}{3in}
+\rulelabel{E-Txn}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
 {
-  \mathcal{F} = \lambda S.\, (T_i,j,\C{RD}(X),\interp{S}(X))\\
-  \underI{(\mathcal{F},\E) \redsto (v,\E')}
+  \I(\C{true},\stl,\stg,\stg')\spc
+  \stg \vdash (c,\stl) \stepsto (c',\stl')
 }
 {
-  \I \vdash (\txnbox{X}_i,\E) \tstepsto (v,\E')
+  (\ctxn{i}{\I,\stl,\stg}{c},\stg') \stepsto
+  (\ctxn{i}{\I,\stl',\stg'}{c'},\stg')
 }
 \end{array}
 \end{smathpar}
 \end{minipage}
 %
 %
-\begin{minipage}{2.3in}
-\vspace*{.2in}
-\rulelabel{E-Asgn}
-\begin{smathpar}
-\begin{array}{c}
-\RULE
-{
-  \mathcal{F} = \lambda S.\, (T_i,j,\C{WR(X)},v)\\
-  \underI{(\mathcal{F},\E) \redsto (v,\E')}
-}
-{
-  \I \vdash (\txnbox{X:=v}_i,\E) \tstepsto (\cskip,\E')
-}
-\end{array}
-\end{smathpar}
-\end{minipage}
-%
-%
-\begin{minipage}{2.5in}
-\vspace*{.2in}
+\begin{minipage}{2.8in}
 \rulelabel{E-Commit}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
 {
-  \mathcal{F} = \lambda S.\, (T_i,j,\C{COMMIT},\bot)\\
-  \underI{(\mathcal{F},\E) \redsto (\bot,\E')}
+  \I(\C{false},\stl,\stg,\stg')
 }
 {
-  \I \vdash (\ctxn{i}{\cskip},\E) \stepsto (\cskip, \E')
+  (\ctxn{i}{\I,\stl,\stg}{\cskip},\stg') \stepsto (\cskip,\stl\gg\stg')
 }
 \end{array}
 \end{smathpar}
 \end{minipage}
 %
+
 
 \caption{\small \txnimp: Syntax and Small-step semantics}
 \label{fig:txnimp}
