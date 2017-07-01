@@ -216,6 +216,22 @@ back. If the aforementioned version check fails (i.e., the database
 has a later version than the snapshot), the transaction is rolled back
 and re-executed.
 
+\begin{figure}[t]
+\includegraphics[scale=0.5]{Figures/RR-postgres}
+\caption{Database state transitions corresponding to an execution of
+  an RR transaction $T_1$ on Postgres. $T_2$ and $T_3$ are concurrent
+  transactions. State has three data items, $a$, $b$ and $c$. }
+\label{fig:rr-postgres}
+\end{figure}
+\begin{figure}[t]
+\includegraphics[scale=0.5]{Figures/RR-abstract}
+  \caption{An abstract execution equivalent to the one in
+  Fig.~\ref{fig:rr-postgres}. Database state remains invariant as long as
+  $T_1$ executes. The effects of concurrent transactions ($T_2$ and
+  $T_3$) are witnessed just before the commit.}
+\label{fig:rr-abstract}
+\end{figure}
+
 Although this implementation, comprising many thousands of lines code,
 is highly involved, its semantic behavior in terms of how it effects
 transitions on the database state is fairly simple.  Since a
