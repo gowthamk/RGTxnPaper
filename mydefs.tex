@@ -167,7 +167,8 @@ morekeywords={module, match, when, @@deriving, not, : , txn_do, do, SQL/\\}
 \newcommand{\rval}{\textsf{rval}}
 \newcommand{\visible}{\textsf{visible}}
 \newcommand{\maxId}{\textsf{maxId}}
-\newcommand{\aeval}{\textsf{aeval}}
+\newcommand{\eval}{\textsf{eval}}
+\newcommand{\dom}{\textsf{dom}}
 \newcommand{\underE}[1]{\E \Vdash #1}
 \newcommand{\underIT}[1]{\;\I,\C{Txn}_i \vdash #1\;}
 \newcommand{\underI}[1]{\;\I \vdash #1\;}
@@ -190,4 +191,15 @@ morekeywords={module, match, when, @@deriving, not, : , txn_do, do, SQL/\\}
 \newcommand{\Prop}{\mathbb{P}}
 \newcommand{\Pow}[1]{\mathcal{P}\left(#1\right)}
 \newcommand{\bind}{\gg=}
-\newcommand{\ite}[3]{\C{if}\;#1\;\C{then}\;#2\;\C{else}\;#3}
+\newcommand{\ite}[3]{\C{IF}\;#1\;\C{THEN}\;#2\;\C{ELSE}\;#3}
+\newcommand{\lete}[3]{\C{LET}\;#1=#2\;\C{IN}\;#3}
+\newcommand{\foreache}[2]{\texttt{FOREACH}\;#1\;\texttt{DO}\;#2}
+\newcommand{\inserte}[1]{\texttt{INSERT}\;#1}
+\newcommand{\selecte}[1]{\texttt{SELECT WHERE}\;#1}
+\newcommand{\deletee}[1]{\texttt{DELETE WHERE}\;#1}
+\newcommand{\updatee}[2]{\texttt{UPDATE SET}\;#1\;\texttt{WHERE}\;#2}
+\newcommand{\stl}{\delta}
+\newcommand{\stg}{\Delta}
+\newcommand{\rec}{r}
+\newcommand{\idf}{\texttt{id}}
+\newcommand{\delf}{\texttt{del}}

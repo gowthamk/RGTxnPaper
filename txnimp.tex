@@ -1,5 +1,6 @@
-\renewcommand {\ctxn}[2]{\C{txn}\langle #1 \rangle\{#2\}}
+\renewcommand{\ctxn}[3]{\C{TXN}_{#1}\langle #2 \rangle\{#3\}}
 \begin{figure*}[!ht]
+\raggedright
 %
 \textbf{Syntax}\\
 %
@@ -7,107 +8,80 @@
 \renewcommand{\arraystretch}{1.2}
 \begin{array}{lclcl}
 \multicolumn{5}{c} {
-  {X,Y} \in \mathtt{Id} \qquad
-  {i,j,n,v} \in \mathbb{N} \qquad
-  {T_i,T_j} \in \mathtt{TxnId} \qquad
+  {x,y} \in \mathtt{Variables}\qquad
+  {f} \in \mathtt{Field\;Names} \qquad
+% {\tau} \in \mathtt{Table\;Names}
+  {i,j} \in \mathbb{N} \qquad
+  {\odot} \in \{+,-,\le,\ge,=\}\qquad
 }\\
-e & \in & \mathtt{Expressions} & \coloneqq & v \ALT X \ALT e \pm e \\
-c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT X := e 
-      \ALT c_1;c_2 \ALT c1 || c2 \ALT \ctxn{i}{ c } \\
-t & \in & \mathtt{Terms} & \coloneqq & e \ALT c\\
+\multicolumn{5}{c}{
+  {k} \in \mathbb{Z} \qquad
+  {\rec} \in \{\bar{f}=\bar{k}\}\qquad
+  {\stl,\stg,s} \in \Pow{\rec} \qquad
+  \I \in \mathbb{B}\times\Pow{\rec}\times\Pow{\rec}\times\Pow{\rec}
+  \rightarrow \Prop
+}\\
+v & \in & \mathtt{Values} & \coloneqq & k \ALT \rec \ALT s\\
+e & \in & \mathtt{Expressions} & \coloneqq & c \ALT x \ALT x.f 
+    \ALT \{\bar{f}=\bar{e}\} \ALT e_1 \odot e_2\\ 
+c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
+    \ALT \ite{e}{c_1}{c_2}\ALT c_1;c_2 \ALT \inserte{e}  \\
+&&&&\ALT \deletee{\lambda x.e}
+    \ALT \lete{x}{\selecte{\lambda x.e}}{c}
+    \ALT \updatee{\bar{f}=\bar{e}}{\lambda x.e}\\
+&&&&\ALT \foreache{e_1}{\lambda x.\lambda y. e_2} 
+    \ALT \foreache{s_1 \cup s_2}{\lambda x.\lambda y. e}
+    \ALT \ctxn{i}{\I}{ c } \ALT \ctxn{i}{\I,\stl,\stg}{c} \ALT c1 || c2\\
+% t & \in & \mathtt{Terms} & \coloneqq & e \ALT c\\
+\ectx & \in & \mathtt{Eval\;Ctx} & ::= & \bullet \ALT  
+  \bullet || c_2 \ALT c_1 || \bullet \ALT \bullet;\,c_2 
+  \ALT \ctxn{i}{\I,\stl,\stg}{\bullet} \\
 \end{array}
 \end{smathpar}
 %
-
-%
-\textbf{Auxiliary Definitions}
-%
-
-\begin{minipage}{3.6in}
-\begin{smathpar}
-\begin{array}{lclcl}
-\op& \in &  \mathtt{Op.\;Name} & \coloneqq & \C{RD}(X) \ALT \C{WR}(X) \ALT \C{COMMIT}\\
-\eta &  \in & \mathtt{Effect} & \coloneqq & (T_i,j,\op,\mathbb{N}\cup\{\bot\})\\
-\A & \in & \mathtt{Effect\;Set} & \coloneqq &  \Pow{\mathtt{Effect}}\\
-\llbracket \cdot \rrbracket &  \in & \mathtt{State} & \coloneqq & \Pow{\mathtt{Effect}} \rightarrow \mathtt{Id} \rightarrow \mathbb{N}\\
-\end{array}
-\end{smathpar}
-\end{minipage}
-%
-%
-\begin{minipage}{2.25in}
-\begin{smathpar}
-\begin{array}{lclcl}
-\visZ & \in & \mathtt{Visibility} & \coloneqq & \Pow{\mathtt{Effect}\times\mathtt{Effect}}\\
-\E & \in & \mathtt{Execution} & \coloneqq &  (\A,\visZ)\\
-\I & \in & \mathtt{Invariant} & \coloneqq & \E \rightarrow \Prop\\
-\mathcal{F} & \in & \mathtt{Op.\;Def.} & \coloneqq &
-\Pow{\mathtt{Effect}} \rightarrow \mathtt{Effect}\\
-\end{array}
-\end{smathpar}
-\end{minipage}
-%
-
-\renewcommand{\arraystretch}{1.5}
-\begin{smathpar}
-\begin{array}{c}
-\txn(t_i,\_,\_,\_) = t_i \qquad
-\id(\_,j,\_,\_) = j \qquad
-\kind(\_,\_,\op,\_) = \op \qquad
-\rval(\_,\_,\_,n) = n\\
-\end{array}
-\end{smathpar}
+\bigskip
 
 \renewcommand{\arraystretch}{1.2}
 
 %
-\textbf{Evaluation} \quad 
-\fbox {\({\I} \vdash (\mathcal{F},\E) \redsto (v,\E')\)} \quad
-\fbox {\({\I} \vdash (\txnbox{t}_i,\E) \tstepsto (t',\E')\)} \quad
-\fbox {\(\I \vdash (c,\E) \stepsto (c',\E')\)}\\
-
-%
-\begin{minipage}{2.6in}
-\begin{smathpar}
-\begin{array}{lclcl}
-\ectx & \in & \mathtt{Eval\;Ctx} & ::= & \bullet \ALT  
-  \bullet || c_2 \ALT c_1 || \bullet \\
-\end{array}
-\end{smathpar}
-\end{minipage}
-\begin{minipage}{3.5in}
-\begin{smathpar}
-\begin{array}{lclcl}
-\ectx_i & \in & \mathtt{Eval\;Ctx\;in}\;\C{txn}\langle i \rangle & ::= &
-  \ctxn{i}{\bullet} \ALT \txnbox{\bullet \pm e_2}_i \ALT 
-  \txnbox{v_1 \pm \bullet}_i \ALT \txnbox{\bullet;\,c_2}_i \\
-\end{array}
-\end{smathpar}
-\end{minipage}
-%
-\bigskip
-
+\textbf{Local Reduction} \quad 
+\fbox {\(\stg \vdash (c,\stl) \stepsto (c',\stl')\)}\\
 %
 \begin{minipage}{2.8in}
-\rulelabel{E-Aux}
+\rulelabel{E-Insert}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
 {
-  S \subseteq \A \spc
-  \eta = \mathcal{F}(S) \spc
-  \id(\eta) > \maxId(\A) \\
-% \I(\A,\visZ) \spc
-  \E' = (\A \cup \{\eta\},\visZ \cup S \times \{\eta\}) \spc\spc
-  \I(\E')
+  i \not\in \dom(\stl \cup \stg)\\
+  r = \{\bar{f}=\bar{k};\,\idf=i;\,\delf=0\}
 }
 {
-  \I \vdash (\mathcal{F},(\A,\visZ)) \redsto (\rval(\eta),\E')
+  \stg \vdash (\inserte{\{\bar{f}=\bar{k}\}},\stl) \stepsto
+  (\cskip,\stl \cup \{r\})
 }
 \end{array}
 \end{smathpar}
 \end{minipage}
 %
+%
+\begin{minipage}{2.8in}
+\rulelabel{E-Delete}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  S = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e)=\C{true} \\
+        \hspace*{0.7in}\conj r'=\{\bar{f}=r.\bar{f}; \idf=r.\idf; \delf=1\}\}
+}
+{
+  \stg \vdash (\deletee{\lambda x.e},\stl) \stepsto (\cskip,\stl \cup S)
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
 %
 \begin{minipage}{1.75in}
 \rulelabel{E-Top-Ctx}
