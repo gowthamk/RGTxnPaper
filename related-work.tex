@@ -3,6 +3,7 @@
 \label{sec:relatedwork}
 
 \paragraph{Specifying weak isolation.}
+
 Adya~\cite{adyaphd} specifies several weak isolation levels in terms
 of \emph{dependency graphs} between transactions, and the kinds of
 dependencies that are forbidden in each case. The operational nature
@@ -20,6 +21,14 @@ Like ours, all the aforementioned specification frameworks use the
 vocabulary introduced in~\cite{burckhardt14}. However, none of them
 are equipped with a reasoning framework that can use such
 specifications to verify programs under weak isolation.
+
+Recent work by Crooks \emph{et al.}~\cite{CPA+17} also explores the
+use of a state-based interpretation of isolation as we do, and share
+our position that enables specification of weak isolation that are not
+tied to implementation-specific artifacts.  However, they do not
+consider verification (manual or automated) of client programs, and it
+is not immediately apparent if their specification formalism is
+amenable for use within a verification toolchain. 
 
 \vspace*{-4pt}
 \paragraph{Reasoning under weak isolation} In~\cite{feketessi}, Fekete
