@@ -15,18 +15,19 @@ class of expressions ($e$). Commands ($c$) include $\cskip$,
 conditional statements, \C{LET} constructs to bind names, \C{FOREACH}
 loops, SQL statements, their sequential composition ($c_1;c_2$), and
 transactions ($\ctxn{i}{\I}{c}$) and their parallel composition
-($c_1\,||\,c_2$). Certain terms that only appear at run-time are also
-present in $c$. These include a \C{TXN} block tagged with sets ($\stl$
-and $\stg$) of records that assume special meaning in operational
-semantics, and a \C{FOREACH} loop that keeps track of the set ($s_1$)
-of items already iterated, and the set ($s_2$) of items yet to be
-iterated. Note that even the surface-level \C{FOREACH} shown here is a
-little different from the one used in previous sections; its
-higher-order argument has two arguments, $y$ and $z$, which are
-invoked (during the reduction) with the set of already-iterated items,
-and the current item, respectively. This form of \C{FOREACH} lends
-itself to inductive reasoning, facilitating inductive proofs
-(Sec.~\ref{sec:reasoning}).
+($c_1\,||\,c_2$). The $\I$ in \C{TXN} block syntax is the
+transaction's isolation specification, which will be explained later.
+Certain terms that only appear at run-time are also present in $c$.
+These include a \C{TXN} block tagged with sets ($\stl$ and $\stg$) of
+records that assume special meaning in operational semantics, and a
+\C{FOREACH} loop that keeps track of the set ($s_1$) of items already
+iterated, and the set ($s_2$) of items yet to be iterated. Note that
+even the surface-level \C{FOREACH} shown here is a little different
+from the one used in previous sections; its higher-order argument has
+two arguments, $y$ and $z$, which are invoked (during the reduction)
+with the set of already-iterated items, and the current item,
+respectively. This form of \C{FOREACH} lends itself to inductive
+reasoning, facilitating inductive proofs (Sec.~\ref{sec:reasoning}).
 
 % also We let $T_i$ for $i \in \mathbb{N}$
 % range over transaction identifiers. When it is evident we are
@@ -110,9 +111,48 @@ with $s_1$ and the current element $x$ (note: $\uplus$ in $\{x\}
 $s_2$ becomes empty. The reduction rules for conditionals, \C{LET}
 binders, and sequences are straightforward, hence ommitted.
 
-The top-level reduction relation
+The top-level reduction relation defines small-step semantics of
+transactions, and their parallel composition. A transaction always
+comes tagged with an isolation specification $\I$ that dictates the
+timing and nature of iterferences that the transaction can witness.
+Formally, $\I$ is a function that maps a boolean ($\mathbb{B}$) and a
+triplet of database states (three sets of records:
+$\Pow(r)\times\Pow(r)\times\Pow(r)$) to a logical proposition
+($\Prop$). The abstract machine calls $\I$ while reducing
+$\ctxn{i}{\I}{c}$. The boolean argument identifies if the transaction
+is still executing (\C{true}), or if it has finished execution and
+ready to commit (\C{false}).  Among the triplet of sets (the second
+argument), first is the (current) transaction-local database state
+($\stl$), second is the state ($\stg$) of the global database when the
+transaction last took a step, and third is the current state ($\stg'$)
+of the global database.  Intuitively, $\stg'\neq\stg$ indicates an
+interference from a concurrent transaction, and the $\I$ decides if
+this interference is allowed or not, considering the local database
+state ($\stl$). For instance, as described in
+(Sec.~\ref{sec:motivation}), an RR transaction on Postgres defines
+$\I$ as following:
+\begin{smathpar}
+\begin{array}{lcl}
+\I\,\C{true}\,(\stl,\stg,\stg') & = & \stg' = \stg\\
+\I\,\C{false}\,(\stl,\stg,\stg') & = & \forall(r\in\stl)(r'\in\stg).~
+  r'.\idf = r.\idf \Rightarrow r'\in\stg'.
+\end{array}
+\end{smathpar}
 
+The reduction of a $\ctxn{i}{\I}{c}$ begins by first converting it to
+its run-time form $\ctxn{i}{\I,\stl,\stg}{c}$, where $\stl =
+\emptyset$, and $\stg$ the current (global) database. The top-level
+reduction rules in Fig.~\ref{fig:txnimp} assume this form. Rule
+\rulelabel{E-Txn} reduces $\ctxn{i}{\I,\stl,\stg}{c}$ under a database
+state ($\stg'$), only if the isolation specification ($\I$) allows the
+interference between $\stg$ and $\stg'$ during the execution. Rule
+\rulelabel{E-Commit} commits the transaction
+$\ctxn{i}{\I,\stl,\stg}{c}$ by flushing its uncommitted records to the
+database. This is done only if the interference between $\stg$ and
+$\stg'$ is allowed during the commit by the isolation specification.
 
+% For convenience, we define $\I_r = \I(\C{true})$ and $\I_c =
+% \I(\C{false})$.
 % Fundamental to our development is the notion of a trace invariant
 % ($\I$). $\I$ is a function from traces ($\E$) to first-order logical
 % formulas ($\Prop$) that define well-formedness

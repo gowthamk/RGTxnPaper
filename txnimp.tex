@@ -18,7 +18,7 @@
   {k} \in \mathbb{Z}\cup\mathbb{B} \qquad
   {\rec} \in \{\bar{f}=\bar{k}\}\qquad
   {\stl,\stg,s} \in \Pow{\rec} \qquad
-  \I \in \mathbb{B}\times\Pow{\rec}\times\Pow{\rec}\times\Pow{\rec}
+  \I \in \mathbb{B}\rightarrow\Pow{\rec}\times\Pow{\rec}\times\Pow{\rec}
   \rightarrow \Prop
 }\\
 v & \in & \mathtt{Values} & \coloneqq & k \ALT \rec \ALT s\\
@@ -144,7 +144,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \begin{array}{c}
 \RULE
 {
-  \I(\C{true},\stl,\stg,\stg')\spc
+  \I\,\C{true}\,(\stl,\stg,\stg')\spc
   \stg \vdash (c,\stl) \stepsto (c',\stl')
 }
 {
@@ -162,7 +162,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \begin{array}{c}
 \RULE
 {
-  \I(\C{false},\stl,\stg,\stg')
+  \I\,\C{false}\,(\stl,\stg,\stg')
 }
 {
   (\ctxn{i}{\I,\stl,\stg}{\cskip},\stg') \stepsto (\cskip,\stl\gg\stg')
