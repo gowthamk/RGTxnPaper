@@ -194,13 +194,13 @@ quite clear that RC is not an appropriate isolation level for
 
 While reasoning in terms of anomalies is cumbersome, and as the above
 example shows often inadequate, reasoning about weak isolation in
-terms of low-level traces~\cite{adyaphd,gotsmanconcur15} complicates
-high-level reasoning.  A possible alternative would interleave weak
-isolation implementation details within the program, yielding a
-(more-or-less) conventional concurrent program that can be then
-subject to classical concurrent verification methods.  Considering the
-size and complexity of real-world transaction systems, this strategy
-is unlikely to scale.
+terms of low-level traces~\cite{adyaphd,gotsmanconcur15} on memory
+read and write actions complicates high-level reasoning.  A possible
+alternative would interleave weak isolation implementation details
+within the program, yielding a (more-or-less) conventional concurrent
+program that can be then subject to classical concurrent verification
+methods.  Considering the size and complexity of real-world
+transaction systems, this strategy is unlikely to scale.
 
 In this paper, we adopt a different approach that \emph{lifts}
 isolation semantics (\emph{not} their implementations) to the
@@ -277,15 +277,15 @@ lifetime an RR transaction ($T$):
 \end{itemize}
 
 This simple characterization of RR isolation allows us to verify the
-consistency condtions associated with the \C{new\_order}
+consistency conditions associated with the \C{new\_order}
 transaction. First, since the database doesn't change ($\Delta' =
 \Delta$) (where $\Delta'$ represents the state after the transaction
 commits), during the execution of the transaction's body, we can
-reason about \C{new\_order} as if it executed in complete isolation
+reason about \C{new\_order} as though it executed in complete isolation
 until its commit point, leading to a verification process similar to
 what would been applied when reasoning about serializability.  When
 \C{new\_order} finishes execution and becomes ready to commit, a
-transition that transfers the transaction'slocal writes ($\delta$) to
+transition that transfers the transaction's local writes ($\delta$) to
 the unchanged database state ($\Delta$).  However, we are required to
 consider the interference from concurrent transitions at this point,
 which might change the database state from $\Delta$ to $\Delta_c$. If
@@ -311,11 +311,11 @@ Rely-Gurantee, which extend Hoare logic with additional artifacts and
 where (stable) intermediary assertions and loop invariants remain a
 major source of annotation burden.  However, a relational database is
 a significantly simpler abstraction than shared memory. There are no
-pointers, or linked data structures, or aliasing.  Although a database
+pointers, linked data structures, or aliasing.  Although a database
 essentially abstracts a mutable state, the state is mutated through a
 well-defined fixed number of interfaces (SQL statements), each tagged
 with a logical formula describing what records are accessed and
-updated. 
+updated.
 
 This observation leads us away from thinking of database transactions
 as concurrent imperative programs.  Instead, we see value in viewing
@@ -433,11 +433,11 @@ loop as a formula in the domain of sets extended with a bind
 function. The advantage in doing so is that we can now make use of a
 semantics-preserving translation from this domain to first-order
 logic, allowing us to leverage SMT solvers for automatic proofs
-without having to infer loop invariant, or provide intermediate
+without having to infer loop invariants, or provide intermediate
 assertions.  Sec.~\ref{sec:automation} describes this translation. In
 the exposition thus far, we assumed $\Delta$ remains invaraint, which
 is clearly not the case when we admit concurrency.  Necessary
 concurrency extensions of the state transformer semantics is also
 covered in Sec.~\ref{sec:automation}.  The following two sections,
-however, focus on laying theoretical foundations for reasoning about
-weak isolation.
+however, first focus on laying the theoretical foundations for
+reasoning about weak isolation.
