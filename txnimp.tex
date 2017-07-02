@@ -1,4 +1,4 @@
-\renewcommand{\ctxn}[3]{\C{TXN}_{#1}\langle #2 \rangle\{#3\}}
+%\renewcommand{\ctxn}[3]{\C{TXN}_{#1}\langle #2 \rangle\{#3\}}
 \begin{figure*}[!ht]
 \raggedright
 %
@@ -22,7 +22,7 @@
   \rightarrow \Prop
 }\\
 v & \in & \mathtt{Values} & \coloneqq & k \ALT \rec \ALT s\\
-e & \in & \mathtt{Expressions} & \coloneqq & c \ALT x \ALT x.f 
+e & \in & \mathtt{Expressions} & \coloneqq & k \ALT x \ALT x.f 
     \ALT \{\bar{f}=\bar{e}\} \ALT e_1 \odot e_2\\ 
 c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
     \ALT \ite{e}{c_1}{c_2}\ALT c_1;c_2 \ALT \inserte{x}  \\

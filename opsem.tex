@@ -5,41 +5,113 @@
 
 \input{txnimp}
 
-% Fig.~\ref{fig:txnimp} shows the syntax and small-step semantics of
-% \txnimp, a core language that we will use to formalize the intuitions
-% presented in the previous section. Natural numbers, (shared) variables
-% and arithmetic expressions constitute the syntactic class of
-% expressions ($e$).  Commands ($c$) include $\cskip$, assignment
-% statements, transaction (\C{txn}) lexical blocks, and their sequential
-% and parallel composition. We let $T_i$ for $i \in \mathbb{N}$ range
-% over transaction identifiers. When it is evident we are referring to a
-% transaction, we use the number $i$ instead of $T_i$ for identification
-% (\eg in $\C{txn}\langle i \rangle$). Like variables, transaction
-% identifiers are globally accessible. For notational convenience, we
-% let $t$ range over both expressions and commands.
+Fig.~\ref{fig:txnimp} shows the syntax and small-step semantics of
+\txnimp, a core language that we use to formalize our intuitions about
+reasoning under weak isolation. Variables ($x$), Integer and boolean
+constants ($k$), records ($r$) of named constants, sets ($s$) of such
+records, arithmetic and boolean expressions ($e_1 \odot e_2$), and
+record expressions ($\{\bar{f}=\bar{e}\}$) constitute the syntactic
+class of expressions ($e$). Commands ($c$) include $\cskip$,
+conditional statements, \C{LET} constructs to bind names, \C{FOREACH}
+loops, SQL statements, their sequential composition ($c_1;c_2$), and
+transactions ($\ctxn{i}{\I}{c}$) and their parallel composition
+($c_1\,||\,c_2$). Certain terms that only appear at run-time are also
+present in $c$. These include a \C{TXN} block tagged with sets ($\stl$
+and $\stg$) of records that assume special meaning in operational
+semantics, and a \C{FOREACH} loop that keeps track of the set ($s_1$)
+of items already iterated, and the set ($s_2$) of items yet to be
+iterated. Note that even the surface-level \C{FOREACH} shown here is a
+little different from the one used in previous sections; its
+higher-order argument has two arguments, $y$ and $z$, which are
+invoked (during the reduction) with the set of already-iterated items,
+and the current item, respectively. This form of \C{FOREACH} lends
+itself to inductive reasoning, facilitating inductive proofs
+(Sec.~\ref{sec:reasoning}).
 
-% We define a small-step operational semantics for this language in
-% terms of an abstract machine that generates an execution trace ($\E$).
-% The first component of the trace is a set ($\A$) of \emph{effects},
-% where an effect ($\eta$) is a tuple of (a). the identifier ($T_i$) of
-% the transaction that generated this effect, (b). the unique
-% identifier ($j$) of this effect, (c). the operation ($\op$)
-% documented by this effect, which can be either a read (\C{RD(X)}), a
-% write (\C{WR(X)}), or a transaction commit (\C{COMMIT}), and (d). the
-% value, if any, associated with the operation (\eg, value read or value
-% written). Functions $\txn$, $\id$, $\oper$, and $\rval$ project each
-% of the four aforementioned individual components of the tuple.  In
-% every step of the evaluation, the machine reduces a \txnimp\ term by
-% executing a read, write or commit operation, generating an effect, and
-% extending the trace. Since effects include transaction identifiers,
-% the semantics distinguishes between terms ($t$) of different
-% transactions. For example, $\txnbox{t}_i$ denotes a term $t$ inside a
-% transaction $T_i$.  Evaluation contexts are also appropriately marked.
-% For example, $\ectx_i$ denotes the evaluation context for a term
-% inside $T_i$. The other component of an execution trace is a
-% visibility relation ($\visZ$) that establishes a visibility property
-% between effects among different transactions. The intent and mechanics
-% of $\visZ$ is described in the sequel.
+% also We let $T_i$ for $i \in \mathbb{N}$
+% range over transaction identifiers. When it is evident we are
+% referring to a transaction, we use the number $i$ instead of $T_i$ for
+% identification (\eg in $\C{txn}\langle i \rangle$). Like variables,
+% transaction identifiers are globally accessible. For notational
+% convenience, we let $t$ range over both expressions and commands.
+
+We define a small-step operational semantics for this language in
+terms of an abstract machine that executes a command, and updates
+either a transaction-local database ($\stl$), or the global database
+($\stg$). Database ($\stg$) is a modeled as a set of records of a
+pre-defined type, i.e., they all belong to a single table.
+Generalization to multiple tables is straightforward. Records in
+$\stg$ are uniquely identifiable through their $\idf$ field, which is
+auto-generated and does not belong to the surface language, i.e.,
+$\C{id}\notin f$. For a set $S$ of records, we define $\dom(S)$ as the
+set of unique ids of all the records in $S$. Thus $|\dom(\stg)| =
+|\stg|$. During its execution, a transaction may write to multiple
+records in $\stg$. Atomicity dictates that such writes shouldn't be
+available in $\stg$ until the transaction commits. We therefore
+associate each transaction with a local database ($\stl$) that stores
+\emph{only} the uncommitted records\footnote{While SQL's \C{UPDATE}
+admits writes at the granularity of record fields, databases, in
+reality, enforce record-level locking, allowing us to think of
+``uncommitted writes'' as ``uncommitted records''. }. Uncommitted
+records include deleted records, which are identified by a hidden
+$\delf$ field set to \C{true}. When the transaction commits, its local
+database is atomically \emph{flushed} to the global database,
+committing the uncommitted records. The flush operation ($\gg$) is defined as
+following:
+\begin{smathpar}
+\begin{array}{c}
+\forall r.~ r \in (\stl\gg\stg) ~\Leftrightarrow~ 
+  (r.\idf \notin \dom(\stl) \conj r \in \stg)
+\disj (r \in \stl \conj \neg r.\delf) 
+\end{array}
+\end{smathpar}
+Let $\stg' = \stl\gg\stg$. A record $r$ belongs to $\stg'$ iff it
+belongs to $\stg$ and not been updated in $\stl$, i.e., $r.\idf \notin
+\dom(\stl)$, or it belongs to $\stl$, i.e., it is either a new record,
+or an updated version of an old record, but the updatation is not a
+deletion ($\neg r.\delf$). Thus, flush defines the result of
+atomically applying transaction's local writes to the global database.
+Besides the commit, flush also helps a transaction read its own
+writes. Intuitively, the result of a read operation inside a
+transaction must be computed on the database resulting from flushing
+the current local state ($\stl$) to the global state ($\stg$). The
+abstract machine of Fig.~\ref{fig:txnimp}, however, doesn't let a
+transaction read its own writes. This reduces verbosity and simplifies
+semantics, without losing any generality; substituting $\stl\gg\stg$
+for $\stg$ at select places in reduction rules recovers the real
+
+Small-step semantics is stratified into a transaction-local reduction
+relation, and a top-level reduction relation. Transaction-local
+relation ($\stg \vdash (c,\stl) \stepsto (c',\stl')$) defines a
+small-step reduction for a command inside a transaction, when the
+database state is $\stg$; the command $c$ reduces to $c'$, while
+updating the transaction-local database $\stl$ to $\stl'$. The
+definition assumes a meta function $\eval$ that evaluates expressions
+with no free variables to values. The reduction relation for SQL
+statements is defined straightforwardly.  \C{INSERT} adds a new record
+to $\stl$ after adding a unique identifier (more discussion on
+uniqueness later). \C{DELETE} finds the records in $\stg$ that match
+the search criteria defined by its boolean function argument, and adds
+the records to $\stl$ after marking them for deletion. \C{SELECT}
+bounds the name introduced by \C{LET} to the set of records from
+$\stg$ that match the search criteria, and then executes the bound
+command $c$. \C{UPDATE} uses its first function argument to compute
+the updated version of the records that match the search criteria
+defined by its second function argument. Updated records are added to
+$\stl$. 
+
+The reduction of \C{FOREACH} starts by first converting it to its
+run-time form that also keeps track of the iterated items ($s_1$),
+besides the yet-to-be-iterated items ($s_2$). Initially, $s_1$ is
+empty. As the elements are iterated, they are removed from $s_2$ and
+added to $s_1$ . Iteration involves invoking the higher-order function
+with $s_1$ and the current element $x$ (note: $\uplus$ in $\{x\}
+\uplus s_2$ denotes a disjoint union). The reduction ends when the
+$s_2$ becomes empty. The reduction rules for conditionals, \C{LET}
+binders, and sequences are straightforward, hence ommitted.
+
+The top-level reduction relation
+
 
 % Fundamental to our development is the notion of a trace invariant
 % ($\I$). $\I$ is a function from traces ($\E$) to first-order logical
