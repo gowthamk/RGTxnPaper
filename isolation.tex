@@ -1,2 +1,75 @@
-\subsection{Isolation}
+\subsection{Isolation Specifications}
 \label{sec:isolation}
+
+Operational semantics of Fig.~\ref{fig:txnimp} does not employ
+concurrency control constructs in any form. Any additional concurrency
+control provided by the database implementation, beyond that which is
+already incuded in the isolation specification, also needs to be
+axiomatized in $\I$. We first describe such axiomatizations, and then
+present the specifications of the standard isolation levels as
+implemented by popular off-the-shelf databases.
+
+\textbf{Unique Ids}. Most relational databases associate every record
+in a table with a unique identifier. Often, auto-generated unique
+identifiers are part of the schema itself (via SQL's \C{UNIQUE} and
+\C{AUTO\_INCREMENT} keywords), but if not, database adds one (e.g.,
+MySQL's InnoDB engine automatically adds a 6-byte identifier if none
+exists). Enforcing global uniqueness of identifiers requires exclusive
+locks, which are absent from Fig.~\ref{fig:txnimp}. The
+\rulelabel{E-Insert} rule assigns an id to the newly added record
+after checking that it is not already present in $\stg$ and $\stl$.
+But the new record is only added to $\stl$, which is invisible outside
+the transaction. Thus, the uniqueness check for the same id also
+passes in a concurrent transaction, resulting in duplicate ids
+after both commits. To prevent this, we need the following proposition
+in $\I$ of every transaction, regardless of whether it is executing
+or committing:
+\begin{smathpar}
+\begin{array}{lcl}
+  \I_{id}(\stl,\stg,\stg') & = & \forall(r\in\stl).~
+      r.\idf\notin \dom(\stg) \Rightarrow r.\idf\notin \dom(\stg').
+\end{array}
+\end{smathpar}
+$\I_{id}$ makes sure that a globally unique id generated during a
+transaction's execution remains globally unique until it commits. An
+interference from a concurrent transaction that adds the same id to
+$\stg$ is prohibited.
+
+\textbf{Write Locks}. Transactions in MySQL and Postgres (effectively)
+obtain exclusive locks on records they update, and do not release them
+until they commit, thus preventing write-write (ww) conflicts. To
+obtain this behavior on the abstract machine of Fig.~\ref{fig:txnimp},
+the following proposition needs to be in $\I$ for every transaction:
+\begin{smathpar}
+\begin{array}{lcl}
+  \I_{ww}(\stl,\stg,\stg') & = & \forall(r'\in\stl)(r \in \stg).~
+      r.\idf = r'.\idf  \Rightarrow r\in\stg'.
+\end{array}
+\end{smathpar}
+That is, given a record $r'\in\stl$, if there exists an $r\in\stg$
+with the same id (i.e., $r'$ is an updated version of $r$), then $r$
+must be present unmodified in $\stg'$. This prevents a concurrent
+transaction from changing $r$, thus simulating the behavior of an
+exclusive lock. There is however a caveat: if we assume extensional
+equality over records, a write by a concurrent transaction that
+doesn't change $r$'s contents is still allowed. While this in itself
+is not a problem, the concurrent transaction may modify other records,
+which then become visible in the current transaction. A write lock
+prevents this behavior, whereas our axiomatization ($\I_{ww}$) allows
+it. An easy fix for this is to add version timestamps to records that
+effectively intensionalizes equality. Nonetheless, imprecise
+axiomatization of write locks hasn't been a problem in practice.
+
+\textbf{Read-Only Transactions}. Certain databases implement special
+previleges for read-only transactions. Read-only behavior can be
+enforced on a transaction by including the following proposition in
+its $\I$:
+\begin{smathpar}
+\begin{array}{lcl}
+  \I_{ro}(\stl,\stg,\stg') & = & \stl = \emptyset\\
+\end{array}
+\end{smathpar}
+If a transaction declared as read-only performs a write, then its
+$\stl\neq \emptyset$, and the transaction never commits.
+
+
