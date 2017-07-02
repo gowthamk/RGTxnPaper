@@ -7,7 +7,7 @@ all:
 	bibtex popl18
 	pdflatex -shell-escape popl18
 
-haste:
+once:
 	pdflatex -shell-escape popl18
 
 clean:

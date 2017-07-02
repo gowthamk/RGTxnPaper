@@ -25,11 +25,11 @@ v & \in & \mathtt{Values} & \coloneqq & k \ALT \rec \ALT s\\
 e & \in & \mathtt{Expressions} & \coloneqq & c \ALT x \ALT x.f 
     \ALT \{\bar{f}=\bar{e}\} \ALT e_1 \odot e_2\\ 
 c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
-    \ALT \ite{e}{c_1}{c_2}\ALT c_1;c_2 \ALT \inserte{e}  \\
+    \ALT \ite{e}{c_1}{c_2}\ALT c_1;c_2 \ALT \inserte{x}  \\
 &&&&\ALT \deletee{\lambda x.e}
     \ALT \lete{x}{\selecte{\lambda x.e}}{c}
     \ALT \updatee{\lambda x.e_1}{\lambda x.e_2}\\
-&&&&\ALT \foreache{e_1}{\lambda x.\lambda y. e_2} 
+&&&&\ALT \foreache{x}{\lambda y.\lambda z. c} 
     \ALT \foreachr{s_1}{s_2}{\lambda x.\lambda y. e}\\
 &&&&\ALT \ctxn{i}{\I}{ c } \ALT \ctxn{i}{\I,\stl,\stg}{c} \ALT c1 || c2\\
 % t & \in & \mathtt{Terms} & \coloneqq & e \ALT c\\
@@ -123,12 +123,12 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 
 \begin{smathpar}
 \begin{array}{ll}
-  \rulelabel{E-Foreach1} & \stg \vdash (\foreache{e}{\lambda x.\lambda
-  y.c},\stl) \stepsto (\foreachr{\emptyset}{\eval(e)}{\lambda x.\lambda y. c})\\
-  \rulelabel{E-Foreach2} & \stg \vdash (\foreachr{s_1}{\{r\} \cup s_2}{\lambda x.\lambda
-  y.c},\stl) \stepsto ([r/y][s_1/x]c;\,\foreachr{s_1 \cup \{r\}}{s_2}{\lambda x.\lambda y. c})\\
-  \rulelabel{E-Foreach3} & \stg \vdash (\foreachr{s}{\emptyset}{\lambda x.\lambda
-  y.c},\stl) \stepsto (\cskip,\stl)\\
+  \rulelabel{E-Foreach1} & \stg \vdash (\foreache{s}{\lambda y.\lambda
+  z.c},\stl) \stepsto (\foreachr{\emptyset}{s}{\lambda y.\lambda z. c})\\
+  \rulelabel{E-Foreach2} & \stg \vdash (\foreachr{s_1}{\{r\} \uplus s_2}{\lambda y.\lambda
+  z.c},\stl) \stepsto ([r/z][s_1/y]c;\,\foreachr{s_1 \cup \{r\}}{s_2}{\lambda y.\lambda z. c})\\
+  \rulelabel{E-Foreach3} & \stg \vdash (\foreachr{s}{\emptyset}{\lambda y.\lambda
+  z.c},\stl) \stepsto (\cskip,\stl)\\
 \end{array}
 \end{smathpar}
 %
