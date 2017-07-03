@@ -6,7 +6,7 @@ concurrency control mechanisms, which are absent from
 Fig.~\ref{fig:txnimp}. In this section, we first axiomatize the
 semantics of various concurrency control constructs, and then define
 the precise semantics of the isolation levels as they are implemented
-on Postgres and MySQL datbases.
+on two real-world databases -  PostgreSQL and MySQL.
 % Any additional concurrency control provided by the database
 % implementation, beyond that which is already incuded in the
 % isolation specification, also needs to be axiomatized in $\I$. We
@@ -24,8 +24,8 @@ locks, which are absent from Fig.~\ref{fig:txnimp}. The
 \rulelabel{E-Insert} rule assigns an id to the newly added record
 after checking that it is not already present in $\stg$ and $\stl$.
 But the new record is only added to $\stl$, which is invisible outside
-the transaction. Thus, the uniqueness check for the same id also
-passes in a concurrent transaction, resulting in duplicate ids
+the transaction. Thus, it is possible that the uniqueness check for the same id may
+also succeed in a concurrent transaction, resulting in duplicate ids
 after both commits. To prevent this, we need the following proposition
 in $\I$ of every transaction, regardless of whether it is executing
 or committing:
@@ -35,16 +35,15 @@ or committing:
       r.\idf\notin \dom(\stg) \Rightarrow r.\idf\notin \dom(\stg').
 \end{array}
 \end{smathpar}
-$\I_{id}$ makes sure that a globally unique id generated during a
-transaction's execution remains globally unique until it commits. An
-interference from a concurrent transaction that adds the same id to
-$\stg$ is prohibited.
+$\I_{id}$ ensures that a globally unique id generated during a
+transaction's execution remains globally unique until it commits, prohibiting
+interference from a concurrent transaction that adds the same id.
 
-\textbf{Write Locks}. Transactions in MySQL and Postgres (effectively)
+\textbf{Write Locks}. Transactions in MySQL and PostgreSQL (effectively)
 obtain exclusive locks on records they update, and do not release them
 until they commit, thus preventing write-write (ww) conflicts. To
 obtain this behavior on the abstract machine of Fig.~\ref{fig:txnimp},
-the following proposition needs to be in $\I$ for every transaction:
+the following proposition must hold for every transaction:
 \begin{smathpar}
 \begin{array}{lcl}
   \I_{ww}(\stl,\stg,\stg') & = & \forall(r'\in\stl)(r \in \stg).~
@@ -65,7 +64,7 @@ it. An easy fix for this is to add version timestamps to records that
 effectively intensionalizes equality. Nonetheless, imprecise
 axiomatization of write locks hasn't been a problem in practice.
 
-\textbf{Snapshots} Both MySQL and Postgres implement isolation levels
+\textbf{Snapshots} Both MySQL and PostgresSQL implement isolation levels
 that execute transactions against a static snapshot of the database.
 The semantics of a snapshot be axiomatized as following:
 \begin{smathpar}
@@ -102,7 +101,7 @@ $\stl\neq \emptyset$, and the transaction never commits.
 \centering
 \begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|l|l|}
 \cline{2-13}
-                                & \multicolumn{6}{c|}{{\color[HTML]{333333} Postgres}}                         & \multicolumn{6}{c|}{MySql}                                                   \\ \cline{2-13} 
+                                & \multicolumn{6}{c|}{{\color[HTML]{333333} PostgreSQL}}                         & \multicolumn{6}{c|}{MySql}                                                   \\ \cline{2-13} 
                                 & \multicolumn{2}{c|}{RC} & \multicolumn{2}{c|}{RR} & \multicolumn{2}{c|}{SER} & \multicolumn{2}{c|}{RC} & \multicolumn{2}{c|}{RR} & \multicolumn{2}{c|}{SER} \\ \cline{2-13} 
                                 & T          & F          & T          & F          & T           & F          & T          & F          & T          & F          & T           & F          \\ \hline
 \multicolumn{1}{|l|}{$\I_{ss}$} &            &            & \checkmark &            & \checkmark  & \checkmark &            &            & \checkmark &            & \checkmark  & \checkmark \\ \hline
@@ -112,10 +111,10 @@ $\stl\neq \emptyset$, and the transaction never commits.
 \multicolumn{1}{|l|}{$\I_{ww}$} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark  & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark  & \checkmark \\ \hline
 \end{tabular}
 
-\caption{The semantics of isolation levels on Postgres and MySQL}
+\caption{The semantics of isolation levels on PostgreSQL and MySQL}
 \label{fig:iso-table}
 \end{table}
 
 With help of the above axiomatizations, we can now define the precise
-semantics of various isolation levels on Postgres and MySQL. The table
+semantics of various isolation levels on PostgreSQL and MySQL. The table
 in Table~\ref{fig:iso-table} captures the summary.

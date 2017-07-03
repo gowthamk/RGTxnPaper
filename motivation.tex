@@ -224,7 +224,7 @@ and re-executed.
 \begin{figure}[t]
 \includegraphics[scale=0.5]{Figures/RR-postgres}
 \caption{Database state transitions corresponding to an execution of
-  an RR transaction $T_1$ on PostgresSQL. $T_2$ and $T_3$ are concurrent
+  an RR transaction $T_1$ on PostgreSQL. $T_2$ and $T_3$ are concurrent
   transactions. The database state has three data items, $a$, $b$ and $c$. }
 \label{fig:rr-postgres}
 \end{figure}
@@ -266,7 +266,7 @@ effects from any concurrent transactions that write to the same data
 items as the current RR transaction.  Similarly, if $\delta$ denotes
 a local log that relates transaction variables being written with their updated values,
 then $\forall x\in\mathit{dom}(\delta)$, $\Delta_c(x) =
-\Delta(x)$. To summarize, the operational semantics of PostgresSQL's RR
+\Delta(x)$. To summarize, the operational semantics of PostgreSQL's RR
 implementation can be captured as an axiomatization over transitions of
 the database state ($\Delta \longrightarrow \Delta'$) during the
 lifetime an RR transaction ($T$):
