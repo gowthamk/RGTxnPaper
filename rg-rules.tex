@@ -58,12 +58,12 @@
 {
   \stable(R,\I)\spc
   P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
-  R_r(\stl,\stg,\stg') \Leftrightarrow \I(\C{true},\stl,\stg,\stg') 
+  \R_r(\stl,\stg,\stg') \Leftrightarrow \I(\C{true},\stl,\stg,\stg') 
         \wedge R(\stg,\stg') \spc
-  R_r \vdash \rg{P}{c}{Q}\\
-  R_c(\stl,\stg,\stg') \Leftrightarrow \I(\C{false},\stl,\stg,\stg') 
+  \R_r \vdash \rg{P}{c}{Q}\\
+  \R_c(\stl,\stg,\stg') \Leftrightarrow \I(\C{false},\stl,\stg,\stg') 
         \wedge R(\stg,\stg') \spc
-  \stable(R_c,Q)\\
+  \stable(\R_c,Q)\\
   \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
     G(\stg, \stl \gg \stg)\spc
   \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
