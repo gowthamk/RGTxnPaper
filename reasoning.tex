@@ -205,100 +205,8 @@ is added to $y$ at the end of the iteration, hence $Q_c \conj z\in y$
 is valid at the end of the iteration, from which $I$ must follow. When
 \C{FOREACH} has finished execution, $y$, the set of iterated items, is
 the entire set $x$. Thus $I \conj y=x$ must imply the post-condition
-$Q$, which also needs to be stable. The rules for conditions,
+$Q$, which also needs to be stable. The rules for conditionals,
 sequencing etc., are more-or-less standard, hence elided.
-
-% \subsection{Semantics and Soundness}
-
-% The rules that define rely-guarantee judgment are shown in
-% Fig.~\ref{fig:rg-rules}. Like standard rely-guarantee definitions,
-% these definitions also require a \emph{stability} condition, which
-% requires pre- and post- conditions to hold despite any interference
-% from concurrent threads (captured by $R$). Stability can be predicated
-% on the assumption that interference preserves the trace invariant
-% $\I$. Formally:\vspace*{-10pt}
-
-% \begin{smathpar}
-% \begin{array}{lcl}
-%   \underI{\stable(R,P)} & \defeq & \forall \E, \E'.\, 
-%   \I(\E) \conj P(\E) \conj R(\E,\E') \\
-%   &   & \hspace*{1in}\conj \I(\E') \Rightarrow P(\E')\\
-% \end{array}
-% \end{smathpar}
-
-% \noindent However, the assumption that interference preserves $\I$ (or,
-% dually, $\I$ withstands interference) needs to be justified
-% separately. We call this the stability requirement on $\I$:\vspace*{-10pt}
-
-% \begin{smathpar}
-% \begin{array}{lcl}
-% \stable(R,\I)& \defeq & \forall \E, \E'.\, 
-%   \I(\E) \conj R(\E,\E')\Rightarrow \I(\E')\\
-% \end{array}
-% \end{smathpar}
-
-% \noindent The rule \rulelabel{RG-Var} defines the rely-guarantee judgment for
-% shared variable reads inside a transaction $T_i$. It requires $\I$ to
-% be stable, and pre- and post- conditions to be stable relative to
-% $\I$.  The quantified premise effectively requires a proof that if the
-% abstract machine of Fig.~\ref{fig:txnimp} takes a step starting from
-% an execution $\E$ that satisfies the pre-condition $P$, then the
-% resultant execution $\E'$ satisfies the post-condition $Q$, and that
-% the guarantee $G$ faithfully captures the transition from $\E$ to
-% $\E'$. It is informative to compare this premise with the premise of
-% the \rulelabel{E-Aux} reduction rule of Fig.~\ref{fig:txnimp}. Similar
-% premises also appear in the \rulelabel{RG-Asgn} and \rulelabel{RG-Txn}
-% rules, which define rely-guarantee judgments for assignments and
-% transactions, respectively. \rulelabel{RG-Var} however also requires
-% the return value ($\interp{S}(X)$) of the read to satisfy the
-% assertion $C$ meant for the value. \rulelabel{RG-Arith} defines the RG
-% judgment for an arithmetic expression $e_1\pm e_2$ in terms of the
-% corresponding judgments for the constituent expressions $e_1$ and
-% $e_2$. The quantified premise requires any value resulting from
-% evaluating $e_1 \pm e_2$ to satisfy the assertion $C$, provided that
-% $e_1$ and $e_2$ always evaluate to values that satisfy $C_1$ and
-% $C_2$, respectively. The rules for sequential and parallel composition
-% of commands are essentially the same as their counterparts in a
-% standard rely-guarantee formulation and hence elided.
-
-% % RG judgment for the assignment $X:=e$ makes use of the corresponding
-% % judgment for the RHS expression $e$. The quantified premise asserts
-% % that evaluating the assigment after evaluating $e$ to a value $v$ and
-% % an execution $\E$, should result in an execution $\E'$ that satisfies
-% % the post-condition $Q$, while being related to $\E$ via the guarantee
-% % $G$. RG judgment for the \C{txn} lexical block is similar.  It uses
-% % the judgment for the transaction-bound command $c$ (i.e.,
-% % $\txnbox{c}_i$) to obtain an invariant $Q'$ for the execution $\E$
-% % before the commit, and verifies that committing the transaction under
-% % $\E$ results in an execution $\E'$ that satisfies transaction's
-% % post-condition $Q$. As usual, $\E$ and $\E'$ need to be related by $G$.
-% % The rules for sequential composition of transaction-bound comands
-% % (\rulelabel{RG-Seq}) and parallel composition of top-level commands
-% % (\rulelabel{RG-Par}) are straightforward, and more-or-less same as the
-% % corresponding rules in classical rely-guarantee.
-
-% The \rulelabel{RG-Conseq} rule defines ways to strengthen or
-% weaken relations and assertions associated with the RG judgment of
-% transaction-bound expressions. Similar rules exist for
-% transaction-bound and top-level commands, but are not
-% shown.\footnote{The supplementary materials provide the complete set
-%   of rules.} As is the case with a standard rely-guarantee
-% formulation,the rules allow the pre-condition $P$ and the rely relation
-% $R$ to be strengthened, and the post-condition $Q$ (also, $C$ in the
-% case of expressions) and the guarantee relation $G$ to be weakened.
-% The most notable aspect of the \rulelabel{RG-Conseq} rules is that
-% they allow the trace invariant $\I$ to be strengthened. Considering
-% that $\I$ captures isolation properties, this means that a program
-% proven correct under weaker isolation levels is also correct under
-% stronger ones.  Parametricity over the trace invariant $\I$, combined
-% with the ability to strengthen $\I$ as needed, allows our proof system
-% to support a highly flexible proof strategy to prove programs correct
-% over various isolation variants. For example, programmers can
-% \emph{define} isolation guarantees of their choice (by defining $\I$
-% appropriately) and then prove programs correct assuming the guarantees
-% hold.  The soundness of strengthening $\I$ ensures that a program can
-% be safely executed on any system that offers isolation guarantees
-% at least as strong as those assumed.
 
 \subsection{Semantics and Soundness}
 
@@ -314,16 +222,26 @@ R^{n+1}(x,z)$
 \end{itemize}
 \end{definition}
 
-\begin{definition}[\bfseries Interleaved step and multi-step relations]
-An interleaved step relation interleaves thread-local reductions with
-interference from concurrent threads captured as the rely relation
-($R$).  It is defined thus:\vspace*{-10pt}
+% \begin{definition}[\bfseries Interleaved step and multi-step relations]
+% An interleaved step relation interleaves transaction-local reductions with
+% legal interference from concurrent transactions as defined by the
+% $\I$-constrained rely relation ($\R$).  It is defined thus:
+% \begin{smathpar}
+% \begin{array}{lcl}
+% (c,\stl,\stg) \rstepsto (c',\stl',\stg') & \defeq & \stg \vdash 
+%   (c,\stl) \stepsto (c',\stl') \conj \stg'=\stg \\
+%   &   & \disj (c' = c \conj \stl'=\stl \conj \R(\stl, \stg, \stg'))\\
+% \end{array}
+% \end{smathpar}
 
+\begin{definition}[\bfseries Interleaved step and multi-step relations]
+An interleaved step relation interleaves a transaction's reduction with
+interference from concurrent transactions as captured by the rely
+relation. It is defined thus:
 \begin{smathpar}
 \begin{array}{lcl}
-\I \vdash (c,\E) \rstepsto (c',\E') & \defeq & \I \vdash 
-  (c,\E) \stepsto (c',\E') \\
-  &   & \disj (c' = c \conj R(\E, \E') \conj \I(\E'))\\
+(c,\stg) \rstepsto (c',\stg') & \defeq &  
+  (c,\stg) \stepsto (c',\stg') \disj (c' = c \conj R(\stg, \stg'))\\
 \end{array}
 \end{smathpar}
 
