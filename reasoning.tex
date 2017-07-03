@@ -148,7 +148,7 @@ always proven w.r.t to $R$, and not $R^{*}$, although interference
 may include multiple environment steps, and $R$ only captures a single
 step. This is nonetheless sound due to the the inductive reasoning: if
 $Q$ is preserved by every step of $R$, then $Q$ is preserved by
-$R^{*}$, and vice-versa.  However, such reasoning does
+$R^{*}$, and vice-versa.  However, such reasoning does not
 extend naturally to isolation-constrained interference ($\R$)
 because $R^{*}$ modulo $\I$ is not same as $\R^{*}$; the former is a
 transitive relation constrained by $\I$, whereas the latter is the
@@ -170,11 +170,11 @@ $\I$, defined as below:
 \end{smathpar}
 It can be easily verified that the above stability condition is
 satisfied by the isolation axioms from Sec.~\ref{sec:isolation}. For
-instance, $\I_{ss}$, the snapshot axiom, is stable because if is
-invalid, then an interference has already modified a record, and no
-further interference will restore the original record. This is because
-records bear transaction ids, and the transaction that wrote the
-original record has long committed.
+instance, $\I_{ss}$, the snapshot axiom, is stable because if
+$\I_{ss}$ is invalid, then an interference has already modified a
+record, and no further interference will restore the original record,
+because original record bears the id of a transaction that has long
+committed. Thus, $\I_{ss}$ remains invalid.
 
 The \rulelabel{RG-Conseq} rule lets us safely strengthen the guarantee
 $G$, or weaken the rely $R$ of a transaction. Importantly, it also
@@ -301,104 +301,104 @@ sequencing etc., are more-or-less standard, hence elided.
 % be safely executed on any system that offers isolation guarantees
 % at least as strong as those assumed.
 
-% \subsection{Semantics and Soundness}
+\subsection{Semantics and Soundness}
 
-% \begin{definition}[\bfseries Step-indexed reflexive transitive closure]
-% For all $A:\text{Type}$, $R: A \rightarrow A \rightarrow \mathbb{P}$, and $n :
-% \mathbb{N}$, the step-indexed reflexive transitive closure $R^n$ of $R$ is
-% the smallest relation satisfying the following
-% properties:
-% \begin{itemize}
-% \item $\forall (x:A).\, R^0 (x,x)$
-% \item $\forall (n:\mathbb{N})(x,y,z : A).\, R(x,y) \conj R^n(y,z) \Rightarrow
-% R^{n+1}(x,z)$
-% \end{itemize}
-% \end{definition}
+\begin{definition}[\bfseries Step-indexed reflexive transitive closure]
+For all $A:\text{Type}$, $R: A \rightarrow A \rightarrow \mathbb{P}$, and $n :
+\mathbb{N}$, the step-indexed reflexive transitive closure $R^n$ of $R$ is
+the smallest relation satisfying the following
+properties:
+\begin{itemize}
+\item $\forall (x:A).\, R^0 (x,x)$
+\item $\forall (n:\mathbb{N})(x,y,z : A).\, R(x,y) \conj R^n(y,z) \Rightarrow
+R^{n+1}(x,z)$
+\end{itemize}
+\end{definition}
 
-% \begin{definition}[\bfseries Interleaved step and multi-step relations]
-% An interleaved step relation interleaves thread-local reductions with
-% interference from concurrent threads captured as the rely relation
-% ($R$).  It is defined thus:\vspace*{-10pt}
+\begin{definition}[\bfseries Interleaved step and multi-step relations]
+An interleaved step relation interleaves thread-local reductions with
+interference from concurrent threads captured as the rely relation
+($R$).  It is defined thus:\vspace*{-10pt}
 
-% \begin{smathpar}
-% \begin{array}{lcl}
-% \I \vdash (c,\E) \rstepsto (c',\E') & \defeq & \I \vdash 
-%   (c,\E) \stepsto (c',\E') \\
-%   &   & \disj (c' = c \conj R(\E, \E') \conj \I(\E'))\\
-% \end{array}
-% \end{smathpar}
+\begin{smathpar}
+\begin{array}{lcl}
+\I \vdash (c,\E) \rstepsto (c',\E') & \defeq & \I \vdash 
+  (c,\E) \stepsto (c',\E') \\
+  &   & \disj (c' = c \conj R(\E, \E') \conj \I(\E'))\\
+\end{array}
+\end{smathpar}
 
-% \noindent The interleaved step relation for transaction bound expressions
-% ($\txnbox{e}_i$) and commands ($\txnbox{c}_i$) is defined similarly.
-% An interleaved multi-step relation ($\stepssto{n}$) is the step-indexed
-% reflexive transitive closure of the interleaved step relation.
-% \end{definition}
+\noindent The interleaved step relation for transaction bound expressions
+($\txnbox{e}_i$) and commands ($\txnbox{c}_i$) is defined similarly.
+An interleaved multi-step relation ($\stepssto{n}$) is the step-indexed
+reflexive transitive closure of the interleaved step relation.
+\end{definition}
 
-% \begin{definition}[\bfseries Semantics of the RG judgment]
-% \label{def:rg-semantics}
-% The semantics of the RG sextuple $\rg{\mathbb{I},P,R}{c}{G,Q}$ is defined
-% in terms of the interleaved step relation thus:\vspace*{-10pt}
+\begin{definition}[\bfseries Semantics of the RG judgment]
+\label{def:rg-semantics}
+The semantics of the RG sextuple $\rg{\mathbb{I},P,R}{c}{G,Q}$ is defined
+in terms of the interleaved step relation thus:\vspace*{-10pt}
 
-% \begin{smathpar}
-% \begin{array}{l}
-% \hspace*{-0.3in}
-% \rg{\mathbb{I},P,R}{c}{G,Q} \;\defeq\; \forall \E.\, P(\E)
-%   \wedge \mathbb{I}(\E) \\
-% \hspace*{0.4in}\Rightarrow (\forall n,\E'.\; \I \vdash (c,\E) 
-%     \rstepssto{n} (\cskip,\E') \Rightarrow Q(\E')) \\
-% \hspace*{0.5in}\conj \texttt{step-guaranteed}(\I,R,G,c,\E)\\
-% \end{array}
-% \end{smathpar}
+\begin{smathpar}
+\begin{array}{l}
+\hspace*{-0.3in}
+\rg{\mathbb{I},P,R}{c}{G,Q} \;\defeq\; \forall \E.\, P(\E)
+  \wedge \mathbb{I}(\E) \\
+\hspace*{0.4in}\Rightarrow (\forall n,\E'.\; \I \vdash (c,\E) 
+    \rstepssto{n} (\cskip,\E') \Rightarrow Q(\E')) \\
+\hspace*{0.5in}\conj \texttt{step-guaranteed}(\I,R,G,c,\E)\\
+\end{array}
+\end{smathpar}
 
-% \noindent The first conjunct in the consequent is called the \emph{Hoare
-% consequent} since it ascribes Hoare triple semantics to an RG sextuple.
-% The second conjunct, called the \emph{guarantee consequent}, uses the
-% $\texttt{step-guaranteed}$ predicate defined below:\vspace*{-10pt}
+\noindent The first conjunct in the consequent is called the \emph{Hoare
+consequent} since it ascribes Hoare triple semantics to an RG sextuple.
+The second conjunct, called the \emph{guarantee consequent}, uses the
+$\texttt{step-guaranteed}$ predicate defined below:\vspace*{-10pt}
 
-% \begin{smathpar}
-% \begin{array}{l}
-% \texttt{step-guaranteed}(\I,R,G,c,\E) \;\defeq\; \forall n,\E',c'',\E''.\\
-% \hspace*{0.2in}\I \vdash (c,\E) \rstepssto{n} (c',\E') \conj \I \vdash (c',\E') \stepsto
-%   (c'',\E'') \Rightarrow G(\E',\E'')\\
-% \end{array}
-% \end{smathpar}
+\begin{smathpar}
+\begin{array}{l}
+\texttt{step-guaranteed}(\I,R,G,c,\E) \;\defeq\; \forall n,\E',c'',\E''.\\
+\hspace*{0.2in}\I \vdash (c,\E) \rstepssto{n} (c',\E') \conj \I \vdash (c',\E') \stepsto
+  (c'',\E'') \Rightarrow G(\E',\E'')\\
+\end{array}
+\end{smathpar}
 
-% \noindent The guarantee consequent requires $G$ to capture the trace effect of
-% every small-step of $c$, where the reduction can be interleaved by the
-% interference ($R$) from concurrent threads. The semantics of the RG
-% sextuple for transaction-bound commands ($\txnbox{c}_i$) is defined
-% similarly. Expressions, unlike commands, evaluate to a value $v$, and
-% the semantics of their RG septuple ($\rg{\I,P,R}{\txnbox{e}_i}{G,C,Q}$) differs slightly in that its
-% Hoare consequent requires the value $v$ to satisfy the assertion $C$. 
-% \end{definition}
+\noindent The guarantee consequent requires $G$ to capture the trace effect of
+every small-step of $c$, where the reduction can be interleaved by the
+interference ($R$) from concurrent threads. The semantics of the RG
+sextuple for transaction-bound commands ($\txnbox{c}_i$) is defined
+similarly. Expressions, unlike commands, evaluate to a value $v$, and
+the semantics of their RG septuple ($\rg{\I,P,R}{\txnbox{e}_i}{G,C,Q}$) differs slightly in that its
+Hoare consequent requires the value $v$ to satisfy the assertion $C$. 
+\end{definition}
 
-% Note that the semantics of all RG judgments, including the judgments
-% for transaction-bound terms, make similar demands of the guarantee
-% relation. Given that transactions are atomic (though not isolated), it
-% is not immediately apparent why a transaction's guarantee is required
-% to make explicit every step of its reduction. This requirement is
-% justified however because, in reality, a transaction's atomicity is
-% predicated on the isolation settings of the observer. A \iso{Read
-%   Uncommitted} transaction, for example, is permitted to observe the
-% internal state of a transaction $T$ even if $T$ is claimed to execute
-% atomically.  In the interest of modular verification, the transaction
-% must therefore make its internal state available via its guarantee
-% relation.
+Note that the semantics of all RG judgments, including the judgments
+for transaction-bound terms, make similar demands of the guarantee
+relation. Given that transactions are atomic (though not isolated), it
+is not immediately apparent why a transaction's guarantee is required
+to make explicit every step of its reduction. This requirement is
+justified however because, in reality, a transaction's atomicity is
+predicated on the isolation settings of the observer. A \iso{Read
+  Uncommitted} transaction, for example, is permitted to observe the
+internal state of a transaction $T$ even if $T$ is claimed to execute
+atomically.  In the interest of modular verification, the transaction
+must therefore make its internal state available via its guarantee
+relation.
 
-% \begin{theorem}[\bfseries Soundness] 
-% The rely-guarantee judgments defined by the rules in
-% Fig.~\ref{fig:rg-rules} are sound with respect to the semantics of
-% Definition~\ref{def:rg-semantics}.\footnote{Formal proof of soundness
-% is provided in the supplementary material.}
-% \end{theorem}
+\begin{theorem}[\bfseries Soundness] 
+The rely-guarantee judgments defined by the rules in
+Fig.~\ref{fig:rg-rules} are sound with respect to the semantics of
+Definition~\ref{def:rg-semantics}.\footnote{Formal proof of soundness
+is provided in the supplementary material.}
+\end{theorem}
 
-% \noindent In particular, if $\rg{\I,P,R}{c}{G,Q}$ can be derived using
-% the rules of Fig.~\ref{fig:rg-rules}, then (a) every interleaved
-% multi-step reduction of $c$ starting from a trace that satisfies $P$
-% and $\I$, results in a trace that satisfies $Q$, and (b) the effect
-% that every small-step of $c$ has on the trace is contained in $G$.
-% Soundness of the RG judgment for transaction-bound commands
-% ($\txnbox{c}_i$) is stated similarly.  For expressions, soundness of
-% the judgment $\rg{\I,P,R}{\txnbox{e}_i}{G,C,Q}$ also proves that $e$
-% is always evaluated to a value that satisfies $C$.
+\noindent In particular, if $\rg{\I,P,R}{c}{G,Q}$ can be derived using
+the rules of Fig.~\ref{fig:rg-rules}, then (a) every interleaved
+multi-step reduction of $c$ starting from a trace that satisfies $P$
+and $\I$, results in a trace that satisfies $Q$, and (b) the effect
+that every small-step of $c$ has on the trace is contained in $G$.
+Soundness of the RG judgment for transaction-bound commands
+($\txnbox{c}_i$) is stated similarly.  For expressions, soundness of
+the judgment $\rg{\I,P,R}{\txnbox{e}_i}{G,C,Q}$ also proves that $e$
+is always evaluated to a value that satisfies $C$.
 
