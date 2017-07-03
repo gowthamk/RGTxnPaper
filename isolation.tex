@@ -1,13 +1,18 @@
 \subsection{Isolation Specifications}
 \label{sec:isolation}
 
-Operational semantics of Fig.~\ref{fig:txnimp} does not employ
-concurrency control constructs in any form. Any additional concurrency
-control provided by the database implementation, beyond that which is
-already incuded in the isolation specification, also needs to be
-axiomatized in $\I$. We first describe such axiomatizations, and then
-present the specifications of the standard isolation levels as
-implemented by popular off-the-shelf databases.
+Databases implement isolation levels through a combination of various
+concurrency control mechanisms, which are absent from
+Fig.~\ref{fig:txnimp}. In this section, we first axiomatize the
+semantics of various concurrency control constructs, and then define
+the precise semantics of the isolation levels as they are implemented
+on Postgres and MySQL datbases.
+% Any additional concurrency control provided by the database
+% implementation, beyond that which is already incuded in the
+% isolation specification, also needs to be axiomatized in $\I$. We
+% first describe such axiomatizations, and then present the
+% specifications of the standard isolation levels as implemented by
+% popular off-the-shelf databases.
 
 \textbf{Unique Ids}. Most relational databases associate every record
 in a table with a unique identifier. Often, auto-generated unique
@@ -60,6 +65,26 @@ it. An easy fix for this is to add version timestamps to records that
 effectively intensionalizes equality. Nonetheless, imprecise
 axiomatization of write locks hasn't been a problem in practice.
 
+\textbf{Snapshots} Both MySQL and Postgres implement isolation levels
+that execute transactions against a static snapshot of the database.
+The semantics of a snapshot be axiomatized as following:
+\begin{smathpar}
+\begin{array}{lcl}
+  \I_{ss}(\stl,\stg,\stg') & = & \stg' = \stg.
+\end{array}
+\end{smathpar}
+% The snapshot semantics however may not be applicable throughout the
+% lifetime of the transaction, like in the case of Repeatable Read (RR).
+
+\textbf{Rollbacks} Rollbacks triggered by the post-facto detection of
+write-write conflicts can be axiomatized as following:
+\begin{smathpar}
+\begin{array}{lcl}
+  \I_{rb}(\stl,\stg,\stg') & = & \forall(r\in\stl)(r'\in\stg).~
+  r'.\idf = r.\idf \Rightarrow r'\in\stg'.
+\end{array}
+\end{smathpar}
+
 \textbf{Read-Only Transactions}. Certain databases implement special
 previleges for read-only transactions. Read-only behavior can be
 enforced on a transaction by including the following proposition in
@@ -72,4 +97,25 @@ its $\I$:
 If a transaction declared as read-only performs a write, then its
 $\stl\neq \emptyset$, and the transaction never commits.
 
+%\usepackage[table,xcdraw]{xcolor}
+\begin{table}[]
+\centering
+\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|l|l|}
+\cline{2-13}
+                                & \multicolumn{6}{c|}{{\color[HTML]{333333} Postgres}}                         & \multicolumn{6}{c|}{MySql}                                                   \\ \cline{2-13} 
+                                & \multicolumn{2}{c|}{RC} & \multicolumn{2}{c|}{RR} & \multicolumn{2}{c|}{SER} & \multicolumn{2}{c|}{RC} & \multicolumn{2}{c|}{RR} & \multicolumn{2}{c|}{SER} \\ \cline{2-13} 
+                                & T          & F          & T          & F          & T           & F          & T          & F          & T          & F          & T           & F          \\ \hline
+\multicolumn{1}{|l|}{$\I_{ss}$} &            &            & \checkmark &            & \checkmark  & \checkmark &            &            & \checkmark &            & \checkmark  & \checkmark \\ \hline
+\multicolumn{1}{|l|}{$\I_{rb}$} &            &            &            & \checkmark &             &            &            &            &            &            &             &            \\ \hline
+\multicolumn{1}{|l|}{$\I_{ro}$} &            &            &            &            &             &            &            &            & \checkmark & \checkmark &             &            \\ \hline
+\multicolumn{1}{|l|}{$\I_{id}$} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark  & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark  & \checkmark \\ \hline
+\multicolumn{1}{|l|}{$\I_{ww}$} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark  & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark  & \checkmark \\ \hline
+\end{tabular}
 
+\caption{The semantics of isolation levels on Postgres and MySQL}
+\label{fig:iso-table}
+\end{table}
+
+With help of the above axiomatizations, we can now define the precise
+semantics of various isolation levels on Postgres and MySQL. The table
+in Table~\ref{fig:iso-table} captures the summary.
