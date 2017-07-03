@@ -144,23 +144,22 @@ stability of $I$ w.r.t $G$, i.e., $\forall \stg,\stg'.~I(\stg) \wedge
 G(\stg,\stg') \Rightarrow I(\stg')$.
 
 A characteristic of RG reasoning is that stability of an assertion is
-always proven w.r.t to $R$, and not $R^{*}$, although interference
-may include multiple environment steps, and $R$ only captures a single
+always proven w.r.t to $R$, and not $R^{*}$, although interference may
+include multiple environment steps, and $R$ only captures a single
 step. This is nonetheless sound due to the the inductive reasoning: if
 $Q$ is preserved by every step of $R$, then $Q$ is preserved by
-$R^{*}$, and vice-versa.  However, such reasoning does not
-extend naturally to isolation-constrained interference ($\R$)
-because $R^{*}$ modulo $\I$ is not same as $\R^{*}$; the former is a
-transitive relation constrained by $\I$, whereas the latter is the
-transitive closure of a $\I$-constrained relation. We therefore
-introduce a side-condition on $\I$ that restores the equality. The
-condition requires $\I$ to allow an intereference $R^{*}(\stg,\stg'')$,
-for two database states $\stg$ and $\stg''$, only if it also allows
-interference for every prefix of $R^{*}(\stg,\stg'')$. In other words,
-if $\I$ disallows interference from $\stg$ to $\stg'$, then an
-$R$-step from $\stg'$ to $\stg''$ shouldn't make the interference from
-$\stg$ to $\stg''$ valid. We call this the stability condition on
-$\I$, defined as below:
+$R^{*}$, and vice-versa.  However, such reasoning does not extend
+naturally to isolation-constrained interference because $R^{*}$ modulo
+$\I$ is not same as $\R^{*}$; the former is a transitive relation
+constrained by $\I$, whereas the latter is the transitive closure of a
+$\I$-constrained relation. We therefore introduce a side-condition on
+$\I$ that restores the equality. The condition requires $\I$ to allow
+an intereference $R^{*}(\stg,\stg'')$, for two database states $\stg$
+and $\stg''$, only if it also allows interference for every prefix of
+$R^{*}(\stg,\stg'')$. In other words, if $\I$ disallows interference
+from $\stg$ to $\stg'$, then an $R$-step from $\stg'$ to $\stg''$
+shouldn't make the interference from $\stg$ to $\stg''$ valid. We call
+this the stability condition on $\I$, defined as below:
 \begin{smathpar}
 \begin{array}{lcl}
   \stable(R,\I) & \Leftrightarrow & \forall \stl,\stg,\stg',\stg''.~
