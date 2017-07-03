@@ -102,7 +102,7 @@ morekeywords={module, match, when, @@deriving, not, : , txn_do, do, SQL/\\}
 % Formatting
 %---------
 \newcommand{\C}[1]{\code{#1}}
-\newcommand{\R}[1]{\textsc{#1}}
+%\newcommand{\R}[1]{\textsc{#1}}
 \newcommand{\tuplee}[1]{\langle #1 \rangle}
 \newcommand*{\rom}[1]{\expandafter\romannumeral #1}
 
@@ -123,7 +123,7 @@ morekeywords={module, match, when, @@deriving, not, : , txn_do, do, SQL/\\}
 \newcommand{\qqquad}{\quad\quad}
 \newcommand{\cskip}{\C{SKIP}}
 \newcommand{\stxn}[3]{\C{TXN}\langle #2 \rangle\{#3\}}
-\newcommand{\ctxn}[3]{\R{txn}\langle #2 \rangle\{#3\}}
+\newcommand{\ctxn}[3]{\C{txn}\langle #2 \rangle\{#3\}}
 \newcommand{\catomic}[1]{\C{ATOMIC}\{#1\}}
 \newcommand{\stepsto}{\longrightarrow}
 \newcommand{\rstepsto}{\longrightarrow_{R}}

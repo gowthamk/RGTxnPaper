@@ -1,0 +1,210 @@
+\begin{figure}[t]
+\raggedright
+%
+\textbf{Txn-Local Reasoning} \quad 
+  \fbox {\( R \vdash \hoare{P}{c}{Q} \)} \\
+%\fbox{\( \rg{\mathbb{I},P,R}{\txnbox{c}_i}{G,Q}\)} \quad
+%\fbox{\( \rg{\mathbb{I},P,R}{c}{G,Q}\)} \quad\\
+%
+\begin{minipage}{3.2in}
+\rulelabel{RG-Insert}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \stable(R,Q)\\
+  \hspace*{-1.1in}\forall\stl,\stl',\stg,i.~P(\stl,\stg) \conj i \not\in
+  \dom(\stl\cup\stg) \\
+  \conj \stl'=\stl \cup 
+  \{\{\bar{f}=x.\bar{f};\,\idf=i;\,\delf=\C{false}\} \Rightarrow 
+  Q(\stl',\stg)
+}
+{
+  R \vdash \hoare{P}{\inserte{x}}{Q}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+%
+\begin{minipage}{3.2in}
+\rulelabel{RG-Delete}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \stable(R,Q)\\
+  \hspace*{-0.2in}\forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
+  \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).~ [r/x]e=\C{true} \\
+        \hspace*{0.7in}\conj r'=\{\bar{f}=r.\bar{f}; \idf=r.\idf;
+        \delf=\C{true}\}\}
+  \Rightarrow 
+  Q(\stl',\stg)
+}
+{
+  R \vdash \hoare{P}{\deletee{\lambda x.e}}{Q}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+%
+\begin{minipage}{3in}
+\rulelabel{RG-Update}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \stable(R,Q)\\
+  \hspace*{-0.2in}\forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
+  \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).~ [r/x]e_2 =\C{true} \\
+        \hspace*{1.4in}\conj r'=[r/x]e_1\}
+  \Rightarrow 
+  Q(\stl',\stg)
+}
+{
+  R \vdash \hoare{P}{\updatee{\lambda x.e_1}{\lambda x.e_2}}{Q}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+%
+\begin{minipage}{3in}
+\rulelabel{RG-Select}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  R \vdash \hoare{P'}{c}{Q}\spc
+  \stable(R,P')\\
+  \hspace*{-0.2in}P'(\stl,\stg) \Leftrightarrow P(\stl,\stg) \wedge
+  x = \{r' \,|\, \exists(r\in\Delta).~ [r/x]e_2 =\C{true}\} \\
+}
+{
+  R \vdash \hoare{P}{\selecte{\lambda x.e}}{Q}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+%
+\begin{minipage}{3in}
+\rulelabel{RG-Foreach}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \stable(R,Q)\spc
+  \stable(R,I)\\
+  P \wedge y=\emptyset \Rightarrow I\spc
+  R \vdash \hoare{I \wedge z\in x}{c}{Q_c}\\
+  Q_c \wedge z\in y \Rightarrow I\spc
+  I \wedge y=x \Rightarrow Q
+}
+{
+  R \vdash \hoare{P}{\foreache{x}{\lambda y.\lambda z.c}}{Q}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+%
+\begin{minipage}{3in}
+\rulelabel{RG-Conseq}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  R \vdash \hoare{P}{c}{Q}\\
+  P' \Rightarrow P \spc
+  Q \Rightarrow Q' \spc
+  \stable(R,P')\spc
+  \stable(R,Q')\spc
+}
+{
+  R \vdash \hoare{P'}{c}{Q'}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+\bigskip
+
+%
+\textbf{Top-Level Reasoning} \quad \fbox {\(
+\rg{I,R}{c}{G,I} \)}\\
+%
+%
+\begin{minipage}{3.5in}
+\rulelabel{RG-Txn}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \stable(R,\I)\spc
+  P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
+  R_r(\stl,\stg,\stg') \Leftrightarrow \I(\C{true},\stl,\stg,\stg') 
+        \wedge R(\stg,\stg') \spc
+  R_r \vdash \rg{P}{c}{Q}\\
+  R_c(\stl,\stg,\stg') \Leftrightarrow \I(\C{false},\stl,\stg,\stg') 
+        \wedge R(\stg,\stg') \spc
+  \stable(R_c,Q)\\
+  \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
+    G(\stg, \stl \gg \stg)\spc
+  \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
+}
+{
+  \rg{I,R}{\ctxn{i}{\I}{c}}{G,I}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+%
+\begin{minipage}{3.6in}
+\rulelabel{RG-Par}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+ \rg{I,R \cup G_2}{c_1}{G_1,I} \\
+ \rg{I,R \cup G_1}{c_2}{G_2,I}
+}
+{\rg{I,R}{c1||c2}{G_1\cup G_2,I}}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+%
+\begin{minipage}{2in}
+\rulelabel{RG-Conseq2}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \rg{I,R}{\ctxn{i}{\I}{c}}{G,I}\\
+  \I' \Rightarrow \I \spc 
+  R' \subseteq R \spc 
+  \stable(R',\I')\\
+  G \subseteq G' \spc
+  \forall \stg,\stg'.~I(\stg) \wedge G'(\stg,\stg') \Rightarrow I(\stg')\\
+}
+{
+  \rg{I,R'}{\ctxn{i}{\I'}{c}}{G',I}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+\caption{\small \txnimp: Rely-Guarantee Rules}
+\label{fig:rg-rules}
+\vspace*{-12pt}
+\end{figure}

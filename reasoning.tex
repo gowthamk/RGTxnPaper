@@ -176,6 +176,40 @@ further interference will restore the original record. This is because
 records bear transaction ids, and the transaction that wrote the
 original record has long committed.
 
+The \rulelabel{RG-Conseq} rule lets us safely strengthen the guarantee
+$G$, or weaken the rely $R$ of a transaction. Importantly, it also
+allows its isolation specification $\I$ to be strengthened. This means
+that a transaction proven correct under a weaker isolation level is
+also correct under a stronger level. Parametricity over the isolation
+specification $\I$, combined with the ability to strengthen $\I$ as
+needed, admits a flexible proof strategy to prove database programs
+correct. For example, programmers can declare isolation requirements
+of their choice through $\I$, and then prove programs correct assuming
+the guarantees hold. The soundness of strengthening $\I$ ensures that
+a program can be safely executed on any system that offers isolation
+guarantees at least as strong as those assumed.
+
+Two rules of the transaction-local RG judgment are shown in
+Fig.~\ref{fig:rg-rules}. The rule \rulelabel{RG-Update} is
+illustrative of the RG rules for SQL statements; they basically
+reflect the structure of the corresponding reduction rule from
+Fig.~\ref{fig:txnimp}, and require no further explanation. The rule
+\rulelabel{RG-Foreach} defines the RG judgment for a \C{FOREACH} loop.
+As is characteristic of loops, the reasoning is pivoted on a loop
+invariant $\I$ (not same as the high-level invariant), that needs to
+be stable w.r.t $\R$. $I$ must follow $P$, the pre-condition of
+\C{FOREACH}, when no elements have been iterated, i.e, when
+$y=\emptyset$. The body of the loop can assume the loop invariant, and
+the fact that $z$ is an element from the set $x$ being iterated, to
+prove its post-condition $Q_c$. Operational semantics ensures that $z$
+is added to $y$ at the end of the iteration, hence $Q_c \conj z\in y$
+is valid at the end of the iteration, from which $I$ must follow. When
+\C{FOREACH} has finished execution, $y$, the set of iterated items, is
+the entire set $x$. Thus $I \conj y=x$ must imply the post-condition
+$Q$, which also needs to be stable. The rules for conditions,
+sequencing etc., are more-or-less standard, hence elided.
+
+% \subsection{Semantics and Soundness}
 
 % The rules that define rely-guarantee judgment are shown in
 % Fig.~\ref{fig:rg-rules}. Like standard rely-guarantee definitions,
