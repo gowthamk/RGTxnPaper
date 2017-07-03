@@ -13,14 +13,11 @@
 % {\tau} \in \mathtt{Table\;Names}
   {i,j} \in \mathbb{N} \qquad
   {\odot} \in \{+,-,\le,\ge,=\}\qquad
-}\\
-\multicolumn{5}{c}{
   {k} \in \mathbb{Z}\cup\mathbb{B} \qquad
-  {\rec} \in \{\bar{f}=\bar{k}\}\qquad
-  {\stl,\stg,s} \in \Pow{\rec} \qquad
-  \I \in \mathbb{B}\rightarrow\Pow{\rec}\times\Pow{\rec}\times\Pow{\rec}
-  \rightarrow \Prop
+  {\rec} \in \{\bar{f}=\bar{k}\}\
 }\\
+{\stl,\stg,s} & \in & \mathtt{State} & \coloneqq &  \Pow{\{\bar{f}=\bar{k}\}} \\
+{\I_e, \I_c }  & \in & \mathtt{Isolation Spec} & \coloneqq & (\stl,\stg,\stg') \rightarrow \Prop\\
 v & \in & \mathtt{Values} & \coloneqq & k \ALT \rec \ALT s\\
 e & \in & \mathtt{Expressions} & \coloneqq & k \ALT x \ALT x.f 
     \ALT \{\bar{f}=\bar{e}\} \ALT e_1 \odot e_2\\ 
@@ -31,7 +28,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
     \ALT \updatee{\lambda x.e_1}{\lambda x.e_2}\\
 &&&&\ALT \foreache{x}{\lambda y.\lambda z. c} 
     \ALT \foreachr{s_1}{s_2}{\lambda x.\lambda y. e}\\
-&&&&\ALT \ctxn{i}{\I}{ c } \ALT \ctxn{i}{\I,\stl,\stg}{c} \ALT c1 || c2\\
+&&&&\ALT \stxn{i}{\I}{ c } \ALT \ctxn{i}{\I,\stl,\stg}{c} \ALT c1 || c2\\
 % t & \in & \mathtt{Terms} & \coloneqq & e \ALT c\\
 \ectx & \in & \mathtt{Eval\;Ctx} & ::= & \bullet \ALT  
   \bullet || c_2 \ALT c_1 || \bullet \ALT \bullet;\,c_2 
@@ -93,10 +90,10 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \RULE
 {
   s = \{r\in\Delta \,|\, \eval([r/x]e)=\C{true}\}\spc
-  c' = [s/x]c
+  c' = [s/y]c
 }
 {
-  \stg \vdash (\lete{x}{\selecte{\lambda x.e}}{c}, \stl) \stepsto 
+  \stg \vdash (\lete{y}{\selecte{\lambda x.e}}{c}, \stl) \stepsto 
               (c',\stl)
 }
 \end{array}
@@ -139,40 +136,50 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \fbox {\((c,\stg) \stepsto (c',\stg')\)}\\
 %
 \begin{minipage}{3in}
+  \rulelabel{E-Txn-Start}
+  \begin{smathpar}
+  \begin{array}{c}
+    \RULE{}
+         {(\stxn{i}{\I_e}{c},\stg) \stepsto (\ctxn{i}{\I_e,\emptyset,\stg}{c},\stg)}
+  \end{array}
+  \end{smathpar}
+\end{minipage}%
+\hfill
+\begin{minipage}{3in}
 \rulelabel{E-Txn}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
 {
-  \I\,\C{true}\,(\stl,\stg,\stg')\spc
+  \I_e\,\,(\stl,\stg,\stg')\spc
   \stg \vdash (c,\stl) \stepsto (c',\stl')
 }
 {
-  (\ctxn{i}{\I,\stl,\stg}{c},\stg') \stepsto
-  (\ctxn{i}{\I,\stl',\stg'}{c'},\stg')
+  (\ctxn{i}{\I_e,\stl,\stg}{c},\stg') \stepsto
+  (\ctxn{i}{\I_e,\stl',\stg'}{c'},\stg')
 }
 \end{array}
 \end{smathpar}
-\end{minipage}
-%
-%
-\begin{minipage}{2.8in}
+\end{minipage}\\
+
+\begin{center}
+\begin{minipage}{3in}
 \rulelabel{E-Commit}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
 {
-  \I\,\C{false}\,(\stl,\stg,\stg')
+  \I_c\,\,(\stl,\stg,\stg')
 }
 {
-  (\ctxn{i}{\I,\stl,\stg}{\cskip},\stg') \stepsto (\cskip,\stl\gg\stg')
+  (\ctxn{i}{\I_e,\stl,\stg}{\cskip},\stg') \stepsto (\cskip,\stl\gg\stg')
 }
 \end{array}
 \end{smathpar}
 \end{minipage}
+\end{center}
+\hfill
 %
-
-
 \caption{\small \txnimp: Syntax and Small-step semantics}
 \label{fig:txnimp}
 \end{figure*}
