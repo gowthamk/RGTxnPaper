@@ -34,13 +34,13 @@
 \RULE
 {
   \\
-  R \vdash \hoare{P'}{c}{Q}\spc
-  \stable(R,P')\\
+  \R \vdash \hoare{P'}{c}{Q}\spc
+  \stable(\R,P')\\
   \hspace*{-0.2in}P'(\stl,\stg) \Leftrightarrow P(\stl,\stg) \wedge
   x = \{r' \,|\, \exists(r\in\Delta).~ [r/x]e_2 =\C{true}\} \\
 }
 {
-  R \vdash \hoare{P}{\selecte{\lambda x.e}}{Q}
+  \R \vdash \hoare{P}{\selecte{\lambda x.e}}{Q}
 }
 \end{array}
 \end{smathpar}
@@ -55,7 +55,7 @@
 \begin{array}{c}
 \RULE
 {
-  \stable(R,Q)\\
+  \stable(\R,Q)\\
   \forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
   \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).~ [r/x]e
         \conj r'=\{\bar{f}=r.\bar{f}; \idf=r.\idf;
@@ -64,7 +64,7 @@
   Q(\stl',\stg)
 }
 {
-  R \vdash \hoare{P}{\deletee{\lambda x.e}}{Q}
+  \R \vdash \hoare{P}{\deletee{\lambda x.e}}{Q}
 }
 \end{array}
 \end{smathpar}
@@ -79,7 +79,7 @@
 \begin{array}{c}
 \RULE
 {
-  \stable(R,Q)\\
+  \stable(\R,Q)\\
   \hspace*{-1.1in}\forall\stl,\stl',\stg,i.~P(\stl,\stg) \conj i \not\in
   \dom(\stl\cup\stg) \\
   \conj \stl'=\stl \cup 
@@ -87,7 +87,7 @@
   Q(\stl',\stg)
 }
 {
-  R \vdash \hoare{P}{\inserte{x}}{Q}
+  \R \vdash \hoare{P}{\inserte{x}}{Q}
 }
 \end{array}
 \end{smathpar}
@@ -103,7 +103,7 @@
   \stable(\R,Q)\spc
   \stable(\R,I)\\
   P \wedge y=\emptyset \Rightarrow I\spc
-  R \vdash \hoare{I \wedge z\in x}{c}{Q_c}\\
+  \R \vdash \hoare{I \wedge z\in x}{c}{Q_c}\\
   Q_c \wedge z\in y \Rightarrow I\spc
   I \wedge y=x \Rightarrow Q
 }
