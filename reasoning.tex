@@ -223,8 +223,8 @@ record, and no further interference will restore the original record,
 because original record bears the id of a transaction that has long
 committed. Thus, $\I_{ss}$ remains invalid.
 
-The \rulelabel{RG-Conseq} rule lets us safely strengthen the guarantee
-$G$, or weaken the rely $R$ of a transaction. Importantly, it also
+The \rulelabel{RG-Conseq} rule lets us safely weaken the guarantee
+$G$, and strengthen the rely $R$ of a transaction. Importantly, it also
 allows its isolation specification $\I$ to be strengthened. This means
 that a transaction proven correct under a weaker isolation level is
 also correct under a stronger level. Parametricity over the isolation
