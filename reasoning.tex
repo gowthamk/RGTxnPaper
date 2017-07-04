@@ -41,7 +41,7 @@ $\begin{decoration}
 \end{tabular}
   \caption{Factorial program written as an atomic block and a weakly
   isolated transaction (shared variables have uppercase names).
-  Effect of multiple iteratons of the \C{atomic} loop can be
+  Effect of multiple iterations of the \C{atomic} loop can be
   summarized as $k!$, while same cannot be done with the
   \C{transaction} loop, where weak isolation allows reads in different
   iterations to return different values for $X$.  Nonetheless,
@@ -50,39 +50,38 @@ $\begin{decoration}
 \label{fig:atomic-vs-transaction}
 \end{figure}
 
-We now describe a proof system that lets us prove the correctness of a \txnimp
-program $c$ w.r.t its high-level invariant $I$, on a machine that
-satisfies the isolation specifications ($\I$) of its
+We now describe a proof system that lets us prove the correctness of a
+\txnimp program $c$ w.r.t its high-level invariant $I$, on a machine
+that satisfies the isolation specifications ($\I$) of its
 transactions\footnote{Note the difference between $I$ and $\I$. The
 former constitute \emph{proof} \emph{obligations} for the programmer,
 whereas the latter describes a transaction's \emph{assumptions} about
 operational characteristics of the underlying machine.}.  Our proof
-system is essentially an adapatation of the rely-guarantee reasoning
+system is essentially an adaptation of the rely-guarantee reasoning
 framework to the setting of weakly isolated database transactions. It
 deals with the additional complexity introduced by this setting, while
 also taking advantage of the opportunities it provides to simplify the
 reasoning. The primary challenge is the weak isolation; how do we
 relate a transaction's isolation specification ($\I$) to its rely
-relation ($R$) that describes the environment, so that the
-interference is considered only insofar as the isolation level allows
-it? Our proof system shows how to compute a rely relation ($R$) modulo
-the isolation specification ($\I$) of a transaction. Another
-characteristic of the transaction setting is the atomicity of a
-trasaction's aggregate writes; a transaction's writes are not visible
-to its peers until it commits. In the context of rely-guarantee, this
-means that the transactions guarantee ($G$) should capture the
-aggregate effect of a transaction, and not its individual writes.
-While \C{atomic} blocks are also present in the shared-memory
-programs, the fact that a transactions are weakly isolated introduces
-complexity.  Unlike an \C{atomic} block, the effect of a transaction
-is \emph{not} a sequential composition of the effects of its
-statements because each statement witnesses a potentially different
-version of the state. This is illustrated in
+relation ($R$) that describes the transaction's environment, so that
+the interference is considered only insofar as the isolation level
+allows it? Our proof system shows how to compute a rely relation ($R$)
+modulo the isolation specification ($\I$) of a transaction. Another
+characteristic of the transaction setting is atomicity; a
+transaction's writes are not visible to its peers until it commits. In
+the context of rely-guarantee, this means that the transactions
+guarantee ($G$) should capture the aggregate effect of a transaction,
+and not its individual writes.  While shared memory \C{atomic} blocks
+also have the same characteristic, the fact that a transactions are
+weakly isolated introduces complexity.  Unlike an \C{atomic} block,
+the effect of a transaction is \emph{not} a sequential composition of
+the effects of its statements because each statement witnesses a
+potentially different version of the state. This is illustrated in
 Fig.~\ref{fig:atomic-vs-transaction}, where a series of operations on
-\C{X} can be composed to describe the effect of an \C{atomic} block,
-while same cannot be done in a transaction. Thus, weak isolation needs
-to be taken into account when defining and verifying guarantees, and
-our proof system shows how. 
+a shared variable (\C{X}) can be composed to describe the effect of an
+\C{atomic} block, while same cannot be done in a transaction. Thus,
+weak isolation needs to be taken into account when defining and
+verifying guarantees, and our proof system shows how. 
 
 \subsection{The Rely-Guarantee Judgment}
 \label{sec:rely-guarantee}
@@ -97,7 +96,7 @@ quintuple $\rg{P,R}{c}{G,Q}$. Instead of a separate $P$ and $Q$, our
 top-level judgment has $I$ for both pre- and post-conditions, because
 our focus is on verifying that a \txnimp program \emph{preserves}
 database's consistency conditions\footnote{The terms \emph{consistency
-condition}, \emph{high-level invaraint}, and \emph{integrity
+condition}, \emph{high-level invariant}, and \emph{integrity
 constraint} all mean the same.}. Transaction-local RG judgment doesn't
 include a guarantee relation because transaction-local effects are not
 visible outside a transaction. Also, the rely relation ($\R$) of the
@@ -118,7 +117,7 @@ transaction-local and global states change in relation to each other.
 
 The quintessential aspect of a rely-guarantee judgment is the
 stability condition, which, intuitively, requires the validity of an
-assertion $\phi$ to be unaffacted by the interference, i.e., the rely
+assertion $\phi$ to be unaffected by the interference, i.e., the rely
 relation $R$. In conventional RG, stability is defined as following
 ($\sigma$ denotes a state):
 \begin{smathpar}
@@ -167,7 +166,7 @@ is defined as following:
 \end{array}
 \end{smathpar}
 That is, if $Q$ relates $\stl$ to $\stg$, and an interference allowed
-by the isolation specfication (which implicitly considers the local
+by the isolation specification (which implicitly considers the local
 state $\stl$) takes $\stg$ to $\stg'$, the $Q$ must also relate $\stl$
 to $\stg'$.
 
@@ -203,7 +202,7 @@ $\I$ is not same as $\R^{*}$; the former is a transitive relation
 constrained by $\I$, whereas the latter is the transitive closure of a
 $\I$-constrained relation. We therefore introduce a side-condition on
 $\I$ that restores the equality. The condition requires $\I$ to allow
-an intereference $R^{*}(\stg,\stg'')$, for two database states $\stg$
+an interference $R^{*}(\stg,\stg'')$, for two database states $\stg$
 and $\stg''$, only if it also allows interference for every prefix of
 $R^{*}(\stg,\stg'')$. In other words, if $\I$ disallows interference
 from $\stg$ to $\stg'$, then an $R$-step from $\stg'$ to $\stg''$
