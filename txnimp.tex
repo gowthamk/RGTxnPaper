@@ -28,11 +28,11 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
     \ALT \updatee{\lambda x.e_1}{\lambda x.e_2}\\
 &&&&\ALT \foreache{x}{\lambda y.\lambda z. c} 
     \ALT \foreachr{s_1}{s_2}{\lambda x.\lambda y. e}\\
-&&&&\ALT \stxn{i}{\I}{ c } \ALT \ctxn{i}{\I,\stl,\stg}{c} \ALT c1 || c2\\
+&&&&\ALT \stxn{i}{\I_e,\I_c}{ c } \ALT \ctxn{i}{\I_e,\I_c,\stl,\stg}{c} \ALT c1 || c2\\
 % t & \in & \mathtt{Terms} & \coloneqq & e \ALT c\\
 \ectx & \in & \mathtt{Eval\;Ctx} & ::= & \bullet \ALT  
   \bullet || c_2 \ALT c_1 || \bullet \ALT \bullet;\,c_2 
-  \ALT \ctxn{i}{\I,\stl,\stg}{\bullet} \\
+  \ALT \ctxn{i}{\I_e,\I_c,\stl,\stg}{\bullet} \\
 \end{array}
 \end{smathpar}
 %
@@ -140,7 +140,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
   \begin{smathpar}
   \begin{array}{c}
     \RULE{}
-         {(\stxn{i}{\I_e}{c},\stg) \stepsto (\ctxn{i}{\I_e,\emptyset,\stg}{c},\stg)}
+         {(\stxn{i}{\I_e,\I_c}{c},\stg) \stepsto (\ctxn{i}{\I_e,\I_c,\emptyset,\stg}{c},\stg)}
   \end{array}
   \end{smathpar}
 \end{minipage}%
@@ -155,8 +155,8 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
   \stg \vdash (c,\stl) \stepsto (c',\stl')
 }
 {
-  (\ctxn{i}{\I_e,\stl,\stg}{c},\stg') \stepsto
-  (\ctxn{i}{\I_e,\stl',\stg'}{c'},\stg')
+  (\ctxn{i}{\I_e,\I_c,\stl,\stg}{c},\stg') \stepsto
+  (\ctxn{i}{\I_e,\I_c,\stl',\stg'}{c'},\stg')
 }
 \end{array}
 \end{smathpar}
@@ -172,7 +172,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
   \I_c\,\,(\stl,\stg,\stg')
 }
 {
-  (\ctxn{i}{\I_e,\stl,\stg}{\cskip},\stg') \stepsto (\cskip,\stl\gg\stg')
+  (\ctxn{i}{\I_e,\I_c,\stl,\stg}{\cskip},\stg') \stepsto (\cskip,\stl\gg\stg')
 }
 \end{array}
 \end{smathpar}
