@@ -2,7 +2,7 @@
 \raggedright
 %
 \fbox {\( \R \vdash \hoare{P}{c}{Q} \)} 
-\quad \fbox {\( \rg{I,R}{c}{G,I} \)}\\
+\quad \fbox {\( \rg{I,R}{c}{G,I} \)}\\[4pt]
 %\fbox{\( \rg{\mathbb{I},P,R}{\txnbox{c}_i}{G,Q}\)} \quad
 %\fbox{\( \rg{\mathbb{I},P,R}{c}{G,Q}\)} \quad\\
 %
@@ -13,11 +13,9 @@
 \RULE
 {
   \stable(\R,Q)\\
-  \forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
-  \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).\\
-      \hspace*{0.7in}[r/x]e_2 \conj r'=[r/x]e_1\}
-  \Rightarrow 
-  Q(\stl',\stg)
+  \forall\stl,\stl',\stg.~P(\stl,\stg) \conj \\
+  \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).[r/x]e_2 \conj\\
+  \hspace*{.7in} r'=[r/x]e_1\} \Rightarrow   Q(\stl',\stg)
 }
 {
   \R \vdash \hoare{P}{\updatee{\lambda x.e_1}{\lambda x.e_2}}{Q}
@@ -101,11 +99,11 @@
 \RULE
 {
   \stable(\R,Q)\spc
-  \stable(\R,I)\\
-  P \wedge y=\emptyset \Rightarrow I\spc
-  \R \vdash \hoare{I \wedge z\in x}{c}{Q_c}\\
-  Q_c \wedge z\in y \Rightarrow I\spc
-  I \wedge y=x \Rightarrow Q
+  \stable(\R,\psi)\\
+  P \wedge y=\emptyset \Rightarrow \psi\spc
+  \R \vdash \hoare{\psi \wedge z\in x}{c}{Q_c}\\
+  Q_c \wedge z\in y \Rightarrow \psi\spc
+  \psi \wedge y=x \Rightarrow Q
 }
 {
   \R \vdash \hoare{P}{\foreache{x}{\lambda y.\lambda z.c}}{Q}

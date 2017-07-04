@@ -45,7 +45,7 @@ business logic is captured in 5 database transactions that operate on
 \C{Order\_line} tables. The transaction acts on the behalf of a
 customer, whose id is \C{c\_id}, to place a new order for a given
 set of items (\C{item\_reqs}), to be served by a warehouse under the
-district identified by \C{d\_id}.  Fig.~\ref{fig:scheme} illustrates
+district identified by \C{d\_id}.  Fig.~\ref{fig:schema} illustrates
 the relationship among these different tables.
 
 The transaction manages order placement by invoking appropriate SQL
@@ -81,7 +81,7 @@ an \C{Order\_line} record is created for each requested item to relate
 the order with the item. Each item has a corresponding record in the
 \C{Stock} table, which keeps track of the quantity of the item left in
 stock (\C{s\_qty}). The quantity is updated by the transaction to
-reflect the processing of new order (if the stock quantity falls below
+reflect the processing of new orders (if the stock quantity falls below
 10, it is automatically replenished by 91).
 
 TPC-C defines multiple invariants, called \emph{consistency
@@ -103,7 +103,7 @@ the \C{Order} record's \C{o\_ol\_cnt} field, thus preserving the
 consistency condition.
 
 Because the aforementioned reasoning is reasonably simple to perform
-manually, verfiying the soundess of TPC-C's consistency conditions
+manually, verifying the soundess of TPC-C's consistency conditions
 would appear to be feasible.  Serializability aids the tractability of
 verification by preventing any interference among concurrently
 executing transactions while the \C{new\_order} transaction executes.
@@ -279,28 +279,27 @@ lifetime an RR transaction ($T$):
 This simple characterization of RR isolation allows us to verify the
 consistency conditions associated with the \C{new\_order}
 transaction. First, since the database doesn't change ($\Delta' =
-\Delta$) (where $\Delta'$ represents the state after the transaction
-commits), during the execution of the transaction's body, we can
-reason about \C{new\_order} as though it executed in complete isolation
-until its commit point, leading to a verification process similar to
-what would been applied when reasoning about serializability.  When
+\Delta$) during the execution of the transaction's body, we can reason
+about \C{new\_order} as though it executed in complete isolation until
+its commit point, leading to a verification process similar to what
+would been applied when reasoning about serializability.  When
 \C{new\_order} finishes execution and becomes ready to commit, a
-transition that transfers the transaction's local writes ($\delta$) to
-the unchanged database state ($\Delta$).  However, we are required to
+transition transfers the transaction's local writes ($\delta$) to the
+unchanged database state ($\Delta$).  However, we are required to
 consider the interference from concurrent transitions at this point,
 which might change the database state from $\Delta$ to $\Delta_c$. If
 this interference includes the effects of a concurrent \C{new\_order}
 transaction (with the same \C{d\_id}), then verification fails as
-described previously (Fig.~\ref{fig:new_order_execs}). Fortunately,
-sequential reasoning shows that this is impossible - RR prevents a
-concurrent \C{new\_order} transaction that modifies the same
-\C{District} record as the current transaction (concretely, since the
-record is already present in the current transaction's local log, any
-transition from $\Delta$ to $\Delta_c$ cannot change this record).
-Applying such axiomatic reasoning on \C{new\_order} allows us to prove
-that the TPC-C invariant holds when the transaction is executed under
-PostgreSQL's RR isolation.  Our proof framework generalizes this style
-of reasoning to various isolation levels on databases.
+described previously.  Fortunately, sequential reasoning shows that
+this is impossible - RR prevents a concurrent \C{new\_order}
+transaction that modifies the same \C{District} record as the current
+transaction (concretely, since the record is already present in the
+current transaction's local log, any transition from $\Delta$ to
+$\Delta_c$ cannot change this record).  Applying such axiomatic
+reasoning on \C{new\_order} allows us to prove that the TPC-C
+invariant holds when the transaction is executed under PostgreSQL's RR
+isolation.  Our proof framework generalizes this style of reasoning to
+various isolation levels on databases.
 
 The second observation that informs our approach is one that pertains
 to automation. Program verification, even when machine-aided, often
@@ -327,7 +326,7 @@ the pre- and post-states of a statement. This state transformer
 semantics can be defined algorithmically, just like predicate
 transformer semantics (e.g., strongest post-condition).  Here, a state
 transformer interprets a SQL statement in the set domain, taking
-advantage of the fact that a a database is essentially a set of
+advantage of the fact that the database is essentially a set of
 tuples, and a SQL statement is a transformer over these sets.  The
 benefit of this approach is that low-level loops can now be
 substituted with higher-order combinators that automatically lift the
@@ -424,7 +423,7 @@ Their composition gives the state transformer of the loop body:
   fun ($\Delta$,$\delta$) -> $\delta$ $\cup$ $F_U(\Delta) \,\cup\, F_I(\Delta)$
 \end{ocaml}
 Let $F_{body}(\Delta) = F_U(\Delta) \,\cup\, F_I(\Delta)$.   The
-transformer for the \C{foreach} loop can now be computed as following:
+transformer for the \C{foreach} loop can now be computed as follows:
 \begin{ocaml}
   fun ($\Delta$,$\delta$) -> $\delta$ $\cup$ item_reqs$\bind$(fun item_req -> $F_{body}(\Delta)$)
 \end{ocaml}
