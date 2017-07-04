@@ -51,36 +51,29 @@
 % \end{figure}
 
 We now describe a proof system that lets us prove the correctness of a
-\txnimp program $c$ w.r.t its high-level invariant $I$, on a machine
-that satisfies the isolation specifications ($\I$) of its
-transactions\footnote{Note the difference between $I$ and $\I$. The
-former constitute \emph{proof} \emph{obligations} for the programmer,
-whereas the latter describes a transaction's \emph{assumptions} about
-operational characteristics of the underlying machine.}.  Our proof
-system is essentially an adaptation of the rely-guarantee reasoning
-framework to the setting of weakly isolated database transactions. It
-deals with the additional complexity introduced by this setting, while
-also taking advantage of the opportunities it provides to simplify the
-reasoning. The primary challenge is the weak isolation; how do we
-relate a transaction's isolation specification ($\I$) to its rely
-relation ($R$) that describes the transaction's environment, so that
-the interference is considered only insofar as the isolation level
-allows it? Our proof system shows how to compute a rely relation ($R$)
-modulo the isolation specification ($\I$) of a transaction. Another
-characteristic of the transaction setting is atomicity; a
-transaction's writes are not visible to its peers until it commits. In
-the context of rely-guarantee, this means that the transactions
-guarantee ($G$) should capture the aggregate effect of a transaction,
-and not its individual writes.  While shared memory \C{atomic} blocks
-also have the same characteristic, the fact that a transactions are
-weakly isolated introduces complexity.  Unlike an \C{atomic} block,
-the effect of a transaction is \emph{not} a sequential composition of
-the effects of its statements because each statement witnesses a
-potentially different version of the state. For example,  a series of
-operations on a shared variable (\C{X}) can be composed to describe
-the effect of an \C{atomic} block, while same cannot be done in a
-transaction. Thus, weak isolation needs to be taken into account when
-defining and verifying guarantees, and our proof system shows how. 
+\txnimp program $c$ w.r.t its high-level consistency conditions $I$,
+on an implementation that satisfies the isolation specifications
+($\I$) of its transactions\footnote{Note the difference between $I$
+  and $\I$. The former constitute \emph{proof} \emph{obligations} for
+  the programmer, whereas the latter describes a transaction's
+  \emph{assumptions} about the operational characteristics of the
+  underlying system.}.  Our proof system is essentially an adaptation
+of rely-guarantee reasoning framework~\cite{rgjones} to the setting of
+weakly isolated database transactions.  The primary challenge in the
+formulation deals with how we relate a transaction's isolation
+specification ($\I$) to its rely relation ($R$) that describes the
+transaction's environment, so that interference is considered only
+insofar as allowed by the isolation level.  Another characteristic of
+the transaction setting that affects the structure of the proof system
+is atomicity; a transaction's writes are not visible to its peers
+until it commits.  In the context of rely-guarantee, this means that
+the transaction's guarantee ($G$) should capture the aggregate effect
+of a transaction, and not its individual writes.  While shared memory
+\C{atomic} blocks also have the same characteristic, the fact that
+transactions are weakly isolated introduces complexity.  Unlike an
+\C{atomic} block, the effect of a transaction is \emph{not} a
+sequential composition of the effects of its statements because each
+statement witnesses a potentially different version of the state.
 
 \subsection{The Rely-Guarantee Judgment}
 \label{sec:rely-guarantee}
@@ -92,33 +85,33 @@ rely-guarantee (RG) reasoning rules for $\txnimp$. We define two RG
 judgments: top-level ($\rg{I,R}c{G,I}$), and transaction-local ($\R
 \vdash \hoare{P}c{Q}$).  Recall that the standard RG judgment is the
 quintuple $\rg{P,R}{c}{G,Q}$. Instead of a separate $P$ and $Q$, our
-top-level judgment has $I$ for both pre- and post-conditions, because
-our focus is on verifying that a \txnimp program \emph{preserves}
+top-level judgment uses $I$ for both pre- and post-conditions, because
+our focus is on verifying that a \txnimp\ program \emph{preserves}
 database's consistency conditions\footnote{The terms \emph{consistency
-condition}, \emph{high-level invariant}, and \emph{integrity
-constraint} all mean the same.}. Transaction-local RG judgment doesn't
-include a guarantee relation because transaction-local effects are not
-visible outside a transaction. Also, the rely relation ($\R$) of the
-transaction-local judgment is not same as the top-level rely relation
-($R$) as it takes into account the transaction's isolation
-specification ($\I$). Intuitively, $\R$ is $R$ modulo $\I$; formal
-definition will be given shortly. Recall that a transaction writes to
-its local database ($\stl$), which is then flushed when the
-transaction commits. Thus, the guarantee of a transaction depends on
-the state of its local database at the commit point. The pre- and
-post-condition assertions ($P$ and $Q$) in the local judgment
-facilitate tracking the changes to the transaction-local state, which
-eventually helps us prove the validity of the transaction's guarantee.
-Note that $P$ and $Q$ are bi-state assertions; they relate
-transaction-local database state ($\stl$) to the global database state
-($\stg$). Thus, the transaction-local judgment effectively tracks how
-transaction-local and global states change in relation to each other.
+    condition}, \emph{high-level invariant}, and \emph{integrity
+    constraint} all mean the same.}.  A transaction-local RG judgment
+does not include a guarantee relation because transaction-local
+effects are not visible outside a transaction. Also, the rely relation
+($\R$) of the transaction-local judgment is not the same as the
+top-level rely relation ($R$) because it must take into account the
+transaction's isolation specification ($\I$). Intuitively, $\R$ is $R$
+modulo $\I$.  Recall that a transaction writes to its local database
+($\stl$), which is then flushed when the transaction commits. Thus,
+the guarantee of a transaction depends on the state of its local
+database at the commit point. The pre- and post-condition assertions
+($P$ and $Q$) in the local judgment facilitate tracking the changes to
+the transaction-local state, which eventually helps us prove the
+validity of the transaction's guarantee.  Both $P$ and $Q$ are
+bi-state assertions; they relate transaction-local database state
+($\stl$) to the global database state ($\stg$). Thus, the
+transaction-local judgment effectively tracks how transaction-local
+and global states change in relation to each other.
 
-The quintessential aspect of a rely-guarantee judgment is the
-stability condition, which, intuitively, requires the validity of an
-assertion $\phi$ to be unaffected by the interference, i.e., the rely
-relation $R$. In conventional RG, stability is defined as following
-($\sigma$ denotes a state):
+A central feature of a rely-guarantee judgment is a stability
+condition that requires the validity of an assertion $\phi$ to be
+unaffected by the interference, i.e., the rely relation $R$. In
+conventional RG, stability is defined as follows, where $\sigma$ denotes a
+state:
 \begin{smathpar}
 \begin{array}{lcl}
 \stable(R,\phi) & \Leftrightarrow & \forall \sigma,\sigma'.~
@@ -133,31 +126,31 @@ above. We will introduce them as they are encountered.
 \rulelabel{RG-Txn} is the top-level rule that lets us prove a
 transaction preserves the high-level invariant $I$ when executed under
 the required isolation as specified by $\I$. It relies on the
-transaction-local judgment to verify the the transaction body ($c$).
+transaction-local judgment to verify the transaction body ($c$).
 The precondition $P$ of $c$ must follow from the fact that the
 transaction-local database ($\stl$) is initially empty, and the global
 database satisfies the high-level invariant $I$. The rely relation
 ($\R_l$) for the local judgment is a ternary relation computed as $R$
-modulo $\I_e$ as following:
+modulo $\I_e$:
 \begin{smathpar}
 \begin{array}{lcl}
 \R_l(\stl,\stg,\stg') & \Leftrightarrow & R(\stg,\stg') \conj
 \I_e(\stl,\stg,\stg')
 \end{array}
 \end{smathpar}
-Thus, $\R_l$ allows an interference only if it doesn't violate the
+Thus, $\R_l$ allows an interference only if it does not violate the
 execution-time isolation specification ($\I_e$) of the transaction. If a
 certain interference violates the isolation spec, i.e., $R(\stg,\stg')
 \Rightarrow \neg(\I_e(\stl,\stg,\stg'))$, then $\R_l(\stl,\stg,\stg')
 \Leftrightarrow false$, and any assertion is trivially stable w.r.t
 that interference. This is sensible considering such interference is
-pre-empted in the operational semantics. 
+prevented in the operational semantics. 
 
 Recall that $P$ and $Q$ of the transaction-local RG judgment are
 binary assertions; they relate local and global database states. The
 local judgment rules require one or both of them to be stable. The
 stability of a binary assertion $Q$ w.r.t a ternary rely relation $\R$
-is defined as following:
+is defined as:
 \begin{smathpar}
 \begin{array}{c}
 \forall \stl,\stg,\stg'.~ Q(\stl,\stg) \conj \R(\stl,\stg,\stg')
@@ -166,13 +159,13 @@ is defined as following:
 \end{smathpar}
 That is, if $Q$ relates $\stl$ to $\stg$, and an interference allowed
 by the isolation specification (which implicitly considers the local
-state $\stl$) takes $\stg$ to $\stg'$, the $Q$ must also relate $\stl$
+state $\stl$) takes $\stg$ to $\stg'$, then $Q$ must also relate $\stl$
 to $\stg'$.
 
-For the guarantee $G$ of the transaction to be valid, it must follow
+For the guarantee $G$ of a transaction to be valid, it must follow
 from the post-condition $Q$ of the body, provided that $Q$ is stable
 w.r.t the commit-time interference captured by $R_c$. $R_c$, like
-$R_l$, is computed as rely relation modulo isolation, except that
+$R_l$, is computed as a rely relation modulo isolation, except that
 commit-time isolation ($\I_c$) is considered. The validity of
 $G$ is captured by the following implication:
 \begin{smathpar}
@@ -181,8 +174,8 @@ $G$ is captured by the following implication:
 \end{array}
 \end{smathpar}
 In other words, if $Q$ relates the transaction-local database state
-($\stl$) to the state of the global database ($\stg$) before the
-commit, then $G$ must relate the states of the global database before
+($\stl$) to the state of the global database ($\stg$) before a transaction
+commits, then $G$ must relate the states of the global database before
 and after the commit. The act of commit captured by the flush
 operation ($\stl\gg\stg$). Once we establish the validity of $G$ as a
 faithful representative of the transaction, we can verify that the
@@ -193,20 +186,20 @@ G(\stg,\stg') \Rightarrow I(\stg')$.
 A characteristic of RG reasoning is that stability of an assertion is
 always proven w.r.t to $R$, and not $R^{*}$, although interference may
 include multiple environment steps, and $R$ only captures a single
-step. This is nonetheless sound due to the the inductive reasoning: if
+step. This is nonetheless sound due to inductive reasoning: if
 $Q$ is preserved by every step of $R$, then $Q$ is preserved by
 $R^{*}$, and vice-versa.  However, such reasoning does not extend
 naturally to isolation-constrained interference because $R^{*}$ modulo
 $\I$ is not same as $\R^{*}$; the former is a transitive relation
-constrained by $\I$, whereas the latter is the transitive closure of a
+constrained by $\I$, whereas the latter is the transitive closure of an
 $\I$-constrained relation. We therefore introduce a side-condition on
 $\I$ that restores the equality. The condition requires $\I$ to allow
 an interference $R^{*}(\stg,\stg'')$, for two database states $\stg$
 and $\stg''$, only if it also allows interference for every prefix of
 $R^{*}(\stg,\stg'')$. In other words, if $\I$ disallows interference
 from $\stg$ to $\stg'$, then an $R$-step from $\stg'$ to $\stg''$
-shouldn't make the interference from $\stg$ to $\stg''$ valid. We call
-this the stability condition on $\I$, defined as below:
+should not make the interference from $\stg$ to $\stg''$ valid.  This
+stability condition on $\I$ is defined formally thus:
 \begin{smathpar}
 \begin{array}{lcl}
   \stable(R,\I) & \Leftrightarrow & \forall \stl,\stg,\stg',\stg''.~
@@ -219,8 +212,8 @@ satisfied by the isolation axioms from Sec.~\ref{sec:isolation}. For
 instance, $\I_{ss}$, the snapshot axiom, is stable because if
 $\I_{ss}$ is invalid, then an interference has already modified a
 record, and no further interference will restore the original record,
-because original record bears the id of a transaction that has long
-committed. Thus, $\I_{ss}$ remains invalid.
+because the original record bears the id of a transaction that has
+already committed. Thus, $\I_{ss}$ remains invalid.
 
 The \rulelabel{RG-Conseq} rule lets us safely weaken the guarantee
 $G$, and strengthen the rely $R$ of a transaction. Importantly, it
@@ -236,25 +229,25 @@ strengthening $\I$ ensures that a program can be safely executed on
 any system that offers isolation guarantees at least as strong as
 those assumed.
 
-Two rules of the transaction-local RG judgment are shown in
-Fig.~\ref{fig:rg-rules}. The rule \rulelabel{RG-Update} is
-illustrative of the RG rules for SQL statements; they basically
-reflect the structure of the corresponding reduction rule from
-Fig.~\ref{fig:txnimp}, and require no further explanation. The rule
+Salient rules of transaction-local RG judgment are shown in
+Fig.~\ref{fig:rg-rules}. These rules (\rulelabel{RG-Update},
+\rulelabel{RG-Select}, \rulelabel{RG-Delete}, and
+\rulelabel{RG-Insert}) reflect the structure of the corresponding
+reduction rule from Fig.~\ref{fig:txnimp}.  The rule
 \rulelabel{RG-Foreach} defines the RG judgment for a \C{FOREACH} loop.
 As is characteristic of loops, the reasoning is pivoted on a loop
-invariant $I$ (not same as the high-level invariant), that needs to be
-stable w.r.t $\R$. $I$ must follow $P$, the pre-condition of
-\C{FOREACH}, when no elements have been iterated, i.e, when
-$y=\emptyset$. The body of the loop can assume the loop invariant, and
-the fact that $z$ is an element from the set $x$ being iterated, to
-prove its post-condition $Q_c$. Operational semantics ensures that $z$
-is added to $y$ at the end of the iteration, hence $Q_c \conj z\in y$
-is valid at the end of the iteration, from which $I$ must follow. When
-\C{FOREACH} has finished execution, $y$, the set of iterated items, is
-the entire set $x$. Thus $I \conj y=x$ must imply the post-condition
-$Q$, which also needs to be stable. The rules for conditionals,
-sequencing etc., are more-or-less standard, hence elided.
+invariant $\psi$ that needs to be stable w.r.t $\R$. $\psi$ must be
+implied by $P$, the pre-condition of \C{FOREACH}, when no elements
+have been iterated, i.e, when $y=\emptyset$. The body of the loop can
+assume the loop invariant, and the fact that $z$ is an element from
+the set $x$ being iterated, to prove its post-condition $Q_c$. The
+operational semantics ensures that $z$ is added to $y$ at the end of
+the iteration, hence $Q_c \conj z\in y$ is valid at the end of the
+iteration, from which $\psi$ must follow. When the loop has finished
+execution, $y$, the set of iterated items, is the entire set $x$. Thus
+$\psi \conj y=x$ must imply the post-condition $Q$, which also needs
+to be stable. The rules for conditionals, sequencing etc., are
+standard, and hence elided.
 
 \subsection{Semantics and Soundness}
 
@@ -323,8 +316,8 @@ global RG judgment is defined below:\vspace*{-10pt}
 \end{definition}
 
 We can now assert the soundness of the RG judgments in
-Fig.~\ref{fig:rg-rules} as following\footnote{Formal proof of soundness
-is provided in the supplementary material.}:
+Fig.~\ref{fig:rg-rules} as follows\footnote{Its proof is provided in
+  the supplementary material.}:
 
 \begin{theorem}[\bfseries Soundness] 
 The rely-guarantee judgments defined by the rules in
@@ -334,6 +327,7 @@ Definition~\ref{def:rg-semantics}.
 
 \noindent Thus, if $\rg{I,R}{c}{G,I}$ is a valid RG judgment, then (a)
 every interleaved multi-step reduction of $c$ preserves the database
-integrity constraint $I$, and (b) the effect that every transaction in
-$c$ has on the database state is captured by $G$.  
+integrity constraint (consistency condition) $I$, and (b) the effect
+that every transaction in $c$ has on the database state is captured by
+$G$.
 

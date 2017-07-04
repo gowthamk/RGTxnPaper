@@ -20,21 +20,23 @@
   compositional reasoning about the behavior of concurrently executing
   weakly-isolated transactions.  Recognizing that the proof burden
   necessary to use this logic may dissuade application developers, we
-  also describe a fully automated verification tool based on this
-  foundation that determines the safety of high-level consistency
-  assertions associated with such transactions.  The key to effective
-  inference is the observation that weakly-isolated transactions can
-  be viewed as functional (monadic) computations over database state,
-  allowing us to treat their operations as state transformers over the
-  database.  This interpretation enables automated verification using
-  off-the-shelf SMT solvers.
+  also describe an inference procedure based on this foundation that
+  ascertains the weakest isolation level that still guarantees the
+  safety of high-level consistency assertions associated with such
+  transactions.  The key to effective inference is the observation
+  that weakly-isolated transactions can be viewed as functional
+  (monadic) computations over database state, allowing us to treat
+  their operations as state transformers over the database.  This
+  interpretation enables automated verification using off-the-shelf
+  SMT solvers.
   
   Notably, our development is parametric over a transaction's specific
   isolation semantics, allowing it to be applicable over a range of
   concurrency control mechanisms.  Case studies and experiments on
-  real-world applications demonstrate the utility of our approach, and
-  provide strong evidence that automated verification of
-  weakly-isolated transactions can be placed on the same formal
-  footing as their strongly-isolated serializable counterparts.
+  real-world applications (written in an embedded DSL in OCaml)
+  demonstrate the utility of our approach, and provide strong evidence
+  that automated verification of weakly-isolated transactions can be
+  placed on the same formal footing as their strongly-isolated
+  serializable counterparts.
 
 \end{abstract}

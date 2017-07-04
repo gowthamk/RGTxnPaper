@@ -59,9 +59,9 @@ records while serving Linkbench's~\cite{linkbench} insertion workload
 report discovering more than 10 duplicate records.  Rails relies on
 database transactions to validate uniqueness during insertions, which
 is sensible if transactions are serializable, but incorrect under the
-\emph{read committed} isolation level used in the experiments. The
-same study has found that 13\% of all invariants among 67 open source
-Ruby-on-Rails applications are at risk of being violated due to weak
+weak isolation level used in the experiments. The same study has found
+that 13\% of all invariants among 67 open source Ruby-on-Rails
+applications are at risk of being violated due to weak
 isolation. Indeed, incidents of safety violations due to executing
 applications in a weakly-isolated environment have been reported on
 web services in production~\cite{starbucksbug, scimedbug}, including
@@ -156,42 +156,42 @@ transactions along with automated verification support that realizes
 this goal.  We develop a set of syntax-directed compositional proof
 rules that allow developers to build correctness proofs for
 transactional programs in the presence of a weakly-isolated
-concurrency control mechanism.  Moreover, we also present an inference
-algorithm based on a state transformer semantics that allows us to
-automatically verify the weakest isolation level for a transaction
-that ensures its consistency requirements are maintained.  The key to
-inference is our formulation of database state (represented as sets of
-tuples) as a monad, in which database computations are interpreted as
-transformers over these sets.  This interpretation leads to an
-encoding database operations amenable for verification by SMT solvers.
+concurrency control mechanism.  Realizing that the proof burden to use
+these rules would likely discourage applications programmers, we
+present an inference procedure based on a state transformer semantics
+that allows us to automatically verify the weakest isolation level for
+a transaction that ensures its consistency requirements are
+maintained.  The key to inference is our formulation of database state
+(represented as sets of tuples) as a monad, and in which database
+computations are interpreted as transformers over these sets.  This
+interpretation leads to an encoding of database computations amenable
+for verification by off-the-shelf SMT solvers.
 
-We have realized these ideas as an embedded DSL within OCaml, with
-support for common SQL operations (updates, selects, inserts, deletes,
-joins, etc.).  Experimental results on real-world benchmarks
-demonstrate the feasibility of automated verification of weakly
-isolated transactions, an important advance in improving the safety of
-realistic database computations. The paper makes the following
-contributions:
+We have realized these ideas as an embedded DSL within OCaml, that
+supports common relational SQL operations (updates, selects, inserts,
+deletes, joins, etc.).  Experimental results on real-world benchmarks
+demonstrate the feasibility and value of automated verification for
+weakly isolated transactions, an important advance in improving the
+safety of realistic database computations. The paper makes the
+following contributions:
 \vspace*{-6pt}
 \begin{enumerate}
-\item An operational semantics for an embedded DSL in OCaml that
-  expresses SQL-based relational database operations as monadic
-  computations on database state represented abstractly as sets of
-  tuples.
- \item A compositional proof system for this language capable of
-   relating high-level application invariants to transformations on
-   database state, parameterized by a weak isolation semantics that
+\item An embedded DSL in OCaml that treats SQL-based relational
+  database operations as monadic computations over an abstract
+  database state.
+ \item An operational semantics and compositional proof system for
+   this language capable of relating high-level application invariants
+   to database state, parameterized by a weak isolation semantics that
    selectively exposes the visibility of these operations to other
    transactions.
- \item An inference algorithm capable of discovering the
-   weakest isolation level that is sound with respect to a
-   transaction's high-level consistency requirements.  The algorithm
-   exploits our monadic formulation, treating database computations as
-   predicate state transformers, that leads to a natural encoding
-   amenable for automated verification.
+ \item An inference algorithm capable of discovering the weakest
+   isolation level that is sound with respect to a transaction's
+   high-level consistency requirements.  The algorithm interprets
+   database operations as predicate state transformers leadig to a
+   natural encoding amenable for automated verification.
  \item A realistic implementation along with results on real-world
    database benchmarks that justify our approach and the utility of
-   our proof methodology.
+   our proof methodology and inference procedure.
 \end{enumerate}
 \noindent Our results provide the first (to the best of our knowledge)
 automated mechanism to verify the safety of high-level consistency
