@@ -37,10 +37,10 @@
   \R \vdash \hoare{P'}{c}{Q}\spc
   \stable(\R,P')\\
   P'(\stl,\stg) \Leftrightarrow P(\stl,\stg) \wedge
-  x = \{r' \,|\, \exists(r\in\Delta).~ [r/x]e_2\} \\
+  x = \{r' \,|\, \exists(r\in\Delta).~ [r/y]e_2\} \\
 }
 {
-  \R \vdash \hoare{P}{\selecte{\lambda x.e}}{Q}
+  \R \vdash \hoare{P}{\lete{x}{\selecte{\lambda y.e}}{c}}{Q}
 }
 \end{array}
 \end{smathpar}

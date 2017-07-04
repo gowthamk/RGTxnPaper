@@ -68,9 +68,11 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \begin{array}{c}
 \RULE
 {
+  \hspace*{-1.5in}
   s = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e)=\C{true} \\
-        \hspace*{0.7in}\conj r'=\{\bar{f}=r.\bar{f}; \idf=r.\idf;
-        \delf=\C{true}\}\}\\
+      \hspace*{0.1in}\conj r'=\{\bar{f}=r.\bar{f}; \idf=r.\idf;
+        \delf=\C{true}\}\}\spc
+  \dom(\stl)\cap\dom(s) = \emptyset \spc
 % \dom(s) \cap \dom(\delta) = \emptyset
 }
 {
@@ -89,6 +91,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \begin{array}{c}
 \RULE
 {
+  \\
   s = \{r\in\Delta \,|\, \eval([r/x]e)=\C{true}\}\spc
   c' = [s/y]c
 }
@@ -107,7 +110,9 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \begin{array}{c}
 \RULE
 {
-  s = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e_2)=\C{true} \conj r'=[r/x]e_1\}\\
+  s = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e_2)=\C{true} \\
+  \hspace*{0.9in}\conj r'=[r/x]e_1\}\spc
+  \dom(\stl) \cap \dom(s) = \emptyset
 }
 {
   \stg \vdash (\updatee{\lambda x.e_1}{\lambda x.e_2},\stl) \stepsto 

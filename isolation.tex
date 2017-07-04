@@ -1,12 +1,20 @@
 \subsection{Isolation Specifications}
 \label{sec:isolation}
 
-Databases implement isolation levels through a combination of various
-concurrency control mechanisms, which are absent from
-Fig.~\ref{fig:txnimp}. In this section, we first axiomatize the
-semantics of various concurrency control constructs, and then define
-the precise semantics of the isolation levels as they are implemented
-on two real-world databases -  PostgreSQL and MySQL.
+A distinctive characteristic of our development is that it is
+parameterized on the isolation specification $\I$. $\I$ can be
+instantiated with the declarative characterization of an isolation
+guarantee or a concurrency control mechanism, regardless of its actual
+implementation. This allows us to model a range of isolation
+properties that are relevant to the theory and practice of database
+systems. We present some below:
+
+% Databases implement isolation levels through a combination of various
+% concurrency control mechanisms, which are absent from
+% Fig.~\ref{fig:txnimp}. In this section, we first axiomatize the
+% semantics of various concurrency control constructs, and then define
+% the precise semantics of the isolation levels as they are implemented
+% on two real-world databases -  PostgreSQL and MySQL.
 % Any additional concurrency control provided by the database
 % implementation, beyond that which is already incuded in the
 % isolation specification, also needs to be axiomatized in $\I$. We
@@ -14,21 +22,18 @@ on two real-world databases -  PostgreSQL and MySQL.
 % specifications of the standard isolation levels as implemented by
 % popular off-the-shelf databases.
 
-\textbf{Unique Ids}. Most relational databases associate every record
-in a table with a unique identifier. Often, auto-generated unique
-identifiers are part of the schema itself (via SQL's \C{UNIQUE} and
-\C{AUTO\_INCREMENT} keywords), but if not, database adds one (e.g.,
-MySQL's InnoDB engine automatically adds a 6-byte identifier if none
-exists). Enforcing global uniqueness of identifiers requires exclusive
-locks, which are absent from Fig.~\ref{fig:txnimp}. The
-\rulelabel{E-Insert} rule assigns an id to the newly added record
-after checking that it is not already present in $\stg$ and $\stl$.
-But the new record is only added to $\stl$, which is invisible outside
-the transaction. Thus, it is possible that the uniqueness check for the same id may
-also succeed in a concurrent transaction, resulting in duplicate ids
-after both commits. To prevent this, we need the following proposition
-in $\I$ of every transaction, regardless of whether it is executing
-or committing:
+\textbf{Unique Ids}. As the \C{new\_order} example
+(Sec.~\ref{sec:motivation}) demonstrates, enforcing global uniqueness
+of ordered identifiers requires stronger isolation. Alternatively,
+globally unique sequence numbers, regardless of the isolation level,
+can be from a requested from a relational databases via SQL's
+\C{UNIQUE} and \C{AUTO\_INCREMENT} keywords. Our development crucially
+relies on the uniqueness of record identifiers\footnote{This has
+parallels in real-world. For e.g., MySQL's InnoDB engine automatically
+adds a 6-byte unique identifier if none exists for a record.}, which
+are generated locally by the \rulelabel{E-Insert} rule. Global
+uniqueness of locally generated identifiers can be axiomatized as an
+isolation property as following:
 \begin{smathpar}
 \begin{array}{lcl}
   \I_{id}(\stl,\stg,\stg') & = & \forall(r\in\stl).~
@@ -36,14 +41,17 @@ or committing:
 \end{array}
 \end{smathpar}
 $\I_{id}$ ensures that a globally unique id generated during a
-transaction's execution remains globally unique until it commits, prohibiting
-interference from a concurrent transaction that adds the same id.
+transaction's execution remains globally unique until it commits,
+prohibiting interference from a concurrent transaction that adds the
+same id. The axiom thus simulates a global counter protected by an
+exclusive lock.
 
-\textbf{Write Locks}. Transactions in MySQL and PostgreSQL (effectively)
-obtain exclusive locks on records they update, and do not release them
-until they commit, thus preventing write-write (ww) conflicts. To
-obtain this behavior on the abstract machine of Fig.~\ref{fig:txnimp},
-the following proposition must hold for every transaction:
+\textbf{Write-Write Conflicts}. Databases often employ a combination of
+concurrency control methods, both optimistic (e.g., speculation and
+rollback) and pessimistic (e.g., exclusive locking), to eliminate
+write-write conflicts among concurrent transactions. The absence of
+write-write (ww) conflicts, regardless of how it is achieved, can be
+axiomatized as following:
 \begin{smathpar}
 \begin{array}{lcl}
   \I_{ww}(\stl,\stg,\stg') & = & \forall(r'\in\stl)(r \in \stg).~
@@ -54,19 +62,23 @@ That is, given a record $r'\in\stl$, if there exists an $r\in\stg$
 with the same id (i.e., $r'$ is an updated version of $r$), then $r$
 must be present unmodified in $\stg'$. This prevents a concurrent
 transaction from changing $r$, thus simulating the behavior of an
-exclusive lock. There is however a caveat: if we assume extensional
-equality over records, a write by a concurrent transaction that
-doesn't change $r$'s contents is still allowed. While this in itself
-is not a problem, the concurrent transaction may modify other records,
-which then become visible in the current transaction. A write lock
-prevents this behavior, whereas our axiomatization ($\I_{ww}$) allows
-it. An easy fix for this is to add version timestamps to records that
-effectively intensionalizes equality. Nonetheless, imprecise
-axiomatization of write locks hasn't been a problem in practice.
+exclusive lock or a speculative execution that succeeded (Note: a
+transaction writing to $r$ always changes $r$ because its $\txnf$
+field is updated). 
+% There is however a caveat: if we assume extensional
+% equality over records, a write by a concurrent transaction that
+% doesn't change $r$'s contents is still allowed. While this in itself
+% is not a problem, the concurrent transaction may modify other records,
+% which then become visible in the current transaction. A write lock
+% prevents this behavior, whereas our axiomatization ($\I_{ww}$) allows
+% it. An easy fix for this is to add version timestamps to records that
+% effectively intensionalizes equality. Nonetheless, imprecise
+% axiomatization of write locks hasn't been a problem in practice.
 
-\textbf{Snapshots} Both MySQL and PostgresSQL implement isolation levels
-that execute transactions against a static snapshot of the database.
-The semantics of a snapshot be axiomatized as following:
+\textbf{Snapshots} Almost all major relational databases implement
+isolation levels that execute transactions against a static snapshot
+of the database.  The semantics of a snapshot can be axiomatized as
+following:
 \begin{smathpar}
 \begin{array}{lcl}
   \I_{ss}(\stl,\stg,\stg') & = & \stg' = \stg.
@@ -74,15 +86,6 @@ The semantics of a snapshot be axiomatized as following:
 \end{smathpar}
 % The snapshot semantics however may not be applicable throughout the
 % lifetime of the transaction, like in the case of Repeatable Read (RR).
-
-\textbf{Rollbacks} Rollbacks triggered by the post-facto detection of
-write-write conflicts can be axiomatized as following:
-\begin{smathpar}
-\begin{array}{lcl}
-  \I_{rb}(\stl,\stg,\stg') & = & \forall(r\in\stl)(r'\in\stg).~
-  r'.\idf = r.\idf \Rightarrow r'\in\stg'.
-\end{array}
-\end{smathpar}
 
 \textbf{Read-Only Transactions}. Certain databases implement special
 previleges for read-only transactions. Read-only behavior can be
@@ -95,6 +98,86 @@ its $\I$:
 \end{smathpar}
 If a transaction declared as read-only performs a write, then its
 $\stl\neq \emptyset$, and the transaction never commits.
+
+We now define various isolation guarantees that are either found in
+the database and distributed systems literature, or implemented by a
+commercial vendor.
+
+\textbf{Read Committed (RC) and Monotonic Atomic View (MAV)} RC
+isolation allows a transaction to witness only the writes of the
+committed transactions. In particular, \emph{dirty writes} of
+uncommitted transactions are not made visible. Monotonic Atomic View
+(MAV)~\cite{hat,quelea} is an extension to RC that guarantees the
+continuous visibility of a committed transaction's writes if they once
+become visible in the current transaction. That is, an MAV transaction
+does not witness \emph{disappearing writes}, which can happen on a
+weakly consistent machine. Due to the SC nature of our abstract
+machine (there is always a single global database state $\stg$; not a
+vector of states indexed by vector clocks), and our choice to never
+violate atomicity of a transaction's writes, both RC and MAV are
+already guaranteed by our semantics. Thus $\I_e$ and $\I_c$ are both
+$true$ for RC and MAV.
+
+\textbf{Repeatable Read (RR)} By definition, a read in a Repeatable
+Read transaction is required to return the same value regardless of
+how many ever times it is repeated. RR is often implemented (for e.g.,
+in ~\cite{mysql,quelea,hat}) by executing the transaction against a
+(conceptual) snapshot of the database, but committing its writes to
+the actual database. This implementation of RR can be axiomatized as
+$\I_e = \I_{ss}$ and $\I_{c}=true$. However, this specification of RR
+is stronger than the ANSI SQL specification, which requires no more
+than the invariance of already read records. In particular, ANSI SQL
+RR allows \emph{phantom reads} phenomenon, where a \C{SELECT} query
+might return newer records that were not previously present. This
+specification is implemented, for e.g., in~\cite{mssql}, using
+record-level exclusive read locks, that prevent a record from being
+modified while it is read by an uncommitted transaction. ANSI SQL RR
+can be axiomatized in our framework, but it requires a minor extension
+to our operational semantics to track a transaction's reads. In
+particular, the records returned by \C{SELECT} should be added to the
+local database $\stl$, but without changing their transaction
+idenfitiers ($\txnf$ fields), and flush ($\gg$) should only flush the
+records that bear the current transaction's identifier. With this
+extension, ANSI SQL RR can be axiomatized thus ($i$ is the id of the
+current transaction):
+\begin{smathpar}
+\begin{array}{lcl}
+  \I_e(\stl,\stg,\stg') & \Leftrightarrow & \forall(r'\in\stl)(r \in \stg).~
+      r'.\idf \neq i \wedge r.\idf = r'.\idf  \Rightarrow r\in\stg'.\\
+  \I_c(\stl,\stg,\stg') & \Leftrightarrow & true\\
+\end{array}
+\end{smathpar}
+
+\textbf{Snapshot Isolation (SI)} The concept of executing a
+transaction against a consistent snapshot of the database was first
+proposed as Snapshot Isolation in~\cite{berenson}. SI doesn't admit
+write-write conflicts, and the original proposal, which is implemented
+in MS SQL Server~\cite{sqlserver}, required the
+database to roll-back an SI transaction if conflicts are detected
+during the commit. This behavior can be axiomatized as following:
+\begin{smathpar}
+\begin{array}{lcl}
+\I_e\,\,(\stl,\stg,\stg') & = & \stg' = \stg\\
+\I_c\,\,(\stl,\stg,\stg') & = & \forall(r\in\stl)(r'\in\stg).~ r'.\idf = r.\idf \Rightarrow r'\in\stg'.
+\end{array}
+\end{smathpar}
+Observe that the same axiomatization applies to Postgres's RR,
+although its implementation (described in Sec.~\ref{sec:motivation})
+differs considerably from the original proposal. Thus, reasoning done
+for an SI transaction on MS SQL server carries over Postgres's RR and
+vice-versa, demonstrating the benefits of reasoning axiomatically
+about isolation properties.
+
+\textbf{Serializability (SER)} Axiomatization of serializability is
+straightforward:
+\begin{smathpar}
+\begin{array}{lcl}
+\I_e\,\,(\stl,\stg,\stg') & = & \stg' = \stg\\
+\I_c\,\,(\stl,\stg,\stg') & = & \stg' = \stg.
+\end{array}
+\end{smathpar}
+
+
 
 %\usepackage[table,xcdraw]{xcolor}
 \begin{table}[]
