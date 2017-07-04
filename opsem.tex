@@ -18,8 +18,8 @@ transactions ($\ctxn{i}{\I}{c}$) and their parallel composition
 ($c_1\,||\,c_2$). The $\I$ in the \C{TXN} block syntax is the
 transaction's isolation specification, which will be explained later.
 Certain terms that only appear at run-time are also present in $c$.
-These include a \textsc{TXN} block tagged with sets ($\stl$ and $\stg$) of
-records whose meaning is explained below, and a runtime \textsc{FOREACH}
+These include a {\sf txn} block tagged with sets ($\stl$ and $\stg$) of
+records whose meaning is explained below, and a runtime {\sf foreach}
 expression that keeps track of the set ($s_1$) of items already
 iterated, and the set ($s_2$) of items yet to be iterated. Note that
 even the surface-level syntax of the \C{FOREACH} command shown here is
@@ -114,40 +114,42 @@ binders, and sequences are straightforward, and ommitted for brevity.
 
 The top-level reduction relation defines the small-step semantics of
 transactions, and their parallel composition. A transaction always
-comes tagged with an isolation specification $\I_e$ or $\I_c$ that
-dictates the timing and nature of interferences that a transaction can
-witness, both during its execution ($\I_e$), and when it is about to
-commit ($\I_c$).  Formally, $\I_e$ and $\I_c$ are functions that map
-the (current) transaction-local database state ($\stl$), the state
-($\stg$) of the global database when the transaction last took a step,
-and the current state ($\stg'$) of the global database.  Intuitively,
-$\stg'\neq\stg$ indicates an interference from another concurrent
-transaction, and the predicates $\I_e$ and $\I_c$ decide if this
-interference is allowed or not, taking into account the local database
-state ($\stl$). For instance, as described in
-(Sec.~\ref{sec:motivation}), an RR transaction on PostgreSQL defines
-$\I$ as following:
+comes tagged with an isolation specification $\I$, which has two
+components $\I_e$ and $\I_c$, the dictate the timing and nature of
+interferences that the transaction can witness, during its execution
+($\I_e$), and when it is about to commit ($\I_c$).  Formally, $\I_e$
+and $\I_c$ are predicates over by the (current) transaction-local
+database state ($\stl$), the state ($\stg$) of the global database
+when the transaction last took a step, and the current state ($\stg'$)
+of the global database.  Intuitively, $\stg'\neq\stg$ indicates an
+interference from another concurrent transaction, and the predicates
+$\I_e$ and $\I_c$ decide if this interference is allowed or not,
+taking into account the local database state ($\stl$). For instance,
+as described in (Sec.~\ref{sec:motivation}), an RR transaction on
+PostgreSQL defines $\I$ as following:
 \begin{smathpar}
 \begin{array}{lcl}
 \I_e\,\,(\stl,\stg,\stg') & = & \stg' = \stg\\
 \I_c\,\,(\stl,\stg,\stg') & = & \forall(r\in\stl)(r'\in\stg).~ r'.\idf = r.\idf \Rightarrow r'\in\stg'.
 \end{array}
 \end{smathpar}
+For brevity in presentation, we use $\I$ instead of $\I_e$ and $\I_c$
+whenever the discussion applies to both $\I_e$ and $\I_c$. 
 
-The reduction of a $\ctxn{i}{\I_e}{c}$ begins by first converting it
-to its run-time form $\ctxn{i}{\I_e,\stl,\stg}{c}$, where $\stl =
+The reduction of a $\ctxn{i}{\I}{c}$ begins by first converting it to
+its run-time form $\ctxnr{i}{\I,\stl,\stg}{c}$, where $\stl =
 \emptyset$, and $\stg$ the current (global) database.  Rule
-\rulelabel{E-Txn} reduces $\ctxn{i}{\I_e,\stl,\stg}{c}$ under a
-database state ($\stg'$), only if the isolation specification ($\I$)
-allows the interference between $\stg$ and $\stg'$ during that
-step. Rule \rulelabel{E-Commit} commits the transaction
-$\ctxn{i}{\I_c,\stl,\stg}{c}$ by flushing its uncommitted records to
+\rulelabel{E-Txn} reduces $\ctxnr{i}{\I,\stl,\stg}{c}$ under a
+database state ($\stg'$), only if the execution-time isolation
+specification ($\I_e$) allows the interference between $\stg$ and
+$\stg'$. Rule \rulelabel{E-Commit} commits the transaction
+$\ctxnr{i}{\I,\stl,\stg}{c}$ by flushing its uncommitted records to
 the database. This is done only if the interference between $\stg$ and
-$\stg'$ is allowed at the commit point by the isolation specification.
-The distinction between $\I_e$ and $\I_c$ allows us to model realistic
-database features such as snapshot isolation that isolates the effects
-a transaction can witness during its execution but exposes
-interferences from concurrent transactions at the commit point.
+$\stg'$ is allowed at the commit point by the isolation specification
+($\I_c$).  The distinction between $\I_e$ and $\I_c$ allows us to
+model snapshot semantics of realistic isolation levels that isolate a
+transaction from interference during its execution, but exposes
+interference at the commit point.
 
 \input{isolation}
 
