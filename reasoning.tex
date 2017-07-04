@@ -1,6 +1,55 @@
 \section{The Reasoning Framework}
 \label{sec:reasoning}
 
+\begin{figure}
+\centering
+\begin{tabular}{l|l}
+\begin{txnimpcode}
+$\begin{decoration}
+  \{X = k\}
+\end{decoration}$
+  atomic {
+    v1 := 0; v2 := 1;
+    while(v1<X) {
+      v2 := v2 * (X-v1);
+      v1 := v1+1;
+    }
+    X := v2; Y := v2;
+  }
+$\begin{decoration}
+  \{X = k! \conj Y = X\}
+\end{decoration}$
+\end{txnimpcode}
+&
+\begin{txnimpcode}
+$\begin{decoration}
+  \{X = k\}
+\end{decoration}$
+  transaction {
+    v1 := 0; v2 := 1;
+    while(v1<X) {
+      v2 := v2 * (X-v1);
+      v2 := v2 * v1;
+      v1 := v1+1;
+    }
+    X := v2; Y := v2;
+  }
+$\begin{decoration}
+  \{Y = X\}
+\end{decoration}$
+\end{txnimpcode}
+\end{tabular}
+  \caption{Factorial program written as an atomic block and a weakly
+  isolated transaction (shared variables have uppercase names).
+  Effect of multiple iteratons of the \C{atomic} loop can be
+  summarized as $k!$, while same cannot be done with the
+  \C{transaction} loop, where weak isolation allows reads in different
+  iterations to return different values for $X$.  Nonetheless,
+  post-state satisfies $X=Y$ in both cases due to atomicity of
+  writes.}
+\label{fig:atomic-vs-transaction}
+\end{figure}
+
 We now describe a proof system that lets us prove the correctness of a \txnimp
 program $c$ w.r.t its high-level invariant $I$, on a machine that
 satisfies the isolation specifications ($\I$) of its
@@ -30,7 +79,7 @@ is \emph{not} a sequential composition of the effects of its
 statements because each statement witnesses a potentially different
 version of the state. This is illustrated in
 Fig.~\ref{fig:atomic-vs-transaction}, where a series of operations on
-\C{x} can be composed to describe the effect of an \C{atomic} block,
+\C{X} can be composed to describe the effect of an \C{atomic} block,
 while same cannot be done in a transaction. Thus, weak isolation needs
 to be taken into account when defining and verifying guarantees, and
 our proof system shows how. 
