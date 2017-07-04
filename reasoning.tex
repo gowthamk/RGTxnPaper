@@ -139,20 +139,20 @@ The precondition $P$ of $c$ must follow from the fact that the
 transaction-local database ($\stl$) is initially empty, and the global
 database satisfies the high-level invariant $I$. The rely relation
 ($\R_l$) for the local judgment is a ternary relation computed as $R$
-modulo $\I$ as following:
+modulo $\I_e$ as following:
 \begin{smathpar}
 \begin{array}{lcl}
 \R_l(\stl,\stg,\stg') & \Leftrightarrow & R(\stg,\stg') \conj
-\I\,\C{true}\,(\stl,\stg,\stg')
+\I_e(\stl,\stg,\stg')
 \end{array}
 \end{smathpar}
 Thus, $\R_l$ allows an interference only if it doesn't violate the
-execution-time isolation specification of the transaction. If a
+execution-time isolation specification ($\I_e$) of the transaction. If a
 certain interference violates the isolation spec, i.e., $R(\stg,\stg')
-\Rightarrow \neg(\I\,\C{true}\,(\stl,\stg,\stg'))$, then
-$\R_l(\stl,\stg,\stg') \Leftrightarrow false$, and any assertion is
-trivially stable w.r.t that interference. This is sensible considering
-such interference is pre-empted in the operational semantics. 
+\Rightarrow \neg(\I_e(\stl,\stg,\stg'))$, then $\R_l(\stl,\stg,\stg')
+\Leftrightarrow false$, and any assertion is trivially stable w.r.t
+that interference. This is sensible considering such interference is
+pre-empted in the operational semantics. 
 
 Recall that $P$ and $Q$ of the transaction-local RG judgment are
 binary assertions; they relate local and global database states. The
@@ -174,7 +174,7 @@ For the guarantee $G$ of the transaction to be valid, it must follow
 from the post-condition $Q$ of the body, provided that $Q$ is stable
 w.r.t the commit-time interference captured by $R_c$. $R_c$, like
 $R_l$, is computed as rely relation modulo isolation, except that
-commit-time isolation ($\I\,\C{false}$) is considered. The validity of
+commit-time isolation ($\I_c$) is considered. The validity of
 $G$ is captured by the following implication:
 \begin{smathpar}
 \begin{array}{c}
@@ -224,17 +224,18 @@ because original record bears the id of a transaction that has long
 committed. Thus, $\I_{ss}$ remains invalid.
 
 The \rulelabel{RG-Conseq} rule lets us safely weaken the guarantee
-$G$, and strengthen the rely $R$ of a transaction. Importantly, it also
-allows its isolation specification $\I$ to be strengthened. This means
-that a transaction proven correct under a weaker isolation level is
-also correct under a stronger level. Parametricity over the isolation
-specification $\I$, combined with the ability to strengthen $\I$ as
-needed, admits a flexible proof strategy to prove database programs
-correct. For example, programmers can declare isolation requirements
-of their choice through $\I$, and then prove programs correct assuming
-the guarantees hold. The soundness of strengthening $\I$ ensures that
-a program can be safely executed on any system that offers isolation
-guarantees at least as strong as those assumed.
+$G$, and strengthen the rely $R$ of a transaction. Importantly, it
+also allows its isolation specification $\I$ to be strengthened (both
+$\I_e$ and $\I_c$). This means that a transaction proven correct under
+a weaker isolation level is also correct under a stronger level.
+Parametricity over the isolation specification $\I$, combined with the
+ability to strengthen $\I$ as needed, admits a flexible proof strategy
+to prove database programs correct. For example, programmers can
+declare isolation requirements of their choice through $\I$, and then
+prove programs correct assuming the guarantees hold. The soundness of
+strengthening $\I$ ensures that a program can be safely executed on
+any system that offers isolation guarantees at least as strong as
+those assumed.
 
 Two rules of the transaction-local RG judgment are shown in
 Fig.~\ref{fig:rg-rules}. The rule \rulelabel{RG-Update} is
@@ -243,8 +244,8 @@ reflect the structure of the corresponding reduction rule from
 Fig.~\ref{fig:txnimp}, and require no further explanation. The rule
 \rulelabel{RG-Foreach} defines the RG judgment for a \C{FOREACH} loop.
 As is characteristic of loops, the reasoning is pivoted on a loop
-invariant $I$ (not same as the high-level invariant), that needs to
-be stable w.r.t $\R$. $I$ must follow $P$, the pre-condition of
+invariant $I$ (not same as the high-level invariant), that needs to be
+stable w.r.t $\R$. $I$ must follow $P$, the pre-condition of
 \C{FOREACH}, when no elements have been iterated, i.e, when
 $y=\emptyset$. The body of the loop can assume the loop invariant, and
 the fact that $z$ is an element from the set $x$ being iterated, to
