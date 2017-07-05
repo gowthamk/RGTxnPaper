@@ -24,7 +24,7 @@ e & \in & \mathtt{Expressions} & \coloneqq & k \ALT x \ALT x.f
 c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
     \ALT \ite{e}{c_1}{c_2}\ALT c_1;c_2 \ALT \inserte{x}  \\
 &&&&\ALT \deletee{\lambda x.e}
-    \ALT \lete{x}{\selecte{\lambda x.e}}{c}
+    \ALT \lete{y}{\selecte{\lambda x.e}}{c}
     \ALT \updatee{\lambda x.e_1}{\lambda x.e_2}\\
 &&&&\ALT \foreache{x}{\lambda y.\lambda z. c} 
     \ALT \foreachr{s_1}{s_2}{\lambda x.\lambda y. e}\\
@@ -51,11 +51,11 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \RULE
 {
   i \not\in \dom(\stl \cup \stg)\\
-  r = \{\bar{f}=\bar{k};\,\idf=i;\,\delf=\C{false}\}
+  r' = \{r \;\C{with}\; \idf=i;\,\delf=\C{false}\}
 }
 {
-  \stg \vdash (\inserte{\{\bar{f}=\bar{k}\}},\stl) \stepsto
-  (\cskip,\stl \cup \{r\})
+  \stg \vdash (\inserte{r},\stl) \stepsto
+  (\cskip,\stl \cup \{r'\})
 }
 \end{array}
 \end{smathpar}
@@ -70,8 +70,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 {
   \hspace*{-1.5in}
   s = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e)=\C{true} \\
-      \hspace*{0.1in}\conj r'=\{\bar{f}=r.\bar{f}; \idf=r.\idf;
-        \delf=\C{true}\}\}\spc
+      \hspace*{0.1in}\conj r'=\{r \;\C{with}\; \delf=\C{true}\}\}\spc
   \dom(\stl)\cap\dom(s) = \emptyset \spc
 % \dom(s) \cap \dom(\delta) = \emptyset
 }
@@ -110,8 +109,9 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \begin{array}{c}
 \RULE
 {
-  s = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e_2)=\C{true} \\
-  \hspace*{0.9in}\conj r'=[r/x]e_1\}\spc
+  \hspace*{-0.2in}s = \{r' \,|\, \exists(r\in\Delta).~ 
+    \eval([r/x]e_2)=\C{true} \conj r'= \{ [r/x]e_1 \;\C{with}\\
+    \idf=r.\idf;\,\delf = r.\delf \}\} \spc
   \dom(\stl) \cap \dom(s) = \emptyset
 }
 {
