@@ -211,7 +211,10 @@ morekeywords={module, match, when, @@deriving, not, : , txn_do, do, SQL/\\}
 \newcommand{\delf}{\texttt{del}}
 \newcommand{\txnf}{\texttt{txn}}
 \newcommand{\eff}{\mathcal{F}}
-\newcommand{\elabsto}{\Longrightarrow}
+\newcommand{\elabsto}{\Longrightarrow_{\R}}
 \newcommand{\with}{~\C{with}~}
-\newcommand{\itel}[3]{{\sf IF}\;#1\;{\sf THEN}\;#2\;{\sf ELSE}\;#3}
-\newcommand{\stabilize}[1]{\llfloor #1 \rrfloor}
+\newcommand{\itel}[3]{{\sf if}\;#1\;{\sf then}\;#2\;{\sf else}\;#3}
+\newcommand{\stabilize}[1]{\llfloor #1 \rrfloor_{\R}}
+\newcommand{\semof}[1]{\llbracket #1 \rrbracket}
+\newcommand{\existsl}{{\sf exists}}
+\newcommand{\fresh}{{\sf fresh}}

@@ -3,3 +3,11 @@
 
 \input{inference-rules}
 
+\input{logic}
+
+\begin{theorem}
+if $c \elabsto \F$ and $\semof{\F(\stl,\stg)} = (\phi^1,g)$ and
+$P(\stl,\stg) = true$ and $Q(\stl',\stg) = \exists\stl.~ \phi^1 \wedge
+  \forall a. a\in\stl' \Leftrightarrow a\in\stl \vee g(a)$, then
+  $\R \vdash \hoare{P}{c}{Q}$
+\end{theorem}

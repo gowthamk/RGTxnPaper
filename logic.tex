@@ -1,0 +1,53 @@
+\begin{figure}
+\raggedright
+\begin{smathpar}
+\renewcommand{\arraystretch}{1.2}
+\begin{array}{lcl}
+\multicolumn{3}{c}{
+  x \in \texttt{Variables}\spc
+  \phi^0 \in \Prop^{0}
+}\\
+s & \coloneqq & x \ALT \stl \ALT \stg \ALT \{x \,|\, \phi^0\} 
+  \ALT \existsl(x,\phi^0,s) 
+  \ALT s_1 \bind \lambda x. s_2 \ALT \itel{\phi^0}{s_1}{s_2} 
+  \ALT s_1 \cup s_2 \\
+\end{array}
+\end{smathpar}
+%
+\bigskip
+
+%
+\begin{smathpar}
+\begin{array}{lclcr}
+\semof{x \ALT \stl \ALT \stg} & = & (true,x) \ALT (true,\stl) \ALT
+(true,\stg) & \\
+%
+\semof{\{a \,|\, \phi^0\}} & = & (\forall a.~ g(a) \Leftrightarrow \phi^0,g) 
+  & \texttt{  } & \fresh(g)\\
+%
+\semof{\existsl(a,\phi^0,s)} & = &  (\phi^1 \conj 
+  \exists a.\forall b.~ g(b) \Leftrightarrow \phi^0 \wedge g_1(b), ~g)
+  & \texttt{  } & (\phi^1,g_1)=\semof{s} \spc \fresh(g)\\
+%
+\semof{s_1 \bind \lambda x. s_2} & = & (\phi^1_1 \conj \phi^1_2 \conj
+  \forall a.\exists b.~ g(a) \Rightarrow g_2(b) \wedge [b/x]g_1(a) & & \\
+&& \hspace*{0.57in}\conj \forall b.\forall a.~g_2(b) \wedge [b/x]g_1(a) 
+      \Rightarrow g(a), ~g) & \texttt{  } & (\phi^1_1,g_1)=\semof{s_1} \spc
+      (\phi^1_2,g_2)=\semof{s_2} \spc \fresh(g)\\
+%
+\semof{\itel{\phi^0}{s_1}{s_2}} & = & (\phi^1_1 \conj \phi^1_2 \conj
+  \forall a.~ g(a) \Leftrightarrow (\phi^0 \Rightarrow g_1(a))& & \\
+&&  \hspace*{1.5in}\wedge (\neg\phi^0 \Rightarrow g_2(a)),~g) & \texttt{  } 
+      & (\phi^1_1,g_1)=\semof{s_1} \spc
+      (\phi^1_2,g_2)=\semof{s_2} \spc \fresh(g)\\
+%
+\semof{s_1 \cup s_2} & = & (\phi^1_1 \conj \phi^1_2 \conj
+  \forall a.~ g(a) \Leftrightarrow g_1(a) \vee g_2(a),~g) 
+  & \texttt{ } & (\phi^1_1,g_1)=\semof{s_1} \spc
+      (\phi^1_2,g_2)=\semof{s_2} \spc \fresh(g)\\
+\end{array}
+\end{smathpar}
+
+\caption{The syntax and semantics of the set logic}
+\label{fig:logic}
+\end{figure}

@@ -58,7 +58,8 @@
 %
 
 %
-\begin{minipage}{3in}
+\begin{center}
+\begin{minipage}{3.2in}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
@@ -67,29 +68,31 @@
   c_2 \elabsto \F_2 
 }
 {
-  \ite{e}{c_1}{c_2} ~\elabsto~  \itel{e}{\F_1}{\F_2}\\
+  \ite{e}{c_1}{c_2} ~\elabsto~
+    \lambda(\stl,\stg).~\itel{e}{\F_1(\stl,\stg)}{\F_2(\stl,\stg)}\\
 }
 \end{array}
 \end{smathpar}
 \end{minipage}
-%
-%
-\begin{minipage}{3in}
-\begin{smathpar}
-\begin{array}{c}
-\RULE
-{
-  c_1 \elabsto \F_1 \spc
-  c_2 \elabsto \F_2 
-}
-{
-  c_1;c_2 ~\elabsto~  \lambda(\stl,\stg).~\F_1 \cup \F_2(\stl \cup \F_1(\stl,\stg),\stg)
-}
-\end{array}
-\end{smathpar}
-\end{minipage}
+\end{center}
 %
 
+%
+\begin{minipage}{3in}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  c_1 \elabsto \F_1 \spc
+  c_2 \elabsto \F_2 
+}
+{
+  c_1;c_2 ~\elabsto~  \lambda(\stl,\stg).~\F_1(\stl,\stg) \cup \F_2(\stl \cup \F_1(\stl,\stg),\stg)
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
 %
 \begin{minipage}{3in}
 \begin{smathpar}
