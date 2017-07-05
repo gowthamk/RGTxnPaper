@@ -1,0 +1,112 @@
+\begin{figure}
+\raggedright
+%
+\fbox {\(c \elabsto \F \)}\\
+%
+
+\renewcommand{\arraystretch}{1.2}
+\begin{smathpar}
+\begin{array}{lcl}
+\inserte{x} & \elabsto & \stabilize{\lambda(\stl,\stg).~
+  \{ r \,|\, r = \{x \with \idf = \uid(x);\,r.\delf=\C{false};\,
+                \txnf = T_i\} \conj \uid(x) \notin \dom(\stl\cup\stg) \}}\\ 
+%
+\updatee{\lambda x.e_1}{\lambda x.e_2} & \elabsto & \stabilize{
+  \lambda(\stl,\stg).~ \stg \bind (\lambda r.~ 
+  \{r' \,|\, [r/x]e_2 \conj r' = \{[r/x]e_1 \with 
+      \idf=r.\idf;\,\delf = r.\delf;\,\txnf=T_i \}) \} }\\ 
+%
+\deletee{\lambda x.e} & \elabsto & \stabilize{
+  \lambda(\stl,\stg).~ \stg \bind (\lambda r.~ 
+  \{r' \,|\, [r/x]e \conj r'=\{r \with \delf=\C{true}\})\} }\\ 
+%
+\end{array}
+\end{smathpar}
+
+%
+\begin{minipage}{2.7in}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  c \elabsto \F \spc
+}
+{
+  \lete{x}{e}{c} ~\elabsto~  
+    \stabilize{\lambda(\stl,\stg).~ [e/x]\,\F(\stl,\stg)}\\
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+%
+\begin{minipage}{3in}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  c \elabsto \F \spc
+  G = \lambda r.~ \itel{[r/x]e}{\{r\}}{\emptyset}
+}
+{
+  \lete{y}{\selecte{\lambda x.e}}{c} ~\elabsto~  
+    \stabilize{\lambda (\stl,\stg).~ [(\stg \bind G)/y]\,\F(\stl,\stg)}\\
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+%
+\begin{minipage}{3in}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  c_1 \elabsto \F_1 \spc
+  c_2 \elabsto \F_2 
+}
+{
+  \ite{e}{c_1}{c_2} ~\elabsto~  \itel{e}{\F_1}{\F_2}\\
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+%
+\begin{minipage}{3in}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  c_1 \elabsto \F_1 \spc
+  c_2 \elabsto \F_2 
+}
+{
+  c_1;c_2 ~\elabsto~  \lambda(\stl,\stg).~\F_1 \cup \F_2(\stl \cup \F_1(\stl,\stg),\stg)
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+%
+\begin{minipage}{3in}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  c \elabsto \F \spc
+}
+{
+  \foreache{x}{\lambda y.\lambda z.~c} ~\elabsto~
+  \lambda(\stl,\stg).~ x\bind(\lambda z.~\F(\stl,\stg))
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+\caption{\txnimp: Effect inference rules }
+\label{fig:inference-rules}
+\end{figure}

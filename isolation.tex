@@ -132,27 +132,30 @@ the actual database. This implementation of RR can be axiomatized as
 $\I_e = \I_{ss}$ and $\I_{c}=true$. However, this specification of RR
 is stronger than the ANSI SQL specification, which requires no more
 than the invariance of already read records. In particular, ANSI SQL
-RR allows \emph{phantom reads}, a phenonmenon in which a \C{SELECT}
-query might return newer records, inserted into tables, that were not
-present at the point the RR transaction started.  This specification
-is implemented, for e.g., in Microsoft's SQL server, using
-record-level exclusive read locks, that prevent a record from being
-modified while it is read by an uncommitted transaction.  The ANSI SQL
-RR specification can be axiomatized in our framework, but it requires
-a minor extension to our operational semantics to track a
-transaction's reads. In particular, the records returned by \C{SELECT}
-should be added to the local database $\stl$, but without changing
-their transaction identifiers ($\txnf$ fields), and flush ($\gg$)
-should only flush the records that bear the current transaction's
-identifier.  With this small extension, ANSI SQL RR can be axiomatized
-thus ($i$ is the id of the current transaction):
+RR allows \emph{phantom reads}, a phenonmenon in which a repeated
+\C{SELECT} query might return newly inserted records that were not
+previously returned. This specification is implemented, for e.g., in
+Microsoft's SQL server, using record-level exclusive read locks, that
+prevent a record from being modified while it is read by an
+uncommitted transaction.  The ANSI SQL RR specification can be
+axiomatized in our framework, but it requires a minor extension to our
+operational semantics to track a transaction's reads. In particular,
+the records returned by \C{SELECT} should be added to the local
+database $\stl$, but without changing their transaction identifiers
+($\txnf$ fields), and flush ($\gg$) should only flush the records that
+bear the current transaction's identifier. With this extension, ANSI
+SQL RR can be axiomatized thus:
 \begin{smathpar}
 \begin{array}{lcl}
-  \I_e(\stl,\stg,\stg') & \Leftrightarrow & \forall(r'\in\stl)(r \in \stg).~
-      r'.\idf \neq i \wedge r.\idf = r'.\idf  \Rightarrow r\in\stg'.\\
+  \I_e(\stl,\stg,\stg') & \Leftrightarrow & \forall(r\in\stl).
+      r \in \Delta \Rightarrow r \in \Delta'\\
   \I_c(\stl,\stg,\stg') & \Leftrightarrow & true\\
 \end{array}
 \end{smathpar}
+If a record $r$ belongs to both $\stl$ and $\stg$, then it must be a
+record written by a different transaction and read by the current
+transaction. By requiring $r\in\stg'$, $\I_e$ guarantees the
+invariance of $r$, thus the repeatability of the read. 
 
 \textbf{Snapshot Isolation (SI)} The concept of executing a
 transaction against a consistent snapshot of the database was first
