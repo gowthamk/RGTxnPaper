@@ -145,14 +145,18 @@ should be added to the local database $\stl$, but without changing
 their transaction identifiers ($\txnf$ fields), and flush ($\gg$)
 should only flush the records that bear the current transaction's
 identifier.  With this small extension, ANSI SQL RR can be axiomatized
-thus ($i$ is the id of the current transaction):
+thus:
 \begin{smathpar}
 \begin{array}{lcl}
-  \I_e(\stl,\stg,\stg') & \Leftrightarrow & \forall(r'\in\stl)(r \in \stg).~
-      r'.\idf \neq i \wedge r.\idf = r'.\idf  \Rightarrow r\in\stg'.\\
+  \I_e(\stl,\stg,\stg') & \Leftrightarrow & \forall(r\in\stl).
+      r \in \Delta \Rightarrow r \in \Delta'\\
   \I_c(\stl,\stg,\stg') & \Leftrightarrow & true\\
 \end{array}
 \end{smathpar}
+If a record $r$ belongs to both $\stl$ and $\stg$, then it must be a
+record written by a different transaction and read by the current
+transaction. By requiring $r\in\stg'$, $\I_e$ guarantees the
+invariance of $r$, thus the repeatability of the read. 
 
 \textbf{Snapshot Isolation (SI)} The concept of executing a
 transaction against a consistent snapshot of the database was first
