@@ -6,8 +6,9 @@ parameterized on the isolation specification $\I$. $\I$ can be
 instantiated with the declarative characterization of an isolation
 guarantee or a concurrency control mechanism, regardless of its actual
 implementation. This allows us to model a range of isolation
-properties that are relevant to the theory and practice of database
-systems. We present some below:
+properties that are relevant to the theory and practice of realistic
+transaction processing systems, some of the most well-known of which are
+given below:
 
 % Databases implement isolation levels through a combination of various
 % concurrency control mechanisms, which are absent from
@@ -24,14 +25,15 @@ systems. We present some below:
 
 \textbf{Unique Ids}. As the \C{new\_order} example
 (Sec.~\ref{sec:motivation}) demonstrates, enforcing global uniqueness
-of ordered identifiers requires stronger isolation. Alternatively,
-globally unique sequence numbers, regardless of the isolation level,
-can be from a requested from a relational databases via SQL's
-\C{UNIQUE} and \C{AUTO\_INCREMENT} keywords. Our development crucially
-relies on the uniqueness of record identifiers\footnote{This has
-parallels in real-world. For e.g., MySQL's InnoDB engine automatically
-adds a 6-byte unique identifier if none exists for a record.}, which
-are generated locally by the \rulelabel{E-Insert} rule. Global
+of ordered identifiers requires stronger isolation than possible using
+a weak read committed isolation level. Alternatively, globally unique
+sequence numbers, regardless of the isolation level, can be requested
+from a relational databases via SQL's \C{UNIQUE} and
+\C{AUTO\_INCREMENT} keywords. Our development crucially relies on the
+uniqueness of record identifiers\footnote{This has parallels in
+  real-world. For e.g., MySQL's InnoDB engine automatically adds a
+  6-byte unique identifier if none exists for a record.}, which are
+generated locally by the \rulelabel{E-Insert} rule.  The global
 uniqueness of locally generated identifiers can be axiomatized as an
 isolation property as following:
 \begin{smathpar}
@@ -44,14 +46,15 @@ $\I_{id}$ ensures that a globally unique id generated during a
 transaction's execution remains globally unique until it commits,
 prohibiting interference from a concurrent transaction that adds the
 same id. The axiom thus simulates a global counter protected by an
-exclusive lock.
+exclusive lock without explicitly appealing to specific
+implementation artifacts.
 
-\textbf{Write-Write Conflicts}. Databases often employ a combination of
-concurrency control methods, both optimistic (e.g., speculation and
-rollback) and pessimistic (e.g., exclusive locking), to eliminate
-write-write conflicts among concurrent transactions. The absence of
-write-write (ww) conflicts, regardless of how it is achieved, can be
-axiomatized as following:
+\textbf{Write-Write Conflicts}. Databases often employ a combination
+of concurrency control methods, both optimistic (e.g., speculation and
+rollback) and pessimistic (e.g., various degrees of locking), to
+eliminate write-write (ww) conflicts among concurrent
+transactions. We can specify the  absence of such conflicts using our
+tri-state formulation thus:
 \begin{smathpar}
 \begin{array}{lcl}
   \I_{ww}(\stl,\stg,\stg') & = & \forall(r'\in\stl)(r \in \stg).~
@@ -77,8 +80,7 @@ field is updated).
 
 \textbf{Snapshots} Almost all major relational databases implement
 isolation levels that execute transactions against a static snapshot
-of the database.  The semantics of a snapshot can be axiomatized as
-following:
+of the database that can be axiomatized thus:
 \begin{smathpar}
 \begin{array}{lcl}
   \I_{ss}(\stl,\stg,\stg') & = & \stg' = \stg.
@@ -88,58 +90,62 @@ following:
 % lifetime of the transaction, like in the case of Repeatable Read (RR).
 
 \textbf{Read-Only Transactions}. Certain databases implement special
-previleges for read-only transactions. Read-only behavior can be
-enforced on a transaction by including the following proposition in
-its $\I$:
+privileges for read-only transactions. Read-only behavior can be
+enforced on a transaction by including the following proposition as
+part of its isolation invariant:
 \begin{smathpar}
 \begin{array}{lcl}
   \I_{ro}(\stl,\stg,\stg') & = & \stl = \emptyset\\
 \end{array}
 \end{smathpar}
-If a transaction declared as read-only performs a write, then its
-$\stl\neq \emptyset$, and the transaction never commits.
+%% If a transaction declared as read-only performs a write, then its
+%% $\stl\neq \emptyset$, and the transaction never commits.
 
-We now define various isolation guarantees that are either found in
-the database and distributed systems literature, or implemented by a
-commercial vendor.
+In addition to these properties, there are various isolation
+guarantees proposed in the database or distributed systems literature,
+or implemented by commercial vendors that can also be specified within
+this framework:
 
 \textbf{Read Committed (RC) and Monotonic Atomic View (MAV)} RC
-isolation allows a transaction to witness only the writes of the
-committed transactions. In particular, \emph{dirty writes} of
-uncommitted transactions are not made visible. Monotonic Atomic View
-(MAV)~\cite{hat,quelea} is an extension to RC that guarantees the
-continuous visibility of a committed transaction's writes if they once
-become visible in the current transaction. That is, an MAV transaction
+isolation allows a transaction to witness writes of committed
+transactions at any point during the transaction's execution.
+Although it offers only weak isolation guarantees, it nonetheless
+prevents witnessing \emph{dirty writes} (i.e., writes performed by
+uncommitted transactions).  Monotonic Atomic View
+(MAV)~\cite{bailishat} is an extension to RC that guarantees the
+continuous visibility of a committed transaction's writes once they
+become visible in the current transaction. That is, a MAV transaction
 does not witness \emph{disappearing writes}, which can happen on a
 weakly consistent machine. Due to the SC nature of our abstract
 machine (there is always a single global database state $\stg$; not a
 vector of states indexed by vector clocks), and our choice to never
 violate atomicity of a transaction's writes, both RC and MAV are
-already guaranteed by our semantics. Thus $\I_e$ and $\I_c$ are both
-$true$ for RC and MAV.
+already guaranteed by our semantics.  Thus, defining $\I_e$ and $\I_c$
+to \emph{true} ensures RC and MAV behavior under our semantics.
 
-\textbf{Repeatable Read (RR)} By definition, a read in a Repeatable
-Read transaction is required to return the same value regardless of
-how many ever times it is repeated. RR is often implemented (for e.g.,
-in ~\cite{mysql,quelea,hat}) by executing the transaction against a
+\textbf{Repeatable Read (RR)} By definition, a read to a transactional
+variable in a Repeatable Read transaction is required to return the
+same value whenever accessed.  RR is often implemented (for e.g., in
+~\cite{mysqliso,bailishat}) by executing the transaction against a
 (conceptual) snapshot of the database, but committing its writes to
 the actual database. This implementation of RR can be axiomatized as
 $\I_e = \I_{ss}$ and $\I_{c}=true$. However, this specification of RR
 is stronger than the ANSI SQL specification, which requires no more
 than the invariance of already read records. In particular, ANSI SQL
-RR allows \emph{phantom reads} phenomenon, where a \C{SELECT} query
-might return newer records that were not previously present. This
-specification is implemented, for e.g., in~\cite{mssql}, using
+RR allows \emph{phantom reads}, a phenonmenon in which a \C{SELECT}
+query might return newer records, inserted into tables, that were not
+present at the point the RR transaction started.  This specification
+is implemented, for e.g., in Microsoft's SQL server, using
 record-level exclusive read locks, that prevent a record from being
-modified while it is read by an uncommitted transaction. ANSI SQL RR
-can be axiomatized in our framework, but it requires a minor extension
-to our operational semantics to track a transaction's reads. In
-particular, the records returned by \C{SELECT} should be added to the
-local database $\stl$, but without changing their transaction
-idenfitiers ($\txnf$ fields), and flush ($\gg$) should only flush the
-records that bear the current transaction's identifier. With this
-extension, ANSI SQL RR can be axiomatized thus ($i$ is the id of the
-current transaction):
+modified while it is read by an uncommitted transaction.  The ANSI SQL
+RR specification can be axiomatized in our framework, but it requires
+a minor extension to our operational semantics to track a
+transaction's reads. In particular, the records returned by \C{SELECT}
+should be added to the local database $\stl$, but without changing
+their transaction identifiers ($\txnf$ fields), and flush ($\gg$)
+should only flush the records that bear the current transaction's
+identifier.  With this small extension, ANSI SQL RR can be axiomatized
+thus ($i$ is the id of the current transaction):
 \begin{smathpar}
 \begin{array}{lcl}
   \I_e(\stl,\stg,\stg') & \Leftrightarrow & \forall(r'\in\stl)(r \in \stg).~
@@ -152,9 +158,9 @@ current transaction):
 transaction against a consistent snapshot of the database was first
 proposed as Snapshot Isolation in~\cite{berenson}. SI doesn't admit
 write-write conflicts, and the original proposal, which is implemented
-in MS SQL Server~\cite{sqlserver}, required the
-database to roll-back an SI transaction if conflicts are detected
-during the commit. This behavior can be axiomatized as following:
+in Microsoft SQL Server, required the database to roll-back an SI
+transaction if conflicts are detected during the commit. This behavior
+can be axiomatized thus:
 \begin{smathpar}
 \begin{array}{lcl}
 \I_e\,\,(\stl,\stg,\stg') & = & \stg' = \stg\\
@@ -164,8 +170,8 @@ during the commit. This behavior can be axiomatized as following:
 Observe that the same axiomatization applies to Postgres's RR,
 although its implementation (described in Sec.~\ref{sec:motivation})
 differs considerably from the original proposal. Thus, reasoning done
-for an SI transaction on MS SQL server carries over Postgres's RR and
-vice-versa, demonstrating the benefits of reasoning axiomatically
+for an SI transaction on MS SQL server carries over to Postgres's RR
+and vice-versa, demonstrating the benefits of reasoning axiomatically
 about isolation properties.
 
 \textbf{Serializability (SER)} Axiomatization of serializability is
@@ -179,25 +185,25 @@ straightforward:
 
 
 
-%\usepackage[table,xcdraw]{xcolor}
-\begin{table}[]
-\centering
-\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|l|l|}
-\cline{2-13}
-                                & \multicolumn{6}{c|}{{\color[HTML]{333333} PostgreSQL}}                         & \multicolumn{6}{c|}{MySql}                                                   \\ \cline{2-13} 
-                                & \multicolumn{2}{c|}{RC} & \multicolumn{2}{c|}{RR} & \multicolumn{2}{c|}{SER} & \multicolumn{2}{c|}{RC} & \multicolumn{2}{c|}{RR} & \multicolumn{2}{c|}{SER} \\ \cline{2-13} 
-                                & T          & F          & T          & F          & T           & F          & T          & F          & T          & F          & T           & F          \\ \hline
-\multicolumn{1}{|l|}{$\I_{ss}$} &            &            & \checkmark &            & \checkmark  & \checkmark &            &            & \checkmark &            & \checkmark  & \checkmark \\ \hline
-\multicolumn{1}{|l|}{$\I_{rb}$} &            &            &            & \checkmark &             &            &            &            &            &            &             &            \\ \hline
-\multicolumn{1}{|l|}{$\I_{ro}$} &            &            &            &            &             &            &            &            & \checkmark & \checkmark &             &            \\ \hline
-\multicolumn{1}{|l|}{$\I_{id}$} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark  & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark  & \checkmark \\ \hline
-\multicolumn{1}{|l|}{$\I_{ww}$} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark  & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark  & \checkmark \\ \hline
-\end{tabular}
+%% %\usepackage[table,xcdraw]{xcolor}
+%% \begin{table}[]
+%% \centering
+%% \begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|l|l|}
+%% \cline{2-13}
+%%                                 & \multicolumn{6}{c|}{{\color[HTML]{333333} PostgreSQL}}                         & \multicolumn{6}{c|}{MySql}                                                   \\ \cline{2-13} 
+%%                                 & \multicolumn{2}{c|}{RC} & \multicolumn{2}{c|}{RR} & \multicolumn{2}{c|}{SER} & \multicolumn{2}{c|}{RC} & \multicolumn{2}{c|}{RR} & \multicolumn{2}{c|}{SER} \\ \cline{2-13} 
+%%                                 & T          & F          & T          & F          & T           & F          & T          & F          & T          & F          & T           & F          \\ \hline
+%% \multicolumn{1}{|l|}{$\I_{ss}$} &            &            & \checkmark &            & \checkmark  & \checkmark &            &            & \checkmark &            & \checkmark  & \checkmark \\ \hline
+%% \multicolumn{1}{|l|}{$\I_{rb}$} &            &            &            & \checkmark &             &            &            &            &            &            &             &            \\ \hline
+%% \multicolumn{1}{|l|}{$\I_{ro}$} &            &            &            &            &             &            &            &            & \checkmark & \checkmark &             &            \\ \hline
+%% \multicolumn{1}{|l|}{$\I_{id}$} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark  & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark  & \checkmark \\ \hline
+%% \multicolumn{1}{|l|}{$\I_{ww}$} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark  & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark  & \checkmark \\ \hline
+%% \end{tabular}
 
-\caption{The semantics of isolation levels on PostgreSQL and MySQL}
-\label{fig:iso-table}
-\end{table}
+%% \caption{The semantics of isolation levels on PostgreSQL and MySQL}
+%% \label{fig:iso-table}
+%% \end{table}
 
-With help of the above axiomatizations, we can now define the precise
-semantics of various isolation levels on PostgreSQL and MySQL. The table
-in Table~\ref{fig:iso-table} captures the summary.
+%% With help of the above axiomatizations, we can now define the precise
+%% semantics of various isolation levels on PostgreSQL and MySQL. The table
+%% in Table~\ref{fig:iso-table} captures the summary.
