@@ -134,17 +134,23 @@ database satisfies the high-level invariant $I$. The rely relation
 modulo $\I_e$:
 \begin{smathpar}
 \begin{array}{lcl}
-\R_l(\stl,\stg,\stg') & \Leftrightarrow & R(\stg,\stg') \conj
-\I_e(\stl,\stg,\stg')
+%\R_l(\stl,\stg,\stg') & \Leftrightarrow & R(\stg,\stg') \conj
+%\I_e(\stl,\stg,\stg')
+  \R_l(\stl,\stg,\stg') & \Leftrightarrow & \exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg')
 \end{array}
 \end{smathpar}
-Thus, $\R_l$ allows an interference only if it does not violate the
-execution-time isolation specification ($\I_e$) of the transaction. If a
-certain interference violates the isolation spec, i.e., $R(\stg,\stg')
-\Rightarrow \neg(\I_e(\stl,\stg,\stg'))$, then $\R_l(\stl,\stg,\stg')
-\Leftrightarrow false$, and any assertion is trivially stable w.r.t
-that interference. This is sensible considering such interference is
-prevented in the operational semantics. 
+In words, if there exists $\stg_1$ which was the global database state during the last step by a transaction and if the transaction can take its next step at the current global database state $\stg$, then even after the interference, the transaction should still be able to take its next step. If there is no such state $\stg_1$, then a transaction will never be able to take its next step after the interference, and hence such interference can be safely discarded. 
+
+%\begin{smathpar}
+%\exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') \Rightarrow \forall \stg_2 
+%\end{smathpar}
+%Thus, $\R_l$ allows an interference only if it does not violate the
+%execution-time isolation specification ($\I_e$) of the transaction. If a
+%certain interference violates the isolation spec, i.e., $R(\stg,\stg')
+%\Rightarrow \neg(\I_e(\stl,\stg,\stg'))$, then $\R_l(\stl,\stg,\stg')
+%\Leftrightarrow false$, and any assertion is trivially stable w.r.t
+%that interference. This is sensible considering such interference is
+%prevented in the operational semantics. 
 
 Recall that $P$ and $Q$ of the transaction-local RG judgment are
 binary assertions; they relate local and global database states. The
