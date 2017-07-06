@@ -59,19 +59,21 @@ be stable w.r.t the rely relation $\R$. The stability condition on
 effects is defined below:
 \begin{smathpar}
 \begin{array}{lcl}
-  \stable(\R,\F) & \Leftrightarrow & \forall \stl,\stg,\stg'.~
+  \stable(\R,\F) & \Leftrightarrow & \forall \stl,\stg,\stg',\bar{v}.~
   \R(\stl,\stg,\stg') \Rightarrow \F(\stl,\stg) \equiv \F(\stl,\stg')
 \end{array}
 \end{smathpar}
-Intuitively, the stability condition requires an effect to describe
-the same set of records before and after the interference. The
-equivalence in $\SL$ translates to the equality in first-order logic,
-as will be explained shortly. In the inference rules, stability is
-enforced constructively by a meta function $\stabilize{\cdot}$, which
-accepts an effect and returns a new effect that is guaranteed to be
-stable under $\R$. $\stabilize{\cdot}$ achieves the stability
-guarantee by abstracting away the bound $\stg$ in an unstable $\F$ to
-an existentially bound $\stg'$ as described below:
+where, $\bar{v}$ are the variables that occur free in $\F$ (possible
+because of how the inference rules are structured).  Intuitively, the
+stability condition requires an effect to describe the same set of
+records before and after the interference. The equivalence in $\SL$
+translates to the equality in first-order logic, as will become clear
+shortly. In the inference rules, stability is enforced constructively
+by a meta function $\stabilize{\cdot}$, which accepts an effect and
+returns a new effect that is guaranteed to be stable under $\R$.
+$\stabilize{\cdot}$ achieves the stability guarantee by abstracting
+away the bound $\stg$ in an unstable $\F$ to an existentially bound
+$\stg'$ as described below:
 \begin{smathpar}
 \begin{array}{lcll}
   \stabilize{\F} & = & \F & \texttt{if } \stable(\R,\F).\\
@@ -81,9 +83,40 @@ an existentially bound $\stg'$ as described below:
 \end{smathpar}
 Observe that when $\F$ is not stable, then $\stabilize{\F}$ returns an
 $\F'$ that simply ignores its $\stg$ argument in favor of a generic
-$\stg'$, making $\F'$ trivially stable. The existentially bound
-$\stg'$ satisfies $I$ since transactions are always executed against a
-valid database state. 
+$\stg'$, making $\F'$ trivially stable. It is safe to assume
+$I(\stg')$ because all verified transactions preserve the invariant,
+hence only valid database states will ever be witnessed. From the
+perspective of RG reasoning, $\stabilize{\cdot}$ effectively weakens
+the post-condition of a statement, as done by the
+\rulelabel{RG-Conseq} rule for transaction-bound commands (cf.  the
+supplementary material). The weakening semantics chosen by
+$\stabilize{\cdot}$, while being simple, is nonetheless useful because
+of the $I(\stg')$ assumption on the existentially bound $\stg'$. The
+example in Fig.~\ref{fig:weakening-example} demonstrates. 
+\begin{figure}[h]
+\begin{ocaml}
+let add_interest acc_id pc = atomically @@ do
+  let a = SQL.select1 BankAccount (fun acc -> acc.id = acc_id);
+  let y = a.bal + pc*a.bal;
+  SQL.update BankAccount (fun acc -> {acc with bal = acc.bal + y})
+                         (fun acc -> acc.id = acc_id)
+\end{ocaml}
+\caption{A transaction that deposits an interest to a bank account}
+\label{fig:weakening-example}
+\end{figure}
+Here, an \C{add\_interest} transaction adds a positive interest to the
+balance of a bank account, which is required to be positive ($I(\stg)
+\Leftrightarrow \forall(r\in\stg).~r.\C{bal}\ge 0$). The transaction
+starts by issuing a \C{select1} query, whose effect implicitly asserts
+that there exists a record in the bank account database that is equal
+to $a$ ($\exists(r\in\stg).~r=a$). However, this assertion is unstable
+because a concurrent \C{withdraw} or \C{deposit} transactions might
+update the account balance, and there will no longer exist an
+$r\in\stg$ that is equal to $a$. Fortunately, the weakening operator
+($\stabilize{\cdot}$) comes to the rescue here by weakening the
+assertion to $\exists \stg'.I(\stg') \conj \exists(r\in\stg').~a=r$,
+which is enough to prove that $\C{a.bal + pc*a.bal}\ge 0$, and verify
+that \C{add\_interest} preserves the positive balance invariant.
 
 The inference rules of SQL statements, like the RG rules, closely
 follow the corresponding reduction rules in Fig.~\ref{fig:txnimp},
