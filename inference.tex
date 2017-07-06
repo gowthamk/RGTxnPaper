@@ -1,7 +1,112 @@
 \section{Inference}
 \label{sec:inference}
 
+Rely-Guarantee framework presented in the previous section facilitates
+modular proofs for weakly-isolated transactions, but imposes a
+non-trivial annotation burden on the programmer. In particular, it
+requires each statement ($c$) of the transaction to be annotated with
+a stable pre- ($P$) and post-condition ($Q$), and loops to be
+annotated with stable inductive invariants ($\psi$). While weakest
+pre-condition style predicate transformers can help in inferring $P$'s
+and $Q$'s for regular statements, inferring inductive loop invariants
+is still a challenge, even for the simpler form of loops we admit.
+Thus, predicate transformer-based approach to proof automation is
+unlikely to be effective in this case. We therefore present an
+alternative approach to RG proof automation in this section that is
+based on state transformers instead of predicate transformers. The
+idea is to infer the effect that each statement has on the
+transaction-local database state $\stl$ (i.e., how it transforms
+$\stl$), and compose multiple such effects together to describe the
+effect of the transaction as a whole. Importantly, this approach
+generalizes to loops, where the effect of a loop can be inferred as a
+well-defined function of the effect of its body, thanks to certain
+pleasant properties enjoyed by the database programs modeled by
+$\txnimp$.
+
+\input{logic-syntax}
+
+At the core of our approach is a simple language ($\SL$) to express
+set transformations shown in Fig.~\ref{fig:logic-syntax}. The language
+admits only set expressions that include variables ($x$), literals of
+the form $\{x \,|\, \phi^0\}$ where $\phi^0$ is a propositional
+(quantifier-free) formula on $x$, a restricted form of existential
+quantification that binds a set $x$ satisfying proposition $\phi^0$ in
+a set expression $s$, a monadic composition of two set expressions
+($s_1$ and $s_2$) using bind ($\bind$), a conditional set expression
+where the condition is a propositional formula, and a union of two set
+expressions. Symbols $\stl$ and $\stg$ are also variables in $\SL$,
+but are used to denote local and database states, respectively.  The
+language is carefully chosen to be expressive enough to capture the
+semantics of $\txnimp$ statements, yet simple enough to have a
+semantics-preserving translation to the first-order logic. 
+
 \input{inference-rules}
+
+Fig.~\ref{fig:inference-rules} shows the syntax-directed inference
+rules for $\txnimp$ commands inside a transaction $\C{TXN}_i$.
+Inference depends on the $\I$-constrained rely relation $\R$, and the
+high-level invariant $I$ for the reasons that will become clear
+shortly.  Inference rules compute, for each command $c$, a (meta)
+function $\F$ that returns a set as an expression in $\SL$, given a
+pair of sets ($\stl$ and $\stg$) that describe local and a global
+database states, respectively. The expression returned by
+$\F(\stl,\stg)$ (abstractly) describes the set of records that get
+added to $\stl$ as a result of executing $c$ under $\stl$ and $\stg$.
+Thus, $\F$ captures the \emph{effect} part of the state transformer of
+$c$, which is the function $\lambda(\stl,\stg).~\stl \cup
+\F(\stl,\stg)$. For $\F$ to be useful in RG verification, it needs to
+be stable w.r.t the rely relation $\R$. The stability condition on
+effects is defined below:
+\begin{smathpar}
+\begin{array}{lcl}
+  \stable(\R,\F) & \Leftrightarrow & \forall \stl,\stg,\stg'.~
+  \R(\stl,\stg,\stg') \Rightarrow \F(\stl,\stg) \equiv \F(\stl,\stg')
+\end{array}
+\end{smathpar}
+Intuitively, the stability condition requires an effect to describe
+the same set of records before and after the interference. The
+equivalence in $\SL$ translates to the equality in first-order logic,
+as will be explained shortly. In the inference rules, stability is
+enforced constructively by a meta function $\stabilize{\cdot}$, which
+accepts an effect and returns a new effect that is guaranteed to be
+stable under $\R$. $\stabilize{\cdot}$ achieves the stability
+guarantee by abstracting away the bound $\stg$ in an unstable $\F$ to
+an existentially bound $\stg'$ as described below:
+\begin{smathpar}
+\begin{array}{lcll}
+  \stabilize{\F} & = & \F & \texttt{if } \stable(\R,\F)\\
+  & = & \lambda (\stl,\stg).~\existsl(\stg',I(\stg'),\F(\stl,\stg')) & \texttt{otherwise}\\
+\end{array}
+\end{smathpar}
+Observe that when $\F$ is not stable, then $\stabilize{\F}$ returns an
+$\F'$ that simply ignores its $\stg$ argument in favor of a generic
+$\stg'$, making $\F'$ trivially stable. The existentially bound
+$\stg'$ satisfies $I$ since commands always executed against a valid
+database state. 
+
+The inference rules of SQL statements, like the RG rules, closely
+follow the corresponding reduction rules in Fig.~\ref{fig:txnimp},
+except that their language of expression is $\SL$. For instance, while
+the reduction rule for \C{UPDATE} declaratively specifies the set of
+updated records, the inference rule uses $\SL$'s bind operation to
+\emph{compute} the set. Other SQL rules do likewise. The inference
+rules for \C{LET} binders, conditionals, and sequences compose the
+effects inferred for their subcommands. For instance, the effect of a
+sequence of commands $c_1;c_2$ is the union of effects $F_1$ and $F_2$
+of $c_1$ and $c_2$, respectively, except that $F_2$ is applied to a
+state ($\stl$) to which $F_1$ has already been applied, reflecting
+their order of reduction. The inference rule for \C{FOREACH} takes
+advantage of the $\SL$'s bind operator to lift the effect inferred for
+the loop body to the level of the loop. Since records added to $\stl$
+in each iteration of \C{FOREACH} are independent of the previous
+iteration, sequential composition of the effects of different
+iterations is same as their parallel composition. Since the loop body
+is executed once per each $z\in x$, the effect of the the loop is the
+union of effects ($\F$) for all $z\in x$, all applied to the same
+state ($\stl$ and $\stg$). That is, $\F_{loop}(\stl,\stg) =
+\bigcup_{z\in x}\F_{body}(\stl,\stg)$. From the definition of
+set monad's bind, $\F_{loop}(\stl,\stg) = x \bind (\lambda
+z.~F_{body}(\stl,\stg))$, which is what the rule infers.
 
 \input{logic}
 
@@ -11,3 +116,5 @@ $P(\stl,\stg) = true$ and $Q(\stl',\stg) = \exists\stl.~ \phi^1 \wedge
   \forall a. a\in\stl' \Leftrightarrow a\in\stl \vee g(a)$, then
   $\R \vdash \hoare{P}{c}{Q}$
 \end{theorem}
+
+

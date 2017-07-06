@@ -1,0 +1,20 @@
+\begin{figure}[h]
+\begin{smathpar}
+\renewcommand{\arraystretch}{1.2}
+\begin{array}{lcl}
+\multicolumn{3}{c}{
+  x,y,\stl,\stg \in \texttt{Variables}\spc
+  \varphi \in \Prop^{0}\spc
+  \phi \in \Prop^{1}
+}\\
+s & \coloneqq & x \ALT \stl \ALT \stg \ALT \{x \,|\, \varphi\} 
+  \ALT \existsl(x,\phi,s) 
+  \ALT s_1 \bind \lambda x. s_2 \ALT \itel{\varphi}{s_1}{s_2} 
+  \ALT s_1 \cup s_2 \\
+\end{array}
+\end{smathpar}
+%
+\caption{Syntax of the set language $\SL$}
+\label{fig:logic-syntax}
+\end{figure}
+

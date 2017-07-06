@@ -4,26 +4,91 @@
 \fbox {\(c \elabsto \F \)}\\
 %
 
-\renewcommand{\arraystretch}{1.2}
-\begin{smathpar}
-\begin{array}{lcl}
-\inserte{x} & \elabsto & \stabilize{\lambda(\stl,\stg).~
-  \{ r \,|\, r = \{x \with \idf = \uid(x);\,r.\delf=\C{false};\,
-                \txnf = T_i\} \conj \uid(x) \notin \dom(\stl\cup\stg) \}}\\ 
-%
-\updatee{\lambda x.e_1}{\lambda x.e_2} & \elabsto & \stabilize{
-  \lambda(\stl,\stg).~ \stg \bind (\lambda r.~ 
-  \{r' \,|\, [r/x]e_2 \conj r' = \{[r/x]e_1 \with 
-      \idf=r.\idf;\,\delf = r.\delf;\,\txnf=T_i \}) \} }\\ 
-%
-\deletee{\lambda x.e} & \elabsto & \stabilize{
-  \lambda(\stl,\stg).~ \stg \bind (\lambda r.~ 
-  \{r' \,|\, [r/x]e \conj r'=\{r \with \delf=\C{true}\})\} }\\ 
-%
-\end{array}
-\end{smathpar}
+% \renewcommand{\arraystretch}{1.2}
+% \begin{smathpar}
+% \begin{array}{lcl}
+% % \inserte{x} & \elabsto & \stabilize{\lambda(\stl,\stg).~
+% %   \{ r \,|\, r = \{x \with \idf = \uid(x);\,r.\delf=\C{false};\,
+% %                 \txnf = i\} \conj \uid(x) \notin \dom(\stl\cup\stg) \}}\\ 
+% %
+% %
+% \updatee{\lambda x.e_1}{\lambda x.e_2} & \elabsto & \stabilize{
+%   \lambda(\stl,\stg).~ \stg \bind (\lambda r.~ 
+%   \{r' \,|\, [r/x]e_2 \conj r' = \{[r/x]e_1 \with 
+%       \idf=r.\idf;\,\delf = r.\delf;\,\txnf=i \}) \} }\\ 
+% %
+% \deletee{\lambda x.e} & \elabsto & \stabilize{
+%   \lambda(\stl,\stg).~ \stg \bind (\lambda r.~ 
+%   \{r' \,|\, [r/x]e \conj r'=\{r \with \delf=\C{true}\})\} }\\ 
+% %
+% \end{array}
+% \end{smathpar}
+
 
 %
+\begin{center}
+\begin{minipage}{3.5in}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+}
+{
+  \inserte{x} ~\elabsto~ \stabilize{\lambda(\stl,\stg).~
+    \{ y \,|\, y = \{x \with r.\delf=\C{false};\, \txnf = i\} \}}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+\end{center}
+%
+
+%
+\begin{center}
+\begin{minipage}{3.5in}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  G = \lambda y.~ \itel{[y/x]e_2}
+      {\{[y/x]e_1 \with \delf = y.\delf;\,\txnf=i \}}
+      {\emptyset}
+}
+{
+  \updatee{\lambda x.e_1}{\lambda x.e_2}  ~\elabsto~
+  \stabilize{
+  \lambda(\stl,\stg).~ \stg \bind G \} }
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+\end{center}
+%
+
+%
+\begin{center}
+\begin{minipage}{3in}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  G = \lambda y.~ \itel{[y/x]e}
+      {\{y \with \delf = true;\,\txnf=i \}}
+      {\emptyset}
+}
+{
+  \deletee{\lambda x.e}  ~\elabsto~
+  \stabilize{
+  \lambda(\stl,\stg).~ \stg \bind G \} }
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+\end{center}
+%
+
+%
+\begin{center}
 \begin{minipage}{2.7in}
 \begin{smathpar}
 \begin{array}{c}
@@ -38,8 +103,11 @@
 \end{array}
 \end{smathpar}
 \end{minipage}
+\end{center}
 %
+
 %
+\begin{center}
 \begin{minipage}{3in}
 \begin{smathpar}
 \begin{array}{c}
@@ -55,6 +123,7 @@
 \end{array}
 \end{smathpar}
 \end{minipage}
+\end{center}
 %
 
 %
@@ -78,6 +147,7 @@
 %
 
 %
+\begin{center}
 \begin{minipage}{3in}
 \begin{smathpar}
 \begin{array}{c}
@@ -92,8 +162,11 @@
 \end{array}
 \end{smathpar}
 \end{minipage}
+\end{center}
 %
+
 %
+\begin{center}
 \begin{minipage}{3in}
 \begin{smathpar}
 \begin{array}{c}
@@ -108,6 +181,7 @@
 \end{array}
 \end{smathpar}
 \end{minipage}
+\end{center}
 %
 
 \caption{\txnimp: Effect inference rules }
