@@ -3,32 +3,37 @@
 %
 \begin{smathpar}
 \begin{array}{lclcr}
-\semof{x \ALT \stl \ALT \stg} & = & (true,x) \ALT (true,\stl) \ALT
-(true,\stg) & \\
+\mssemof{x \ALT \stl \ALT \stg \ALT \ldots} & = & (true,g_x) \ALT
+  (true,g_\stl) \ALT (true,g_\stg) \ALT \ldots & \texttt{  }
+  & \\
+%\fresh(g_x) \spc \fresh(g_\stl) \spc \fresh(g_\stg)\\
 %
-\semof{\{a \,|\, \varphi\}} & = & (\forall a.~ g(a) \Leftrightarrow \varphi,g) 
+\mssemof{\{a \,|\, \varphi\}} & = & (\forall a.~ g(a) \Leftrightarrow \varphi,g) 
   & \texttt{  } & \fresh(g)\\
 %
-\semof{\existsl(a,\phi,s)} & = &  (\phi_1 \conj 
-  \exists a.\forall b.~ g(b) \Leftrightarrow \phi \wedge g_1(b), ~g)
-  & \texttt{  } & (\phi_1,g_1)=\semof{s} \spc \fresh(g)\\
+\mssemof{\existsl(a,\phi,s)} & = &  (\phi_1 \conj \mssemof{[a'/a]\phi} 
+% \conj \forall b.~ g(b) \Leftrightarrow g_1(b)
+  , ~g_1)
+  & \texttt{  } & (\phi_1,g_1)=\mssemof{[a'/a]s} \spc \fresh(a') 
+% \spc \fresh(g)\\
+  \\
 %
-\semof{s_1 \bind \lambda x. s_2} & = & (\phi_1 \conj \phi_2 \conj
+\mssemof{s_1 \bind \lambda x. s_2} & = & (\phi_1 \conj \phi_2 \conj
   \forall a.\exists b.~ g(a) \Rightarrow g_2(b) \wedge [b/x]g_1(a) & & \\
 && \hspace*{0.57in}\conj \forall b.\forall a.~g_2(b) \wedge [b/x]g_1(a) 
-      \Rightarrow g(a), ~g) & \texttt{  } & (\phi_1,g_1)=\semof{s_1} \spc
-      (\phi_2,g_2)=\semof{s_2} \spc \fresh(g)\\
+      \Rightarrow g(a), ~g) & \texttt{  } & (\phi_1,g_1)=\mssemof{s_1} \spc
+      (\phi_2,g_2)=\mssemof{s_2} \spc \fresh(g)\\
 %
-\semof{\itel{\varphi}{s_1}{s_2}} & = & (\phi_1 \conj \phi_2 \conj
+\mssemof{\itel{\varphi}{s_1}{s_2}} & = & (\phi_1 \conj \phi_2 \conj
   \forall a.~ g(a) \Leftrightarrow (\varphi \Rightarrow g_1(a))& & \\
 &&  \hspace*{1.5in}\wedge (\neg\varphi \Rightarrow g_2(a)),~g) & \texttt{  } 
-      & (\phi_1,g_1)=\semof{s_1} \spc
-      (\phi_2,g_2)=\semof{s_2} \spc \fresh(g)\\
+      & (\phi_1,g_1)=\mssemof{s_1} \spc
+      (\phi_2,g_2)=\mssemof{s_2} \spc \fresh(g)\\
 %
-\semof{s_1 \cup s_2} & = & (\phi_1 \conj \phi_2 \conj
+\mssemof{s_1 \cup s_2} & = & (\phi_1 \conj \phi_2 \conj
   \forall a.~ g(a) \Leftrightarrow g_1(a) \vee g_2(a),~g) 
-  & \texttt{ } & (\phi_1,g_1)=\semof{s_1} \spc
-      (\phi_2,g_2)=\semof{s_2} \spc \fresh(g)\\
+  & \texttt{ } & (\phi_1,g_1)=\mssemof{s_1} \spc
+      (\phi_2,g_2)=\mssemof{s_2} \spc \fresh(g)\\
 \end{array}
 \end{smathpar}
 
