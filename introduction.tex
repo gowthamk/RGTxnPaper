@@ -73,12 +73,12 @@ strategy; indeed, 75\% of the invariants studied in~\cite{bailisferal}
 were shown to be preserved under some form of weak isolation.  When to
 use weak isolation, and in what form, is therefore a prominent
 question facing all database programmers.\footnote{This position has
-  been echoed by leading database researchers who lament the lack of
+  been echoed by leading database researchers who lament the lack of a
   better understanding of this problem.  See: {\tt
     http://www.bailis.org/blog/understanding-weak-isolation-is-a-serious-problem}.}
 
 A major problem with weak isolation is that its semantics in the
-context of user programs is not well-understood. The original
+context of user programs is not precisely understood. The original
 proposal~\cite{gray1976} defines multiple ``degrees'' of weak
 isolation in terms of implementation details such as the nature and
 duration of locks held in each case. The ANSI SQL 92 standard defines
@@ -97,8 +97,8 @@ relating Adya's system model to a formal operational semantics or a
 proof system that can facilitate rigorous correctness arguments.
 Consequently, reasoning about weak isolation remains an error prone
 endeavor, with major database vendors~\cite{postgresiso, mysqliso,
-oracleiso} continuing to document their isolation levels primarily in
-terms of the undesirable phenomena a particular isolation level may
+  oracleiso} continuing to document their isolation levels primarily
+in terms of the undesirable phenomena a particular isolation level may
 induce, placing the burden on the programmer to determine application
 correctness.
 
@@ -156,16 +156,16 @@ transactions along with automated verification support that realizes
 this goal.  We develop a set of syntax-directed compositional proof
 rules that allow developers to build correctness proofs for
 transactional programs in the presence of a weakly-isolated
-concurrency control mechanism.  Realizing that the proof burden to use
-these rules would likely discourage applications programmers, we
-present an inference procedure based on a state transformer semantics
-that allows us to automatically verify the weakest isolation level for
-a transaction that ensures its consistency requirements are
-maintained.  The key to inference is our formulation of database state
-(represented as sets of tuples) as a monad, and in which database
-computations are interpreted as transformers over these sets.  This
-interpretation leads to an encoding of database computations amenable
-for verification by off-the-shelf SMT solvers.
+concurrency control mechanism.  Realizing that the proof burden
+imposed by these rules would likely discourage applications
+programmers from using them, we present an inference procedure based
+on a state transformer semantics that automatically verifies the
+weakest isolation level for a transaction that ensures its consistency
+requirements are maintained.  The key to inference is a novel formulation
+of database state (represented as sets of tuples) as a monad, and in
+which database computations are interpreted as transformers over these
+sets.  This interpretation leads to an encoding of database
+computations amenable for verification by off-the-shelf SMT solvers.
 
 We have realized these ideas as an embedded DSL within OCaml, that
 supports common relational SQL operations (updates, selects, inserts,
@@ -187,17 +187,20 @@ following contributions:
  \item An inference algorithm capable of discovering the weakest
    isolation level that is sound with respect to a transaction's
    high-level consistency requirements.  The algorithm interprets
-   database operations as predicate state transformers leadig to a
-   natural encoding amenable for automated verification.
+   database operations as state transformers expressed in a language
+   amenable for translation into a decidable fragment of first-order
+   logic, and is thus suitable for automated verification using
+   off-the-shelf SMT solvers.
  \item A realistic implementation along with results on real-world
    database benchmarks that justify our approach and the utility of
    our proof methodology and inference procedure.
 \end{enumerate}
 \noindent Our results provide the first (to the best of our knowledge)
-automated mechanism to verify the safety of high-level consistency
-conditions for weakly-isolated transactions, thereby allowing such
-transactions to enjoy the same rigorous reasoning capabilities as
-their strongly-isolated (serializable) counterparts.
+automated mechanism capable of verifying the safety of high-level
+consistency conditions for weakly-isolated database transactions,
+thereby allowing such transactions to enjoy the same rigorous
+reasoning capabilities as their strongly-isolated (serializable)
+counterparts.
 
 The remainder of the paper is organized as follows. The next section
 provides motivation and background on serializable and weakly-isolated

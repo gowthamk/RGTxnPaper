@@ -3,7 +3,6 @@
 \label{sec:relatedwork}
 
 \paragraph{Specifying weak isolation.}
-
 Adya~\cite{adyaphd} specifies several weak isolation levels in terms
 of \emph{dependency graphs} between transactions, and the kinds of
 dependencies that are forbidden in each case. The operational nature
@@ -31,7 +30,7 @@ is not immediately apparent if their specification formalism is
 amenable for use within a verification toolchain. 
 
 \vspace*{-4pt}
-\paragraph{Reasoning under weak isolation} In~\cite{feketessi}, Fekete
+\paragraph{Reasoning under weak isolation.} In~\cite{feketessi}, Fekete
 \emph{et al.} propose a theory to characterize non-serializable
 executions that arise under {\sc si}. Fekete~\cite{fekete2005} also
 proposes an algorithm that allocates either {\sc si} or {\sc ser}
@@ -50,40 +49,55 @@ isolation levels (rooted in~\cite{berenson}) under a pre-defined store
 consistency model.
 
 \vspace*{-4pt}
-\paragraph{Reasoning under weak consistency} There have been several
+\paragraph{Reasoning under weak consistency.} There have been several
 recent proposals to reason about programs executing under weak
 consistency~\cite{bailisvldb, alvarocalm, gotsmanpopl16,redblueatc,
-  redblueosdi, ecinec}. All of them assume a system model that offers
-a choice between a \emph{coordination-free} weak consistency level
+redblueosdi, ecinec}. All of them assume a system model that offers a
+choice between a \emph{coordination-free} weak consistency level
 (\emph{e.g.}, eventual consistency~\cite{redblueosdi, redblueatc,
-  ecinec, alvarocalm, bailisvldb}) or causal
+ecinec, alvarocalm, bailisvldb}) or causal
 consistency~\cite{lbc16,gotsmanpopl16}). All these efforts involve
 proving that atomic and fully isolated operations preserve application
 invariants when executed under these consistency levels.  In contrast,
-we admit weakly-isolated transactions, and our system model accepts
-\emph{specifications} of consistency and isolation levels drawn from
-an expressive logic.  Gotsman \emph{et al.}~\cite{gotsmanpopl16}
-adapt \iso{Parallel Snapshot Isolation} to a transaction-less setting
-by interpreting it as a consistency level that serializes writes to
-objects; a dedicated proof rule is developed to help prove prove
-program invariants hold under this model. By parameterizing our proof
-system over a gamut of weak isolation specifications, we avoid the
-need to define a separate proof rule for each new isolation level we
-may encounter.
+our focus in on reasoning in the presence of weakly-isolated
+transactions under a strongly consistent store.  Gotsman \emph{et
+al.}~\cite{gotsmanpopl16} adapt \iso{Parallel Snapshot Isolation} to a
+transaction-less setting by interpreting it as a consistency level
+that serializes writes to objects; a dedicated proof rule is developed
+to help prove prove program invariants hold under this model. By
+parameterizing our proof system over a gamut of weak isolation
+specifications, we avoid the need to define a separate proof rule for
+each new isolation level we may encounter.
+
+%% \vspace*{-4pt}
+%% \paragraph{Reasoning under relaxed memory.} The reasoning mechanisms
+%% used to describe and prove properties about weakly-isolated
+%% transactions bear some resemblance to those used to formalize relaxed
+%% memory behaviour~\cite{battycpp}.  Ridge~\cite{rgtso} generalizes
+%% rely-guarantee reasoning to the x86-TSO memory model.  Likewise,
+%% Vafeiadis \emph{et al.}~\cite{rsl13} generalize concurrent separation
+%% logic (CSL)~\cite{csl} to the C11 relaxed memory model.  Ferreira
+%% \emph{et al.}~\cite{ferreira10} propose a parameterized operational
+%% semantics for relaxed memory models, but the parameterization is over
+%% a relation between relaxed memory programs and related {\sc sc}
+%% programs. Demange \emph{et al.}~\cite{DLZ+13} present a \emph{buffered
+%%   memory model} for Java that defines an axiomatic definition for the
+%% JMM in terms of memory reorderings, and an operational instantiation
+%% consistent with the TSO memory model.
 
 \vspace*{-4pt}
-\paragraph{Reasoning under relaxed memory} The reasoning mechanisms
-used to describe and prove properties about weakly-isolated
-transactions bear some resemblance to those used to formalize relaxed
-memory behaviour~\cite{battycpp}.  Ridge~\cite{rgtso} generalizes
-rely-guarantee reasoning to the x86-TSO memory model.  Likewise,
-Vafeiadis \emph{et al.}~\cite{rsl13} generalize concurrent separation
-logic (CSL)~\cite{csl} to the C11 relaxed memory model.  Ferreira
-\emph{et al.}~\cite{ferreira10} propose a parameterized operational
-semantics for relaxed memory models, but the parameterization is over
-a relation between relaxed memory programs and related {\sc sc}
-programs. Demange \emph{et al.}~\cite{DLZ+13} present a \emph{buffered
-  memory model} for Java that defines an axiomatic definition for the
-JMM in terms of memory reorderings, and an operational instantiation
-consistent with the TSO memory model.
+\paragraph{Inference.}  Prior work by Vafeiadis~\cite{Vaf10,Vaf10a}
+describe \emph{action inference}, an inference procedure for computing
+rely and guarantee relations in the conetxt of RGSep~\cite{VP07}, an
+integration of rely-guarantee and separation logic~\cite{Rey02} that
+allows one to precisely reason about local and shared state of a
+concurrent program. The ideas underlying action inference have been
+used to prove memory safety, linearizability, shape invariant
+inference, etc.  of fine-grained concurrent data structures.  While
+our motivation is similar to theirs (inference of intermediate
+assertions and invariants), the context of study (transactions
+vs. shared-memory concurrency), the objects being analyzed (relational
+database tables vs. concurrent data structures), and the analysis
+technique used to drive inference (state transformers vs. abstract
+interpretation) are quite different.
 
