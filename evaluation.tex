@@ -1,0 +1,50 @@
+\subsection{Evaluation}
+
+To explore the space of correct isolation levels for different transactions, we  also  ran a number  of experiments using  a real transaction OLTP workload   based on TPC-C benchmark.  
+ The  workload  involves  a mix of five TPC-C transaction types: 
+\C{New\_Order},  \C{Payment},  \C{Delivery}, \C{Stock Level} and  \C{Order Status}, 
+operating on top of  a $10$-warehouse database.  
+Each warehouse has  $10$ districts, each serving $3000$ customers. 
+TPC-C  specification model  requires  maintaining multiple   consistency conditions.  We focus  on   four conditions, named $I_1$, $I_2$, $I_3$, and $I_4$.   
+Consistency condition $I_1$  requires that  sales of each  warehouse  equals to the  sum of    its  district's sales.  Conditions $I_2$ and $I_3$  enforce  
+ sequentially unique IDs assigned to  orders placed in the same   warehouse and district. Condition $I_4$ requires 
+ the  number of  item orders   in each district 
+  reflexes  the district's roll-up. 
+Given the consistency conditions,  Table  \ref{tab:tpcc-eval} gives the isolation level  for the \C{New\_Order},  \C{Payment},  and \C{Delivery} transactions using the  MySQL and PostgreSQL databases   to maintain   each consistency condition. Note,   \C{Stock Level} and  \C{Order Status}   are read-only transactions can be executed under RC.   
+Recall that the \C{New\_Order} transaction places a new order for
+ items from a particular district in a warehouse.  
+The \C{Payment} transaction  processes  a payment for a particular customer and updates the customer, district, and warehouse tables. 
+ The  \C{Delivery}  transaction processes  orders for a particular   district at  a warehouse. 
+ Our experimental results  show that  the concurrent executions of   \C{New\_Order}   
+    and  \C{Delivery} transactions under a weak isolation level (i.e.,  RC) is anomalous, i.e., it may violate the consistency conditions $I_2$ and $I_3$. Depending on the isolation guarantees provided  by  underlying database,   the stronger  isolation level is required. For instance, the isolation level RR in PostgreSQL  is sufficient to preserve the consistency  conditions while  operating on MySQL database  requires  these transaction to be serialized.  
+
+
+ 	\begin{table*}[t]\small
+	\centering
+\begin{tabular}{|c|c|c|c|}
+		\hline
+	\textbf{Transaction}   & \textbf{Invariant} 
+	& \textbf{MySQL-Isolation} & \textbf{PostgreSQL-Isolation} \\ 
+	\hline
+	\multirow{4}{*}{\C{New\_Order} }  & $I_1$ 
+	& RC &  RC\\ 
+	&  $I_2$ &SER & RR \\
+	&  $I_3$ & SER  &  RR  \\
+	& $I_4$ & RC & RC   \\
+	\hline
+	\multirow{4}{*}{\C{Payment}}  & $I_1 $ 
+	& RC &  RC\\ 
+	&  $I_2$  &RC & RC \\
+	&  $I_3 $ & RC  &  RC  \\
+	& $I_4$  & RC & RC   \\
+	\hline
+	\multirow{4}{*}{\C{Delivery}}  & $I_1$  
+	& RC &  RC \\ 
+	&  $I_2$ &SER & RR \\
+	&  $I_3$ & SER  &  RR \\
+	& $I_4$  & RC & RC   \\
+	\hline
+\end{tabular}
+	\caption{ Isolation level required by TPC-C transactions. }
+	\label{tab:tpcc-eval}
+\end{table*}

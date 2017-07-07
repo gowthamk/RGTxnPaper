@@ -28,22 +28,24 @@ The tension between serializable transactions, which are easy to
 reason about but difficult to implement efficiently, and more
 pragmatic variants that are driven by performance and availability
 considerations, has motivated the development of weaker forms of
-transaction isolation, beginning as early as 1976~\cite{gray1976}. The
-ANSI SQL 92 standard defines three such weak isolation levels which
-are now implemented in many relational and NoSQL databases. Not
-surprisingly, weakly-isolated transactions have been found to
-significantly outperform serializable transactions on benchmark
-suites, both on single-node databases and multi-node replicated
-stores~\cite{dbtuningbook,bailishat,bailisvldb}, leading to their
-overwhelming adoption. A 2013 study~\cite{bailishotos} of 18 popular
-ACID and ``NewSQL'' databases found that only three of them offer
-serializability by default, and half, including Oracle 11g, do not
-offer it at all.  A 2015 study~\cite{bailisferal} of a large corpus of
-database applications finds no evidence that applications manifestly
-change the default isolation level offered by the database. Taken
-together, these studies make clear that weakly-isolated transactions
-are quite prevalent in practice, whereas serializable transactions are
-often eschewed.
+transaction isolation, beginning as early as 1976~\cite{gray1976};
+these instantiations permit a transaction to witness various effects
+of newly committed, or even concurrently running, transactions while
+it executes.  The ANSI SQL 92 standard defines three such weak
+isolation levels which are now implemented in many relational and
+NoSQL databases. Not surprisingly, weakly-isolated transactions have
+been found to significantly outperform serializable transactions on
+benchmark suites, both on single-node databases and multi-node
+replicated stores~\cite{dbtuningbook,bailishat,bailisvldb}, leading to
+their overwhelming adoption. A 2013 study~\cite{bailishotos} of 18
+popular ACID and ``NewSQL'' databases found that only three of them
+offer serializability by default, and half, including Oracle 11g, do
+not offer it at all.  A 2015 study~\cite{bailisferal} of a large
+corpus of database applications finds no evidence that applications
+manifestly change the default isolation level offered by the
+database. Taken together, these studies make clear that
+weakly-isolated transactions are quite prevalent in practice, whereas
+serializable transactions are often eschewed.
 
 Unfortunately, weak isolation admits behaviors that are difficult to
 comprehend~\cite{berenson}. To quantify weak isolation anomalies,
@@ -166,41 +168,43 @@ of database state (represented as sets of tuples) as a monad, and in
 which database computations are interpreted as transformers over these
 sets.  This interpretation leads to an encoding of database
 computations amenable for verification by off-the-shelf SMT solvers.
-
-We have realized these ideas as an embedded DSL within OCaml, that
-supports common relational SQL operations (updates, selects, inserts,
-deletes, joins, etc.).  Experimental results on real-world benchmarks
-demonstrate the feasibility and value of automated verification for
-weakly isolated transactions, an important advance in improving the
-safety of realistic database computations. The paper makes the
-following contributions:
-\vspace*{-6pt}
+The paper makes the following contributions:
+%% We have realized these ideas as an embedded DSL within OCaml, that
+%% supports common relational SQL operations (updates, selects, inserts,
+%% deletes, joins, etc.).  Experimental results on real-world benchmarks
+%% demonstrate the feasibility and value of automated verification for
+%% weakly isolated transactions, an important advance in improving the
+%% safety of realistic database computations.
 \begin{enumerate}
-\item An embedded DSL in OCaml that treats SQL-based relational
-  database operations as monadic computations over an abstract
-  database state.
- \item An operational semantics and compositional proof system for
-   this language capable of relating high-level application invariants
-   to database state, parameterized by a weak isolation semantics that
-   selectively exposes the visibility of these operations to other
-   transactions.
- \item An inference algorithm capable of discovering the weakest
-   isolation level that is sound with respect to a transaction's
-   high-level consistency requirements.  The algorithm interprets
-   database operations as state transformers expressed in a language
-   amenable for translation into a decidable fragment of first-order
-   logic, and is thus suitable for automated verification using
-   off-the-shelf SMT solvers.
- \item A realistic implementation along with results on real-world
-   database benchmarks that justify our approach and the utility of
-   our proof methodology and inference procedure.
+\item We analyze properties of weak isolation in the context of an
+  embedded DSL for OCaml that treats SQL-based relational database
+  operations (e.g., inserts, selects, deletes, joins, updates, etc.)
+  as monadic computations over an abstract database state.
+ \item We develop an operational semantics and compositional proof
+   system for this language capable of relating high-level application
+   invariants to database state, parameterized by a weak isolation
+   semantics that selectively exposes the visibility of these
+   operations to other transactions.
+ \item Exploiting the monadic definition of database state, we devise
+   an inference algorithm capable of discovering the weakest isolation
+   level that is sound with respect to a transaction's high-level
+   consistency requirements.  The algorithm interprets database
+   operations as state transformers expressed in a language amenable
+   for translation into a decidable fragment of first-order logic, and
+   is thus suitable for automated verification using off-the-shelf SMT
+   solvers.
+ \item We present details of a realistic implementation along with an
+   evaluation study on real-world database benchmarks that justify our
+   approach and the utility of our proof methodology and inference
+   mechanism..
 \end{enumerate}
 \noindent Our results provide the first (to the best of our knowledge)
-automated mechanism capable of verifying the safety of high-level
-consistency conditions for weakly-isolated database transactions,
-thereby allowing such transactions to enjoy the same rigorous
-reasoning capabilities as their strongly-isolated (serializable)
-counterparts.
+formalization of weakly-isolated transactions, along with an
+expressive and compositional proof automation framework capable of
+verifying the safety of high-level consistency conditions attached to
+these transactions.  Collectively, these contributions allow
+weakly-isolated transactions to enjoy the same rigorous reasoning
+capabilities as their strongly-isolated (serializable) counterparts.
 
 The remainder of the paper is organized as follows. The next section
 provides motivation and background on serializable and weakly-isolated

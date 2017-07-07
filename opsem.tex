@@ -7,7 +7,7 @@
 
 Fig.~\ref{fig:txnimp} shows the syntax and small-step semantics of
 \txnimp, a core language that we use to formalize our intuitions about
-reasoning under weak isolation. Variables ($x$), Integer and boolean
+reasoning under weak isolation. Variables ($x$), integer and Boolean
 constants ($k$), records ($r$) of named constants, sets ($s$) of such
 records, arithmetic and boolean expressions ($e_1 \odot e_2$), and
 record expressions ($\{\bar{f}=\bar{e}\}$) constitute the syntactic
@@ -16,20 +16,21 @@ conditional statements, \C{LET} constructs to bind names, \C{FOREACH}
 loops, SQL statements, their sequential composition ($c_1;c_2$), and
 transactions ($\ctxn{i}{\I}{c}$) and their parallel composition
 ($c_1\,||\,c_2$). Each transaction is assumed to have a unique
-identifier $i$. The $\I$ in the \C{TXN} block syntax is the
-transaction's isolation specification, which will be explained later.
-Certain terms that only appear at run-time are also present in $c$.
-These include a {\sf txn} block tagged with sets ($\stl$ and $\stg$) of
-records whose meaning is explained below, and a runtime {\sf foreach}
-expression that keeps track of the set ($s_1$) of items already
-iterated, and the set ($s_2$) of items yet to be iterated. Note that
-even the surface-level syntax of the \C{FOREACH} command shown here is
-a little different from the one used in previous sections; its
-higher-order function has two arguments, $y$ and $z$, which are
-invoked (during the reduction) with the set of already-iterated items,
-and the current item, respectively. This form of \C{FOREACH} lends
-itself to inductive reasoning that will be useful for verification
-(Sec.~\ref{sec:reasoning}).
+identifier $i$, and executes at the top-level; our semantics does not
+supported nested transactions. The $\I$ in the \C{TXN} block syntax is
+the transaction's isolation specification, which will be explained
+later.  Certain terms that only appear at run-time are also present in
+$c$.  These include a {\sf txn} block tagged with sets ($\stl$ and
+$\stg$) of records whose meaning is explained below, and a runtime
+{\sf foreach} expression that keeps track of the set ($s_1$) of items
+already iterated, and the set ($s_2$) of items yet to be
+iterated. Note that even the surface-level syntax of the \C{FOREACH}
+command shown here is a little different from the one used in previous
+sections; its higher-order function has two arguments, $y$ and $z$,
+which are invoked (during the reduction) with the set of
+already-iterated items, and the current item, respectively. This form
+of \C{FOREACH} lends itself to inductive reasoning that will be useful
+for verification (Sec.~\ref{sec:reasoning}).
 
 % also We let $T_i$ for $i \in \matshbb{N}$
 % range over transaction identifiers. When it is evident we are
@@ -49,9 +50,9 @@ enforces this invariant wherever necessary. Certain hidden fields are
 treated specially by the operational semantics, and they are hidden
 from the surface language. These include a $\txnf$ field that tracks
 the identifier of the transaction that last updated the record, and a
-$\delf$ field that flags the deleted records in $\stl$.  For a set $S$
-of records, we define $\dom(S)$ as the set of unique ids of all
-records in $S$. Thus $|\dom(\stg)| = |\stg|$. During its execution, a
+$\delf$ field that flags deleted records in $\stl$.  For a set $S$ of
+records, we define $\dom(S)$ as the set of unique ids of all records
+in $S$. Thus $|\dom(\stg)| = |\stg|$. During its execution, a
 transaction may write to multiple records in $\stg$. Atomicity
 dictates that such writes should not be visible in $\stg$ until the
 transaction commits. We therefore associate each transaction with a
@@ -87,24 +88,24 @@ without losing any generality, since substituting $\stl\gg\stg$ for
 $\stg$ at select places in the reduction rules effectively allows
 reads of uncommitted transaction writes to be realized.
 
-The small-step semantics is stratified into a transaction-local reduction
-relation, and a top-level reduction relation. The transaction-local
-relation ($\stg \vdash (c,\stl) \stepsto (c',\stl')$) defines a
-small-step reduction for a command inside a transaction, when the
-database state is $\stg$; the command $c$ reduces to $c'$, while
-updating the transaction-local database $\stl$ to $\stl'$. The
-definition assumes a meta function $\eval$ that evaluates expressions
-with no free variables to values. The reduction relation for SQL
-statements is defined straightforwardly. \C{INSERT} adds a new record
-to $\stl$ after checking the uniqueness of its id. \C{DELETE} finds
-the records in $\stg$ that match the search criteria defined by its
-boolean function argument, and adds the records to $\stl$ after
-marking them for deletion. \C{SELECT} bounds the name introduced by
-\C{LET} to the set of records from $\stg$ that match the search
-criteria, and then executes the bound command $c$. \C{UPDATE} uses its
-first function argument to compute the updated version of the records
-that match the search criteria defined by its second function
-argument. Updated records are added to $\stl$. 
+The small-step semantics is stratified into a transaction-local
+reduction relation, and a top-level reduction relation. The
+transaction-local relation ($\stg \vdash (c,\stl) \stepsto
+(c',\stl')$) defines a small-step reduction for a command inside a
+transaction, when the database state is $\stg$; the command $c$
+reduces to $c'$, while updating the transaction-local database $\stl$
+to $\stl'$. The definition assumes a meta function $\eval$ that
+evaluates expressions with no free variables to values. The reduction
+relation for SQL statements is defined straightforwardly. \C{INSERT}
+adds a new record to $\stl$ after checking the uniqueness of its
+id. \C{DELETE} finds the records in $\stg$ that match the search
+criteria defined by its boolean function argument, and adds the
+records to $\stl$ after marking them for deletion. \C{SELECT} bounds
+the name introduced by \C{LET} to the set of records from $\stg$ that
+match the search criteria, and then executes the bound command
+$c$. \C{UPDATE} uses its first function argument to compute the
+updated version of the records that match the search criteria defined
+by its second function argument. Updated records are added to $\stl$.
 
 The reduction of \C{FOREACH} starts by first converting it to its
 run-time form to keep track of iterated items ($s_1$),
