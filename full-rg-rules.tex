@@ -1,3 +1,257 @@
+\section{Operational Semantics}
+
+%\renewcommand{\ctxn}[3]{\C{TXN}_{#1}\langle #2 \rangle\{#3\}}
+\begin{figure*}[!ht]
+\raggedright
+%
+\textbf{Syntax}\\
+%
+\begin{smathpar}
+\renewcommand{\arraystretch}{1.2}
+\begin{array}{lclcl}
+\multicolumn{5}{c} {
+  {x,y} \in \mathtt{Variables}\qquad
+  {f} \in \mathtt{Field\;Names} \qquad
+% {\tau} \in \mathtt{Table\;Names}
+  {i,j} \in \mathbb{N} \qquad
+  {\odot} \in \{+,-,\le,\ge,=\}\qquad
+  {k} \in \mathbb{Z}\cup\mathbb{B} \qquad
+  {\rec} \in \{\bar{f}=\bar{k}\}\
+}\\
+{\stl,\stg,s} & \in & \mathtt{State} & \coloneqq &  \Pow{\{\bar{f}=\bar{k}\}} \\
+{\I_e, \I_c }  & \in & \mathtt{Isolation Spec} & \coloneqq & (\stl,\stg,\stg') \rightarrow \Prop\\
+v & \in & \mathtt{Values} & \coloneqq & k \ALT \rec \ALT s\\
+e & \in & \mathtt{Expressions} & \coloneqq & k \ALT x \ALT x.f 
+    \ALT \{\bar{f}=\bar{e}\} \ALT e_1 \odot e_2\\ 
+c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
+    \ALT \ite{e}{c_1}{c_2}\ALT c_1;c_2 \ALT \inserte{x}  \\
+&&&&\ALT \deletee{\lambda x.e}
+    \ALT \lete{x}{\selecte{\lambda x.e}}{c}
+    \ALT \updatee{\lambda x.e_1}{\lambda x.e_2}\\
+&&&&\ALT \foreache{x}{\lambda y.\lambda z. c} 
+    \ALT \foreachr{s_1}{s_2}{\lambda x.\lambda y. e}\\
+&&&&\ALT \txn{i}{\I_e,\I_c}{ c } \ALT \ctxn{i}{\I_e,\I_c,\stl,\stg}{c} \ALT c1 || c2\\
+% t & \in & \mathtt{Terms} & \coloneqq & e \ALT c\\
+\ectx & \in & \mathtt{Eval\;Ctx} & ::= & \bullet \ALT  
+  \bullet || c_2 \ALT c_1 || \bullet \ALT \bullet;\,c_2 
+  \ALT \ctxn{i}{\I_e,\I_c,\stl,\stg}{\bullet} \\
+\end{array}
+\end{smathpar}
+%
+\bigskip
+
+\renewcommand{\arraystretch}{1.2}
+
+%
+\textbf{Local Reduction} \quad 
+\fbox {\(\stg \vdash (c,\stl) \stepsto (c',\stl')\)}\\
+%
+\begin{minipage}{2.8in}
+\rulelabel{E-Insert}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  i \not\in \dom(\stl \cup \stg)\\
+  r = \{\bar{f}=\bar{k};\,\idf=i;\,\delf=\C{false}\}
+}
+{
+  \stg \vdash (\inserte{\{\bar{f}=\bar{k}\}},\stl) \stepsto
+  (\cskip,\stl \cup \{r\})
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+%
+\begin{minipage}{2.8in}
+\rulelabel{E-Delete}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  s = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e)=\C{true} \\
+        \hspace*{0.7in}\conj r'=\{\bar{f}=r.\bar{f}; \idf=r.\idf;
+        \delf=\C{true}\}\}\\
+% \dom(s) \cap \dom(\delta) = \emptyset
+}
+{
+  \stg \vdash (\deletee{\lambda x.e},\stl) \stepsto (\cskip,\stl \cup s)
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+\bigskip
+
+%
+\begin{minipage}{2.8in}
+\rulelabel{E-Select}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  s = \{r\in\Delta \,|\, \eval([r/x]e)=\C{true}\}\spc
+  c' = [s/y]c
+}
+{
+  \stg \vdash (\lete{y}{\selecte{\lambda x.e}}{c}, \stl) \stepsto 
+              (c',\stl)
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+%
+\begin{minipage}{2.8in}
+\rulelabel{E-Update}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  s = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e_2)=\C{true} \conj r'=[r/x]e_1\}\\
+}
+{
+  \stg \vdash (\updatee{\lambda x.e_1}{\lambda x.e_2},\stl) \stepsto 
+              (\cskip,\stl \cup s)
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
+
+\begin{minipage}{2.8in}
+\rulelabel{E-Seq1}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+ \stg \vdash (c1, \stl) \stepsto (c1', \stl') \spc c1 \neq \cskip
+}
+{
+  \stg \vdash (c1;c2, \stl) \stepsto 
+              (c1';c2,\stl')
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+
+\begin{minipage}{2.8in}
+\rulelabel{E-Seq2}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+ \stg \vdash (c1, \stl) \stepsto (\cskip, \stl')
+}
+{
+  \stg \vdash (c1;c2, \stl) \stepsto 
+              (c2,\stl')
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+
+\begin{minipage}{2.8in}
+\rulelabel{E-IfTrue}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+ \eval(e) = \C{true}
+}
+{
+  \stg \vdash (\ite{e}{c_1}{c_2}, \stl) \stepsto 
+              (c1,\stl)
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+
+\begin{minipage}{2.8in}
+\rulelabel{E-IfFalse}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+ \eval(e) = \C{false}
+}
+{
+  \stg \vdash (\ite{e}{c_1}{c_2}, \stl) \stepsto 
+              (c2,\stl)
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+
+\begin{smathpar}
+\begin{array}{ll}
+  \rulelabel{E-Foreach1} & \stg \vdash (\foreache{s}{\lambda y.\lambda
+  z.c},\stl) \stepsto (\foreachr{\emptyset}{s}{\lambda y.\lambda z. c})\\
+  \rulelabel{E-Foreach2} & \stg \vdash (\foreachr{s_1}{\{r\} \uplus s_2}{\lambda y.\lambda
+  z.c},\stl) \stepsto ([r/z][s_1/y]c;\,\foreachr{s_1 \cup \{r\}}{s_2}{\lambda y.\lambda z. c})\\
+  \rulelabel{E-Foreach3} & \stg \vdash (\foreachr{s}{\emptyset}{\lambda y.\lambda
+  z.c},\stl) \stepsto (\cskip,\stl)\\
+\end{array}
+\end{smathpar}
+%
+\bigskip
+
+%
+\textbf{Top-Level Reduction} \quad 
+\fbox {\((c,\stg) \stepsto (c',\stg')\)}\\
+%
+\begin{minipage}{3in}
+  \rulelabel{E-Txn-Start}
+  \begin{smathpar}
+  \begin{array}{c}
+    \RULE{}
+         {(\txn{i}{\I_e,\I_c}{c},\stg) \stepsto (\ctxn{i}{\I_e,\I_c,\emptyset,\stg}{c},\stg)}
+  \end{array}
+  \end{smathpar}
+\end{minipage}%
+\hfill
+\begin{minipage}{3in}
+\rulelabel{E-Txn}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \I_e\,\,(\stl,\stg,\stg')\spc
+  \stg \vdash (c,\stl) \stepsto (c',\stl')
+}
+{
+  (\ctxn{i}{\I_e,\I_c,\stl,\stg}{c},\stg') \stepsto
+  (\ctxn{i}{\I_e,\I_c,\stl',\stg'}{c'},\stg')
+}
+\end{array}
+\end{smathpar}
+\end{minipage}\\
+
+\begin{center}
+\begin{minipage}{3in}
+\rulelabel{E-Commit}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \I_c\,\,(\stl,\stg,\stg')
+}
+{
+  (\ctxn{i}{\I_e,\I_c,\stl,\stg}{\cskip},\stg') \stepsto (\cskip,\stl\gg\stg')
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+\end{center}
+\hfill
+%
+\caption{\small \txnimp: Syntax and Small-step semantics}
+\label{fig:txnimp}
+\end{figure*}
+
+
+
 \begin{figure}[t]
 \raggedright
 %
@@ -12,7 +266,7 @@
 \begin{array}{c}
 \RULE
 {
-  \stable(R,Q)\\
+  \stable(R,P)\\
   \hspace*{-1.1in}\forall\stl,\stl',\stg,i.~P(\stl,\stg) \conj i \not\in
   \dom(\stl\cup\stg) \\
   \conj \stl'=\stl \cup 
@@ -34,7 +288,7 @@
 \begin{array}{c}
 \RULE
 {
-  \stable(R,Q)\\
+  \stable(R,P)\\
   \hspace*{-0.2in}\forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
   \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).~ [r/x]e=\C{true} \\
         \hspace*{0.7in}\conj r'=\{\bar{f}=r.\bar{f}; \idf=r.\idf;
@@ -57,7 +311,7 @@
 \begin{array}{c}
 \RULE
 {
-  \stable(R,Q)\\
+  \stable(R,P)\\
   \hspace*{-0.2in}\forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
   \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).~ [r/x]e_2 =\C{true} \\
         \hspace*{1.4in}\conj r'=[r/x]e_1\}
@@ -80,12 +334,12 @@
 \RULE
 {
   R \vdash \hoare{P'}{c}{Q}\spc
-  \stable(R,P')\\
+  \stable(R,P)\\
   \hspace*{-0.2in}P'(\stl,\stg) \Leftrightarrow P(\stl,\stg) \wedge
   x = \{r' \,|\, \exists(r\in\Delta).~ [r/x]e_2 =\C{true}\} \\
 }
 {
-  R \vdash \hoare{P}{\selecte{\lambda x.e}}{Q}
+  R \vdash \hoare{P}{\lete{y}{\selecte{\lambda x.e}}{c}}{Q}
 }
 \end{array}
 \end{smathpar}
@@ -99,21 +353,52 @@
 \begin{array}{c}
 \RULE
 {
-  \stable(R,Q)\spc
-  \stable(R,I)\\
-  P \wedge y=\emptyset \Rightarrow I\spc
-  R \vdash \hoare{I \wedge z\in x}{c}{Q_c}\\
-  Q_c \wedge z\in y \Rightarrow I\spc
-  I \wedge y=x \Rightarrow Q
+  \stable(\R,Q)\spc
+  \stable(\R,\psi)\\
+  P \Rightarrow [y/\phi]\psi\spc
+  \R \vdash \hoare{\psi \wedge z\in x}{c}{Q_c}\\
+  Q_c  \Rightarrow [y \cup \{z\} / y]\psi \spc
+  [x / y]\psi \Rightarrow Q
 }
 {
-  R \vdash \hoare{P}{\foreache{x}{\lambda y.\lambda z.c}}{Q}
+  \R \vdash \hoare{P}{\foreache{x}{\lambda y.\lambda z.c}}{Q}
 }
 \end{array}
 \end{smathpar}
 \end{minipage}
 %
 
+\begin{minipage}{3in}
+\rulelabel{RG-Seq}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+\hoare{P} {c1} {Q^{'}} \spc \hoare{Q^{'}}{c2}{Q}\\
+\stable(R, Q^{'})
+}
+{
+  R \vdash \hoare{P}{c1;c2}{Q}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+
+\begin{minipage}{3in}
+\rulelabel{RG-If}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+\hoare{P \wedge e} {c1} {Q} \spc \hoare{P \wedge \neg e}{c2}{Q}\\
+\stable(R, P)
+}
+{
+  R \vdash \hoare{P}{\ite{e}{c_1}{c_2}}{Q}
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
 %
 \begin{minipage}{3in}
 \rulelabel{RG-Conseq}
@@ -147,20 +432,19 @@
 \begin{array}{c}
 \RULE
 {
+ \stable(R, I) \spc
   \stable(R,\I)\spc
   P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
-  R_r(\stl,\stg,\stg') \Leftrightarrow \I(\C{true},\stl,\stg,\stg') 
-        \wedge R(\stg,\stg') \spc
+  R_r(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') \spc
   R_r \vdash \rg{P}{c}{Q}\\
-  R_c(\stl,\stg,\stg') \Leftrightarrow \I(\C{false},\stl,\stg,\stg') 
-        \wedge R(\stg,\stg') \spc
+  R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_c(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg')  \spc
   \stable(R_c,Q)\\
   \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
     G(\stg, \stl \gg \stg)\spc
   \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
 }
 {
-  \rg{I,R}{\ctxn{i}{\I}{c}}{G,I}
+  \rg{I,R}{\ctxn{i}{\I}{c}}{G \cup ID,I}
 }
 \end{array}
 \end{smathpar}
@@ -174,10 +458,10 @@
 \begin{array}{c}
 \RULE
 {
- \rg{I,R \cup G_2}{c_1}{G_1,I} \\
- \rg{I,R \cup G_1}{c_2}{G_2,I}
+ \rg{I,R \cup G_2 \cup ID}{t_1}{G_1 \cup ID,I} \\
+ \rg{I,R \cup G_1 \cup ID}{t_2}{G_2 \cup ID,I}
 }
-{\rg{I,R}{c1||c2}{G_1\cup G_2,I}}
+{\rg{I,R}{t1||t2}{G_1\cup G_2 \cup ID,I}}
 \end{array}
 \end{smathpar}
 \end{minipage}
@@ -208,3 +492,387 @@
 \label{fig:rg-rules}
 \vspace*{-12pt}
 \end{figure}
+
+\begin{definition}[ Step-indexed reflexive transitive closure]
+For all $A:\text{Type}$, $R: A \rightarrow A \rightarrow \mathbb{P}$, and $n :
+\mathbb{N}$, the step-indexed reflexive transitive closure $R^n$ of $R$ is
+the smallest relation satisfying the following
+properties:
+\begin{itemize}
+\item $\forall (x:A).\, R^0 (x,x)$
+\item $\forall (x,y,z : A).\, R(x,y) \conj R^{n-1}(y,z) \Rightarrow
+R^{n}(x,z)$
+\end{itemize}
+\end{definition}
+
+\begin{definition} [Interleaved step relation]
+The interleaved step relation (denoted as $\rightarrow_R$) interleaves transaction local reduction with interference from concurrent transactions captured as the Rely relation (R). It is defined as follows:
+\begin{mathpar}
+\begin{array}{lcl}
+(t, \stg) \rightarrow_{R}  (t^{'}, \stg^{'}) & \defeq & (t = t^{'} \wedge R(\sigma, \sigma^{'}))  \vee ((t, \stg) \rightarrow (t^{'}, \sigma^{'}))% \wedge\\
+%& & (t.c = \texttt{SKIP} \Rightarrow \mathbb{I}_c(t.\sigma_l, t.\sigma_g, \sigma)) \wedge (\neg(t.c = \texttt{SKIP}) \Rightarrow \mathbb{I}_r(t.\sigma_l, t.\sigma_g, \sigma)))
+\end{array}
+\end{mathpar}
+
+The interleaved multistep relation (denoted as $\rightarrow_R^n$) is the step-indexed reflexive transitive closure of $\rightarrow_R$.
+\end{definition}
+
+Given a transaction $t = \texttt{txn}\langle \mathbb{I}, \stl, \stg \rangle \{c\}$, we use the notation $t.\stl, t.\stg, t.\mathbb{I}$ and $t.c$ to denote the various components of $t$. Below, we provide a more precise definition of the transaction-local RG judgement:
+
+\begin{mathpar}
+\begin{array}{lcl}
+\R \vdash \hoare{P}{c}{Q} & \defeq & \forall t, \stg,\stg',\bar{v}.
+  P(t.\stl,\stg) \conj t.c = c \wedge (t,\stg) \rightarrow_{\R}^{n} (t_2, \stg^{'}) \rightarrow (t^{'}, \stg^{'}) \wedge t^{'}.c = \texttt{SKIP} \wedge Q(t^{'}.\stl, \stg^{'})
+\end{array}
+\end{mathpar}
+
+Here, we have explicitly stated that the last step in the reduction sequence is taken by the transaction (and not by the environment),  finishing in the state satisfying the assertion $Q$. The nature of interference before and after the last step of the transaction are different (after the last step and before the commit step, the interference is controlled by $\mathbb{I}_c$, while before the last step, the interference is controlled by $\mathbb{I}_e$). Also, $\bar{v}$ denote valuations to all free variables in $c$.
+
+\begin{lemma}
+If $\stable(R, Q)$, then $\forall \stl, \stg, \stg', k. Q(\stl, \stg) \wedge R^{k}(\stg, \stg') \Rightarrow Q(\stl, \stg')$
+\end{lemma}
+
+\begin{proof}
+We use induction on $k$. 
+
+\textbf{Base Case}: For $k = 0$, $\stg = \stg'$ and hence $Q(\stl, \stg')$. 
+
+\textbf{Inductive Case}: For the inductive case, assume that for $k'$, $\forall \stl, \stg, \stg'. Q(\stl, \stg) \wedge R^{k'}(\stg, \stg') \Rightarrow Q(\stl, \stg')$.
+Given $\stl, \stg, \stg_1$ such that $Q(\stl, \stg)$, $R^{k'+1}(\stl, \stg_1)$, we have to show $Q(\stl, \stg_1)$. There exists $\stg'$ such that $R^{k'}(\stg, \stg')$ and $R(\stg', \stg_1)$. By the inductive hypothesis, $Q(\stl, \stg')$. $\stable(R,Q)$ is defined as follows:
+$$
+\stable(R,Q) = \forall \stl, \stg, \stg'. Q(\stl, \stg) \wedge R(\stg, \stg') \Rightarrow Q(\stl, \stg')
+$$
+Instantiating the above statement with $\stl, \stg', \stg_1$, we get $Q(\stl, \stg_1)$
+\end{proof}
+
+\begin{theorem}
+RG-Txn is sound.
+\end{theorem}
+\begin{proof}
+\begin{mathpar}
+\begin{array}{lc}
+  \stable(R, I) & HI\\
+  \stable(R,\I) & H\I \\
+  P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg) & HP\\ 
+  \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') & H\R_l \\
+  \R_e\vdash \rg{P}{c}{Q} & Hc\\
+  \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_c(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg') & H\R_c \\
+  \stable(\R_c,Q) & HQ \\
+  \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
+    G(\stg, \stl \gg \stg)\spc  & HQG \\
+  \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg') & HG\\
+  \forall \stg. G(\stg, \stg) & HID
+\end{array}
+\end{mathpar}
+
+Let $t_s = \ctxn{i}{\I}{c}$. Consider $\stg$ such that $I(\stg)$, and let $(t_s, \stg) \rightarrow_{R}^{n} (\texttt{SKIP}, \stg^{'})$. We have to show (1) $I(\stg^{'})$ and (2) $\texttt{step-guaranteed}(R, G, t_s, \stg)$. We break down the sequence of reductions into four parts :
+
+\begin{itemize}
+\item $\pi_1 = (t_s, \stg) \rightarrow_{R}^{n_1} (t_s, \stg_1) \rightarrow (t, \stg_1)$, where initially only the environment takes steps and the last step in the sequence is the start of the transaction using the rule E-Txn-Start. 
+\item $(t, \stg_1) \rightarrow_{R}^{n_2} (t^{'}, \stg_2)$, which begins from $t$ taking its first step at state $\stg_1$ and ends at the first configuration where $t^{'}.c = \texttt{SKIP}$. We denote this sub-sequence by $\pi$.
+\item $(t^{'}, \stg_2) \rightarrow_{R}^{n_3} (\texttt{SKIP}, \stg_3)$ which ends at the step where $t$ commits.
+\item $(\texttt{SKIP}, \stg_3) \rightarrow_{R}^{n_4} (\texttt{SKIP}, \stg^{'})$ where only the environment takes a step.
+\end{itemize}
+
+In the sequence $\pi_1$, $R^{n_1}(\stg, \stg_1)$. By $I(\stg)$, $HI$ and Lemma 6.3, $I(\stg_1)$. By the rule E-Txn-Start, $t.\stl = \phi, t.\stg = \stg_1$ and $t.c = c$. Hence $P(t.\stl, \stg_1)$.
+
+Expanding the definition of the assertion $Hc$ and instantiating it with $\stg = \stg_1$ and $\stg^{'} = \stg_2$, we would get $Q(t^{'}.\stl, \stg_2)$. However, the environment steps in run $\pi$ are in $R$, while the environment steps in assertion $Hc$ are in $\R_e$. Hence, we will now show that only environment steps in $\R_e$ can actually happen in the run $\pi$. We will show this in two steps. In the first step, we will prove that for all configurations $(t_p, \stg_p)$ in the run $\pi$ except possibly the last configuration, $\I_e(t_p.\stl, t_p.\stg, \stg_p)$. 
+
+We will prove this by contradiction. Assume that there is a configuration $(t_1, \stg_b)$ such that $\neg \I_e( t_1.\stl, t_1.\stg, \stg_b)$. Let $(t_1, \stg_{b}^{'}) \rightarrow (t_{1}^{'}, \stg_{b}^{'})$ be the next step in $\pi$ taken by the transaction. We know that this step always exists because the last step in $\pi$ is taken by the transaction.  Then $\mathbb{I}_e(t_1.\stl, t_1.\stg, \stg_{b}^{'})$. All steps between $(t_1, \stg_b)$ and $(t_1, \stg_{b}^{'})$ are taken by the environment, i.e. $R^{k}(\stg_b, \stg_{b}^{'})$ for some $k$. However,  $\neg \I_e(t_1.\stl, t_1.\stg, \stg_b)$, the assertion $H\I$ and a simple induction on $k$ shows that $\neg \I_e(t_1.\stl, t_1.\stg, \stg_{b}^{'})$. This is a contradiction. Hence, $\I_e(t_1.\stl, t_1.\stg, \stg_b)$. 
+
+Now, we will show that every environment step in $\pi$ is in $\R_e$. Assume that $(t_1, \stg_a) \rightarrow_R (t_1, \stg_b)$ is an environment step such that $R(\stg_a, \stg_b)$. Then, we know that $\I_e(t_1.\stl, t_1.\stg, \stg_a)$ and $\I_e(t_1.\stl, t_1.\stg, \stg_b)$. Hence, $t_1.\stg$ provides the existence of $\stg_1$ in the definition of $\R_e$. Thus, $\R_e(t_1.\stl, \stg_a, \stg_b)$. We can use $Hc$ and make the assertion $Q(t^{'}.\stl, \stg_2)$.
+
+Note that $t^{'}.\stg = \stg_2$. Also, since all the changes in the global database state have so far been made by the environment, $I(\stg_2)$.
+
+$(t^{'}, \stg_2) \rightarrow_{R}^{n_3 - 1} (t^{'}, \stg_{2}^{'}) \rightarrow (\texttt{SKIP}, \stg_3)$, where the first $n_3-1$ steps are only performed by the environment. Since the transaction commits at state $\stg_{2}^{'}$, by the E-Commit rule, $\I_c(t^{'}.\stl, \stg_2, \stg_{2}^{'})$. We will now show that all environment steps in the above run must be in $\R_c$. Again, we will show this in two steps. Let $m = n_3 - 1$ and $(t^{'}, \stg_2) \rightarrow_R (t^{'}, \stg_{21}) \rightarrow_R (t^{'}, \stg_{22}) \ldots \rightarrow_R (t^{'}, \stg_{2m}) \rightarrow (\texttt{SKIP}, \stg_3)$. We will show that $\I_c(t^{'}.\stl, \stg_2, \stg_{2k})$ for all $k, 1 \leq k \leq m$. 
+
+We will prove this by contradiction. Suppose for some $i$, $\neg \I_c(t^{'}.\stl, \stg_2, \stg_{2i})$. Clearly, $R^{j}(\stg_{2i}, \stg^{'})$. Then, by $H\I$ and a simple induction on $j$, we can show that $\neg \I_c(t^{'}.\stl, \stg_2, \stg_{2}^{'})$. However, this is a contradiction. Hence, $\forall k$, $\I_c(t^{'}.\stl, \stg_2, \stg_{2k})$.
+
+Now, we will show that every environment step is in $\R_c$. Consider the step $(t^{'}, \stg_{2k}) \rightarrow_R (t^{'}, \stg_{2(k+1)})$. We have $\I_c(t^{'}.\stl, \stg_2, \stg_{2k})$ and $\I_c(t^{'}.\stl, \stg_2, \stg_{2(k+1)})$. Hence, $\stg_2$ provides the existence of $\stg_1$ in the definition of $\R_c$. Thus, $\R_c(t^{'}.\stl, \stg_{2k}, \stg_{2(k+1)})$.
+
+By $HQ$, $Q(t^{'}.\stl, \stg_2)$ and Lemma 6.3 we have $Q(t^{'}.\stl, \stg_{2}^{'})$. Since all state changes so far have been made by the environment, $I(\stg_{2}^{'})$. By $HQG$, $G(\stg_{2}^{'}, t^{'}.\stl \gg \stg_{2}^{'})$. By the E-Commit rule, $\stg_3 = (t^{'}.\stl \gg \stg_{2}^{'})$. Hence, $G(\stg_{2}^{'}, \stg_3)$. All the steps of the transaction except the commit step do not change the global database state and by $HID$ belong to $G$. The commit step satisfies $G$. This proves the \texttt{step-guaranteed} assertion. Finally, by $HG$, $I(\stg_3)$.
+
+%{\color{red}Note : Since E-Commit is applied at $(t^{'}, \sigma_{2}^{'})$ and $t^{'}.\sigma_g = \sigma_2$, $\mathbb{I}_c(t^{'}.\sigma_l, \sigma_2, \sigma_2^{'})$. $\sigma_{2}^{'}$ can be reached from $\sigma_2$ by any number of environment steps, each of which may not obey $\mathbb{I}_c$. That is, there may exist $\sigma_3$ such that $R(\sigma_2, \sigma_3)$ and $\neg \mathbb{I}_c(t^{'}.\sigma_l, \sigma_2, \sigma_3)$. Such states will be overlooked by the $\texttt{stable}_c$ function}.
+
+All the steps in $(\texttt{SKIP}, \stg_3) \rightarrow_{R}^{n_4} (\texttt{SKIP}, \stg^{'})$ are performed by the environment. Since $I(\stg_3)$, by $HI$ and Lemma 6.3, $I(\stg^{'})$.
+\end{proof}
+
+%\RULE
+%{
+%  R \vdash \hoare{P'}{c}{Q}\spc
+%  \stable(R,P')\\
+%  \hspace*{-0.2in}P'(\stl,\stg) \Leftrightarrow P(\stl,\stg) \wedge
+%  x = \{r' \,|\, \exists(r\in\Delta).~ [r/x]e_2 =\C{true}\} \\
+%}
+%{
+%  R \vdash \hoare{P}{\selecte{\lambda x.e}}{Q}
+%}
+
+% s = \{r\in\Delta \,|\, \eval([r/x]e)=\C{true}\}\spc
+%  c' = [s/y]c
+\begin{theorem}
+RG-Select is sound
+\end{theorem}
+
+\begin{proof}
+Given the premise of RG-Select, $t, \stg$ such that $t.c = \lete{x}{\selecte{\lambda y.e}}{c}$, $(t, \stg) \rightarrow_{R}^{m} (t_2, \stg^{'}) \rightarrow (t^{'}, \stg^{'})$, $P(t.\stl, \stg)$ and $t^{'}.c = \texttt{SKIP}$, we have to show that $Q(t^{'}.\stl, \stg^{'})$. The reduction sequence can be broken down into following parts:
+
+\begin{itemize}
+\item $\pi_1 = (t, \stg) \rightarrow_{R}^{n_1} (t, \stg_1) \rightarrow (t_1, \stg_1)$ where initially only the environment takes steps, and ends with the application of the E-Select rule.
+\item $\pi_2 = (t_1, \stg_1) \rightarrow_{R}^{n_2} (t_2, \stg^{'}) \rightarrow (t^{'}, \stg^{'}) $ which corresponds to the execution of $\C{c}$
+\end{itemize}
+
+In $\pi_1$, $R^{n_1}(\stg, \stg_1)$. By $P(t.\stl, \stg)$ and $\stable(R, P)$, we get $P(t.\stl, \stg_1)$. By applying the E-Select rule, $t_1.\stl = t.\stl$, $t_1.c = [s/x]c$, where $s = \{r\in\Delta_1 \,|\, \eval([r/y]e)=\C{true}\}$. By definition of $P'$, $P'(t_1.\stl, \stg_1)$. The following property holds trivially:
+
+$$
+R \vdash \hoare{P \wedge x = s} {c} {Q} \Leftrightarrow R \vdash \hoare{P} {[s/x]c} {Q}
+$$
+
+Since $R \vdash \hoare{P'}{c}{Q}$, by the above property, $R \vdash \hoare{P}{[s/x]c}{Q}$. Since $P(t_1.\stl, \stg_1)$, by definition of $R \vdash \hoare{P}{[s/x]c}{Q}$, we get $Q(t^{'}.\stl, \stg')$.
+
+%Suppose the transaction next takes a step at state $\stg_1$, i.e. for some $k$ $R^{k}(\stg, \stg_1)$ and the rest of reduction is $(t_1, \stg_1) \rightarrow (t_{1}^{'}, \stg_1) \rightarrow_{R}^{m^{'}}  (t_2, \stg^{'}) \rightarrow (t^{'}, \sigma^{'})$. Now, $P'(t_1.\stl, \stg)$ and by $\stable(R, P')$, $P'(t_1.\stl, \stg_1)$. Since $P'(t_1.\stl, \stg)$ binds $y$ to $s$ and $t_1.c = [s/y]c$, by the assertion $R \vdash \hoare{P'}{c}{Q}$, $Q(t^{'}.\stl, \stg^{'})$.
+
+\end{proof}
+
+\begin{theorem}
+RG-Update is sound
+\end{theorem}
+
+\begin{proof}
+Given the premise of RG-Update, $t, \stg$ such that $t.c = \updatee{\lambda x.e_1}{\lambda x.e_2}$, $(t, \stg) \rightarrow_{R}^{m} (t_2, \stg^{'}) \rightarrow (t^{'}, \stg^{'})$, $P(t.\stl, \stg)$ and $t^{'}.c = \texttt{SKIP}$, we have to show that $Q(t^{'}.\stl, \stg^{'})$. 
+
+Since only a single step needs to be taken by the transaction (by applying the E-Update rule), $t_2.c = t.c$, $t_2.\stl = t.\stl$ and $R^m(\stg, \stg')$. By $\stable(R, P)$, $P(t_2.\stl, \stg')$. According to E-Update,  $t^{'}.\stl = t_2.\stl \cup \{r' \,|\, \exists(r\in \stg').~ \eval([r/x]e_2)=\C{true} \conj r'=[r/x]e_1\}$. From the premise of RG-Update, we know that 
+
+$$
+\forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
+  \stl' = \stl \cup \{r' \,|\, \exists(r \in \stg).~ [r/x]e_2 =\C{true} \conj r'=[r/x]e_1\} \Rightarrow 
+  Q(\stl',\stg)
+$$
+
+Instantiating the above statement with $\stl = t_2.\stl$ and $\stg = \stg'$, we get $Q(\stl',\stg')$. However, $\stl^{'} = t^{'}.\stl$. Hence, $Q(t^{'}.\stl,\stg')$.
+\end{proof}
+
+\begin{theorem}
+RG-Insert is sound
+\end{theorem}
+
+\begin{proof}
+Given the premise of RG-Insert, $t, \stg$ such that $t.c = \inserte{x}$, $(t, \stg) \rightarrow_{R}^{m} (t_2, \stg^{'}) \rightarrow (t^{'}, \stg^{'})$, $P(t.\stl, \stg)$ and $t^{'}.c = \texttt{SKIP}$, we have to show that $Q(t^{'}.\stl, \stg^{'})$. 
+
+Since only a single step needs to be taken by the transaction (by applying the E-Insert rule), $t_2.c = t.c$, $t_2.\stl = t.\stl$ and $R^m(\stg, \stg')$. By $\stable(R, P)$, $P(t_2.\stl, \stg')$. According to E-Insert, $t^{'}.\stl = t_2.\stl \cup \{\bar{f}=\bar{k};\,\idf=i;\,\delf=\C{false}\}$ and $i \not\in \dom(t_2.\stl \cup \stg')$. From the premise of RG-Insert, we know that 
+
+$$
+\forall\stl,\stl',\stg,i.~P(\stl,\stg) \conj i \not\in
+  \dom(\stl\cup\stg) \\
+  \conj \stl'=\stl \cup 
+  \{\{\bar{f}=x.\bar{f};\,\idf=i;\,\delf=\C{false}\} \Rightarrow 
+  Q(\stl',\stg)
+$$
+
+Instantiating the above statement with $\stl = t_2.\stl$ and $\stg = stg'$, we get $Q(\stl',\stg')$. However, $\stl^{'} = t^{'}.\stl$. Hence, $Q(t^{'}.\stl,\stg)$.
+\end{proof}
+
+\begin{theorem}
+RG-Delete is sound
+\end{theorem}
+
+\begin{proof}
+Given the premise of RG-Delete $t, \stg$ such that $t.c = \deletee{\lambda x.e}$, $(t, \stg) \rightarrow_{R}^{m} (t_2, \stg^{'}) \rightarrow (t^{'}, \sigma^{'})$, $P(t.\stl, \stg)$ and $t^{'}.c = \texttt{SKIP}$, we have to show that $Q(t^{'}.\stl, \stg^{'})$. 
+
+Since only a single step needs to be taken by the transaction (by applying the E-Delete rule), $t_2.c = t.c$, $t_2.\stl = t.\stl$ and $R^m(\stg, \stg')$. By $\stable(R, P)$, $P(t_2.\stl, \stg')$. According to E-Delete,  $t^{'}.\stl = t_2.\stl \cup \{r' \,|\, \exists(r\in\stg').~ \eval([r/x]e)=\C{true} \conj r'=\{\bar{f}=r.\bar{f}; \idf=r.\idf;\delf=\C{true}\}\}$. From the premise of RG-Delete, we know that 
+
+$$
+\forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
+  \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).~ [r/x]e=\C{true}
+        \conj r'=\{\bar{f}=r.\bar{f}; \idf=r.\idf;
+        \delf=\C{true}\}\}  \Rightarrow 
+  Q(\stl',\stg)
+$$
+
+Instantiating the above statement with $\stl = t_2.\stl$ and $\stg = \stg'$, we get $Q(\stl',\stg')$. However, $\stl^{'} = t^{'}.\stl$. Hence, $Q(t^{'}.\stl,\stg')$.
+\end{proof}
+
+%\RULE
+%{
+%  \stable(R,Q)\spc
+%  \stable(R,I)\\
+%  P \wedge y=\emptyset \Rightarrow I\spc
+%  R \vdash \hoare{I \wedge z\in x}{c}{Q_c}\\
+%  Q_c \wedge z\in y \Rightarrow I\spc
+%  I \wedge y=x \Rightarrow Q
+%}
+%{
+%  R \vdash \hoare{P}{\foreache{x}{\lambda y.\lambda z.c}}{Q}
+%}
+
+\begin{theorem}
+RG-Foreach is sound
+\end{theorem}
+
+\begin{proof}
+\begin{mathpar}
+\begin{array}{lc}
+\stable(R,Q) & HQ\\
+  \stable(R,\psi) & HI\\
+  \stable(R,P) & HP\\
+  P  \Rightarrow [\phi / y]\psi & H1\\
+  R \vdash \hoare{\psi \wedge z\in x}{c}{Q_c} & Hc\\
+  Q_c \Rightarrow [y \cup \{z\} / y]\psi & H2\\
+  %[x / y] \psi \Rightarrow Q & HF \\
+ \end{array}
+  \end{mathpar}
+Given $t, \stg$ such that $t.c = \foreache{x}{\lambda y.\lambda z.c}$, $(t, \stg) \rightarrow_{R}^{n} (t_2, \stg^{'}) \rightarrow (t^{'}, \stg^{'})$, $P(t.\stl, \stg)$ and $t^{'}.c = \texttt{SKIP}$, we have to show that $Q(t^{'}.\stl, \stg^{'})$. 
+
+The operational semantics of \texttt{foreach} (E-Foreach1, E-Foreach2, E-Foreach3) essentially execute the command $\texttt{c}$ for a number of iterations, where in each iteration, $\texttt{z}$ is bound to a record $r \in \texttt{x}$, while $\C{y}$ is bound to a set containing records bound to $\C{z}$ in previous iterations. $\C{z}$ is bound to a different record in each iteration, and the loop stops when all records in $\C{x}$ are iterated over. 
+
+Assuming that $|x| = s$, the reduction sequence for \texttt{foreach} will have the following structure : 
+
+$$
+(t, \stg) \rightarrow_{R}^{m} (t_{1}, \stg_{1}) \rightarrow_{R}^{n_1} (t_{2}^{'}, \stg_{2}^{'}) \rightarrow_{R}^{n_{1}^{'}} (t_{2}, \stg_{2}) \rightarrow_{R}^{n_2} (t_{3}^{'},\stg_{3}^{'}) \rightarrow_{R}^{n_{2}^{'}} (t_{3}, \stg_{3}) \ldots (t_{s}, \stg_{s}) \rightarrow_{R}^{n_s} (t_{s+1}^{'}, \stg_{s+1}^{'}) \rightarrow_{R}^{l} (t^{'}, \stg^{'})
+$$
+ 
+The reduction sequence $\pi_i = (t_{i}, \stg_{i}) \rightarrow_{R}^{n_i} (t_{i+1}^{'}, \stg_{i+1}^{'})$ corresponds to the execution of the command $\C{c}$ in the $i$th iteration, such that the first and last steps in $\pi_i$ are not environment steps. The sequence $\pi_0 = (t, \stg) \rightarrow_{R}^{m} (t_{1}, \stg_{1})$ corresponds to the steps E-Foreach1 and E-Foreach2 along with environment steps. Similarly, the sequence $\pi_{i}^{'} = (t_{i+1}^{'}, \stg_{i+1}^{'}) \rightarrow_{R}^{n_{1}^{'}} (t_{i+1}, \stg_{2})$ corresponds to the execution of the E-Foreach2 step required to prepare the $(i+1)$th iteration along with environment steps.  
+
+Let $x = \{r_1, \ldots, r_s\}$, and assume that the records are picked in the increasing order. Then at the start of the $i$th iteration, $\C{z}$ is bound to $r_i$, while $\C{y}$ is bound to $\{r_1, \ldots, r_{i-1}\}$. We will show that $[\{r_1,\ldots, r_i\} / y]\psi$ holds at the end of iteration $i$, for all $1 \leq i \leq s$. More precisely, we will show $[\{r_1,\ldots, r_i\} / y]\psi(t_{i+1}^{'}.\stl, \stg_{i+1}^{'})$. We will use induction on $i$.
+
+\textbf{Base Case}: The steps E-Foreach1 and E-Foreach2 do not change $\stl$. Also, $P(t.\stl, \stg)$ and $\stable(R, P)$. Hence, at the end of the sequence $\pi_0$, $P(t_{1}.\stl, \stg_{1})$. By $H1$, this implies $[\phi / y] \psi(t_1.\stl, \stg_1)$. The sequence $\pi_1 = (t_{1}, \stg_{1}) \rightarrow_{R}^{n_1} (t_{2}^{'}, \stg_{2}^{'})$ corresponds the execution of $\C{c}$ in the first iteration with $\C{z}$ bound to $r_1$ and $\C{y}$ bound to $\phi$. Clearly, $\psi(t_1.\stl, \stg_1) \wedge z \in x$ holds. Hence, by $Hc$, $Q_c(t_{2}^{'}.\stl, \stg_{2}^{'})$. By H2, this implies $[\{r_1\} / y] \psi(t_2^{'}.\stl, \stg_{2}^{'})$.
+
+\textbf{Inductive Case}: Assume that $[\{r_1,\ldots, r_{k-1}\} / y]\psi(t_{k}^{'}.\stl, \stg_{k}^{'})$. The next sequence of reductions $(t_{k}^{'}, \stg_{k}^{'}) \rightarrow_{R}^{n_{k}^{'}} (t_k, \stg_k)$ only corresponds to the execution of the E-Foreach2 step for the $k$th iteration and environment steps. E-Foreach2 does not change $\stl$, and since $\stable(R, \psi)$, we get $[\{r_1,\ldots, r_k\} / y]\psi(t_{k}.\stl, \stg_{k})$. At the start of the next iteration, $\C{z}$ is bound to $r_{k}$, and $\C{y}$ is bound to $\{r_1, \ldots, r_{k-1}\}$. Hence, $\psi(t_k.\stl, \stg_k) \wedge z \in x$. By Hc, this implies $Q_c(t_{k+1}^{'}.\stl, \stg_{k+1}^{'})$. By $H2$, this implies $[y \cup z / y] \psi(t_{k+1}^{'}.\stl, \stg_{k+1}^{'}) = [\{r_1, \ldots, r_k\} / y]\psi(t_{k+1}^{'}.\stl, \stg_{k+1}^{'})$. This proves the inductive step.
+
+Hence, at the end of the $s$th iteration, $[x / y]\psi(t_{s+1}^{'}.\stl, \stg_{s+1}^{'})$. This implies $Q(t_{s+1}^{'}.\stl, \stg_{s+1}^{'})$. Finally, the last part of the reduction, $(t_{s+1}^{'}, \stg_{s+1}^{'}) \rightarrow_{R}^{l} (t^{'}, \stg^{'})$ corresponds environment steps and E-Foreach3 (as the last step). Since $\stable(R, Q)$ and E-Foreach3 does not change $\stl$, we have $Q(t^{'}.\stl, \stg)$. 
+
+\end{proof}
+
+\begin{theorem}
+RG-Seq is sound
+\end{theorem}
+
+\begin{proof}
+\begin{mathpar}
+\begin{array}{lc}
+\hoare{P} {c1} {Q^{'}} & H1\\
+ \hoare{Q^{'}}{c2}{Q} & H2\\
+\stable(R, Q^{'}) & H3
+\end{array}
+\end{mathpar}
+Given $t, \stg$ such that $t.c = c1;c2$, $(t, \stg) \rightarrow_{R}^{m} (t_2, \stg^{'}) \rightarrow (t^{'}, \stg^{'})$, $P(t.\stl, \stg)$ and $t^{'}.c = \texttt{SKIP}$, we have to show that $Q(t^{'}.\stl, \stg^{'})$. We can divide the reduction sequence into three parts :
+
+\begin{itemize}
+\item $(t,\stg) \rightarrow_{R}^{m_1} (t_{m}^{'}, \stg_1) \rightarrow (t_{m}, \stg_1)$, where $t_m.c = c2$. We denote this sequence as $\pi_1$.
+\item $(t_m, \stg_1) \rightarrow_{R}^{m_2} (t_m, \stg_{1}^{'}) $ where all steps are taken by the environment. This sequence is denoted as $\pi_2$.
+\item $(t_m, \stg_{1}^{'}) \rightarrow_{R}^{m_3} (t_{2}, \stg^{'}) \rightarrow (t^{'}, \stg^{'})$. This run is denoted as $\pi_3$.
+\end{itemize}
+
+By the premise of the E-Seq1 and E-Seq2 rules, all the reductions in the sequence $\pi_1$ are also applicable to $c1$. Hence, consider transaction $s$ such that $s.c = c1$, $s.\stl=t.\stl$. Then, there exists the sequence $(s, \stg)  \rightarrow_{R}^{m_1} (s_2, \stg_1) \rightarrow (s^{'}, \stg_1)$ with $s^{'}.c = \texttt{SKIP}$, $s^{'}.\stl = t_{m}.\stl$. Since $P(s.\stl, \stg)$, by H1, $Q^{'}(s^{'}.\stl, \stg_1)$. This implies $Q^{'}(t_m.\stl, \stg_1)$.
+
+In the sequence $\pi_2$, all steps are taken by the environment. By H3, $Q^{'}(t_m.\stl, \stg_{1}^{'})$.
+
+Since $t_m.c = c2$, by H3, $Q(t^{'}.\stl, \stg^{'})$.
+
+%There exists $s$ such that $s.c = c1$, $s.\sigma_l=t.\sigma_l$, $s.\sigma_v = t.\sigma_v$ and the run $(s, \sigma) \rightarrow (s_1, \sigma) \rightarrow_{R}^{m_1} (s_2, \sigma_1) \rightarrow (s^{'}, \sigma_1)$ with $s^{'}.c = \texttt{SKIP}$. Similarly, there exists $u$ such that $u.c = c2$, $u.\sigma_l = s^{'}.\sigma_l$, $u.\sigma_v = s^{'}.\sigma_v$ and the run $(u, \sigma_{1}^{'}) \rightarrow (u_1, \sigma_{1}^{'}) \rightarrow_{R}^{m_2} (u_2, \sigma^{'}) \rightarrow (u^{'}, \sigma^{'})$ with $R^{m_3}(\sigma_1, \sigma_{1}^{'})$ and $u^{'}.c = \texttt{SKIP}$. Also, $u^{'}.\sigma_l = t^{'}.\sigma_l$ and $u^{'}.\sigma_v = t^{'}.\sigma_v$.
+
+%By H1, $Q^{'}(s^{'}.\sigma_l, \sigma_3, s^{'}.\sigma_v)$. By H2, $Q^{'}(s^{'}.\sigma_l, \sigma_{3}^{'}, s^{'}.\sigma_v)$. Also, $Q^{'}(u.\sigma_l, \sigma_{3}^{'}, u.\sigma_v)$. By H3, $Q(u^{'}.\sigma_l, \sigma^{'}, u^{'}.\sigma_v)$. Hence $Q(t^{'}.\sigma_l, \sigma^{'}, t^{'}.\sigma_v)$.
+
+\end{proof}
+
+\begin{theorem}
+RG-If is sound
+\end{theorem}
+\begin{proof}
+\begin{mathpar}
+\begin{array}{lc}
+\hoare{P \wedge e} {c1} {Q} & H1 \\
+\hoare{P \wedge \neg e}{c2}{Q} & H2\\
+\stable(R, P) & H3
+\end{array}
+\end{mathpar}
+
+Given $t, \stg$ such that $t.c = \ite{e}{c_1}{c_2}$, $(t, \stg) \rightarrow_{R}^{m} (t_2, \stg^{'}) \rightarrow (t^{'}, \stg^{'})$, $P(t.\stl, \stg)$ and $t^{'}.c = \texttt{SKIP}$, we have to show that $Q(t^{'}.\stl, \stg^{'})$. Assume that $\texttt{eval}(e) = \texttt{true}$. We divide the sequence of steps into two parts:
+
+\begin{itemize}
+\item $\pi_1 = (t, \stg) \rightarrow_{R}^{n_1} (t, \stg_1) \rightarrow (t_1, \stg_1)$ where initially only the environment takes steps, and the last step is taken by the transaction using E-IfTrue.
+\item $\pi_2 = (t_1, \stg_1) \rightarrow_{R}^{n_2} (t_2, \stg^{'}) \rightarrow (t^{'}, \stg^{'})$
+\end{itemize}
+
+Since $P(t.\stl, \stg)$ and $R^{n_1}(\stg, \stg_1)$, by H3, we have $P(t.\stl, \stg_1)$. By applying the rule E-IfTrue, we have $t_1.\stl = t.\stl$, $t_1.c = c1$. Hence, $P(t_1.\stl, \stg_1)$. By the definition of $H1$, $Q(t^{'}, \stg')$. A similar proof follows for the case $\texttt{eval}(e) = \texttt{false}$
+%In the first step by $t$, only the rules E-IfTrue and E-IfFalse are applicable. Assume that $t.\sigma_v(e)$. Then, $t_1.c = c1$, $t_1.\sigma_v = t.\sigma_v$, $t_1.\sigma_l = t.\sigma_l$ and $t_1.\sigma_g= \sigma$. Assume that the next step is taken by the transaction at global database state $\sigma_1$. That is, the environment takes $m_1$ steps in $(t_1, \sigma) \rightarrow_{R}^{m_1} (t_1, \sigma_1)$. Then, since the transaction takes a step, $\mathbb{I}_r(t_1.\sigma_l, \sigma, \sigma_1)$. Due to $\texttt{stable}_{\mathbb{I}}(R, \mathbb{I}_r)$, all the $m_1$ must also follow $\mathbb{I}_r$, and hence by $H3$, $P(t_1.\sigma_l, \sigma_1, t_1.\sigma_1)$. By $H1$, $Q(t^{'}.\sigma_l, \sigma^{'}, t^{'}.\sigma_v)$. 
+
+%A similar proof follows for the case $\neg t.\sigma_v(e)$.
+\end{proof}
+
+%\begin{lemma}
+%If $\{\mathbb{I}, I, R\} t \{G, I\}$, then $\{\mathbb{I}, I, R \cup ID\} t \{G, I\}$, where $ID$ is the identity function
+%\end{lemma}
+%\begin{proof}
+%Given $\sigma$ such that $I(\sigma)$ and the run $\pi_1$, $(t,\sigma) \rightarrow_{R \cup ID}^{n_1} (\texttt{SKIP}, \sigma^{'})$, we have to show (1) $I(\sigma^{'})$ and (2)$\texttt{commit-guarantee}(\mathbb{I}, R \cup ID, G, t, \sigma)$.
+%
+%We will transform the run $\pi_1$ to run $\pi_2$ of the form $(t,\sigma) \rightarrow_{R}^{n_2} (\texttt{SKIP}, \sigma^{'})$. Consider any sequence of two steps in the run $\pi_1$ of the form $(t_1, \sigma_1) \rightarrow_{R \cup ID} (t_1, \sigma_1) \rightarrow_{R \cup ID} (t_2, \sigma_2)$, i.e. the first step is taken by the environment in the form of the $ID$ function. Then we remove the first step and obtain the valid step $(t_1, \sigma_1) \rightarrow_{R \cup ID} (t_2, \sigma_2)$. We perform this transformation from left to right (i.e. increasing values of the step index) whenever the environment takes a step in the form of the $ID$ function. It is clear that the resulting run will only have environment steps in the form of $R$. Since the run $\pi_2$ also ends in $\sigma^{'}$, by the hypothesis $I(\sigma^{'})$. Also, the commit step in the run $\pi_2$ will involve the same states as the commit step in $\pi_1$. Hence, $\texttt{commit-guarantee}(\mathbb{I}, R \cup ID, G, t, \sigma)$. 
+%\end{proof}
+
+\begin{lemma}
+If $\stable(R, Q)$ and $R' \subseteq R$, then $\stable(R', Q)$
+\end{lemma}
+\begin{proof}
+Given $\stl, \stg, \stg'$ such that $Q(\stl, \stg)$ and $R'(\stg, \stg')$, we have to show that $Q(\stl, \stg')$. Since $R' \subseteq R$, $R(\stg, \stg')$. Hence, by $\stable(R,Q)$, $Q(\stl, \stg')$.
+\end{proof}
+
+\begin{lemma}
+If $\rg{I,R}{\ctxn{i}{\I}{c}}{G \cup ID,I}$ and $R^{'} \subseteq R$, then $\rg{I,R'}{\ctxn{i}{\I}{c}}{G \cup ID,I}$
+\end{lemma}
+\begin{proof}
+Let $t = \ctxn{i}{\I}{c}$. Then, given $\stg$ such that $I(\stg)$ and $(t, \stg) \rightarrow_{R'}^{n} (\C{SKIP}, \stg^{'})$, we have to show (1) $I(\stg^{'})$ and (2) $\texttt{step-guaranteed}(R', G \cup ID, t, \stg)$. Since $R' \subseteq R$, every environment step in the above reduction sequence is in $R$. Thus,  $(t, \stg) \rightarrow_{R'}^{n} (\C{SKIP}, \stg^{'})$, which by definition of $\rg{I,R}{\ctxn{i}{\I}{c}}{G \cup ID,I}$ implies $I(\stg')$. The same argument holds for $\texttt{step-guaranteed}(R', G \cup ID, t, \stg)$.
+\end{proof}
+
+\begin{theorem}
+RG-Par is sound
+\end{theorem}
+
+\begin{proof}
+\begin{mathpar}
+\begin{array}{lc}
+ \rg{I,R \cup G_2 \cup ID}{t_1}{G_1 \cup ID,I} & H1\\
+ \rg{I,R \cup G_1 \cup ID}{t_2}{G_2 \cup ID,I} & H2
+\end{array}
+\end{mathpar}
+
+Consider $\stg$ such that $I(\stg)$, and let $(t_1 || t_2, \stg) \rightarrow_{R}^{n} (\texttt{SKIP}, \stg^{'})$. We have to show (1) $I(\stg^{'})$ and (2) $\texttt{step-guaranteed}( R, G_1 \cup G_2 \cup ID, t1 || t_2, \stg)$. 
+
+Suppose that $t_1$ commits before $t_2$ in the execution sequence. Consider the sequence upto (and including) the commit step of $t_1$, i.e. $(t_1 || t_2, \stg) \rightarrow_{R}^{n_1} (t_{1}^{'} || t_{2}^{'}, \stg_1) \rightarrow (t_{2}^{'}, \stg_{1}^{'})$. In this sequence, all steps apart from the steps taken by $t_1$ belong to $R \cup ID$, since any step taken by $t_2$ cannot change the global database state. Hence, there exists the sequence $(t_1, \stg) \rightarrow_{R \cup ID}^{n_1} (t_{1}^{'}, \stg_1) \rightarrow (\texttt{SKIP}, \stg_{1}^{'})$. Since $R \cup ID \subseteq R \cup G_2 \cup ID$, by H1 and Lemma, $I(\stg_{1}^{'})$ and $G_1(\stg_1, \stg_{1}^{'})$. Now, consider the entire run from the perspective of $t_2$. All steps taken by $t_1$ except the commit step do not change the global database state, and the change during the commit step belongs to $G_1$. Hence, all steps in the run apart from the steps taken by $t_2$ belong to $R \cup G_1 \cup ID$. Hence, there exists a run $(t_2, \stg) \rightarrow_{R \cup G_1 \cup ID}^{n} (\texttt{SKIP}, \stg^{'})$. By H2 $I(\stg^{'})$. 
+
+Finally, the commit step of $t_1$ belongs to $G_1$, while the commit step of $t_2$ belongs to $G_2$, and every other step of either transaction does not change the global database state. Hence,  $\texttt{step-guaranteed}(R, G_1 \cup G_2 \cup ID, t1 || t2, \stg)$. The proof for the case where $t_2$ commits before $t_1$ would be similar.
+\end{proof}
+
+\begin{theorem}
+RG-Conseq is sound
+\end{theorem}
+
+\begin{proof}
+\begin{mathpar}
+\begin{array}{lc}
+ R \vdash \hoare{P}{t}{Q} & H1\\
+  P' \Rightarrow P & H2\\
+  Q \Rightarrow Q' & H3\\
+\end{array}
+\end{mathpar}
+Given $t, \stg$ such that $(t, \stg) \rightarrow_{R}^{m} (t_2, \stg^{'}) \rightarrow (t^{'}, \stg^{'})$, $P'(t.\stl, \stg)$ and $t^{'}.c = \texttt{SKIP}$, we have to show that $Q'(t^{'}.\stl, \stg^{'})$. By H2, $P(t.\stl, \stg)$. Then, expanding the definition in H1, we get $Q(t^{'}.\stl, \stg')$. By H3, $Q'(t^{'}.\stl, \stg^{'})$.
+\end{proof}
+
+\begin{theorem}
+RG-Conseq2 is sound
+\end{theorem}
+
+\begin{proof}
+\begin{mathpar}
+\begin{array}{lc}
+\rg{I,R}{\ctxn{i}{\I}{c}}{G,I} & H1\\
+  \I' \Rightarrow \I \spc & H2\\
+  R' \subseteq R \spc & H2\\
+  \stable(R',\I') & H3\\
+  G \subseteq G' & H4\\
+  \forall \stg,\stg'.~I(\stg) \wedge G'(\stg,\stg') \Rightarrow I(\stg')& H5
+  \end{array}
+  \end{mathpar}
+Let $t = \ctxn{i}{\I'}{c}$. Given $\stg$ such that $I(\stg)$ and reduction sequence $\pi = (t, \stg) \rightarrow_{R'}^{n} (\C{SKIP}, \stg')$, we have to show that $I(\stg')$ and $\texttt{step-guaranteed}(R', G', t, \stg)$. First, we will show that the above reduction sequence is valid even if the isolation level of $t$ is changed to $\mathbb{I}$. Assume that the transaction performs $m$ steps in $\pi$. We will use induction on $m$ to show that every step of the transaction is valid for isolation level $\mathbb{I}$. 
+
+For the base case, the first step is always valid irrespective of any isolation level. For the inductive case, assume that all steps upto the $k$th step of the transaction in $t$ are valid with isolation level $\mathbb{I}$. Let the $(k+1)$th step of the transaction be $(t_1, \stg_1) \rightarrow (t_2, \stg_1)$. Then $\mathbb{I}'(t_1.\stl, t_1.\stg, \stg_1)$. By H2, $\mathbb{I}(t_1.\stl, t_1.\stg, \stg_1)$. Hence, the $k+1$th step is also valid for isolation level $\mathbb{I}$. This shows that the entire reduction sequence is valid even if the isolation level of $t$ is changed to $\mathbb{I}$. Let $t' = \ctxn{i}{\I'}{c}$. Since $R' \subseteq R$, it follows that the reduction sequence $\pi' = (t', \stg) \rightarrow_{R}^{n} (\C{SKIP}, \stg')$ comprising of the same steps as $\pi$ is valid. By H1, $I(\stg')$. Finally, by $\texttt{step-guaranteed}(R, G, t', \stg)$, all global database state changes caused by $t'$ in $\pi'$ are in $G$. But these are the same global database stage changes in $\pi$. Since $G \subseteq G'$, these state changes are also in $G'$.
+\end{proof}

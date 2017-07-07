@@ -97,7 +97,7 @@
 \RULE
 {
   \stable(\R,Q)\spc
-  \stable(\R,\psi)\\
+  \stable(\R,\psi) \spc \stable(\R, P)\\
   P \Rightarrow [\emptyset/y]\psi\spc
   \R \vdash \hoare{\psi \wedge z\in x}{c}{Q_c}\\
   Q_c \Rightarrow [y \cup \{z\}/y]\psi\spc
@@ -122,7 +122,7 @@
   \stable(R,\I)\spc
   \stable(R,I)\spc
   P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
-  \R_l(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg')\\
+  \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg')\\
   \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_c(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg')\\
   \R_l \vdash \rg{P}{c}{Q} \spc \stable(\R_c,Q) \spc 
   \forall \stg.~G(\stg,\stg)\\
