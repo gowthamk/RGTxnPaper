@@ -10,7 +10,7 @@ Consistency condition $I_1$  requires that  sales of each  warehouse  equals to 
  sequentially unique IDs assigned to  orders placed in the same   warehouse and district. Condition $I_4$ requires 
  the  number of  item orders   in each district 
   reflexes  the district's roll-up. 
-Given the consistency conditions,  Table  \ref{tab:tpcc-eval} gives the isolation level  for the \C{New\_Order},  \C{Payment},  \C{Delivery} transactions using the  MySQL and PostgreSQL databases   to maintain   each consistency condition. Note,   \C{Stock Level} and  \C{Order Status}   are read-only transactions can be executed under RC.   
+Given the consistency conditions,  Table  \ref{tab:tpcc-eval} gives the isolation level  for the \C{New\_Order},  \C{Payment},  and \C{Delivery} transactions using the  MySQL and PostgreSQL databases   to maintain   each consistency condition. Note,   \C{Stock Level} and  \C{Order Status}   are read-only transactions can be executed under RC.   
 Recall that the \C{New\_Order} transaction places a new order for
  items from a particular district in a warehouse.  
 The \C{Payment} transaction  processes  a payment for a particular customer and updates the customer, district, and warehouse tables. 
