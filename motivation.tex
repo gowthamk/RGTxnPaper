@@ -152,43 +152,58 @@ is a relational database, not low-level memory.
 
 To illustrate some of these challenges, consider the behavior of the
 \C{new\_order} transaction when executed with a \emph{Read Committed}
-(RC) isolation level, the default isolation level in PostgreSQL, a
-widely used open-source database system.  An RC transaction is
+(RC) isolation level, the default isolation level in 8 of the 18
+databases studied in~\ref{bailishotos}.  An RC transaction is
 isolated from \emph{dirty writes}, i.e., writes of uncommitted
 transactions, but is allowed to witness the writes of concurrent
 transactions as soon as they are committed. Thus, with two concurrent
 instances of the \C{new\_order} transaction (call them $T_1$ and
 $T_2$), both concurrently placing new orders for different customers
-under the same district (\C{d\_id}), PostgreSQL admits the two
-executions shown in Fig.~\ref{fig:new_order_execs}.
+under the same district (\C{d\_id}), RC isolation allows the
+execution shown in Fig.~\ref{fig:new_order_execs}.
 
-\begin{figure}[!h]
-\centering
-\subcaptionbox {
-  {\sc rc} Execution 1
-  \label{fig:motiv-eg-1-b}
-} [
-  0.55\columnwidth
-] {
-  \includegraphics[scale=0.45]{Figures/motiv-eg-1-b}
-}
-%\hspace*{0.5in}
-\subcaptionbox {
-  {\sc rc} Execution 2
-  \label{fig:motiv-eg-1-a}
-}{
-  \includegraphics[scale=0.45]{Figures/motiv-eg-1-a}
-}
-  \caption{\small RC executions involving two instances ($T_1$ and
+\begin{figure}[!t]
+\includegraphics[scale=0.45]{Figures/motiv-eg-1-b}
+\caption{\small An RC execution involving two instances ($T_1$ and
   $T_2$) of the \C{new\_order} transaction depicted in
   Fig.~\ref{fig:new_order_code}. 
-  Each instance reads the \C{d\_id} \C{District} record twice, the second
-  time to (atomically) update the \C{d\_next\_o\_id} field.}
-\label{fig:new_order_execs}
+  Both instances read the \C{d\_id} \C{District} record concurrently,
+  because neither transaction is committed when the reads are
+  executed.  The subsequent operations are effectively sequentialized,
+  since $T_2$ commits. Nonetheless, reading the same value for
+  \C{d\_next\_o\_id} prompts both instances to add \C{Order} records
+  with same ids, which inturn triggers the the violation of TPC-C's
+  consistency condition.}
+\label{fig:new_order_exec}
 \end{figure}
 
-The figure depicts an execution as a series of transactional read, write, and commit
-operations. In the execution on the left, the \C{new\_order} instance
+% \begin{figure}[!h]
+% \centering
+% \subcaptionbox {
+%   {\sc rc} Execution 1
+%   \label{fig:motiv-eg-1-b}
+% } [
+%   0.55\columnwidth
+% ] {
+%   \includegraphics[scale=0.45]{Figures/motiv-eg-1-b}
+% }
+% %\hspace*{0.5in}
+% \subcaptionbox {
+%   {\sc rc} Execution 2
+%   \label{fig:motiv-eg-1-a}
+% }{
+%   \includegraphics[scale=0.45]{Figures/motiv-eg-1-a}
+% }
+%   \caption{\small RC executions involving two instances ($T_1$ and
+%   $T_2$) of the \C{new\_order} transaction depicted in
+%   Fig.~\ref{fig:new_order_code}. 
+%   Each instance reads the \C{d\_id} \C{District} record twice, the second
+%   time to (atomically) update the \C{d\_next\_o\_id} field.}
+% \label{fig:new_order_execs}
+% \end{figure}
+
+The figure depicts an execution as a series of SQL 
+operations. In the execution, the \C{new\_order} instance
 $T_1$ (green) reads the \C{d\_next\_o\_id} field of the district
 record for \C{d\_id}, but before it increments the field, another
 \C{new\_order} instance ($T_2$) begins its execution and commits. Note
@@ -197,26 +212,19 @@ inserts new \C{Order} and \C{Order\_line} records with their \C{o\_id}
 and \C{ol\_o\_id} fields (resp.) equal to \C{d\_next\_o\_id}. $T_2$
 also increments the \C{d\_next\_o\_id} field, which $T_1$ has already
 acccessed. This is allowed because reads do not obtain a mutually
-exclusive lock on most databases, including PostgreSQL. After $T_2$'s
-commit, $T_1$ resumes execution and adds new \C{Order} and
-\C{Order\_line} fields with the same order id as $T_1$. Thus, by the
-end of the execution, \C{Order\_line} records inserted by $T_1$ and
-$T_2$ all bear the same order id. There are also two \C{Order} records
-with the same district id (\C{d\_id}) and order id, none of whose
-\C{o\_ol\_cnt} reflects the actual number of \C{Order\_line} records
-inserted with that order id.  This clearly violates TPC-C's consistency
-condition.
+exclusive lock on most databases. After $T_2$'s commit, $T_1$ resumes
+execution and adds new \C{Order} and \C{Order\_line} fields with the
+same order id as $T_1$. Thus, by the end of the execution,
+\C{Order\_line} records inserted by $T_1$ and $T_2$ all bear the same
+order id. There are also two \C{Order} records with the same district
+id (\C{d\_id}) and order id, none of whose \C{o\_ol\_cnt} reflects the
+actual number of \C{Order\_line} records inserted with that order id.
+This clearly violates TPC-C's consistency condition. 
 
-Notably, this example does not exhibit any common concurrency bugs
-that arise from incorrect use of weak isolation such as
-\emph{write-write} conflicts, or \emph{lost updates}.  While $T_1$ and
-$T_2$ both increment the \C{d\_next\_o\_id} field of the district
-record, they do so atomically (Line 4 of
-Fig.~\ref{fig:new_order_code}), allowing both updates to be present in
-the final state. Likewise, other well-known anomalies that
-characterize RC isolation~\cite{berenson} such as \emph{fuzzy reads},
-\emph{phantom reads}, \emph{read skew}, and \emph{write skew}, are
-also not exhibited by the example.  Thus, program analyses that aim to
+Notably, this example does not exhibit any of the anomalies that
+characterize RC isolation~\cite{berenson}. For instance, there are no
+\emph{lost writes}; both concurrent transactions' writes are present
+in the final state of the database. Thus, program analyses that aim to
 determine appropriate isolation by checking for possible
 manifestations of these anomalies would fail to identify grounds for
 promoting the isolation level of \C{new\_order} to something stronger.
@@ -224,40 +232,44 @@ Yet, if we take the semantics of the application into account, it is
 quite clear that RC is not an appropriate isolation level for
 \C{new\_order}.
 
-While reasoning in terms of anomalies is cumbersome, and as the above
-example shows often inadequate, reasoning about weak isolation in
-terms of low-level traces~\cite{adyaphd,gotsmanconcur15} on memory
-read and write actions complicates high-level reasoning.  A possible
-alternative would interleave weak isolation implementation details
-within the program, yielding a (more-or-less) conventional concurrent
-program that can be then subject to classical concurrent verification
-methods.  Considering the size and complexity of real-world
-transaction systems, this strategy is unlikely to scale.
+While reasoning in terms of anomalies is cumbersome and inadequate,
+reasoning about weak isolation in terms of low-level
+traces~\cite{adyaphd,gotsmanconcur15} on memory read and write actions
+complicates high-level reasoning.  A possible alternative would
+interleave weak isolation implementation details within the program,
+yielding a (more-or-less) conventional concurrent program that can be
+then subject to classical concurrent verification methods.
+Considering the size and complexity of real-world transaction systems,
+this strategy is unlikely to scale.
 
 In this paper, we adopt a different approach that \emph{lifts}
 isolation semantics (\emph{not} their implementations) to the
 application layer, providing a principled framework to simultaneously
 reason about application invariants and isolation properties.  To
 illustrate this idea informally, consider how we might verify that
-\C{new\_order} is sound when executed under a \emph{Repeatable Read}
-(RR) isolation level.  PostgreSQL executes an RR transaction by taking
-a (conceptual) snapshot of the database state before the transaction
-begins that is used by reads performing the transaction.  When the
-transaction attempts to update a record, a check is made to determine
-if the current version of the record in the database is the same as the
-snapshot version. If it is, an exclusive lock is obtained on the
-record, and the update is performed. If the record is already locked,
-the transaction blocks until the lock is released.  When the lock is
-obtained, is held exclusively until the transaction commits or rolls
-back. If the aforementioned version check fails (i.e., the database
-has a later version than the snapshot), the transaction is rolled back
-and re-executed.
+\C{new\_order} is sound when executed under \emph{Snapshot Isolation}
+(SI), and isolation level stronger than RC. Snapshot isolation
+allows transactions to be executed against their respective private
+snapshots of the database, thus admitting concurrency, but it also
+requires that there not be any write-writeconflicts among
+concurrent transactions. Write-write conflicts can be eliminated in various
+ways; either through detection followed by a rollback, or through
+exclusive locks, or a combination of both, leading to different ways
+in which SI can be realized. For instance, one possible implementation
+of SI, close to the one use by PostgreSQL~\cite{postgres-ssi},
+executes a transaction against its private snapshot of the database,
+but obtains exclusive locks on the actual records in the database
+before performing writes. A write is performed only of the record
+hasn't already been updated by a concurrent transaction, i.e,  when it
+doesn't result in a write-write conflict.  Otherwise, the transaction is
+rolledback. This implementation is demonstrated for a simple database
+with three records, $a$, $b$, and $c$ in Fig.~\ref{fig:RR-postgres}.
 
 \begin{figure}[t]
 \includegraphics[scale=0.5]{Figures/RR-postgres}
 \caption{Database state transitions corresponding to an execution of
-  an RR transaction $T_1$ on PostgreSQL. $T_2$ and $T_3$ are concurrent
-  transactions. The database state has three data items, $a$, $b$ and $c$. }
+  an SI transaction $T_1$ on a PostgreSQL-like store. $T_2$ and $T_3$
+  are concurrent transactions. }
 \label{fig:rr-postgres}
 \end{figure}
 \begin{figure}[t]
@@ -268,70 +280,131 @@ and re-executed.
 \label{fig:rr-abstract}
 \end{figure}
 
-Although this implementation, comprising many thousands of lines of
-code, is highly involved, its semantic behavior in terms of how it
-effects transitions on the database state is fairly simple.  Since a
-transaction's reads are always served from a snapshot, no state
-changes are witnessed while the execution is in progress. Thus,
-insofar as an RR transaction is concerned, the database state does not
-change during the execution.  Uncommitted writes are recorded in a
-transaction-local state.  When the transaction commits, the local
-state is atomically written to the global state to yield a global
-state that reflects the transaction's updates.  However, unlike a
-strongly isolated serializable transaction, the commit operation is
-performed against the current state of the database, not the
-snapshot. Thus, after the transaction finishes execution, but before
-it commits, the transaction is able to witness the effects of all
-concurrent transactions that committed before it.  The PostgreSQL RR
-implementation effectively constrains this transition.
-
-We can axiomatize this operational description by observing that (a)
-due to the version check, the current transaction cannot update a data
-item that was already updated by a concurrent transaction, and (b) due
-to the use of exclusive write locks, a data item updated by the
-current transaction cannot be overwritten by a concurrent transaction.
-If $\Delta$ is the state of the database when an RR transaction
-finishes, and $\Delta_c$ is the state visible to the transaction at
-the point of commit, we know the transition from $\Delta$ to
-$\Delta_c$ (written $\Delta \longrightarrow \Delta_c$) cannot exhibit
-effects from any concurrent transactions that write to the same data
-items as the current RR transaction.  Similarly, if $\delta$ denotes
-a local log that relates transaction variables being written with their updated values,
-then $\forall x\in\mathit{dom}(\delta)$, $\Delta_c(x) =
-\Delta(x)$. To summarize, the operational semantics of PostgreSQL's RR
-implementation can be captured as an axiomatization over transitions of
-the database state ($\Delta \longrightarrow \Delta'$) during the
-lifetime an RR transaction ($T$):
+Implementations of SI on real databases (e.g., PostgreSQL) are
+complicated, often running into thousands of lines of code.
+Nonetheless, the semantics of Snapshot Isolation, in terms of how it
+effects the transitions on the database state, can be captured in a
+fairly simple model. Firstly, although SI admits concurrent
+transactions, their effects are  not witnessed in the current
+transaction (call it $T$), during $T$'s execution. Thus, insofar as
+$T$ is concerned, as long as it executes, the global state doesn't
+change. More formally, for every consecutive pair of global states
+$(\stg,\stg')$ witnessed by $T$ during its execution, $\stg'=\stg$.
+After $T$ finishes execution, it commits to the actual database, which
+incorporates the effects of concurrent transactions. In executions
+where $T$ successfully commits, concurrent transactions are guaranteed
+to not be in write-write conflict with $T$. Thus, if $\stg$ is the
+global state that $T$ witnessed when it finished execution (which
+would be same as the snapshot state), and $\stg'$ is the state to
+which $T$ commits, then the diff between $\stg$ and $\stg'$ shouldn't
+be in a write-write conflict with $T$. To concretize this notion, let
+the database state be a map from transaction variables to values, and
+let $\stl$ denote a transaction-local log that maps the variables
+being written to their updated values. Then the absence of write-write
+conflicts between $T$ and the diff between $\stg$ and $\stg'$ can be
+defined as: $\forall x\in\mathit{dom}(\delta)$, $\stg'(x) = \stg(x)$.
+To summarize, the semantics of SI can be captured as an axiomatization
+over transitions of the database state ($\Delta \longrightarrow
+\Delta'$) during the lifetime an SI transaction ($T$):
 \begin{itemize}
   \item While $T$ executes, $\Delta' = \Delta$.
   \item After $T$ finishes execution, but before it commits its local
     state $\delta$, $\forall(x\in\delta).~\Delta'(x) = \Delta(x)$.
 \end{itemize}
 
-This simple characterization of RR isolation allows us to verify the
-consistency conditions associated with the \C{new\_order}
-transaction. First, since the database doesn't change ($\Delta' =
-\Delta$) during the execution of the transaction's body, we can reason
-about \C{new\_order} as though it executed in complete isolation until
-its commit point, leading to a verification process similar to what
-would been applied when reasoning about serializability.  When
-\C{new\_order} finishes execution and becomes ready to commit, a
-transition transfers the transaction's local writes ($\delta$) to the
-unchanged database state ($\Delta$).  However, we are required to
-consider the interference from concurrent transitions at this point,
-which might change the database state from $\Delta$ to $\Delta_c$. If
-this interference includes the effects of a concurrent \C{new\_order}
-transaction (with the same \C{d\_id}), then verification fails as
-described previously.  Fortunately, sequential reasoning shows that
-this is impossible - RR prevents a concurrent \C{new\_order}
-transaction that modifies the same \C{District} record as the current
-transaction (concretely, since the record is already present in the
-current transaction's local log, any transition from $\Delta$ to
-$\Delta_c$ cannot change this record).  Applying such axiomatic
-reasoning on \C{new\_order} allows us to prove that the TPC-C
-invariant holds when the transaction is executed under PostgreSQL's RR
-isolation.  Our proof framework generalizes this style of reasoning to
-various isolation levels on databases.
+% nor $T$'s effects are
+% witnessed by concurrent transactions, during $T$'s execution. Thus,
+% $T$'s execution can be thought of as a series of transitions of a
+% state local to $T$ (call it $\stl$), that has no bearing outside $T$. Conversely, any
+% transitions performed by the concurrent transactions on the global
+% state (call it $\stg$) has no
+% bearing on $T$ since $T$ reads off a static snapshot established at
+% the beginning of the transaction. Consequently, any
+% state transitions performed by the concurrent transactions can be
+% \emph{moved past} $T$'s local state transitions. $T$'s commit,
+% however, is a global state transition that is enabled only if
+% there are no WW conflicts between $T$ and concurrent transactions.
+% Thus, concurrent transactions' state transitions cannot be moved past
+% $T$'s commit, and $T$ can be thought of witnessing the effects of
+% concurrent transactions just before its commit. 
+% therefore treat Since a
+% transaction's reads are always served from a snapshot, no state
+% changes are witnessed while the execution is in progress. Thus,
+% insofar as an RR transaction is concerned, the database state does not
+% change during the execution.  Uncommitted writes are recorded in a
+% transaction-local state.  When the transaction commits, the local
+% state is atomically written to the global state to yield a global
+% state that reflects the transaction's updates.  However, unlike a
+% strongly isolated serializable transaction, the commit operation is
+% performed against the current state of the database, not the
+% snapshot. Thus, after the transaction finishes execution, but before
+% it commits, the transaction is able to witness the effects of all
+% concurrent transactions that committed before it.  The PostgreSQL RR
+% implementation effectively constrains this transition.
+
+% We can axiomatize this operational description by observing that (a)
+% due to the version check, the current transaction cannot update a data
+% item that was already updated by a concurrent transaction, and (b) due
+% to the use of exclusive write locks, a data item updated by the
+% current transaction cannot be overwritten by a concurrent transaction.
+% If $\Delta$ is the state of the database when an RR transaction
+% finishes, and $\Delta_c$ is the state visible to the transaction at
+% the point of commit, we know the transition from $\Delta$ to
+% $\Delta_c$ (written $\Delta \longrightarrow \Delta_c$) cannot exhibit
+% effects from any concurrent transactions that write to the same data
+% items as the current RR transaction.  Similarly, if $\delta$ denotes
+% a local log that relates transaction variables being written with their updated values,
+% then $\forall x\in\mathit{dom}(\delta)$, $\Delta_c(x) =
+% \Delta(x)$. To summarize, the operational semantics of PostgreSQL's RR
+% implementation can be captured as an axiomatization over transitions of
+% the database state ($\Delta \longrightarrow \Delta'$) during the
+% lifetime an RR transaction ($T$):
+% \begin{itemize}
+%   \item While $T$ executes, $\Delta' = \Delta$.
+%   \item After $T$ finishes execution, but before it commits its local
+%     state $\delta$, $\forall(x\in\delta).~\Delta'(x) = \Delta(x)$.
+% \end{itemize}
+
+This simple characterization of SI isolation allows us to verify the
+consistency conditions associated with the \C{new\_order} transaction.
+First, since the database doesn't change ($\Delta' = \Delta$) during
+the execution of the transaction's body, we can reason about
+\C{new\_order} as though it executed in complete isolation until its
+commit point, leading to a verification process similar to what would
+been applied when reasoning about serializability.  When
+\C{new\_order} finishes execution, but before it commits, the SI
+axiomatization shown above requires us to consider global state
+transitions $\stg \longrightarrow \stg'$ that do not include changes
+to the records ($\stl$) written by \C{new\_order}, i.e.,
+$\forall(x\in\delta).~\Delta'(x) = \Delta(x)$. Since concurrent
+\C{new\_order} transactions that write to the same C{District} record
+modify the record by incrementing its \C{d\_next\_o\_id} field,
+their transitions do not satisfy the necessary condition imposed by
+the SI axiomatization, allowing us to rightfully ignore their
+interference. This leaves the interference due to concurrent
+\C{new\_order} transactions that write to a different district record. 
+Fortunately, such interference does not prompt \C{new\_order} to
+violate the invariant, which can be established by reasoning on the
+similar lines as concurrent program logics, such as the Rely-Guarantee
+logic.
+
+% and becomes ready to commit, a
+% transition transfers the transaction's local writes ($\delta$) to the
+% unchanged database state ($\Delta$).  However, we are required to
+% consider the interference from concurrent transitions at this point,
+% which might change the database state from $\Delta$ to $\Delta_c$. If
+% this interference includes the effects of a concurrent \C{new\_order}
+% transaction (with the same \C{d\_id}), then verification fails as
+% described previously.  Fortunately, sequential reasoning shows that
+% this is impossible - RR prevents a concurrent \C{new\_order}
+% transaction that modifies the same \C{District} record as the current
+% transaction (concretely, since the record is already present in the
+% current transaction's local log, any transition from $\Delta$ to
+% $\Delta_c$ cannot change this record).  Applying such axiomatic
+% reasoning on \C{new\_order} allows us to prove that the TPC-C
+% invariant holds when the transaction is executed under PostgreSQL's RR
+% isolation.  Our proof framework generalizes this style of reasoning to
+% various isolation levels on databases.
 
 The second observation that informs our approach is one that pertains
 to automation. Program verification, even when machine-aided, often
