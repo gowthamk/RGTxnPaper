@@ -155,5 +155,19 @@ model the snapshot semantics of realistic isolation levels that
 isolate a transaction from interference during its execution, but
 expose interferences at the commit point.
 
+\textbf{Local Context Independence} As mentioned previously, our
+operational semantics does not let a transaction read its own writes.
+It also does not let a transaction overwrite its own writes, due to
+the premise $\dom(\stl)\cap\dom(s) = \emptyset$ on
+\rulelabel{E-Delete} and \rulelabel{E-Update} rules. We refer to this
+restriction as \emph{local context independence}. As such, this
+restriction is easy to relax in operational semantics and the
+reasoning framework presented in the next section, however, the
+automation framework introduced in Sec.~\ref{sec:inference} has a
+non-trivial dependence on this assumption. Nonetheless, our experience
+suggests that local context independence is not a severe restriction
+in practice. For instance, all 17 transactions in the TPC-C and TPC-E
+benchmarks satisfy this assumption.
+
 \input{isolation}
 
