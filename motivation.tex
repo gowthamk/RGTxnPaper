@@ -259,7 +259,7 @@ in which SI can be realized. For instance, one possible implementation
 of SI, close to the one use by PostgreSQL~\cite{postgres-ssi},
 executes a transaction against its private snapshot of the database,
 but obtains exclusive locks on the actual records in the database
-before performing writes. A write is performed only of the record
+before performing writes. A write is performed only if the record
 hasn't already been updated by a concurrent transaction, i.e,  when it
 doesn't result in a write-write conflict.  Otherwise, the transaction is
 rolledback. This implementation is demonstrated for a simple database
@@ -287,25 +287,26 @@ effects the transitions on the database state, can be captured in a
 fairly simple model. Firstly, although SI admits concurrent
 transactions, their effects are  not witnessed in the current
 transaction (call it $T$), during $T$'s execution. Thus, insofar as
-$T$ is concerned, as long as it executes, the global state doesn't
-change. More formally, for every consecutive pair of global states
-$(\stg,\stg')$ witnessed by $T$ during its execution, $\stg'=\stg$.
-After $T$ finishes execution, it commits to the actual database, which
-incorporates the effects of concurrent transactions. In executions
-where $T$ successfully commits, concurrent transactions are guaranteed
-to not be in write-write conflict with $T$. Thus, if $\stg$ is the
-global state that $T$ witnessed when it finished execution (which
-would be same as the snapshot state), and $\stg'$ is the state to
-which $T$ commits, then the diff between $\stg$ and $\stg'$ shouldn't
-be in a write-write conflict with $T$. To concretize this notion, let
-the database state be a map from transaction variables to values, and
-let $\stl$ denote a transaction-local log that maps the variables
-being written to their updated values. Then the absence of write-write
-conflicts between $T$ and the diff between $\stg$ and $\stg'$ can be
-defined as: $\forall x\in\mathit{dom}(\delta)$, $\stg'(x) = \stg(x)$.
-To summarize, the semantics of SI can be captured as an axiomatization
-over transitions of the database state ($\Delta \longrightarrow
-\Delta'$) during the lifetime an SI transaction ($T$):
+$T$ is concerned, the global state doesn't change as long as it
+executes. More formally, for every consecutive pair of global states
+$(\stg,\stg')$ witnessed by $T$ during its execution, SI requires
+$\stg'=\stg$.  After $T$ finishes execution, it commits to the actual
+database, which incorporates the effects of concurrent transactions.
+In executions where $T$ successfully commits, concurrent transactions
+are guaranteed to not be in write-write conflict with $T$. Thus, if
+$\stg$ is the global state that $T$ witnessed when it finished
+execution (which would be same as the snapshot state), and $\stg'$ is
+the state to which $T$ commits, then the diff between $\stg$ and
+$\stg'$ shouldn't be in a write-write conflict with $T$. To concretize
+this notion, let the database state be a map from transaction
+variables to values, and let $\stl$ denote a transaction-local log
+that maps the variables being written to their updated values. Then
+the absence of write-write conflicts between $T$ and the diff between
+$\stg$ and $\stg'$ can be defined as: $\forall
+x\in\mathit{dom}(\delta)$, $\stg'(x) = \stg(x)$.  To summarize, the
+semantics of SI can be captured as an axiomatization over transitions
+of the database state ($\Delta \longrightarrow \Delta'$) during the
+lifetime an SI transaction ($T$):
 \begin{itemize}
   \item While $T$ executes, $\Delta' = \Delta$.
   \item After $T$ finishes execution, but before it commits its local
@@ -386,7 +387,9 @@ transactions that write to a different district record.  Fortunately,
 such interference does not prompt \C{new\_order} to violate the
 invariant, which can be established by adopting a reasoning similar to
 the one used on concurrent program logics, such as the Rely-Guarantee
-logic, customized for the database programs.
+logic, customized for the database programs. Our approach generalizes
+this style of reasoning to a range of isolation levels, concurrency
+control techniques, and their combinations used frequently in practice.
 
 % and becomes ready to commit, a
 % transition transfers the transaction's local writes ($\delta$) to the
@@ -497,12 +500,17 @@ transaction-local database ($\delta$) before committing these updates. An update
 statement filters the tuples that match the search criteria from $\Delta$
 and computes the updated tuples that are to be
 added to the local database. Thus, its state transformer (call it
-$T_U$) is the following function on sets\footnote{$\bind$ has higher precedence than $\cup$.}:
-\begin{ocaml}
-  fun ($\Delta$,$\delta$) -> $\delta$ $\cup$ $\Delta$$\bind$(fun s -> if table(s) = stock && s.s_i_id = item_req.ol_i_id 
-                                 then {{s with s_qty = k1}} (* a singleton set *)
-                                 else $\emptyset$)
-\end{ocaml}
+$\T_U$) is the following function on sets\footnote{$\bind$ has higher
+precedence than $\cup$.}:
+\begin{smathpar}
+\begin{array}{l}
+  \lambda(\stl,\stg).~ \stl \cup \stg \bind(\lambda s. 
+      \itel{{\sf table}(s) = \C{Stock} \conj 
+                s.\C{s\_i\_id} = \C{item\_req.ol\_i\_id}\\\hspace*{1.3in}} 
+           {\{\{s \with \C{s\_qty} = \C{k1}\}\}\\\hspace*{1.3in}}
+           {\emptyset}
+\end{array}
+\end{smathpar}
 % \begin{smathpar}
 % \begin{array}{c}
 %   \lambda\Delta.\lambda\delta.\, \delta \;\cup\; 
@@ -518,30 +526,49 @@ $T_U$) is the following function on sets\footnote{$\bind$ has higher precedence 
 %   Rmem(σ'(s')) = Rmem(σ(s')) U 
 %                  Rmem[\x. Rmem[\y. if y<x then {y+x} else {}](σ(s)) U {x}](xs)
 % \end{verbatim}
-Observe that
-$T_U(\Delta,\delta)$ is of the form $\delta \,\cup\,
-F_U(\Delta)$. The transformer ($T_I(\Delta,\delta)$)
-for the subsequent \C{insert} statement can be similarly calculated to
-be of the form $\delta \cup F_I(\Delta)$.
-Their composition gives the state transformer of the loop body:
-\begin{ocaml}
-  fun ($\Delta$,$\delta$) -> $\delta$ $\cup$ $F_U(\Delta) \,\cup\, F_I(\Delta)$
-\end{ocaml}
-Let $F_{body}(\Delta) = F_U(\Delta) \,\cup\, F_I(\Delta)$.   The
-transformer for the \C{foreach} loop can now be computed as follows:
-\begin{ocaml}
-  fun ($\Delta$,$\delta$) -> $\delta$ $\cup$ item_reqs$\bind$(fun item_req -> $F_{body}(\Delta)$)
-\end{ocaml}
-Observe that the transformer captures the precise semantics of the
-loop as a formula in the domain of sets extended with a bind
-function. The advantage in doing so is that we can now make use of a
-semantics-preserving translation from this domain to first-order
-logic, allowing us to leverage SMT solvers for automatic proofs
-without having to infer loop invariants, or provide intermediate
-assertions.  Sec.~\ref{sec:automation} describes this translation. In
-the exposition thus far, we assumed $\Delta$ remains invaraint, which
-is clearly not the case when we admit concurrency.  Necessary
-concurrency extensions of the state transformer semantics is also
-covered in Sec.~\ref{sec:automation}.  The following two sections,
-however, first focus on laying the theoretical foundations for
-reasoning about weak isolation.
+% Observe that
+% $\T_U(\Delta,\delta)$ is of the form $\delta \,\cup\,
+% F_U(\Delta)$. 
+The transformer ($\T_I(\Delta,\delta)$) for the subsequent \C{insert}
+statement can be similarly calculated as the following:
+\begin{smathpar}
+\begin{array}{l}
+  \lambda(\stl,\stg).~ \stl \cup \{\C{ol\_o\_id}=\C{k2};\, 
+        \C{ol\_d\_id}=\C{k3};\, \C{ol\_i\_id}=\C{item\_req.ol\_i\_id};\, 
+        \C{ol\_qty}=\C{item\_req.ol\_qty}\}
+\end{array}
+\end{smathpar}
+Observe that both transformers are of the form $T(\Delta,\delta) =
+\stl \cup F(\stg)$, where $F$ is a function that returns the set of
+records added by the transformer to the transaction-local database
+($\stl$). Let $\F_U$ and $\F_I$ be the corresponding functions for $\T_U$
+and $\T_I$ shown above. The state transformed of the loop body in
+Fig.~\ref{fig:new} can be expressed as the following composition of
+$\F_U$ and $\F_I$:
+\begin{smathpar}
+\begin{array}{l}
+  \lambda(\stl,\stg).~ \stl \cup \F_U(\stg) \cup \F_I(\stg)
+\end{array}
+\end{smathpar}
+The transformer for the loop itself can now be computed as following:
+\begin{smathpar}
+\begin{array}{l}
+  \lambda(\stl,\stg).~ \stl \cup \C{item\_reqs}\bind
+      (\lambda\C{item\_req}.~ \F_U(\stg) \cup \F_I(\stg))
+\end{array}
+\end{smathpar}
+Observe that the structure of the transformer mirrors the structure of
+the program itself. In particular, SQL statements become set
+operations, and the \C{DB} monad's $\bind$ becoms set monadic $\bind$.
+Thus, state transformer inference is completely mechanical. The
+advantage of inferring such transformers is that we can now make use
+of a semantics-preserving translation from the domain of sets equipped
+with $\bind$ to the first-order logic, allowing us to leverage SMT
+solvers for automatic proofs without having to infer loop invariants,
+or provide intermediate assertions.  Sec.~\ref{sec:inference}
+describes this translation. In the exposition thus far, we assumed
+$\Delta$ remains invaraint, which is clearly not the case when we
+admit concurrency.  Necessary concurrency extensions of the state
+transformer semantics is also covered in Sec.~\ref{sec:inference}.
+The following two sections, however, first focus on laying the
+theoretical foundations for reasoning about weak isolation.
