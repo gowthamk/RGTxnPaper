@@ -126,8 +126,8 @@ above. We will introduce them as they are encountered.
 \rulelabel{RG-Txn} is the top-level rule that lets us prove a
 transaction preserves the high-level invariant $I$ when executed under
 the required isolation as specified by $\I$. It relies on the
-transaction-local judgment to verify the transaction body ($c$).
-The precondition $P$ of $c$ must follow from the fact that the
+transaction-local judgment to verify the body ($c$) of a transaction
+$i$. The precondition $P$ of $c$ must follow from the fact that the
 transaction-local database ($\stl$) is initially empty, and the global
 database satisfies the high-level invariant $I$. The rely relation
 ($\R_l$) for the local judgment is a ternary relation computed as $R$
@@ -216,10 +216,11 @@ stability condition on $\I$ is defined formally thus:
 It can be easily verified that the above stability condition is
 satisfied by the isolation axioms from Sec.~\ref{sec:isolation}. For
 instance, $\I_{ss}$, the snapshot axiom, is stable because if
-$\I_{ss}$ is invalid, then an interference has already modified a
-record, and no further interference will restore the original record,
-because the original record bears the id of a transaction that has
-already committed. Thus, $\I_{ss}$ remains invalid.
+$\I_{ss}$ is invalid ($\neg\I_{ss}$), then an interference has already
+modified a record, and no further interference will restore the
+original record, because the original record bears the id of a
+transaction that has already committed. Thus, $\I_{ss}$ remains
+invalid.
 
 The \rulelabel{RG-Conseq} rule lets us safely weaken the guarantee
 $G$, and strengthen the rely $R$ of a transaction. Importantly, it
@@ -248,29 +249,17 @@ have been iterated, i.e, when $y=\emptyset$. The body of the loop can
 assume the loop invariant, and the fact that $z$ is an element from
 the set $x$ being iterated, to prove its post-condition $Q_c$. The
 operational semantics ensures that $z$ is added to $y$ at the end of
-the iteration, hence $Q_c \conj z\in y$ is valid at the end of the
-iteration, from which $\psi$ must follow. When the loop has finished
-execution, $y$, the set of iterated items, is the entire set $x$. Thus
-$\psi \conj y=x$ must imply the post-condition $Q$, which also needs
-to be stable. The rules for conditionals, sequencing etc., are
+the iteration, hence $Q_c$ must imply $[y\cup\{z\}/y]\psi$. When the
+loop has finished execution, $y$, the set of iterated items, is the
+entire set $x$. Thus $[x/y]\psi$ is true at the end of the loop, from
+which the post-condition $Q$ must follow. As with the other rules, $Q$
+needs to be stable. The rules for conditionals, sequencing etc., are
 standard, and hence elided.
 
 \subsection{Semantics and Soundness}
 
 We now formalize the semantics of the RG judgments defined in
 Fig.~\ref{fig:rg-rules}, and state their soundness guarantees.
-
-\begin{definition}[\bfseries Step-indexed reflexive transitive closure]
-For all $A:\text{Type}$, $R: A \rightarrow A \rightarrow \mathbb{P}$, and $n :
-\mathbb{N}$, the step-indexed reflexive transitive closure $R^n$ of $R$ is
-the smallest relation satisfying the following
-properties:
-\begin{itemize}
-\item $\forall (x:A).\, R^0 (x,x)$
-\item $\forall (n:\mathbb{N})(x,y,z : A).\, R(x,y) \conj R^n(y,z) \Rightarrow
-R^{n+1}(x,z)$
-\end{itemize}
-\end{definition}
 
 \begin{definition}[\bfseries Interleaved step and multi-step relations]
 Interleaved step relations interleave global and transaction-local
@@ -281,15 +270,14 @@ relations. They are defined thus:
 (c,\stg) \rstepsto (c',\stg') & \defeq &  
   (c,\stg) \stepsto (c',\stg') \disj (c' = c \conj R(\stg, \stg'))&
   \texttt{global}\\
-(c,\stl,\stg) \rstepsto (c',\stl',\stg') & \defeq & \stg \vdash 
-  (c,\stl) \stepsto (c',\stl') \conj \stg'=\stg& \texttt{transaction-local}\\
+(\tbox{c}_i,\stl,\stg) \rstepsto (\tbox{c'}_i,\stl',\stg') & \defeq & \stg \vdash 
+  (\tbox{c}_i,\stl) \stepsto (\tbox{c'}_i,\stl') \conj \stg'=\stg& \texttt{transaction-local}\\
   &   & \disj (c' = c \conj \stl'=\stl \conj \R(\stl, \stg, \stg'))
 \end{array}
 \end{smathpar}
 
 \noindent An interleaved multi-step relation ($\stepssto{n}$) is the
-step-indexed reflexive transitive closure of the interleaved step
-relation.  
+reflexive transitive closure of the interleaved step relation.  
 \end{definition}
 
 \begin{definition}[\bfseries Semantics of RG judgments]
@@ -299,7 +287,8 @@ defined thus:
 \begin{smathpar}
 \begin{array}{lcl}
 \R \vdash \hoare{P}{c}{Q} & \defeq & \forall \stl,\stl',\stg,\stg'.~
-  P(\stl,\stg) \conj (c,\stl,\stg) \rstepssto{n} (\cskip, \stl',\stg')
+  P(\stl,\stg) \conj (\tbox{c}_i,\stl,\stg) \rstepssto{n}
+  (\tbox{\cskip}_i, \stl',\stg')
   \Rightarrow Q(\stl',\stg')\\
 \rg{I,R}{c}{G,I} & \defeq &  \forall \stg.\, I(\stg)
   \Rightarrow (\forall n,\stg'.\; (c,\stg) 
@@ -314,7 +303,7 @@ global RG judgment is defined below:\vspace*{-10pt}
 
 \begin{smathpar}
 \begin{array}{lcl}
-\texttt{step-guaranteed}(R,G,c,\stg) &\defeq& \forall n,\stg',c'',\stg''.
+\texttt{step-guaranteed}(R,G,c,\stg) &\defeq& \forall \stg',c'',\stg''.
 (c,\stg) \rstepssto{n} (c',\stg') \conj (c',\stg') \stepsto
   (c'',\stg'') \Rightarrow G(\stg',\stg'')\\
 \end{array}
