@@ -7,7 +7,7 @@
 
 Fig.~\ref{fig:txnimp} shows the syntax and small-step semantics of
 \txnimp, a core language that we use to formalize our intuitions about
-reasoning under weak isolation. Variables ($x$), Integer and boolean
+reasoning under weak isolation. Variables ($x$), integer and Boolean
 constants ($k$), records ($r$) of named constants, sets ($s$) of such
 records, arithmetic and boolean expressions ($e_1 \odot e_2$), and
 record expressions ($\{\bar{f}=\bar{e}\}$) constitute the syntactic
@@ -88,24 +88,24 @@ without losing any generality, since substituting $\stl\gg\stg$ for
 $\stg$ at select places in the reduction rules effectively allows
 reads of uncommitted transaction writes to be realized.
 
-The small-step semantics is stratified into a transaction-local reduction
-relation, and a top-level reduction relation. The transaction-local
-relation ($\stg \vdash (c,\stl) \stepsto (c',\stl')$) defines a
-small-step reduction for a command inside a transaction, when the
-database state is $\stg$; the command $c$ reduces to $c'$, while
-updating the transaction-local database $\stl$ to $\stl'$. The
-definition assumes a meta function $\eval$ that evaluates expressions
-with no free variables to values. The reduction relation for SQL
-statements is defined straightforwardly. \C{INSERT} adds a new record
-to $\stl$ after checking the uniqueness of its id. \C{DELETE} finds
-the records in $\stg$ that match the search criteria defined by its
-boolean function argument, and adds the records to $\stl$ after
-marking them for deletion. \C{SELECT} bounds the name introduced by
-\C{LET} to the set of records from $\stg$ that match the search
-criteria, and then executes the bound command $c$. \C{UPDATE} uses its
-first function argument to compute the updated version of the records
-that match the search criteria defined by its second function
-argument. Updated records are added to $\stl$. 
+The small-step semantics is stratified into a transaction-local
+reduction relation, and a top-level reduction relation. The
+transaction-local relation ($\stg \vdash (c,\stl) \stepsto
+(c',\stl')$) defines a small-step reduction for a command inside a
+transaction, when the database state is $\stg$; the command $c$
+reduces to $c'$, while updating the transaction-local database $\stl$
+to $\stl'$. The definition assumes a meta function $\eval$ that
+evaluates expressions with no free variables to values. The reduction
+relation for SQL statements is defined straightforwardly. \C{INSERT}
+adds a new record to $\stl$ after checking the uniqueness of its
+id. \C{DELETE} finds the records in $\stg$ that match the search
+criteria defined by its boolean function argument, and adds the
+records to $\stl$ after marking them for deletion. \C{SELECT} bounds
+the name introduced by \C{LET} to the set of records from $\stg$ that
+match the search criteria, and then executes the bound command
+$c$. \C{UPDATE} uses its first function argument to compute the
+updated version of the records that match the search criteria defined
+by its second function argument. Updated records are added to $\stl$.
 
 The reduction of \C{FOREACH} starts by first converting it to its
 run-time form to keep track of iterated items ($s_1$),

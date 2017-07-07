@@ -1,12 +1,12 @@
 \section{Motivation}
 \label{sec:motivation}
 
-We present our ideas in the context of an embedded DSL in OCaml, which
-offers a \C{DB} monad to define and compose database computations
-given in terms of SQL operations.  Besides the usual \C{bind} and
-\C{return} operators, the monad includes an \C{atomically} combinator
-that executes a database computation as an atomic transaction and
-returns the result.
+We present our ideas in the context of an embedded DSL in OCaml that
+we have developed, which offers a \C{DB} monad to define and compose
+database computations given in terms of SQL operations.  Besides the
+usual \C{bind} and \C{return} operators, the monad includes an
+\C{atomically} combinator that executes a database computation as an
+atomic transaction and returns the result.
 
 \begin{figure}
 \centering
@@ -120,7 +120,7 @@ reflect the processing of new orders (if the stock quantity falls below
 10, it is automatically replenished by 91).
 
 TPC-C defines multiple invariants, called \emph{consistency
-conditions}, over the state of the application in the database. One
+  conditions}, over the state of the application in the database. One
 such consistency condition is the requirement that for a given order
 \C{o}, the \emph{order-line-count} field (\C{o.o\_ol\_cnt}) should
 reflect the number of order lines under the order; this is the number
@@ -132,22 +132,24 @@ set to be equal to the size of the \C{item\_reqs} set. The \C{foreach}
 loop runs once for each \C{item\_req}, adding a new \C{Order\_line}
 record for each requested item, with its \C{ol\_o\_id} field set to
 \C{o\_id}. Thus, at the end of the loop, the number of \C{Order\_line}
-records in the database, whose \C{ol\_o\_id} is equal to \C{o\_id} is
-equal to the size of the \C{item\_req} set, which in turn is equal to
-the \C{Order} record's \C{o\_ol\_cnt} field, thus preserving the
-consistency condition.
+records in the database (i.e., the number of records whose
+\C{ol\_o\_id} field is equal to \C{o\_id}) is guaranteed to be equal
+to the size of the \C{item\_req} set, which in turn is equal to the
+\C{Order} record's \C{o\_ol\_cnt} field; these constraints ensure that
+the transaction's consistency condition is preserved.
 
 Because the aforementioned reasoning is reasonably simple to perform
 manually, verifying the soundess of TPC-C's consistency conditions
 would appear to be feasible.  Serializability aids the tractability of
 verification by preventing any interference among concurrently
-executing transactions while the \C{new\_order} transaction executes.
-Under weak isolation\footnote{Weak isolation does not violate
-  atomicity as long as the witnessed effects are those of committed
-  transactions}, however, interferences of various kinds are
-permitted, leading to executions superficially similar to executions
-permitted by concurrent (racy) programs~\cite{GHE15,HPQ+15}.
-To illustrate, consider the behavior of the \C{new\_order} transaction
+executing transactions while the \C{new\_order} transaction executes,
+essentially yielding serial behaviors.  Under weak
+isolation\footnote{Weak isolation does not violate atomicity as long
+  as the witnessed effects are those of committed transactions},
+however, interferences of various kinds are permitted, leading to
+executions superficially similar to executions permitted by concurrent
+(racy) programs~\cite{GHE15,HPQ+15}.  To illustrate, consider the
+behavior of the \C{new\_order} transaction
 \begin{wrapfigure}{l}{.4\textwidth}
 \includegraphics[scale=0.45]{Figures/motiv-eg-1-b}
 \caption{\small An RC execution involving two instances ($T_1$ and
@@ -198,28 +200,28 @@ isolation allows the execution shown in Fig.~\ref{fig:new_order_exec}.
 % \label{fig:new_order_execs}
 % \end{figure}
 
-The figure depicts an execution as a series of SQL 
-operations. In the execution, the \C{new\_order} instance
-$T_1$ (green) reads the \C{d\_next\_o\_id} field of the district
-record for \C{d\_id}, but before it increments the field, another
-\C{new\_order} instance ($T_2$) begins its execution and commits. Note
-that $T_2$ reads the same \C{d\_next\_o\_id} value as $T_1$, and
-inserts new \C{Order} and \C{Order\_line} records with their \C{o\_id}
-and \C{ol\_o\_id} fields (resp.) equal to \C{d\_next\_o\_id}. $T_2$
-also increments the \C{d\_next\_o\_id} field, which $T_1$ has already
-acccessed. This is allowed because reads do not obtain a mutually
-exclusive lock on most databases. After $T_2$'s commit, $T_1$ resumes
-execution and adds new \C{Order} and \C{Order\_line} fields with the
-same order id as $T_1$. Thus, by the end of the execution,
-\C{Order\_line} records inserted by $T_1$ and $T_2$ all bear the same
-order id. There are also two \C{Order} records with the same district
-id (\C{d\_id}) and order id, none of whose \C{o\_ol\_cnt} reflects the
-actual number of \C{Order\_line} records inserted with that order id.
-This clearly violates TPC-C's consistency condition. 
+The figure depicts an execution as a series of SQL operations. In the
+execution, the \C{new\_order} instance $T_1$ (green) reads the
+\C{d\_next\_o\_id} field of the district record for \C{d\_id}, but
+before it increments the field, another \C{new\_order} instance
+($T_2$) begins its execution and commits. Note that $T_2$ reads the
+same \C{d\_next\_o\_id} value as $T_1$, and inserts new \C{Order} and
+\C{Order\_line} records with their \C{o\_id} and \C{ol\_o\_id} fields
+(resp.) equal to \C{d\_next\_o\_id}. $T_2$ also increments the
+\C{d\_next\_o\_id} field, which $T_1$ has already acccessed. This is
+allowed because reads typically do not obtain a mutually exclusive
+lock on most databases. After $T_2$'s commit, $T_1$ resumes execution
+and adds new \C{Order} and \C{Order\_line} fields with the same order
+id as $T_1$. Thus, by the end of the execution, \C{Order\_line}
+records inserted by $T_1$ and $T_2$ all bear the same order id. There
+are also two \C{Order} records with the same district id (\C{d\_id})
+and order id, none of whose \C{o\_ol\_cnt} reflects the actual number
+of \C{Order\_line} records inserted with that order id.  This clearly
+violates TPC-C's consistency condition.
 
 Notably, this example does not exhibit any of the anomalies that
 characterize RC isolation~\cite{berenson}. For instance, there are no
-\emph{lost writes}; both concurrent transactions' writes are present
+\emph{lost writes} - both concurrent transactions' writes are present
 in the final state of the database. Indeed, program analyses that aim
 to determine appropriate isolation by checking for possible
 manifestations of RC-induced anomalies would fail to identify grounds
@@ -229,7 +231,7 @@ account, it is quite clear that RC is not an appropriate isolation
 level for \C{new\_order}.
 
 While reasoning in terms of anomalies is cumbersome and inadequate,
-reasoning about weak isolation in terms of low-level
+reasoning about weak isolation in terms of
 traces~\cite{adyaphd,gotsmanconcur15} on memory read and write actions
 can complicate high-level reasoning.  A possible alternative would
 interleave weak isolation implementation details within the program,
@@ -247,9 +249,10 @@ illustrate this idea informally, consider how we might verify that
 (SI), a stronger isolation level than RC. Snapshot isolation allows
 transactions to be executed against a private snapshot of the
 database, thus admitting concurrency, but it also requires that there
-not be any write-write conflicts among concurrent transactions when
-they commit. Write-write conflicts can be eliminated in various ways,
-e.g., through conflict detection followed by a rollback, or through
+not be any write-write conflicts (i.e,, both transactions modifying
+the same record) among concurrent transactions when they
+commit. Write-write conflicts can be eliminated in various ways, e.g.,
+through conflict detection followed by a rollback, or through
 exclusive locks, or a combination of both.  For instance, one possible
 implementation of SI, close to the one used by
 PostgreSQL~\cite{postgresiso}, executes a transaction against its
@@ -303,8 +306,8 @@ updated values.  The absence of write-write conflicts between $T$ and
 the diff between $\stg$ and $\stg'$ can be expressed as: $\forall
 x\in\mathit{dom}(\delta)$, $\stg'(x) = \stg(x)$.  In other words, the
 semantics of SI can be captured as an axiomatization over transitions
-of the database state ($\Delta \longrightarrow \Delta'$) during the
-lifetime an SI transaction ($T$):
+of the database state ($\Delta \longrightarrow \Delta'$) during a
+transaction's ($T$) lifetime:
 \begin{itemize}
   \item While $T$ executes, $\Delta' = \Delta$.
   \item After $T$ finishes execution, but before it commits its local
@@ -366,22 +369,22 @@ lifetime an SI transaction ($T$):
 
 \noindent This simple characterization of SI isolation allows us to
 verify the consistency conditions associated with the \C{new\_order}
-transaction.  First, since the database doesn't change ($\Delta' =
-\Delta$) during the execution of the transaction's body, we can reason
+transaction.  First, since the database does not change ($\Delta' =
+\Delta$) during execution of the transaction's body, we can reason
 about \C{new\_order} as though it executed in complete isolation until
 its commit point, leading to a verification process similar to what
-would been applied when reasoning about serializability.  When
-\C{new\_order} finishes execution, but before it commits, the SI
+would been applied when reasoning sequentially.  When \C{new\_order}
+finishes execution, however, but before it commits, the SI
 axiomatization shown above requires us to consider global state
 transitions $\stg \longrightarrow \stg'$ that do not include changes
 to the records ($\stl$) written by \C{new\_order}, i.e.,
 $\forall(x\in\delta).~\Delta'(x) = \Delta(x)$.  The axiomatization
-precludes any execution in which there may concurrent updates to
+precludes any execution in which there are concurrent updates to
 shared table fields (e.g., \C{d\_next\_o\_id} on the same \C{District}
 table), but does not prohibit interferences that write to different
-tables, or different records in the same table.  We need to reason
-about the safety of such interferences with respect to the
-transaction's consistency invariants.
+tables, or write to different records in the same table.  We need to
+reason about the safety of such interferences with respect to
+\C{new\_order}'s consistency invariants.
 
 %% Since concurrent
 %% \C{new\_order} transactions that write to the same \C{District} record
@@ -422,24 +425,26 @@ transaction's consistency invariants.
 %% where (stable) intermediary assertions and loop invariants remain a
 %% major source of annotation burden.
 
-To do so, we observe that a relational database is a significantly
-simpler abstraction than shared memory. There are no pointers, linked
-data structures, or aliasing.  Although a database essentially
-abstracts a mutable state, the state is affected through a
-well-defined fixed number of interfaces (SQL statements), each tagged
-with a logical formula describing what records are accessed and
-updated.
+We approach the verification problem by first observing that a
+relational database is a significantly simpler abstraction than shared
+memory. There are no pointers, linked data structures, or aliasing.
+Although a database essentially abstracts a mutable state, this state
+is affected through a well-defined fixed number of interfaces (SQL
+statements), each tagged with a logical formula describing what
+records are accessed and updated.
 
-This observation leads us away from thinking of database transactions
-as concurrent imperative programs.  Instead, we see value in viewing
-them as essentially functional computations that manage database state
-monadically.  By doing so, we can formulate the semantics of database
-operations as state transformers that relate the operation's pre- and
-post-states.  A state transformer semantics can be defined
-algorithmically, just like classical predicate transformer semantics
-(e.g., strongest post-condition).  Here, a transformer interprets a
+This observation leads us away from thinking of a collection of
+database transactions as a simple variant of a concurrent imperative
+program.  Instead, we see value in viewing them as essentially
+functional computations that manage database state monadically,
+mirroring the structure of our DSL.  By doing so, we can formulate the
+semantics of database operations as state transformers that explicitly
+relate an operation's pre- and post-states, defining the semantics of
+the corresponding transformer algorithmically, just like classical
+predicate transformer semantics (e.g., weakest pre-condition or
+strongest post-condition).  In our case, a transformer interprets a
 SQL statement in the set domain, modeling the database as a set of
-tuples, and a SQL statement a function over this set.  Among other
+tuples, and a SQL statement as a function over this set.  Among other
 things, one benefit of this approach is that low-level loops can now
 be substituted with higher-order combinators that automatically lift
 the state transformer of its higher-order argument (i.e., the loop
@@ -500,14 +505,14 @@ foreach item_reqs @@ fun item_req -> do
 Fig.~\ref{fig:foreach_code} shows a (simplified) snippet of code taken
 from Fig.~\ref{fig:new_order_code}. Some irrelevant expressions have
 been replaced with constants (\C{k1} to \C{k3}).  The body of the loop
-executes a SQL update followed by an insert.  Recall that a transaction
-reads from the global database ($\Delta$), and writes to a
-transaction-local database ($\delta$) before committing these updates. An update
-statement filters the tuples that match the search criteria from $\Delta$
-and computes the updated tuples that are to be
-added to the local database. Thus, its state transformer (call it
-$\T_U$) is the following function on sets\footnote{$\bind$ has higher
-precedence than $\cup$.}:
+executes a SQL update followed by an insert.  Recall that a
+transaction reads from the global database ($\Delta$), and writes to a
+transaction-local database ($\delta$) before committing these
+updates. An update statement filters the tuples that match the search
+criteria from $\Delta$ and computes the updated tuples that are to be
+added to the local database. Thus, the state transformer for the update
+statement (call it $\T_U$) is the following function on
+sets\footnote{$\bind$ has higher precedence than $\cup$.}:
 \begin{smathpar}
 \begin{array}{l}
   \lambda(\stl,\stg).~ \stl \cup \stg \bind(\lambda s. 
@@ -548,9 +553,9 @@ Observe that both transformers are of the form $T(\Delta,\delta) =
 \stl \cup F(\stg)$, where $F$ is a function that returns the set of
 records added by the transformer to the transaction-local database
 ($\stl$). Let $\F_U$ and $\F_I$ be the corresponding functions for
-$\T_U$ and $\T_I$ shown above. The state transformed of the loop body
-in Fig.~\ref{fig:new_order_code} can be expressed as the following
-composition of $\F_U$ and $\F_I$:
+$\T_U$ and $\T_I$ shown above. The state transformation induced by the
+loop body in Fig.~\ref{fig:new_order_code} can be expressed as the
+following composition of $\F_U$ and $\F_I$:
 \begin{smathpar}
 \begin{array}{l}
   \lambda(\stl,\stg).~ \stl \cup \F_U(\stg) \cup \F_I(\stg)
@@ -565,17 +570,16 @@ The transformer for the loop itself can now be computed to be:
 \end{smathpar}
 Observe that the structure of the transformer mirrors the structure of
 the program itself. In particular, SQL statements become set
-operations, and the \C{DB} monad's $\bind$ becoms set monadic $\bind$,
-leading to a completely mechanical inference procedure.  The advantage
-of inferring such transformers is that we can now make use of a
-semantics-preserving translation from the domain of sets equipped with
-$\bind$ to first-order logic, allowing us to leverage SMT solvers for
-automated proofs without having to infer potentially complex
-thread-local invariants or intermediate assertions.
-Sec.~\ref{sec:inference} describes this translation. In the exposition
-thus far, we assumed $\Delta$ remains invariant, which is clearly not
-the case when we admit concurrency.  Necessary concurrency extensions
-of the state transformer semantics to deal with interference is also
-covered in Sec.~\ref{sec:inference}.  The following two sections,
-however, first focus on laying the theoretical foundations for
-reasoning about weak isolation.
+operations, and the \C{DB} monad's $\bind$ becoms set monadic $\bind$.
+The advantage of inferring such transformers is that we can now make
+use of a semantics-preserving translation from the domain of sets
+equipped with $\bind$ to a decidable fragment of first-order logic,
+allowing us to leverage SMT solvers for automated proofs without
+having to infer potentially complex thread-local invariants or
+intermediate assertions.  Sec.~\ref{sec:inference} describes this
+translation. In the exposition thus far, we assumed $\Delta$ remains
+invariant, which is clearly not the case when we admit concurrency.
+Necessary concurrency extensions of the state transformer semantics to
+deal with interference is also covered in Sec.~\ref{sec:inference}.
+The following two sections, however, first focus on laying the
+theoretical foundations for reasoning about weak isolation.
