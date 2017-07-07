@@ -6,9 +6,9 @@ parameterized on the isolation specification $\I$. $\I$ can be
 instantiated with the declarative characterization of an isolation
 guarantee or a concurrency control mechanism, regardless of its actual
 implementation. This allows us to model a range of isolation
-properties that are relevant to the theory and practice of realistic
-transaction processing systems, some of the most well-known of which are
-given below:
+properties that are relevant to the theory and practice of transaction
+processing systems. Few such well-known properties are discussed
+below:
 
 % Databases implement isolation levels through a combination of various
 % concurrency control mechanisms, which are absent from
@@ -25,35 +25,35 @@ given below:
 
 \textbf{Unique Ids}. As the \C{new\_order} example
 (Sec.~\ref{sec:motivation}) demonstrates, enforcing global uniqueness
-of ordered identifiers requires stronger isolation than possible using
-a weak read committed isolation level. Alternatively, globally unique
+of ordered identifiers requires stronger isolation levels than ones
+that are default on most databases. Alternatively, globally unique
 sequence numbers, regardless of the isolation level, can be requested
 from a relational databases via SQL's \C{UNIQUE} and
 \C{AUTO\_INCREMENT} keywords. Our development crucially relies on the
 uniqueness of record identifiers\footnote{This has parallels in
   real-world. For e.g., MySQL's InnoDB engine automatically adds a
   6-byte unique identifier if none exists for a record.}, which are
-generated locally by the \rulelabel{E-Insert} rule.  The global
-uniqueness of locally generated identifiers can be axiomatized as an
-isolation property as following:
+checked locally for uniqueness by the \rulelabel{E-Insert} rule. The
+global uniqueness of locally unique identifiers can be axiomatized as
+an isolation property as following:
 \begin{smathpar}
 \begin{array}{lcl}
   \I_{id}(\stl,\stg,\stg') & = & \forall(r\in\stl).~
       r.\idf\notin \dom(\stg) \Rightarrow r.\idf\notin \dom(\stg').
 \end{array}
 \end{smathpar}
-$\I_{id}$ ensures that a globally unique id generated during a
-transaction's execution remains globally unique until it commits,
-prohibiting interference from a concurrent transaction that adds the
-same id. The axiom thus simulates a global counter protected by an
-exclusive lock without explicitly appealing to specific
-implementation artifacts.
+$\I_{id}$ ensures that if the id of a record is globally unique when
+it is added to a transaction's $\stl$, it remains globally unique
+until the transaction commits. This is achieved by prohibiting the
+interference from a concurrent transaction that adds the same id. The
+axiom thus simulates a global counter protected by an exclusive lock
+without explicitly appealing to an implementation artifact.
 
 \textbf{Write-Write Conflicts}. Databases often employ a combination
 of concurrency control methods, both optimistic (e.g., speculation and
 rollback) and pessimistic (e.g., various degrees of locking), to
 eliminate write-write (ww) conflicts among concurrent
-transactions. We can specify the  absence of such conflicts using our
+transactions. We can specify the absence of such conflicts using our
 tri-state formulation thus:
 \begin{smathpar}
 \begin{array}{lcl}
@@ -86,8 +86,6 @@ of the database that can be axiomatized thus:
   \I_{ss}(\stl,\stg,\stg') & = & \stg' = \stg.
 \end{array}
 \end{smathpar}
-% The snapshot semantics however may not be applicable throughout the
-% lifetime of the transaction, like in the case of Repeatable Read (RR).
 
 \textbf{Read-Only Transactions}. Certain databases implement special
 privileges for read-only transactions. Read-only behavior can be
@@ -98,13 +96,11 @@ part of its isolation invariant:
   \I_{ro}(\stl,\stg,\stg') & = & \stl = \emptyset\\
 \end{array}
 \end{smathpar}
-%% If a transaction declared as read-only performs a write, then its
-%% $\stl\neq \emptyset$, and the transaction never commits.
 
-In addition to these properties, there are various isolation
-guarantees proposed in the database or distributed systems literature,
-or implemented by commercial vendors that can also be specified within
-this framework:
+In addition to these properties, various specific isolation levels
+proposed in the database or distributed systems literature, or
+implemented by commercial vendors can also be specified within this
+framework:
 
 \textbf{Read Committed (RC) and Monotonic Atomic View (MAV)} RC
 isolation allows a transaction to witness writes of committed
@@ -123,9 +119,9 @@ violate atomicity of a transaction's writes, both RC and MAV are
 already guaranteed by our semantics.  Thus, defining $\I_e$ and $\I_c$
 to \emph{true} ensures RC and MAV behavior under our semantics.
 
-\textbf{Repeatable Read (RR)} By definition, a read to a transactional
-variable in a Repeatable Read transaction is required to return the
-same value whenever accessed.  RR is often implemented (for e.g., in
+\textbf{Repeatable Read (RR)} By definition, multiple reads to a
+transactional variable in a Repeatable Read transaction are required
+to return the same value.  RR is often implemented (for e.g., in
 ~\cite{mysqliso,bailishat}) by executing the transaction against a
 (conceptual) snapshot of the database, but committing its writes to
 the actual database. This implementation of RR can be axiomatized as
@@ -137,7 +133,7 @@ RR allows \emph{phantom reads}, a phenonmenon in which a repeated
 previously returned. This specification is implemented, for e.g., in
 Microsoft's SQL server, using record-level exclusive read locks, that
 prevent a record from being modified while it is read by an
-uncommitted transaction.  The ANSI SQL RR specification can be
+uncommitted transaction. The ANSI SQL RR specification can be
 axiomatized in our framework, but it requires a minor extension to our
 operational semantics to track a transaction's reads. In particular,
 the records returned by \C{SELECT} should be added to the local
@@ -154,7 +150,8 @@ SQL RR can be axiomatized thus:
 \end{smathpar}
 If a record $r$ belongs to both $\stl$ and $\stg$, then it must be a
 record written by a different transaction and read by the current
-transaction. By requiring $r\in\stg'$, $\I_e$ guarantees the
+transaction (since the current transaction's records are not yet
+present in $\stg$). By requiring $r\in\stg'$, $\I_e$ guarantees the
 invariance of $r$, thus the repeatability of the read. 
 
 \textbf{Snapshot Isolation (SI)} The concept of executing a
@@ -163,14 +160,16 @@ proposed as Snapshot Isolation in~\cite{berenson}. SI doesn't admit
 write-write conflicts, and the original proposal, which is implemented
 in Microsoft SQL Server, required the database to roll-back an SI
 transaction if conflicts are detected during the commit. This behavior
-can be axiomatized thus:
-\begin{smathpar}
-\begin{array}{lcl}
-\I_e\,\,(\stl,\stg,\stg') & = & \stg' = \stg\\
-\I_c\,\,(\stl,\stg,\stg') & = & \forall(r\in\stl)(r'\in\stg).~ r'.\idf = r.\idf \Rightarrow r'\in\stg'.
-\end{array}
-\end{smathpar}
-Observe that the same axiomatization applies to Postgres's RR,
+can be axiomatized as $\I_e = \I_{ss}$ (execution against a snapshot),
+and $\I_c = \I_{ww}$ (avoiding write-write conflicts during the
+commit).
+% \begin{smathpar}
+% \begin{array}{lcl}
+% \I_e\,\,(\stl,\stg,\stg') & = & \stg' = \stg\\
+% \I_c\,\,(\stl,\stg,\stg') & = & \forall(r\in\stl)(r'\in\stg).~ r'.\idf = r.\idf \Rightarrow r'\in\stg'.
+% \end{array}
+% \end{smathpar}
+Note that the same axiomatization applies to Postgres's RR,
 although its implementation (described in Sec.~\ref{sec:motivation})
 differs considerably from the original proposal. Thus, reasoning done
 for an SI transaction on MS SQL server carries over to Postgres's RR
