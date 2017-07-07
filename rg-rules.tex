@@ -15,7 +15,7 @@
   \stable(\R,Q)\\
   \hspace*{-0.4in} \forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
   \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).[r/x]e_2 \conj\\
-   r'=\{[r/x]e_1 \with \txnf=i;\,\delf=\C{false}\}\} \Rightarrow   Q(\stl',\stg)
+   r'=\{[r/x]e_1 \with \idf=r.\idf;\,\txnf=i;\,\delf=\C{false}\}\} \Rightarrow   Q(\stl',\stg)
 }
 {
   \R \vdash \hoare{P}{\updatee{\lambda x.e_1}{\lambda x.e_2}}{Q}
