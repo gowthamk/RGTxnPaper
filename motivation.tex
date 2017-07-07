@@ -1,12 +1,12 @@
 \section{Motivation}
 \label{sec:motivation}
 
-We present our ideas in the context of our DSL embedded in OCaml,
-which offers a \C{DB} monad to define and compose database
-computations given in terms of SQL operations.  Besides the usual
-\C{bind} and \C{return} operators, the monad offers an \C{atomically}
-combinator that executes a database computation as an atomic
-transaction and returns the result.
+We present our ideas in the context of an embedded DSL in OCaml, which
+offers a \C{DB} monad to define and compose database computations
+given in terms of SQL operations.  Besides the usual \C{bind} and
+\C{return} operators, the monad includes an \C{atomically} combinator
+that executes a database computation as an atomic transaction and
+returns the result.
 
 \begin{figure}
 \centering
@@ -39,28 +39,29 @@ let new_order (d_id, c_id, item_reqs) = atomically do
 
 Fig.~\ref{fig:new_order_code} shows a simplified version of the TPC-C
 \C{new\_order} transaction written in this language. TPC-C is a
-widely-used Online Transaction Processing (OLTP) benchmark that models
-an order-processing system for a wholesale parts supply business. The
-business logic is captured in 5 database transactions that operate on
-9 tables; \C{new\_order} is one such transaction that uses
-\C{District}, \C{Order}, \C{New\_order}, \C{Stock}, and
-\C{Order\_line} tables. The transaction acts on the behalf of a
-customer, whose id is \C{c\_id}, to place a new order for a given
-set of items (\C{item\_reqs}), to be served by a warehouse under the
-district identified by \C{d\_id}.  Fig.~\ref{fig:schema} illustrates
-the relationship among these different tables.
+widely-used and well-studied Online Transaction Processing (OLTP)
+benchmark that models an order-processing system for a wholesale parts
+supply business. The business logic is captured in 5 database
+transactions that operate on 9 tables; \C{new\_order} is one such
+transaction that uses \C{District}, \C{Order}, \C{New\_order},
+\C{Stock}, and \C{Order\_line} tables. The transaction acts on the
+behalf of a customer, whose id is \C{c\_id}, to place a new order for
+a given set of items (\C{item\_reqs}), to be served by a warehouse
+under the district identified by \C{d\_id}.  Fig.~\ref{fig:schema}
+illustrates the relationship among these different tables.
 
 The transaction manages order placement by invoking appropriate SQL
 functionality, captured by various calls to functions defined by the
-\C{SQL} module. All \C{SQL} functions take the table name (a nullary
-constructor) as their first argument. The higher-order \C{SQL.select1}
-function accepts a boolean function that describes the selection
-criteria, and returns any record that meets the criteria (it models
-the SQL query \C{SELECT \ldots\xspace LIMIT 1}). \C{SQL.update} also
-accepts a Boolean function (its 3$^{rd}$ argument) to select the records to be
-updated. Its 2$^{nd}$ argument is a function that maps each selected
-record to a new (updated) record. \C{SQL.insert} inserts a given
-record into the specified table in the database.
+\C{SQL} module. All \C{SQL} operators supported by the module take a
+table name (a nullary constructor) as their first argument. The
+higher-order \C{SQL.select1} function accepts a boolean function that
+describes the selection criteria, and returns any record that meets
+the criteria (it models the SQL query \C{SELECT \ldots\xspace LIMIT
+  1}). \C{SQL.update} also accepts a Boolean function (its 3$^{rd}$
+argument) to select the records to be updated. Its 2$^{nd}$ argument
+is a function that maps each selected record to a new (updated)
+record. \C{SQL.insert} inserts a given record into the specified table
+in the database.
 
 %%%SJ: Reviewers may not understand what primary and foreign keys are,
 %%%or why they are important.  There are also some fields (e.g., ol_i_id)
@@ -76,16 +77,16 @@ record into the specified table in the database.
 
 \begin{figure}[t]
   \centering
-	\begin{subfigure}{0.48\textwidth}
+	\begin{subfigure}{0.4\textwidth}
 		\includegraphics[width=0.9\textwidth]{Figures/schema1}
     \caption{A valid TPC-C database. The only existing order belongs
-      to the district with \C{d\_id}=11. It's id (\C{o\_id}) is one
-      less than the district's \C{d\_next\_o\_id}, and it's order
+      to the district with \C{d\_id}=11. Its id (\C{o\_id}) is one
+      less than the district's \C{d\_next\_o\_id}, and its order
       count (\C{o\_ol\_cnt}) is equal to the number of order line
       records whose \C{ol\_o\_id} is equal to the order's id.  }
 		\label{fig:tpcc_db1}
 	\end{subfigure}
-	\begin{subfigure}{0.48\textwidth}
+	\begin{subfigure}{0.52\textwidth}
 		\includegraphics[width=0.9\textwidth]{Figures/schema2}
     \caption{The database in Fig.~\ref{fig:tpcc_db1} after correctly
       executing a \C{new\_order} transaction. A new order record is
@@ -144,27 +145,9 @@ executing transactions while the \C{new\_order} transaction executes.
 Under weak isolation\footnote{Weak isolation does not violate
   atomicity as long as the witnessed effects are those of committed
   transactions}, however, interferences of various kinds are
-permitted.  Although the verification problem for weakly isolated
-transactions would appear to be superficially similar to the
-verification of (racy) concurrent programs (e.g., garbage
-collectors~\cite{JLP+14,GHE15,HPQ+15}), weak isolation introduces new
-challenges arising from the use of transactions, and new opportunities
-arising from the fact that the store abstraction used by transactions
-is a relational database, not low-level memory.
-
-To illustrate some of these challenges, consider the behavior of the
-\C{new\_order} transaction when executed with a \emph{Read Committed}
-(RC) isolation level, the default isolation level in 8 of the 18
-databases studied in~\ref{bailishotos}.  An RC transaction is
-isolated from \emph{dirty writes}, i.e., writes of uncommitted
-transactions, but is allowed to witness the writes of concurrent
-transactions as soon as they are committed. Thus, with two concurrent
-instances of the \C{new\_order} transaction (call them $T_1$ and
-$T_2$), both concurrently placing new orders for different customers
-under the same district (\C{d\_id}), RC isolation allows the
-execution shown in Fig.~\ref{fig:new_order_execs}.
-
-\begin{figure}[!t]
+permitted, leading to executions superficially similar to executions
+permitted by concurrent (racy) programs~\cite{GHE15,HPQ+15}.
+\begin{wrapfigure}{l}{.4\textwidth}
 \includegraphics[scale=0.45]{Figures/motiv-eg-1-b}
 \caption{\small An RC execution involving two instances ($T_1$ and
   $T_2$) of the \C{new\_order} transaction depicted in
@@ -174,10 +157,22 @@ execution shown in Fig.~\ref{fig:new_order_execs}.
   executed.  The subsequent operations are effectively sequentialized,
   since $T_2$ commits. Nonetheless, reading the same value for
   \C{d\_next\_o\_id} prompts both instances to add \C{Order} records
-  with same ids, which inturn triggers the the violation of TPC-C's
+  with same ids, which in turn triggers a violation of TPC-C's
   consistency condition.}
 \label{fig:new_order_exec}
-\end{figure}
+\end{wrapfigure}
+To illustrate, consider the behavior of the \C{new\_order} transaction
+when executed with a \emph{Read Committed} (RC) isolation level, the
+default isolation level in 8 of the 18 databases studied
+in~\ref{bailishat}.  An RC transaction is isolated from \emph{dirty
+  writes}, i.e., writes of uncommitted transactions, but is allowed to
+witness the writes of concurrent transactions as soon as they are
+committed. Thus, with two concurrent instances of the \C{new\_order}
+transaction (call them $T_1$ and $T_2$), both concurrently placing new
+orders for different customers under the same district (\C{d\_id}), RC
+isolation allows the execution shown in
+Fig.~\ref{fig:new_order_execs}.
+
 
 % \begin{figure}[!h]
 % \centering
@@ -226,18 +221,18 @@ This clearly violates TPC-C's consistency condition.
 Notably, this example does not exhibit any of the anomalies that
 characterize RC isolation~\cite{berenson}. For instance, there are no
 \emph{lost writes}; both concurrent transactions' writes are present
-in the final state of the database. Thus, program analyses that aim to
-determine appropriate isolation by checking for possible
-manifestations of these anomalies would fail to identify grounds for
-promoting the isolation level of \C{new\_order} to something stronger.
-Yet, if we take the semantics of the application into account, it is
-quite clear that RC is not an appropriate isolation level for
-\C{new\_order}.
+in the final state of the database. Indeed, program analyses that aim
+to determine appropriate isolation by checking for possible
+manifestations of RC-induced anomalies would fail to identify grounds
+for promoting the isolation level of \C{new\_order} to something
+stronger.  Yet, if we take the semantics of the application into
+account, it is quite clear that RC is not an appropriate isolation
+level for \C{new\_order}.
 
 While reasoning in terms of anomalies is cumbersome and inadequate,
 reasoning about weak isolation in terms of low-level
 traces~\cite{adyaphd,gotsmanconcur15} on memory read and write actions
-complicates high-level reasoning.  A possible alternative would
+can complicate high-level reasoning.  A possible alternative would
 interleave weak isolation implementation details within the program,
 yielding a (more-or-less) conventional concurrent program that can be
 then subject to classical concurrent verification methods.
@@ -250,62 +245,64 @@ application layer, providing a principled framework to simultaneously
 reason about application invariants and isolation properties.  To
 illustrate this idea informally, consider how we might verify that
 \C{new\_order} is sound when executed under \emph{Snapshot Isolation}
-(SI), and isolation level stronger than RC. Snapshot isolation
-allows transactions to be executed against their respective private
-snapshots of the database, thus admitting concurrency, but it also
-requires that there not be any write-writeconflicts among
-concurrent transactions. Write-write conflicts can be eliminated in various
-ways; either through detection followed by a rollback, or through
-exclusive locks, or a combination of both, leading to different ways
-in which SI can be realized. For instance, one possible implementation
-of SI, close to the one use by PostgreSQL~\cite{postgres-ssi},
-executes a transaction against its private snapshot of the database,
-but obtains exclusive locks on the actual records in the database
-before performing writes. A write is performed only if the record
-hasn't already been updated by a concurrent transaction, i.e,  when it
-doesn't result in a write-write conflict.  Otherwise, the transaction is
-rolledback. This implementation is demonstrated for a simple database
-with three records, $a$, $b$, and $c$ in Fig.~\ref{fig:RR-postgres}.
+(SI), a stronger isolation level than RC. Snapshot isolation allows
+transactions to be executed against a private snapshot of the
+database, thus admitting concurrency, but it also requires that there
+not be any write-write conflicts among concurrent transactions when
+they commit. Write-write conflicts can be eliminated in various ways,
+e.g., through conflict detection followed by a rollback, or through
+exclusive locks, or a combination of both.  For instance, one possible
+implementation of SI, close to the one used by
+PostgreSQL~\cite{postgres-ssi}, executes a transaction against its
+private snapshot of the database, but obtains exclusive locks on the
+actual records in the database before performing writes. A write is
+performed only if the record that is to be written has not already
+been updated by a concurrent transaction. Conflicts are resolved by
+abort and roll back.
 
-\begin{figure}[t]
-\includegraphics[scale=0.5]{Figures/RR-postgres}
-\caption{Database state transitions corresponding to an execution of
-  an SI transaction $T_1$ on a PostgreSQL-like store. $T_2$ and $T_3$
-  are concurrent transactions. }
-\label{fig:rr-postgres}
-\end{figure}
-\begin{figure}[t]
-\includegraphics[scale=0.5]{Figures/RR-abstract}
-  \caption{An abstract execution that includes the concrete execution
-  shown in Fig.~\ref{fig:rr-postgres}. It has no locks or snapshots,
-  admits fewer interleavings, yet results in the same post-state.  }
-\label{fig:rr-abstract}
-\end{figure}
+%% This implementation is demonstrated for a simple
+%% database with three records, $a$, $b$, and $c$ in
+%% Fig.~\ref{fig:RR-postgres}.
+
+%% \begin{figure}[t]
+%% \includegraphics[scale=0.5]{Figures/RR-postgres}
+%% \caption{Database state transitions corresponding to an execution of
+%%   an SI transaction $T_1$ on a PostgreSQL-like store. $T_2$ and $T_3$
+%%   are concurrent transactions. }
+%% \label{fig:rr-postgres}
+%% \end{figure}
+%% \begin{figure}[t]
+%% \includegraphics[scale=0.5]{Figures/RR-abstract}
+%%   \caption{An abstract execution that includes the concrete execution
+%%   shown in Fig.~\ref{fig:rr-postgres}. It has no locks or snapshots,
+%%   admits fewer interleavings, yet results in the same post-state.  }
+%% \label{fig:rr-abstract}
+%% \end{figure}
 
 Implementations of SI on real databases (e.g., PostgreSQL) are
 complicated, often running into thousands of lines of code.
-Nonetheless, the semantics of Snapshot Isolation, in terms of how it
-effects the transitions on the database state, can be captured in a
-fairly simple model. Firstly, although SI admits concurrent
-transactions, their effects are  not witnessed in the current
-transaction (call it $T$), during $T$'s execution. Thus, insofar as
-$T$ is concerned, the global state doesn't change as long as it
-executes. More formally, for every consecutive pair of global states
-$(\stg,\stg')$ witnessed by $T$ during its execution, SI requires
-$\stg'=\stg$.  After $T$ finishes execution, it commits to the actual
-database, which incorporates the effects of concurrent transactions.
-In executions where $T$ successfully commits, concurrent transactions
-are guaranteed to not be in write-write conflict with $T$. Thus, if
-$\stg$ is the global state that $T$ witnessed when it finished
-execution (which would be same as the snapshot state), and $\stg'$ is
-the state to which $T$ commits, then the diff between $\stg$ and
-$\stg'$ shouldn't be in a write-write conflict with $T$. To concretize
-this notion, let the database state be a map from transaction
-variables to values, and let $\stl$ denote a transaction-local log
-that maps the variables being written to their updated values. Then
-the absence of write-write conflicts between $T$ and the diff between
-$\stg$ and $\stg'$ can be defined as: $\forall
-x\in\mathit{dom}(\delta)$, $\stg'(x) = \stg(x)$.  To summarize, the
+Nonetheless, the semantics of SI, in terms of how it effects
+transitions on the database state, can be captured in a fairly simple
+model. First, effects induced by one transaction are not visible to
+another concurrently executing one (call it $T$), during $T$'s
+execution. Thus, from $T$'s perspective, the global state does not
+change during its execution.  More formally, for every operation
+performed by $T$, the global state $T$ witness before ($\stg$) and
+after ($\stg')$ executing the operation is the same ($\stg'=\stg$).
+After $T$ finishes execution, it commits its changes to the actual
+database, which may have already incorporated the effects of concurrent
+transactions. In executions where $T$ successfully commits, concurrent
+transactions are guaranteed to not be in write-write conflict with
+$T$. Thus, if $\stg$ is the global state that $T$ witnessed when it
+finished execution (the snapshot state), and
+$\stg'$ is the state to which $T$ commits, then the difference between
+$\stg$ and $\stg'$ should not result in a write-write conflict with $T$. To
+concretize this notion, let the database state be a map from
+transaction variables to values, and let $\stl$ denote a
+transaction-local log that maps the variables being written to their
+updated values.  The absence of write-write conflicts between $T$
+and the diff between $\stg$ and $\stg'$ can be expressed as: $\forall
+x\in\mathit{dom}(\delta)$, $\stg'(x) = \stg(x)$.  In other words, the
 semantics of SI can be captured as an axiomatization over transitions
 of the database state ($\Delta \longrightarrow \Delta'$) during the
 lifetime an SI transaction ($T$):
@@ -368,30 +365,36 @@ lifetime an SI transaction ($T$):
 %     state $\delta$, $\forall(x\in\delta).~\Delta'(x) = \Delta(x)$.
 % \end{itemize}
 
-This simple characterization of SI isolation allows us to verify the
-consistency conditions associated with the \C{new\_order} transaction.
-First, since the database doesn't change ($\Delta' = \Delta$) during
-the execution of the transaction's body, we can reason about
-\C{new\_order} as though it executed in complete isolation until its
-commit point, leading to a verification process similar to what would
-been applied when reasoning about serializability.  When
+\noindent This simple characterization of SI isolation allows us to
+verify the consistency conditions associated with the \C{new\_order}
+transaction.  First, since the database doesn't change ($\Delta' =
+\Delta$) during the execution of the transaction's body, we can reason
+about \C{new\_order} as though it executed in complete isolation until
+its commit point, leading to a verification process similar to what
+would been applied when reasoning about serializability.  When
 \C{new\_order} finishes execution, but before it commits, the SI
 axiomatization shown above requires us to consider global state
 transitions $\stg \longrightarrow \stg'$ that do not include changes
 to the records ($\stl$) written by \C{new\_order}, i.e.,
-$\forall(x\in\delta).~\Delta'(x) = \Delta(x)$. Since concurrent
-\C{new\_order} transactions that write to the same \C{District} record
-modify the record by incrementing its \C{d\_next\_o\_id} field, their
-transitions do not satisfy the necessary condition imposed by the SI
-axiomatization, allowing us to rightfully ignore their interference.
-This leaves the interference due to concurrent \C{new\_order}
-transactions that write to a different district record.  Fortunately,
-such interference does not prompt \C{new\_order} to violate the
-invariant, which can be established by adopting a reasoning similar to
-the one used on concurrent program logics, such as the Rely-Guarantee
-logic, customized for the database programs. Our approach generalizes
-this style of reasoning to a range of isolation levels, concurrency
-control techniques, and their combinations used frequently in practice.
+$\forall(x\in\delta).~\Delta'(x) = \Delta(x)$.  The axiomatization
+precludes any execution in which there may concurrent updates to
+shared table fields (e.g., \C{d\_next\_o\_id} on the same \C{District}
+table), but does not prohibit interferences that write to different
+tables, or different records in the same table.  We need to reason
+about the safety of such interferences with respect to the
+transaction's consistency invariants.
+
+%% Since concurrent
+%% \C{new\_order} transactions that write to the same \C{District} record
+%% modify the record by incrementing its \C{d\_next\_o\_id} field, their
+%% transitions do not satisfy the necessary condition imposed by the SI
+%% axiomatization, allowing us to rightfully ignore their interference.
+%% This leaves the interference due to concurrent \C{new\_order}
+%% transactions that write to a different district record.  Fortunately,
+%% such interference does not prompt \C{new\_order} to violate the
+%% invariant, which can be established by adopting a reasoning similar to
+%% the one used on concurrent program logics, such as the Rely-Guarantee
+%% logic, customized for the database programs.
 
 % and becomes ready to commit, a
 % transition transfers the transaction's local writes ($\delta$) to the
@@ -411,17 +414,19 @@ control techniques, and their combinations used frequently in practice.
 % isolation.  Our proof framework generalizes this style of reasoning to
 % various isolation levels on databases.
 
-The second observation that informs our approach is one that pertains
-to automation. Program verification, even when machine-aided, often
-entails significant annotation burden in the form of intermediary
-assertions and loop invariants required to prove a program correct.
-This is certainly true for concurrent program logics, such as
-Rely-Gurantee, which extend Hoare logic with additional artifacts and
-where (stable) intermediary assertions and loop invariants remain a
-major source of annotation burden.  However, a relational database is
-a significantly simpler abstraction than shared memory. There are no
-pointers, linked data structures, or aliasing.  Although a database
-essentially abstracts a mutable state, the state is mutated through a
+%% The second observation that informs our approach is one that pertains
+%% to automation. Program verification, even when machine-aided, often
+%% entails significant annotation burden in the form of intermediary
+%% assertions and loop invariants required to prove a program correct.
+%% This is certainly true for concurrent program logics, such as
+%% Rely-Gurantee, which extend Hoare logic with additional artifacts and
+%% where (stable) intermediary assertions and loop invariants remain a
+%% major source of annotation burden.
+
+To do so, we observe that a relational database is a significantly
+simpler abstraction than shared memory. There are no pointers, linked
+data structures, or aliasing.  Although a database essentially
+abstracts a mutable state, the state is affected through a
 well-defined fixed number of interfaces (SQL statements), each tagged
 with a logical formula describing what records are accessed and
 updated.
@@ -429,23 +434,23 @@ updated.
 This observation leads us away from thinking of database transactions
 as concurrent imperative programs.  Instead, we see value in viewing
 them as essentially functional computations that manage database state
-monadically. We find it useful to reason about
-statements that mutate the database state, not in terms of a pre- and
-post-condition pair, but in terms of a state transformer that relates
-the pre- and post-states of a statement. This state transformer
-semantics can be defined algorithmically, just like predicate
-transformer semantics (e.g., strongest post-condition).  Here, a state
-transformer interprets a SQL statement in the set domain, taking
-advantage of the fact that the database is essentially a set of
-tuples, and a SQL statement is a transformer over these sets.  The
-benefit of this approach is that low-level loops can now be
-substituted with higher-order combinators that automatically lift the
-state transformer of its higher-order argument (i.e., the loop body)
-to the state transformer of the combined expression (i.e., the loop).
-Thus the semantics of a \C{foreach} loop, for instance, can be
-captured as a state transformer, where the state is a set, and the
-transformation defines a bind operation. We illustrate this intuition
-on a simple example.
+monadically.  By doing so, we can formulate the semantics of database
+operations as state transformers that relate the operation's pre- and
+post-states.  A state transformer semantics can be defined
+algorithmically, just like classical predicate transformer semantics
+(e.g., strongest post-condition).  Here, a transformer interprets a
+SQL statement in the set domain, modeling the database as a set of
+tuples, and a SQL statement a function over this set.  Among other
+things, one benefit of this approach is that low-level loops can now
+be substituted with higher-order combinators that automatically lift
+the state transformer of its higher-order argument (i.e., the loop
+body) to the state transformer of the combined expression (i.e., the
+loop).  We illustrate this intuition on a simple example.
+
+
+%% Thus the semantics of a \C{foreach} loop, for instance, can be
+%% captured as a state transformer, where the state is a set, and the
+%% transformation defines a bind operation.
 
 % \begin{figure}[!t]
 % \centering
@@ -532,7 +537,7 @@ precedence than $\cup$.}:
 % $\T_U(\Delta,\delta)$ is of the form $\delta \,\cup\,
 % F_U(\Delta)$. 
 The transformer ($\T_I(\Delta,\delta)$) for the subsequent \C{insert}
-statement can be similarly calculated as the following:
+statement can be similarly constructed:
 \begin{smathpar}
 \begin{array}{l}
   \lambda(\stl,\stg).~ \stl \cup \{\C{ol\_o\_id}=\C{k2};\, 
@@ -552,7 +557,7 @@ $\F_U$ and $\F_I$:
   \lambda(\stl,\stg).~ \stl \cup \F_U(\stg) \cup \F_I(\stg)
 \end{array}
 \end{smathpar}
-The transformer for the loop itself can now be computed as following:
+The transformer for the loop itself can now be computed to be:
 \begin{smathpar}
 \begin{array}{l}
   \lambda(\stl,\stg).~ \stl \cup \C{item\_reqs}\bind
@@ -565,12 +570,13 @@ operations, and the \C{DB} monad's $\bind$ becoms set monadic $\bind$.
 Thus, state transformer inference is completely mechanical. The
 advantage of inferring such transformers is that we can now make use
 of a semantics-preserving translation from the domain of sets equipped
-with $\bind$ to the first-order logic, allowing us to leverage SMT
-solvers for automatic proofs without having to infer loop invariants,
-or provide intermediate assertions.  Sec.~\ref{sec:inference}
-describes this translation. In the exposition thus far, we assumed
-$\Delta$ remains invaraint, which is clearly not the case when we
-admit concurrency.  Necessary concurrency extensions of the state
-transformer semantics is also covered in Sec.~\ref{sec:inference}.
-The following two sections, however, first focus on laying the
-theoretical foundations for reasoning about weak isolation.
+with $\bind$ to first-order logic, allowing us to leverage SMT solvers
+for automatic proofs without having to infer loop invariants, or
+provide intermediate assertions.  Sec.~\ref{sec:inference} describes
+this translation. In the exposition thus far, we assumed $\Delta$
+remains invaraint, which is clearly not the case when we admit
+concurrency.  Necessary concurrency extensions of the state
+transformer semantics to deal with interference is also covered in
+Sec.~\ref{sec:inference}.  The following two sections, however, first
+focus on laying the theoretical foundations for reasoning about weak
+isolation.
