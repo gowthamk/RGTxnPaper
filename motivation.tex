@@ -14,13 +14,15 @@ returns the result.
 let new_order d_id c_id item_reqs = atomically do
   dist <- SQL.select1 District (fun d -> d.d_id = d_id);
   let o_id = dist.d_next_o_id;
-  SQL.update District (fun d -> {d with d_next_o_id =d_next_o_id + 1})
-                      (fun d -> d.d_id = d_id );
-  SQL.insert Order {o_id=o_id;  o_d_id=d_id; 
-                    o_c_id=c_id; o_ol_cnt=S.size item_reqs; };
+  SQL.update(* UPDATE *) District 
+            (* SET *)(fun d -> {d with d_next_o_id =d_next_o_id + 1})
+            (* WHERE *)(fun d -> d.d_id = d_id );
+  SQL.insert(* INSERT INTO *) Order (* VALUES *){o_id=o_id;  
+            o_d_id=d_id; o_c_id=c_id; o_ol_cnt=S.size item_reqs; };
   foreach item_reqs @@ fun item_req -> do
-    stk <- SQL.select1 Stock (fun s -> s.s_i_id = item_req.ol_i_id &&
-                                       s.s_d_id = d_id);
+    stk <- SQL.select1(* SELECT * FROM *) Stock 
+              (* WHERE *)(fun s -> s.s_i_id = item_req.ol_i_id 
+                                  && s.s_d_id = d_id)(* LIMIT 1 *); 
     let s_qty' = if stk.s_qty >= item_req.ol_qty + 10 
                 then stk.s_qty - item_req.ol_qty 
                 else stk.s_qty - item_req.ol_qty + 91;
@@ -505,12 +507,17 @@ transaction-local database ($\delta$) before committing these updates. An update
 statement filters the tuples that match the search criteria from $\Delta$
 and computes the updated tuples that are to be
 added to the local database. Thus, its state transformer (call it
-$T_U$) is the following function on sets\footnote{$\bind$ has higher precedence than $\cup$.}:
-\begin{ocaml}
-  fun ($\Delta$,$\delta$) -> $\delta$ $\cup$ $\Delta$$\bind$(fun s -> if table(s) = stock && s.s_i_id = item_req.ol_i_id 
-                                 then {{s with s_qty = k1}} (* a singleton set *)
-                                 else $\emptyset$)
-\end{ocaml}
+$\T_U$) is the following function on sets\footnote{$\bind$ has higher
+precedence than $\cup$.}:
+\begin{smathpar}
+\begin{array}{l}
+  \lambda(\stl,\stg).~ \stl \cup \stg \bind(\lambda s. 
+      \itel{{\sf table}(s) = \C{Stock} \conj 
+                s.\C{s\_i\_id} = \C{item\_req.ol\_i\_id}\\\hspace*{1.3in}} 
+           {\{\{s \with \C{s\_qty} = \C{k1}\}\}\\\hspace*{1.3in}}
+           {\emptyset}
+\end{array}
+\end{smathpar}
 % \begin{smathpar}
 % \begin{array}{c}
 %   \lambda\Delta.\lambda\delta.\, \delta \;\cup\; 
@@ -526,30 +533,50 @@ $T_U$) is the following function on sets\footnote{$\bind$ has higher precedence 
 %   Rmem(σ'(s')) = Rmem(σ(s')) U 
 %                  Rmem[\x. Rmem[\y. if y<x then {y+x} else {}](σ(s)) U {x}](xs)
 % \end{verbatim}
-Observe that
-$T_U(\Delta,\delta)$ is of the form $\delta \,\cup\,
-F_U(\Delta)$. The transformer ($T_I(\Delta,\delta)$)
-for the subsequent \C{insert} statement can be similarly calculated to
-be of the form $\delta \cup F_I(\Delta)$.
-Their composition gives the state transformer of the loop body:
-\begin{ocaml}
-  fun ($\Delta$,$\delta$) -> $\delta$ $\cup$ $F_U(\Delta) \,\cup\, F_I(\Delta)$
-\end{ocaml}
-Let $F_{body}(\Delta) = F_U(\Delta) \,\cup\, F_I(\Delta)$.   The
-transformer for the \C{foreach} loop can now be computed as follows:
-\begin{ocaml}
-  fun ($\Delta$,$\delta$) -> $\delta$ $\cup$ item_reqs$\bind$(fun item_req -> $F_{body}(\Delta)$)
-\end{ocaml}
-Observe that the transformer captures the precise semantics of the
-loop as a formula in the domain of sets extended with a bind
-function. The advantage in doing so is that we can now make use of a
-semantics-preserving translation from this domain to first-order
-logic, allowing us to leverage SMT solvers for automatic proofs
-without having to infer loop invariants, or provide intermediate
-assertions.  Sec.~\ref{sec:automation} describes this translation. In
-the exposition thus far, we assumed $\Delta$ remains invaraint, which
-is clearly not the case when we admit concurrency.  Necessary
-concurrency extensions of the state transformer semantics is also
-covered in Sec.~\ref{sec:automation}.  The following two sections,
-however, first focus on laying the theoretical foundations for
-reasoning about weak isolation.
+% Observe that
+% $\T_U(\Delta,\delta)$ is of the form $\delta \,\cup\,
+% F_U(\Delta)$. 
+The transformer ($\T_I(\Delta,\delta)$) for the subsequent \C{insert}
+statement can be similarly constructed:
+\begin{smathpar}
+\begin{array}{l}
+  \lambda(\stl,\stg).~ \stl \cup \{\C{ol\_o\_id}=\C{k2};\, 
+        \C{ol\_d\_id}=\C{k3};\, \C{ol\_i\_id}=\C{item\_req.ol\_i\_id};\, 
+        \C{ol\_qty}=\C{item\_req.ol\_qty}\}
+\end{array}
+\end{smathpar}
+Observe that both transformers are of the form $T(\Delta,\delta) =
+\stl \cup F(\stg)$, where $F$ is a function that returns the set of
+records added by the transformer to the transaction-local database
+($\stl$). Let $\F_U$ and $\F_I$ be the corresponding functions for $\T_U$
+and $\T_I$ shown above. The state transformed of the loop body in
+Fig.~\ref{fig:new} can be expressed as the following composition of
+$\F_U$ and $\F_I$:
+\begin{smathpar}
+\begin{array}{l}
+  \lambda(\stl,\stg).~ \stl \cup \F_U(\stg) \cup \F_I(\stg)
+\end{array}
+\end{smathpar}
+The transformer for the loop itself can now be computed to be:
+\begin{smathpar}
+\begin{array}{l}
+  \lambda(\stl,\stg).~ \stl \cup \C{item\_reqs}\bind
+      (\lambda\C{item\_req}.~ \F_U(\stg) \cup \F_I(\stg))
+\end{array}
+\end{smathpar}
+Observe that the structure of the transformer mirrors the structure of
+the program itself. In particular, SQL statements become set
+operations, and the \C{DB} monad's $\bind$ becoms set monadic $\bind$.
+Thus, state transformer inference is completely mechanical. The
+advantage of inferring such transformers is that we can now make use
+of a semantics-preserving translation from the domain of sets equipped
+with $\bind$ to first-order logic, allowing us to leverage SMT solvers
+for automatic proofs without having to infer loop invariants, or
+provide intermediate assertions.  Sec.~\ref{sec:inference} describes
+this translation. In the exposition thus far, we assumed $\Delta$
+remains invaraint, which is clearly not the case when we admit
+concurrency.  Necessary concurrency extensions of the state
+transformer semantics to deal with interference is also covered in
+Sec.~\ref{sec:inference}.  The following two sections, however, first
+focus on laying the theoretical foundations for reasoning about weak
+isolation.
