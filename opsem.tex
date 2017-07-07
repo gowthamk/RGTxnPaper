@@ -16,20 +16,21 @@ conditional statements, \C{LET} constructs to bind names, \C{FOREACH}
 loops, SQL statements, their sequential composition ($c_1;c_2$), and
 transactions ($\ctxn{i}{\I}{c}$) and their parallel composition
 ($c_1\,||\,c_2$). Each transaction is assumed to have a unique
-identifier $i$. The $\I$ in the \C{TXN} block syntax is the
-transaction's isolation specification, which will be explained later.
-Certain terms that only appear at run-time are also present in $c$.
-These include a {\sf txn} block tagged with sets ($\stl$ and $\stg$) of
-records whose meaning is explained below, and a runtime {\sf foreach}
-expression that keeps track of the set ($s_1$) of items already
-iterated, and the set ($s_2$) of items yet to be iterated. Note that
-even the surface-level syntax of the \C{FOREACH} command shown here is
-a little different from the one used in previous sections; its
-higher-order function has two arguments, $y$ and $z$, which are
-invoked (during the reduction) with the set of already-iterated items,
-and the current item, respectively. This form of \C{FOREACH} lends
-itself to inductive reasoning that will be useful for verification
-(Sec.~\ref{sec:reasoning}).
+identifier $i$, and executes at the top-level; our semantics does not
+supported nested transactions. The $\I$ in the \C{TXN} block syntax is
+the transaction's isolation specification, which will be explained
+later.  Certain terms that only appear at run-time are also present in
+$c$.  These include a {\sf txn} block tagged with sets ($\stl$ and
+$\stg$) of records whose meaning is explained below, and a runtime
+{\sf foreach} expression that keeps track of the set ($s_1$) of items
+already iterated, and the set ($s_2$) of items yet to be
+iterated. Note that even the surface-level syntax of the \C{FOREACH}
+command shown here is a little different from the one used in previous
+sections; its higher-order function has two arguments, $y$ and $z$,
+which are invoked (during the reduction) with the set of
+already-iterated items, and the current item, respectively. This form
+of \C{FOREACH} lends itself to inductive reasoning that will be useful
+for verification (Sec.~\ref{sec:reasoning}).
 
 % also We let $T_i$ for $i \in \matshbb{N}$
 % range over transaction identifiers. When it is evident we are
@@ -49,9 +50,9 @@ enforces this invariant wherever necessary. Certain hidden fields are
 treated specially by the operational semantics, and they are hidden
 from the surface language. These include a $\txnf$ field that tracks
 the identifier of the transaction that last updated the record, and a
-$\delf$ field that flags the deleted records in $\stl$.  For a set $S$
-of records, we define $\dom(S)$ as the set of unique ids of all
-records in $S$. Thus $|\dom(\stg)| = |\stg|$. During its execution, a
+$\delf$ field that flags deleted records in $\stl$.  For a set $S$ of
+records, we define $\dom(S)$ as the set of unique ids of all records
+in $S$. Thus $|\dom(\stg)| = |\stg|$. During its execution, a
 transaction may write to multiple records in $\stg$. Atomicity
 dictates that such writes should not be visible in $\stg$ until the
 transaction commits. We therefore associate each transaction with a
