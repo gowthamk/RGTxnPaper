@@ -6,16 +6,16 @@
 %\fbox{\( \rg{\mathbb{I},P,R}{\txnbox{c}_i}{G,Q}\)} \quad
 %\fbox{\( \rg{\mathbb{I},P,R}{c}{G,Q}\)} \quad\\
 %
-\begin{minipage}{3.1in}
+\begin{minipage}{3.2in}
 \rulelabel{RG-Update}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
 {
   \stable(\R,Q)\\
-  \forall\stl,\stl',\stg.~P(\stl,\stg) \conj \\
+  \hspace*{-0.4in} \forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
   \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).[r/x]e_2 \conj\\
-  \hspace*{.7in} r'=[r/x]e_1\} \Rightarrow   Q(\stl',\stg)
+   r'=\{[r/x]e_1 \with \txnf=i;\,\delf=\C{false}\}\} \Rightarrow   Q(\stl',\stg)
 }
 {
   \R \vdash \hoare{P}{\updatee{\lambda x.e_1}{\lambda x.e_2}}{Q}
@@ -56,8 +56,7 @@
   \stable(\R,Q)\\
   \forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
   \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).~ [r/x]e
-        \conj r'=\{\bar{f}=r.\bar{f}; \idf=r.\idf;
-        \delf=\C{true}\}\}
+        \conj r'=\{r \with \txnf=i; \delf=\C{true}\}\}
   \Rightarrow 
   Q(\stl',\stg)
 }
@@ -78,11 +77,10 @@
 \RULE
 {
   \stable(\R,Q)\\
-  \hspace*{-1.1in}\forall\stl,\stl',\stg,i.~P(\stl,\stg) \conj i \not\in
+  \hspace*{-1.1in}\forall\stl,\stl',\stg,i.~P(\stl,\stg) \conj r.\idf \not\in
   \dom(\stl\cup\stg) \\
   \conj \stl'=\stl \cup 
-  \{\{\bar{f}=x.\bar{f};\,\idf=i;\,\delf=\C{false}\} \Rightarrow 
-  Q(\stl',\stg)
+  \{\{x \with \txnf=i;\,\delf=\C{false}\} \Rightarrow Q(\stl',\stg)
 }
 {
   \R \vdash \hoare{P}{\inserte{x}}{Q}
@@ -100,10 +98,10 @@
 {
   \stable(\R,Q)\spc
   \stable(\R,\psi)\\
-  P \wedge y=\emptyset \Rightarrow \psi\spc
+  P \Rightarrow [\emptyset/y]\psi\spc
   \R \vdash \hoare{\psi \wedge z\in x}{c}{Q_c}\\
-  Q_c \wedge z\in y \Rightarrow \psi\spc
-  \psi \wedge y=x \Rightarrow Q
+  Q_c \wedge \Rightarrow [y \cup \{x\}/y]\psi\spc
+  [x/y]\psi \Rightarrow Q
 }
 {
   \R \vdash \hoare{P}{\foreache{x}{\lambda y.\lambda z.c}}{Q}
@@ -122,6 +120,7 @@
 \RULE
 {
   \stable(R,\I)\spc
+  \stable(\R,I)\spc
   P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
   \R_l(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg')\\
   \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_c(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg')\\

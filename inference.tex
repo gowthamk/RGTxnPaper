@@ -219,7 +219,7 @@ the supplementary material.}:
   \begin{smathpar}
   \begin{array}{c}
   \R \vdash \hoare{\lambda(\stl,\stg).~\stl=\emptyset \conj
-  I(\stg)}{~c~}{\lambda(\stl,\stg).\stl = \F(\emptyset,\stg)}
+  I(\stg)}{c}{\lambda(\stl,\stg).\stl = \F(\emptyset,\stg)}
   \end{array}
   \end{smathpar}
 \end{theorem}
@@ -259,7 +259,7 @@ below:
 \end{smathpar}
 Automating the application of the \rulelabel{RG-Txn} rule for a
 transaction requires automating the multiple implication checks in
-the premise. While $R$, $\R$, $\R_c$, $\I$ and $\I$ are formulas in
+the premise. While $R$, $\R$, $\R_c$, $\I$ and $I$ are formulas in
 first-order logic (FOL) with a relatively simple structure, $\F$
 is an expression in the set language $\SL$
 (Fig.~\ref{fig:logic-syntax}) with a possibly complex structure.

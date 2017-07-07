@@ -137,7 +137,8 @@ morekeywords={module, match, when, @@deriving, not, : , txn_do, do, SQL/\\}
 \newcommand{\rtstepsto}{\hookrightarrow_R}
 \newcommand{\rtstepssto}[1]{\hookrightarrow^{#1}_R}
 \newcommand{\xtstepssto}[2]{\hookrightarrow^{#1}_{#2}}
-\newcommand{\hoare}[3]{\{#1\}\,#2\,\{#3\}}
+\newcommand{\tbox}[1]{\lbrack #1 \rbrack}
+\newcommand{\hoare}[3]{\{#1\}\,\tbox{#2}_i\,\{#3\}}
 \newcommand{\defeq}[0]{\overset { \mathit{def} }{ = } }
 \newcommand{\rg}[3]{\{#1\}\,#2\,\{#3\}}
 %\newcommand{\defeq}[0]{ \triangleq }
@@ -188,7 +189,6 @@ morekeywords={module, match, when, @@deriving, not, : , txn_do, do, SQL/\\}
 \newcommand{\SJ}[1]{\textcolor{red}{SJ: #1}}
 
 \newcommand{\B}[1]{\small\bf #1}
-\newcommand{\tbox}[1]{\lbrack #1 \rbrack}
 \newcommand{\interp}[1]{\llbracket #1 \rrbracket}
 \newcommand{\cinterp}[1]{\llbracket #1 \rrbracket_{\C{C}}}
 \newcommand{\ectx}{\mathcal{E}}
