@@ -377,16 +377,16 @@ axiomatization shown above requires us to consider global state
 transitions $\stg \longrightarrow \stg'$ that do not include changes
 to the records ($\stl$) written by \C{new\_order}, i.e.,
 $\forall(x\in\delta).~\Delta'(x) = \Delta(x)$. Since concurrent
-\C{new\_order} transactions that write to the same C{District} record
-modify the record by incrementing its \C{d\_next\_o\_id} field,
-their transitions do not satisfy the necessary condition imposed by
-the SI axiomatization, allowing us to rightfully ignore their
-interference. This leaves the interference due to concurrent
-\C{new\_order} transactions that write to a different district record. 
-Fortunately, such interference does not prompt \C{new\_order} to
-violate the invariant, which can be established by reasoning on the
-similar lines as concurrent program logics, such as the Rely-Guarantee
-logic.
+\C{new\_order} transactions that write to the same \C{District} record
+modify the record by incrementing its \C{d\_next\_o\_id} field, their
+transitions do not satisfy the necessary condition imposed by the SI
+axiomatization, allowing us to rightfully ignore their interference.
+This leaves the interference due to concurrent \C{new\_order}
+transactions that write to a different district record.  Fortunately,
+such interference does not prompt \C{new\_order} to violate the
+invariant, which can be established by adopting a reasoning similar to
+the one used on concurrent program logics, such as the Rely-Guarantee
+logic, customized for the database programs.
 
 % and becomes ready to commit, a
 % transition transfers the transaction's local writes ($\delta$) to the
