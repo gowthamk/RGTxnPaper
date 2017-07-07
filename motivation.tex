@@ -11,7 +11,7 @@ transaction and returns the result.
 \begin{figure}
 \centering
 \begin{ocaml}
-let new_order d_id c_id item_reqs = atomically do
+let new_order (d_id, c_id, item_reqs) = atomically do
   dist <- SQL.select1 District (fun d -> d.d_id = d_id);
   let o_id = dist.d_next_o_id;
   SQL.update(* UPDATE *) District 
