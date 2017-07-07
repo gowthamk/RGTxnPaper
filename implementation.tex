@@ -147,10 +147,11 @@ the need for any annotation. In this mode, \tool first infers the
 transformer $\F_{SER}$ of $T$ without considering any interference,
 which then becomes its guarantee ($G$). Doing likewise for every
 transaction results in a rely relation ($R$) that includes $\F_{SER}$
-of every transaction. The verification can now proceed as usual. The
-result of this verification is an assignment of (possibly weak)
-isolation levels to transactions which guarantees serializability of
-all executions. 
+of every transaction. Verification now proceeds by taking interference
+into account, and verifying that each transaction still yeilds the
+same $F$ as its $F_{SER}$. The result of this verification is an
+assignment of (possibly weak) isolation levels to transactions which
+nonetheless guarantees serializability of all executions.  
 
 
 \input{evaluation}
