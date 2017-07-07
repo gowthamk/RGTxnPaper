@@ -1,79 +1,84 @@
 \section{Inference}
 \label{sec:inference}
 
-Rely-Guarantee framework presented in the previous section facilitates
-modular proofs for weakly-isolated transactions, but imposes a
-non-trivial annotation burden on the programmer. In particular, it
-requires each statement ($c$) of the transaction to be annotated with
-a stable pre- ($P$) and post-condition ($Q$), and loops to be
-annotated with stable inductive invariants ($\psi$). While weakest
-pre-condition style predicate transformers can help in inferring $P$'s
-and $Q$'s for regular statements, inferring inductive loop invariants
-is still a challenge, even for the simpler form of loops we admit.
-Thus, predicate transformer-based approach to proof automation is
-unlikely to be effective in this case. We therefore present an
-alternative approach to RG proof automation in this section that is
-based on state transformers instead of predicate transformers. The
-idea is to infer the effect that each statement has on the
-transaction-local database state $\stl$ (i.e., how it transforms
-$\stl$), and compose multiple such effects together to describe the
-effect of the transaction as a whole. Importantly, this approach
-generalizes to loops, where the effect of a loop can be inferred as a
-well-defined function of the effect of its body, thanks to certain
-pleasant properties enjoyed by the database programs modeled by
-$\txnimp$.
+The Rely-Guarantee framework presented in the previous section
+facilitates modular proofs for weakly-isolated transactions, but
+imposes a non-trivial annotation burden.  In particular, it requires
+each statement ($c$) of the transaction to be annotated with a stable
+pre- ($P$) and post-condition ($Q$), and loops to be annotated with
+stable inductive invariants ($\psi$). While weakest pre-condition
+style predicate transformers can help in inferring intermediate
+assertions for regular statements, loop invariant inference remains
+challenging, even for the simple form of loops considered here.  As an
+alternative, we present an inference algorithm based on state
+transformers.  The idea is to infer the logical effect that each
+statement has on the transaction-local database state $\stl$ (i.e.,
+how it transforms $\stl$), and compose multiple such effects together
+to describe the effect of the transaction as a whole.  Importantly,
+this approach generalizes to loops, where the effect of a loop can be
+inferred as a well-defined function of the effect of its body, thanks
+to certain pleasant properties enjoyed by the database programs
+modeled by $\txnimp$.  Interpreting database semantics as functional
+transformations on sets (described in terms of their logical effects)
+enables an inference mechanism that can leverage off-the-shelf SMT
+solvers for automated verification.
 
 \input{logic-syntax}
 
 At the core of our approach is a simple language ($\SL$) to express
-set transformations shown in Fig.~\ref{fig:logic-syntax}. The language
+set transformations (see Fig.~\ref{fig:logic-syntax}). The language
 admits only set expressions that include variables ($x$), literals of
-the form $\{x \,|\, \phi^0\}$ where $\phi^0$ is a propositional
+the form $\{x \,|\, \varphi\}$ where $\varphi$ is a propositional
 (quantifier-free) formula on $x$, a restricted form of existential
-quantification that binds a set $x$ satisfying proposition $\phi^0$ in
-a set expression $s$, a monadic composition of two set expressions
-($s_1$ and $s_2$) using bind ($\bind$), a conditional set expression
-where the condition is a propositional formula, and a union of two set
-expressions. Symbols $\stl$ and $\stg$ are also variables in $\SL$,
-but are used to denote local and database states, respectively.  The
-language is carefully chosen to be expressive enough to capture the
-semantics of $\txnimp$ statements, yet simple enough to have a
-semantics-preserving translation to the first-order logic. 
+quantification that binds a set $x$ satisfying proposition $\phi$ in a
+set expression $s$, a monadic composition of two set expressions
+($s_1$ and $s_2$) composed using a bind ($\bind$) operation, a
+conditional set expression where the condition is a propositional
+formula, and a union of two set expressions. Symbols $\stl$ and $\stg$
+are also variables in $\SL$, but are used to denote local and database
+states, respectively.  The language is carefully chosen to be
+expressive enough to capture the semantics of $\txnimp$ statements (as
+well as SQL operations more generally), yet simple enough to have a
+semantics-preserving translation to a decidable fragment of
+first-order logic.
 
 \input{inference-rules}
 
-Fig.~\ref{fig:inference-rules} shows the syntax-directed inference
-rules for $\txnimp$ commands inside a transaction $\C{TXN}_i$.
-Inference depends on the $\I$-constrained rely relation $\R$, and the
-high-level invariant $I$ for the reasons that will become clear
-shortly.  Inference rules compute, for each command $c$, a (meta)
-function $\F$ that returns a set as an expression in $\SL$, given a
-pair of sets ($\stl$ and $\stg$) that describe local and a global
-database states, respectively. The expression returned by
-$\F(\stl,\stg)$ (abstractly) describes the set of records that get
-added to $\stl$ as a result of executing $c$ under $\stl$ and $\stg$.
-Thus, $\F$ captures the \emph{effect} part of the state transformer of
-$c$, which is the function $\lambda(\stl,\stg).~\stl \cup
-\F(\stl,\stg)$. For $\F$ to be useful in RG verification, it needs to
-be stable w.r.t the rely relation $\R$. The stability condition on
-effects is defined below:
+Fig.~\ref{fig:inference-rules} shows the syntax-directed state
+transformer inference rules for $\txnimp$ commands inside a
+transaction $\C{TXN}_i$.  Inference depends on the $\I$-constrained
+rely relation $\R$, and the high-level invariant $I$ for the reasons
+that will become clear shortly.  Inference rules compute, for each
+command $c$, a (meta) function $\F$ that returns a set as an
+expression in $\SL$, given a pair of sets ($\stl$ and $\stg$) that
+describe local and a global database states, respectively. The
+expression returned by $\F(\stl,\stg)$ (abstractly) describes the set
+of records that get added to $\stl$ as a result of executing $c$ under
+$\stl$ and $\stg$.  Thus, $\F$ captures the \emph{effect} part of the
+state transformer of $c$, which is the function
+$\lambda(\stl,\stg).~\stl \cup \F(\stl,\stg)$\footnote{Recall that the
+  operational semantics treats deletion of records as the addition of
+  the deleted record with its \C{del} field set to true in the local
+  store.}. For $\F$ to be useful in RG verification, it needs to be
+stable w.r.t the rely relation $\R$. The stability condition on
+effects can be defined thus:
 \begin{smathpar}
 \begin{array}{lcl}
   \stable(\R,\F) & \Leftrightarrow & \forall \stl,\stg,\stg',\bar{v}.~
   \R(\stl,\stg,\stg') \Rightarrow \F(\stl,\stg) \equiv \F(\stl,\stg')
 \end{array}
 \end{smathpar}
-where, $\bar{v}$ are the variables that occur free in $\F$ (possible
-because of how the inference rules are structured).  Intuitively, the
-stability condition requires an effect to describe the same set of
-records before and after the interference. The equivalence in $\SL$
-translates to the equality in first-order logic, as will become clear
-shortly. In the inference rules, stability is enforced constructively
-by a meta function $\stabilize{\cdot}$, which accepts an effect and
-returns a new effect that is guaranteed to be stable under $\R$.
-$\stabilize{\cdot}$ achieves the stability guarantee by abstracting
-away the bound $\stg$ in an unstable $\F$ to an existentially bound
-$\stg'$ as described below:
+where, $\bar{v}$ are the variables that occur free in $\F$; this is
+possible because of how the inference rules are structured.
+Intuitively, the stability condition requires an effect to describe
+the same set of records before and after the interference. The
+equivalence in $\SL$ translates to the equality in first-order logic,
+as we describe below. In the inference rules, stability is
+enforced constructively by a meta function $\stabilize{\cdot}$, which
+accepts an effect and returns a new effect that is guaranteed to be
+stable under $\R$.  $\stabilize{\cdot}$ achieves the stability
+guarantee by abstracting away the bound $\stg$ in an unstable $\F$ to
+an existentially bound $\stg'$ as described below:
 \begin{smathpar}
 \begin{array}{lcll}
   \stabilize{\F} & = & \F & \texttt{if } \stable(\R,\F).\\
@@ -81,15 +86,14 @@ $\stg'$ as described below:
       & \texttt{otherwise. }\stg'\texttt{ is a fresh name.}\\
 \end{array}
 \end{smathpar}
-Observe that when $\F$ is not stable, then $\stabilize{\F}$ returns an
-$\F'$ that simply ignores its $\stg$ argument in favor of a generic
+Observe that when $\F$ is not stable, then $\stabilize{\F}$ returns a
+transformer $\F'$ that simply ignores its $\stg$ argument in favor of a generic
 $\stg'$, making $\F'$ trivially stable. It is safe to assume
 $I(\stg')$ because all verified transactions preserve the invariant,
-hence only valid database states will ever be witnessed. From the
+and hence only valid database states will ever be witnessed. From the
 perspective of RG reasoning, $\stabilize{\cdot}$ effectively weakens
 the post-condition of a statement, as done by the
-\rulelabel{RG-Conseq} rule for transaction-bound commands (cf.  the
-supplementary material). The weakening semantics chosen by
+\rulelabel{RG-Conseq} rule for transaction-bound commands.  The weakening semantics chosen by
 $\stabilize{\cdot}$, while being simple, is nonetheless useful because
 of the $I(\stg')$ assumption on the existentially bound $\stg'$. The
 example in Fig.~\ref{fig:weakening-example} demonstrates. 
@@ -101,29 +105,31 @@ let add_interest acc_id pc = atomically @@ do
   SQL.update BankAccount (fun acc -> {acc with bal = acc.bal + y})
                          (fun acc -> acc.id = acc_id)
 \end{ocaml}
-\caption{A transaction that deposits an interest to a bank account}
+\caption{A transaction that deposits an interest to a bank account.}
 \label{fig:weakening-example}
 \end{figure}
-Here, an \C{add\_interest} transaction adds a positive interest to the
-balance of a bank account, which is required to be positive ($I(\stg)
-\Leftrightarrow \forall(r\in\stg).~r.\C{bal}\ge 0$). The transaction
-starts by issuing a \C{select1} query, whose effect implicitly asserts
-that there exists a record in the bank account database that is equal
-to $a$ ($\exists(r\in\stg).~r=a$). However, this assertion is unstable
+Here, an \C{add\_interest} transaction adds a positive interest
+(\C{pc}) to the balance of a bank account, which is required to be
+positive ($I(\stg) \Leftrightarrow \forall(r\in\stg).~r.\C{bal}\ge
+0$). The transaction starts by issuing a \C{select1} query, whose
+effect implicitly asserts that there exists a record in the bank
+account database that is equal to $a$
+($\exists(r\in\stg).~r=a$). However, this assertion is unstable
 because a concurrent \C{withdraw} or \C{deposit} transactions might
-update the account balance, and there will no longer exist an
-$r\in\stg$ that is equal to $a$. Fortunately, the weakening operator
-($\stabilize{\cdot}$) comes to the rescue here by weakening the
-assertion to $\exists \stg'.I(\stg') \conj \exists(r\in\stg').~a=r$,
-which is enough to prove that $\C{a.bal + pc*a.bal}\ge 0$, and verify
-that \C{add\_interest} preserves the positive balance invariant.
+update the account balance, so that such a record no longer exists in
+the database.  Fortunately, the weakening operator
+($\stabilize{\cdot}$) allows us to weaken the assertion to $\exists
+\stg'.I(\stg') \conj \exists(r\in\stg').~a=r$ (Fig.~\ref{fig:logic}
+formalizes the encoding of {\sf exists} to logic), which is enough to
+prove that $\C{a.bal + pc*a.bal}\ge 0$, and verify that
+\C{add\_interest} preserves the positive balance invariant.
 
-The inference rules of SQL statements, like the RG rules, closely
-follow the corresponding reduction rules in Fig.~\ref{fig:txnimp},
-except that their language of expression is $\SL$. For instance, while
-the reduction rule for \C{UPDATE} declaratively specifies the set of
-updated records, the inference rule uses $\SL$'s bind operation to
-\emph{compute} the set. Other SQL rules do likewise. The inference
+The state transformer rules, like the earlier RG rules, closely follow
+the corresponding reduction rules in Fig.~\ref{fig:txnimp}, except
+that their language of expression is $\SL$. For instance, while the
+reduction rule for \C{UPDATE} declaratively specifies the set of
+updated records, the state transformer rule uses $\SL$'s bind
+operation to \emph{compute} the set. Other SQL rules do likewise. The
 rules for \C{LET} binders, conditionals, and sequences compose the
 effects inferred for their subcommands. For instance, the effect of a
 sequence of commands $c_1;c_2$ is the union of effects $F_1$ and $F_2$
@@ -138,9 +144,9 @@ iterations is same as their parallel composition. Since the loop body
 is executed once per each $z\in x$, the effect of the the loop is the
 union of effects ($\F$) for all $z\in x$, all applied to the same
 state ($\stl$ and $\stg$). That is, $\F_{loop}(\stl,\stg) =
-\bigcup_{z\in x}\F_{body}(\stl,\stg)$. From the definition of
-set monad's bind, $\F_{loop}(\stl,\stg) = x \bind (\lambda
-z.~F_{body}(\stl,\stg))$, which is what the rule infers.
+\bigcup_{z\in x}\F_{body}(\stl,\stg)$. From the definition of the set
+monad's bind operator, $\F_{loop}(\stl,\stg) = x \bind (\lambda
+z.~F_{body}(\stl,\stg))$, which mirrors the definition of the rule.
 
 % \begin{figure}[h]
 % \begin{smathpar}
@@ -157,59 +163,58 @@ z.~F_{body}(\stl,\stg))$, which is what the rule infers.
 % \label{fig:people_code}
 % \end{figure}
 
-\begin{example}
-Consider a database of couples that tracks the spouse
-relationship. Each record has an $\idf$ field, a \C{name} field, and a
-spouse id (\C{s\_id}) field. A $\txnimp$ transaction bearing id $i$
-that populates the database with a given set ($xs$) of couples will
-include the following code snippet:
-\begin{smathpar}
-\begin{array}{l}
-  \foreache{xs}{(\lambda y.\lambda x.~ 
-        \updatee{(\lambda z.~ \{\idf=z.\idf;\,\C{name}=z.\C{name};\,
-                               \C{s\_id}=x.\idf\})}
-                {(\lambda z.~ z.\idf = x.\C{s\_id})};\\
-        \hspace*{1.27in} \inserte{x})}
-\end{array}
-\end{smathpar}
-The effect inferred for the program, assuming no interference, is as
-following:
-\begin{smathpar}
-\begin{array}{l}
-  \lambda(\stl,\stg).~xs \bind 
-    (\lambda x. \stg \bind 
-      (\lambda z. \itel{z.\idf = x.\C{s\_id}}
-                       {\{\{\idf=z.\idf;\,\C{name}=z.\C{name};\,
-                               \C{s\_id}=x.\idf\}\}}
-                       {\emptyset}) \\
-      \hspace*{1cm} ~\cup~ \{y \,|\, y = \{x \with \delf=false; \}\})
-\end{array}
-\end{smathpar}
-Under the possibility of an interference affecting the stability, the
-following stable effect is inferred ($I$ is the database invariant):
-\begin{smathpar}
-\begin{array}{l}
-  \lambda(\stl,\stg).~xs \bind 
-    (\lambda x.~\existsl(\stg',I,\stg' \bind 
-      (\lambda z. \itel{z.\idf = x.\C{s\_id}}
-                       {\{\{\idf=z.\idf;\,\C{name}=z.\C{name};\,
-                               \C{s\_id}=x.\idf\}\}}
-                       {\emptyset})) \\
-      \hspace*{1cm} ~\cup~ \{y \,|\, y = \{x \with \delf=false; \}\})
-\end{array}
-\end{smathpar}
-\end{example}
+%% \begin{example}
+%% Consider a database of couples that tracks the spouse
+%% relationship. Each record has an $\idf$ field, a \C{name} field, and a
+%% spouse id (\C{s\_id}) field. A $\txnimp$ transaction bearing id $i$
+%% that populates the database with a given set ($xs$) of couples will
+%% include the following code snippet:
+%% \begin{smathpar}
+%% \begin{array}{l}
+%%   \foreache{xs}{(\lambda y.\lambda x.~ 
+%%         \updatee{(\lambda z.~ \{\idf=z.\idf;\,\C{name}=z.\C{name};\,
+%%                                \C{s\_id}=x.\idf\})}
+%%                 {(\lambda z.~ z.\idf = x.\C{s\_id})};\\
+%%         \hspace*{1.27in} \inserte{x})}
+%% \end{array}
+%% \end{smathpar}
+%% The effect captured by a state transformer inferred for the program, assuming no interference would be:
+%% \begin{smathpar}
+%% \begin{array}{l}
+%%   \lambda(\stl,\stg).~xs \bind 
+%%     (\lambda x. \stg \bind 
+%%       (\lambda z. \itel{z.\idf = x.\C{s\_id}}
+%%                        {\{\{\idf=z.\idf;\,\C{name}=z.\C{name};\,
+%%                                \C{s\_id}=x.\idf\}\}}
+%%                        {\emptyset}) \\
+%%       \hspace*{1cm} ~\cup~ \{y \,|\, y = \{x \with \delf=\mathit{false}; \}\})
+%% \end{array}
+%% \end{smathpar}
+%% Under the possibility of an interference affecting the stability, the
+%% following stable effect is inferred ($I$ is the database invariant):
+%% \begin{smathpar}
+%% \begin{array}{l}
+%%   \lambda(\stl,\stg).~xs \bind 
+%%     (\lambda x.~\existsl(\stg',I,\stg' \bind 
+%%       (\lambda z. \itel{z.\idf = x.\C{s\_id}}
+%%                        {\{\{\idf=z.\idf;\,\C{name}=z.\C{name};\,
+%%                                \C{s\_id}=x.\idf\}\}}
+%%                        {\emptyset})) \\
+%%       \hspace*{1cm} ~\cup~ \{y \,|\, y = \{x \with \delf=false; \}\})
+%% \end{array}
+%% \end{smathpar}
+%% \end{example}
 
 \input{logic}
 
 \subsection{Soundness of Inference}
 
 The correspondence between the inference rules and the RG judgment of
-Sec.~\ref{sec:reasoning} is stated thus\footnote{Proof can be found in
-the supplementary material}:
+Sec.~\ref{sec:reasoning} is stated thus\footnote{The proof can be found in
+the supplementary material.}:
 \begin{theorem}
 \label{thm:inference-sound}
-  Forall i,$R$,$I$,$c$,$\F$, if $\stable(\R,I)$ and $c \elabsto \F$,
+  \emph{Forall} i,$R$,$I$,$c$,$\F$, if $\stable(\R,I)$ and $c \elabsto \F$,
   then:\\\vspace*{-0.2cm}
   \begin{smathpar}
   \begin{array}{c}
@@ -218,8 +223,8 @@ the supplementary material}:
   \end{array}
   \end{smathpar}
 \end{theorem}
-Where the set expression $\F(\emptyset,\stg)$ has a natural
-interpretation, on the lines discussed in the next sub-section.
+\noindent where the set expression $\F(\emptyset,\stg)$ has a natural
+interpretation as discussed below.
 % Where, ${\sf true} = \lambda(\stl,\stg).~true$ and $\stable(\R,I)
 % \Leftrightarrow \forall\stl,\stg,\stg'. I(\stg) \conj
 % \R(\stl,\stg,\stg') \Rightarrow \I(\stg')$.
@@ -227,10 +232,10 @@ interpretation, on the lines discussed in the next sub-section.
 \subsection{From $\SL$ to the first-order logic}
 
 Theorem~\ref{thm:inference-sound} lets us replace the local judgment
-of the \rulelabel{RG-Txn} rule (Fig.~\ref{fig:rg-rules}) by the
-inference judgment. The soundness of a transaction's guarantee can now
+of the \rulelabel{RG-Txn} rule (Fig.~\ref{fig:rg-rules}) by a state
+transformer inference judgment. The soundness of a transaction's guarantee can now
 be established w.r.t the effect $\F$ of the body. The
-\rulelabel{RG-Txn} rule updated to use the inference judgment is shown
+\rulelabel{RG-Txn} rule so updated is shown
 below:
 \begin{smathpar}
 \begin{array}{c}
@@ -252,11 +257,10 @@ below:
 }
 \end{array}
 \end{smathpar}
-Since the inference judgment $c\elabsto \F$ is fully automatic,
-automating the application of the \rulelabel{RG-Txn} rule for a
-transaction now requires automating the multiple implication checks in
+Automating the application of the \rulelabel{RG-Txn} rule for a
+transaction requires automating the multiple implication checks in
 the premise. While $R$, $\R$, $\R_c$, $\I$ and $\I$ are formulas in
-the first-order logic (FOL) with a relatively simple structure, $\F$
+first-order logic (FOL) with a relatively simple structure, $\F$
 is an expression in the set language $\SL$
 (Fig.~\ref{fig:logic-syntax}) with a possibly complex structure.
 Fortunately, however, there exists a semantics-preserving translation
@@ -264,32 +268,33 @@ from $\SL$ to a restricted subset of first-order logic (FOL) that
 lends itself to automatic reasoning. 
 
 The algorithm ($\mssemof{\cdot}$) shown in Fig.~\ref{fig:logic}
-encodes an $\SL$ expression in a FOL. Given a set expression $s$ of
-$\SL$, $\mssemof{s}$ is a pair $(\phi,f)$, where $\phi$ encodes $s$ in
-FOL, and $f$ is a boolean function that names the set defined by $s$.
-Naming provides an easy handle to $s$, simplifying $\mssemof{\cdot}$.
-Set variables ($x$, $\stl$, $\stg$, $\dots$) are encoded as
-unconstrained boolean functions ($g_x$, $g_{\stl}$, $g_{\stg}$,
-$\ldots$) that are named after the variable.  Encoding of a set
-literal $\{a\,|\,\varphi\}$ introduces a new boolean function $g$ that
-is $true$ for only those $a$ that satisfy $\varphi$.  Thus $g$
-faithfully encodes the literal. The encoding of the $\existsl{}$
-expression first eliminates the second-order quantification over sets.
-Existentially bound set variable ($a$) is skolemized, i.e.,
-instantiated with a new unbound variable $a'$, before encoding the
-bound expression $s$ and the first-order constraint $\phi$. The
-algorithm for encoding $\phi$, which is already a first-order formula,
-is straightforward. It basically involves replacing set variables with
-boolean functions named after the variables. The first-order encoding
-for a bind expression describes the semantics of set monad's $\bind$
-in FOL. Let $s_1$ be a set, and let $f$ be a function that maps each
-variable in $s_1$ to a new set. Then, $s_2 = s_1 \bind f$ if and only
-if for all $y\in s_2$, there exists an $x \in s_1$ such that $y =
-f(x)$, and forall $x\in s_1$, $f(x)\in s_2$. The encoding adds new
-constraints to this effect. Conditional set expressions and set union
-are encoded straightforwardly.
+encodes an $\SL$ expression in a decidable fragment of FOL. Given a
+set expression $s$ of $\SL$, $\mssemof{s}$ is a pair $(\phi,f)$, where
+$\phi$ encodes $s$ in FOL, and $f$ is a Boolean function that names
+the set defined by $s$.  Naming provides an easy handle to $s$,
+simplifying $\mssemof{\cdot}$.  Set variables ($x$, $\stl$, $\stg$,
+$\dots$) are encoded as unconstrained Boolean functions ($g_x$,
+$g_{\stl}$, $g_{\stg}$, $\ldots$) that are named after the variable.
+Encoding of a set literal $\{a\,|\,\varphi\}$ introduces a new Boolean
+function $g$ that is \emph{true} for only those $a$ that satisfy $\varphi$.
+Thus $g$ faithfully encodes the literal. The encoding of the
+$\existsl{}$ expression first eliminates the second-order
+quantification over sets.  Existentially bound set variable ($a$) is
+skolemized, i.e., instantiated with a new unbound variable $a'$,
+before encoding the bound expression $s$ and the first-order
+constraint $\phi$. The algorithm for encoding $\phi$, which is already
+a first-order formula, is straightforward. It basically involves
+replacing set variables with Boolean functions named after the
+variables. The first-order encoding for a bind expression describes
+the semantics of set monad's bind operator in FOL. Let $s_1$ be a set, and
+let $f$ be a function that maps each variable in $s_1$ to a new
+set. Then, $s_2 = s_1 \bind f$ if and only if for all $y\in s_2$,
+there exists an $x \in s_1$ such that $y = f(x)$, and forall $x\in
+s_1$, $f(x)\in s_2$. The encoding adds new constraints to this
+effect. Conditional set expressions and set union are encoded
+straightforwardly.
 
-Observe that the language of encoding shown in Fig.~\ref{fig:logic} is
+Observe that the encoding shown in Fig.~\ref{fig:logic} maps to
 a subset of logic that satisfies the following syntactic properties:
 \begin{itemize}
   \item All quantification is first-order; second-order objects, such
@@ -297,12 +302,10 @@ a subset of logic that satisfies the following syntactic properties:
   \item Quantifiers appear only at the prenex position, i.e., at the
     beginning of a quantified formula.  
   \item All function symbols, modulo those that might appear in
-    $\varphi\in\Prop^0$, are uninterpreted and boolean.
+    $\varphi\in\Prop^0$, are uninterpreted and Boolean.
 \end{itemize}
-The fragment of FOL that satisfies the above syntactic conditions is
-called Effectively Propositional first-order logic (denoted {\sf
-EPR}), or Bernay-Sch{\"o}nfinkel-Ramsey (BSR) logic, which is known to
-be decidable~\cite{z3epr}. The language of encoding, however, is a
+This fragment of FOL known as EPR (Effectively Propositional logic)
+is known to be decidable~\cite{z3epr}. The language of encoding, however, is a
 combination of {\sf EPR} with (a). $\Prop^0$, the theory from which
 quantifier-free propositions ($\varphi$) that encode object language
 expressions are drawn, and (b).  $\Prop^1$, the theory from which
@@ -315,7 +318,7 @@ and state the following theorem:
 \end{theorem}
 A useful instantiation of $\SL$ is $\SL[{\sf SLA},{\sf EPR}+{\sf
 SLA}]$, where ${\sf SLA}$ is the theory of simple linear arithmetic.
-{\sf EPR}+{\sf SLA} is known to be decidable~\cite{eprsla}, hence:
+Since {\sf EPR}+{\sf SLA} is known to be decidable~\cite{eprsla}, hence:
 \begin{theorem}
   $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ is decidable.
 \end{theorem}
@@ -323,7 +326,7 @@ The $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ instantiation requires $I$ to
 be drawn from {\sf EPR}+{\sf SLA}, which is expressive enough to
 describe common database integrity constraints, such as referential
 integrity, non-negativeness of all integer values in a column etc.
-Isolation specifications presented in Sec.~\ref{sec:isolation} are
+The isolation specifications presented in Sec.~\ref{sec:isolation} are
 already simple first-order formulas that can be encoded in {\sf EPR}.
 Furthermore, it is also reasonable to expect the guarantee ($G$) of a
 transaction to be expressible in the same logic as its inferred $\F$,
@@ -332,6 +335,6 @@ characterization of the transaction, while $G$ is only an abstraction.
 Thus, with $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ as the language of
 inference, the verification problem for weakly isolated transactions
 is decidable. Moreover, off-the-shelf SMT solvers (e.g., Z3) are
-equipped with efficient decision procedures for ${\sf EPR}+{\sf SLA}$
-fragment, making the verification a practical exercise.
+equipped with efficient decision procedures for ${\sf EPR}+{\sf SLA}$,
+making automated verification a practical exercise.
 
