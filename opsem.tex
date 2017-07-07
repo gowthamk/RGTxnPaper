@@ -43,24 +43,27 @@ terms of an abstract machine that executes a command, and updates
 either a transaction-local ($\stl$), or global ($\stg$) database, both
 of which are modeled as a set of records of a pre-defined type, i.e.,
 they all belong to a single table.  The generalization to multiple
-tables is straightforward.  Records in $\stg$ are uniquely identifiable
-through their $\idf$ field, which is auto-generated and does not
-belong to the surface language, i.e., $\C{id}\notin f$. For a set $S$
-of records, we define $\dom(S)$ as the set of unique ids of all 
+tables is straightforward. The semantics assumes that the records in
+$\stg$ are uniquely identifiable through their $\idf$ field, and
+enforces this invariant wherever necessary. Certain hidden fields are
+treated specially by the operational semantics, and they are hidden
+from the surface language. These include a $\txnf$ field that tracks
+the identifier of the transaction that last updated the record, and a
+$\delf$ field that flags the deleted records in $\stl$.  For a set $S$
+of records, we define $\dom(S)$ as the set of unique ids of all
 records in $S$. Thus $|\dom(\stg)| = |\stg|$. During its execution, a
 transaction may write to multiple records in $\stg$. Atomicity
 dictates that such writes should not be visible in $\stg$ until the
 transaction commits. We therefore associate each transaction with a
 local database ($\stl$) that stores such uncommitted
 records\footnote{While SQL's \C{UPDATE} admits writes at the
-  granularity of record fields, databases, in reality, enforce
+  granularity of record fields, most popular databases enforce
   record-level locking, allowing us to think of ``uncommitted writes''
   as ``uncommitted records''. }. Uncommitted records include deleted
-records, which are identified by a hidden $\delf$ field set to
-\C{true}. When the transaction commits, its local database is
-atomically \emph{flushed} to the global database, committing these
-heretofore uncommitted records. The flush operation ($\gg$) is defined as
-follows:
+records, whose $\delf$ field is set to \C{true}. When the transaction
+commits, its local database is atomically \emph{flushed} to the global
+database, committing these heretofore uncommitted records. The flush
+operation ($\gg$) is defined as follows:
 \begin{smathpar}
 \begin{array}{c}
 \forall r.~ r \in (\stl\gg\stg) ~\Leftrightarrow~ 
@@ -92,16 +95,16 @@ database state is $\stg$; the command $c$ reduces to $c'$, while
 updating the transaction-local database $\stl$ to $\stl'$. The
 definition assumes a meta function $\eval$ that evaluates expressions
 with no free variables to values. The reduction relation for SQL
-statements is defined straightforwardly.  \C{INSERT} adds a new record
-to $\stl$ after adding a unique identifier. \C{DELETE} finds the records in $\stg$ that match
-the search criteria defined by its boolean function argument, and adds
-the records to $\stl$ after marking them for deletion. \C{SELECT}
-bounds the name introduced by \C{LET} to the set of records from
-$\stg$ that match the search criteria, and then executes the bound
-command $c$. \C{UPDATE} uses its first function argument to compute
-the updated version of the records that match the search criteria
-defined by its second function argument. Updated records are added to
-$\stl$. 
+statements is defined straightforwardly. \C{INSERT} adds a new record
+to $\stl$ after checking the uniqueness of its id. \C{DELETE} finds
+the records in $\stg$ that match the search criteria defined by its
+boolean function argument, and adds the records to $\stl$ after
+marking them for deletion. \C{SELECT} bounds the name introduced by
+\C{LET} to the set of records from $\stg$ that match the search
+criteria, and then executes the bound command $c$. \C{UPDATE} uses its
+first function argument to compute the updated version of the records
+that match the search criteria defined by its second function
+argument. Updated records are added to $\stl$. 
 
 The reduction of \C{FOREACH} starts by first converting it to its
 run-time form to keep track of iterated items ($s_1$),

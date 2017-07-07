@@ -50,8 +50,8 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \begin{array}{c}
 \RULE
 {
-  i \not\in \dom(\stl \cup \stg)\\
-  r' = \{r \;\C{with}\; \idf=i;\,\delf=\C{false}\}
+  r.\idf \not\in \dom(\stl \cup \stg)\\
+  r' = \{r \;\C{with}\; \txnf=i;\,\delf=\C{false}\}
 }
 {
   \stg \vdash (\tbox{\inserte{r}}_i,\stl) \stepsto
@@ -68,9 +68,9 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \begin{array}{c}
 \RULE
 {
-  \hspace*{-1.5in}
+  \hspace*{-1in}
   s = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e)=\C{true} \\
-      \hspace*{0.1in}\conj r'=\{r \;\C{with}\; \delf=\C{true}\}\}\spc
+      \hspace*{0.1in}\conj r'=\{r \with \delf=\C{true};\, \txnf=i\}\}\spc
   \dom(\stl)\cap\dom(s) = \emptyset \spc
 % \dom(s) \cap \dom(\delta) = \emptyset
 }
@@ -112,7 +112,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 {
   \hspace*{-0.2in}s = \{r' \,|\, \exists(r\in\Delta).~ 
     \eval([r/x]e_2)=\C{true} \conj r'= \{ [r/x]e_1 \;\C{with}\\
-    \idf=r.\idf;\,\delf = r.\delf \}\} \spc
+    \txnf=i;\,\delf = r.\delf \}\} \spc
   \dom(\stl) \cap \dom(s) = \emptyset
 }
 {
