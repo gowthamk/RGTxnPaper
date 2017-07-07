@@ -1,7 +1,7 @@
 \begin{abstract}
 
   Serializability is a well-understood correctness criterion that
-  simplifies reasoning about the behaviour of concurrent transactions
+  simplifies reasoning about the behavior of concurrent transactions
   by ensuring they are \emph{isolated} from each other while they
   execute.  However, enforcing serializable isolation comes at a steep
   cost in performance because it necessarily restricts opportunities
@@ -25,10 +25,10 @@
   safety of high-level consistency assertions associated with such
   transactions.  The key to effective inference is the observation
   that weakly-isolated transactions can be viewed as functional
-  (monadic) computations over database state, allowing us to treat
-  their operations as state transformers over the database.  This
-  interpretation enables automated verification using off-the-shelf
-  SMT solvers.
+  (monadic) computations over an abstract database state, allowing us
+  to treat their operations as state transformers over the database.
+  This interpretation enables automated verification using
+  off-the-shelf SMT solvers.
   
   Notably, our development is parametric over a transaction's specific
   isolation semantics, allowing it to be applicable over a range of

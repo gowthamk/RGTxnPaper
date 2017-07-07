@@ -88,16 +88,18 @@ each new isolation level we may encounter.
 \vspace*{-4pt}
 \paragraph{Inference.}  Prior work by Vafeiadis~\cite{Vaf10,Vaf10a}
 describe \emph{action inference}, an inference procedure for computing
-rely and guarantee relations in the conetxt of RGSep~\cite{VP07}, an
+rely and guarantee relations in the context of RGSep~\cite{VP07}, an
 integration of rely-guarantee and separation logic~\cite{Rey02} that
 allows one to precisely reason about local and shared state of a
 concurrent program. The ideas underlying action inference have been
 used to prove memory safety, linearizability, shape invariant
 inference, etc.  of fine-grained concurrent data structures.  While
-our motivation is similar to theirs (inference of intermediate
-assertions and invariants), the context of study (transactions
+our motivation is similar (automated inference of intermediate
+assertions and local invariants), the context of study (transactions
 vs. shared-memory concurrency), the objects being analyzed (relational
-database tables vs. concurrent data structures), and the analysis
-technique used to drive inference (state transformers vs. abstract
-interpretation) are quite different.
+database tables vs. concurrent data structures), the properties being
+verified (integrity constraints over relational tables vs. memory
+safety, or linearizability of concurrent data strucgture operations)
+and the analysis technique used to drive inference (state transformers
+vs. abstract interpretation) are quite different.
 
