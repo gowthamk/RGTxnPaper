@@ -1,12 +1,12 @@
 \section{Motivation}
 \label{sec:motivation}
 
-We present our ideas in the context of an embedded DSL in OCaml that
-we have developed which supports a \C{DB} monad to define and compose
-database computations given in terms of SQL operations.  Besides the
-usual \C{bind} and \C{return} operators, the monad offers an
-\C{atomically} combinator that executes a database computation as an
-atomic transaction and returns the result.
+We present our ideas in the context of our DSL embedded in OCaml,
+which offers a \C{DB} monad to define and compose database
+computations given in terms of SQL operations.  Besides the usual
+\C{bind} and \C{return} operators, the monad offers an \C{atomically}
+combinator that executes a database computation as an atomic
+transaction and returns the result.
 
 \begin{figure}
 \centering
@@ -36,8 +36,8 @@ let new_order d_id c_id item_reqs = atomically do
 \end{figure}
 
 Fig.~\ref{fig:new_order_code} shows a simplified version of the TPC-C
-\C{new\_order} transaction written in this language.  TPC-C is a
-well-known Online Transaction Processing (OLTP) benchmark that models
+\C{new\_order} transaction written in this language. TPC-C is a
+widely-used Online Transaction Processing (OLTP) benchmark that models
 an order-processing system for a wholesale parts supply business. The
 business logic is captured in 5 database transactions that operate on
 9 tables; \C{new\_order} is one such transaction that uses
@@ -64,11 +64,43 @@ record into the specified table in the database.
 %%%or why they are important.  There are also some fields (e.g., ol_i_id)
 %%%that are not described either in the caption or the text.
 
-\begin{figure}[!t]
-\includegraphics[scale=0.5]{Figures/schema}
+% \begin{figure}[!t]
+% \includegraphics[scale=0.5]{Figures/schema}
+% \caption{Database schema of TPC-C's order management system.
+%   Columns against highlighted background are primary keys. Arrows denote
+%   foreign key relationships.}
+% \label{fig:schema}
+% \end{figure}
+
+\begin{figure}[t]
+  \centering
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=0.9\textwidth]{Figures/schema1}
+    \caption{A valid TPC-C database. The only existing order belongs
+      to the district with \C{d\_id}=11. It's id (\C{o\_id}) is one
+      less than the district's \C{d\_next\_o\_id}, and it's order
+      count (\C{o\_ol\_cnt}) is equal to the number of order line
+      records whose \C{ol\_o\_id} is equal to the order's id.  }
+		\label{fig:tpcc_db1}
+	\end{subfigure}
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=0.9\textwidth]{Figures/schema2}
+    \caption{The database in Fig.~\ref{fig:tpcc_db1} after correctly
+      executing a \C{new\_order} transaction. A new order record is
+      added whose \C{o\_id} is equal to the \C{d\_next\_o\_id} from
+      Fig.~\ref{fig:tpcc_db1}. The district's \C{d\_next\_o\_id} is
+      incremented. The order's \C{o\_ol\_cnt} is 2, reflecting the
+      actual number of order line records whose \C{ol\_o\_id} is equal
+      to the order's id (2).}
+		\label{fig:tpcc_db2}
+	\end{subfigure}
+
 \caption{Database schema of TPC-C's order management system.
-  Columns against highlighted background are primary keys. Arrows denote
-  foreign key relationships.}
+  The naming
+  convention indicates primary keys and foreign keys. For e.g.,
+  \C{ol\_id} is the primary key column of the order line table,
+  whereas \C{ol\_o\_id} is a foreign key that refers to the \C{o\_id}
+  column of the order table.}
 \label{fig:schema}
 \end{figure}
 
@@ -85,7 +117,7 @@ reflect the processing of new orders (if the stock quantity falls below
 10, it is automatically replenished by 91).
 
 TPC-C defines multiple invariants, called \emph{consistency
-  conditions}, over the state of the application in the database. One
+conditions}, over the state of the application in the database. One
 such consistency condition is the requirement that for a given order
 \C{o}, the \emph{order-line-count} field (\C{o.o\_ol\_cnt}) should
 reflect the number of order lines under the order; this is the number

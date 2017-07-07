@@ -285,13 +285,13 @@ reflexive transitive closure of the interleaved step relation.
 The semantics of the global and transaction-local RG judgments are
 defined thus:
 \begin{smathpar}
-\begin{array}{lcl}
-\R \vdash \hoare{P}{c}{Q} & \defeq & \forall \stl,\stl',\stg,\stg'.~
-  P(\stl,\stg) \conj (\tbox{c}_i,\stl,\stg) \rstepssto{n}
+\begin{array}{lclr}
+\R \vdash \hoare{P}{c}{Q} & \defeq & \forall \stl,\stl',\stg,\stg',
+  \bar{v}.~ P(\stl,\stg) \conj (\tbox{c}_i,\stl,\stg) \rstepssto{n}
   (\tbox{\cskip}_i, \stl',\stg')
-  \Rightarrow Q(\stl',\stg')\\
+  \Rightarrow Q(\stl',\stg') & \bar{v} = {\sf freevars}(c)\\
 \rg{I,R}{c}{G,I} & \defeq &  \forall \stg.\, I(\stg)
-  \Rightarrow (\forall n,\stg'.\; (c,\stg) 
+  \Rightarrow (\forall \stg'.\; (c,\stg) 
     \rstepssto{n} (\cskip,\stg') \Rightarrow I(\stg')) \\
 &&\hspace*{0.5in}\conj \texttt{step-guaranteed}(R,G,c,\stg)\\
 \end{array}
