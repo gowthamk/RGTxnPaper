@@ -15,7 +15,8 @@ class of expressions ($e$). Commands ($c$) include $\cskip$,
 conditional statements, \C{LET} constructs to bind names, \C{FOREACH}
 loops, SQL statements, their sequential composition ($c_1;c_2$), and
 transactions ($\ctxn{i}{\I}{c}$) and their parallel composition
-($c_1\,||\,c_2$). The $\I$ in the \C{TXN} block syntax is the
+($c_1\,||\,c_2$). Each transaction is assumed to have a unique
+identifier $i$. The $\I$ in the \C{TXN} block syntax is the
 transaction's isolation specification, which will be explained later.
 Certain terms that only appear at run-time are also present in $c$.
 These include a {\sf txn} block tagged with sets ($\stl$ and $\stg$) of

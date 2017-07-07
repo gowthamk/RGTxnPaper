@@ -122,8 +122,8 @@ morekeywords={module, match, when, @@deriving, not, : , txn_do, do, SQL/\\}
 %\newcommand{\coloneqq}{::=}
 \newcommand{\qqquad}{\quad\quad}
 \newcommand{\cskip}{\C{SKIP}}
-\newcommand{\ctxnr}[3]{{\sf txn}\langle #2 \rangle\{#3\}}
-\newcommand{\ctxn}[3]{\C{TXN}\langle #2 \rangle\{#3\}}
+\newcommand{\ctxnr}[3]{{\sf txn}_{#1}\langle #2 \rangle\{#3\}}
+\newcommand{\ctxn}[3]{\C{TXN}_{#1}\langle #2 \rangle\{#3\}}
 \newcommand{\catomic}[1]{\C{ATOMIC}\{#1\}}
 \newcommand{\stepsto}{\longrightarrow}
 \newcommand{\rstepsto}{\longrightarrow_{R}}
@@ -188,7 +188,7 @@ morekeywords={module, match, when, @@deriving, not, : , txn_do, do, SQL/\\}
 \newcommand{\SJ}[1]{\textcolor{red}{SJ: #1}}
 
 \newcommand{\B}[1]{\small\bf #1}
-\newcommand{\txnbox}[1]{\lbrack #1 \rbrack}
+\newcommand{\tbox}[1]{\lbrack #1 \rbrack}
 \newcommand{\interp}[1]{\llbracket #1 \rrbracket}
 \newcommand{\cinterp}[1]{\llbracket #1 \rrbracket_{\C{C}}}
 \newcommand{\ectx}{\mathcal{E}}

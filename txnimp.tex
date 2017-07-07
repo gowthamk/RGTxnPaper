@@ -42,7 +42,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 
 %
 \textbf{Local Reduction} \quad 
-\fbox {\(\stg \vdash (c,\stl) \stepsto (c',\stl')\)}\\
+\fbox {\(\stg \vdash (\tbox{c}_i,\stl) \stepsto (\tbox{c'}_i,\stl')\)}\\
 %
 \begin{minipage}{2.8in}
 \rulelabel{E-Insert}
@@ -54,8 +54,8 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
   r' = \{r \;\C{with}\; \idf=i;\,\delf=\C{false}\}
 }
 {
-  \stg \vdash (\inserte{r},\stl) \stepsto
-  (\cskip,\stl \cup \{r'\})
+  \stg \vdash (\tbox{\inserte{r}}_i,\stl) \stepsto
+  (\tbox{\cskip}_i,\stl \cup \{r'\})
 }
 \end{array}
 \end{smathpar}
@@ -75,7 +75,8 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 % \dom(s) \cap \dom(\delta) = \emptyset
 }
 {
-  \stg \vdash (\deletee{\lambda x.e},\stl) \stepsto (\cskip,\stl \cup s)
+  \stg \vdash (\tbox{\deletee{\lambda x.e}}_i,\stl) \stepsto 
+  (\tbox{\cskip}_i,\stl \cup s)
 }
 \end{array}
 \end{smathpar}
@@ -95,8 +96,8 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
   c' = [s/y]c
 }
 {
-  \stg \vdash (\lete{y}{\selecte{\lambda x.e}}{c}, \stl) \stepsto 
-              (c',\stl)
+  \stg \vdash (\tbox{\lete{y}{\selecte{\lambda x.e}}{c}}_i, \stl) \stepsto 
+              (\tbox{c'}_i,\stl)
 }
 \end{array}
 \end{smathpar}
@@ -115,8 +116,8 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
   \dom(\stl) \cap \dom(s) = \emptyset
 }
 {
-  \stg \vdash (\updatee{\lambda x.e_1}{\lambda x.e_2},\stl) \stepsto 
-              (\cskip,\stl \cup s)
+  \stg \vdash (\tbox{\updatee{\lambda x.e_1}{\lambda x.e_2}}_i,\stl) 
+      \stepsto (\tbox{\cskip}_i,\stl \cup s)
 }
 \end{array}
 \end{smathpar}
@@ -125,12 +126,14 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 
 \begin{smathpar}
 \begin{array}{ll}
-  \rulelabel{E-Foreach1} & \stg \vdash (\foreache{s}{\lambda y.\lambda
-  z.c},\stl) \stepsto (\foreachr{\emptyset}{s}{\lambda y.\lambda z. c})\\
-  \rulelabel{E-Foreach2} & \stg \vdash (\foreachr{s_1}{\{r\} \uplus s_2}{\lambda y.\lambda
-  z.c},\stl) \stepsto ([r/z][s_1/y]c;\,\foreachr{s_1 \cup \{r\}}{s_2}{\lambda y.\lambda z. c})\\
-  \rulelabel{E-Foreach3} & \stg \vdash (\foreachr{s}{\emptyset}{\lambda y.\lambda
-  z.c},\stl) \stepsto (\cskip,\stl)\\
+  \rulelabel{E-Foreach1} & \stg \vdash (\tbox{\foreache{s}{\lambda y.\lambda
+    z.c}}_i,\stl) \stepsto (\tbox{\foreachr{\emptyset}{s}{\lambda
+    y.\lambda z. c}}_i,\stl)\\
+  \rulelabel{E-Foreach2} & \stg \vdash (\tbox{\foreachr{s_1}{\{r\} \uplus s_2}
+    {\lambda y.\lambda z.c}}_i,\stl) \stepsto (\tbox{[r/z][s_1/y]c;\,
+    \foreachr{s_1 \cup \{r\}}{s_2}{\lambda y.\lambda z. c}}_i,\stl)\\
+  \rulelabel{E-Foreach3} & \stg \vdash (\tbox{\foreachr{s}{\emptyset}
+    {\lambda y.\lambda z.c}}_i,\stl) \stepsto (\tbox{\cskip}_i,\stl)\\
 \end{array}
 \end{smathpar}
 %
@@ -157,7 +160,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \RULE
 {
   \I_e\,\,(\stl,\stg,\stg')\spc
-  \stg \vdash (c,\stl) \stepsto (c',\stl')
+  \stg \vdash (\tbox{c}_i,\stl) \stepsto (\tbox{c'}_i,\stl')
 }
 {
   (\ctxnr{i}{\I,\stl,\stg}{c},\stg') \stepsto
