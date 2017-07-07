@@ -49,14 +49,15 @@ verification ($R$, $\R_l$, and $\R_c$). It then traverses the AST of a
 transaction, applying the inference rules to construct a state
 tansformer, check its stability, and weaken it ($\stabilize{\cdot}$)
 if it is not stable. The result of traversing the transaction's AST is
-therefore a stable state transformer ($\F$), which is then checked
-against the transaction's stated guarantee ($G$). If the check passes,
-then the guarantee is verified to check if it preserves the invariant
-$I$. The successful result from both the checks results in the
-transaction being certified correct under the current choice of its
-isolation level. Succesful verification of all transactions concludes
-the top-level execution, returning the inferred isolation levels as
-its output.
+therefore a state transformer ($\F$) that is stable w.r.t $R_l$, which
+is also stabilized against $\R_c$ (using $\stabilize{\cdot}$), and
+then checked against the transaction's stated guarantee ($G$). If the
+check passes, then the guarantee is verified to check if it preserves
+the invariant $I$. The successful result from both the checks results
+in the transaction being certified correct under the current choice of
+its isolation level. Succesful verification of all transactions
+concludes the top-level execution, returning the inferred isolation
+levels as its output.
 
 \tool uses Z3 SMT solver as its underlying reasoning engine. Each
 implication check described above is first encoded in the FOL,
@@ -131,7 +132,25 @@ behavior. For instance:
   s).~y\le x\\
 \end{array}
 \end{smathpar}
-There are however certain set functions that 
+There are however certain set functions whose behavior cannot be
+completely axiomatized in FOL. These include \C{sum}, \C{count} etc.
+For them we admit imprecise axiomatization in form certain lemmas on
+these functions.
+
+\textbf{Annotation Burden} \tool significantly reduces the annotation
+burden in verifying a weakly isolated transactions by eliminating the
+need to annotate intermediary assertions and loop invariants.
+Guarantees ($G$) and invariants ($I$), however, still need to be
+provided. Alternatively, a weakly isolated transaction $T$ can be
+verified against the generic serializability condition, to eliminate
+the need for any annotation. In this mode, \tool first infers the
+transformer $\F_{SER}$ of $T$ without considering any interference,
+which then becomes its guarantee ($G$). Doing likewise for every
+transaction results in a rely relation ($R$) that includes $\F_{SER}$
+of every transaction. The verification can now proceed as usual. The
+result of this verification is an assignment of (possibly weak)
+isolation levels to transactions which guarantees serializability of
+all executions. 
 
 
 \input{evaluation}
