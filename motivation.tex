@@ -14,13 +14,15 @@ transaction and returns the result.
 let new_order d_id c_id item_reqs = atomically do
   dist <- SQL.select1 District (fun d -> d.d_id = d_id);
   let o_id = dist.d_next_o_id;
-  SQL.update District (fun d -> {d with d_next_o_id =d_next_o_id + 1})
-                      (fun d -> d.d_id = d_id );
-  SQL.insert Order {o_id=o_id;  o_d_id=d_id; 
-                    o_c_id=c_id; o_ol_cnt=S.size item_reqs; };
+  SQL.update(* UPDATE *) District 
+            (* SET *)(fun d -> {d with d_next_o_id =d_next_o_id + 1})
+            (* WHERE *)(fun d -> d.d_id = d_id );
+  SQL.insert(* INSERT INTO *) Order (* VALUES *){o_id=o_id;  
+            o_d_id=d_id; o_c_id=c_id; o_ol_cnt=S.size item_reqs; };
   foreach item_reqs @@ fun item_req -> do
-    stk <- SQL.select1 Stock (fun s -> s.s_i_id = item_req.ol_i_id &&
-                                       s.s_d_id = d_id);
+    stk <- SQL.select1(* SELECT * FROM *) Stock 
+              (* WHERE *)(fun s -> s.s_i_id = item_req.ol_i_id 
+                                  && s.s_d_id = d_id)(* LIMIT 1 *); 
     let s_qty' = if stk.s_qty >= item_req.ol_qty + 10 
                 then stk.s_qty - item_req.ol_qty 
                 else stk.s_qty - item_req.ol_qty + 91;
