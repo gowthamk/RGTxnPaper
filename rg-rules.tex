@@ -12,7 +12,7 @@
 \begin{array}{c}
 \RULE
 {
-  \stable(\R,Q)\\
+  \stable(\R,P)\\
   \hspace*{-0.4in} \forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
   \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).[r/x]e_2 \conj\\
    r'=\{[r/x]e_1 \with \txnf=i;\,\delf=\C{false}\}\} \Rightarrow   Q(\stl',\stg)
@@ -33,7 +33,7 @@
 {
   \\
   \R \vdash \hoare{P'}{c}{Q}\spc
-  \stable(\R,P')\\
+  \stable(\R,P)\\
   P'(\stl,\stg) \Leftrightarrow P(\stl,\stg) \wedge
   x = \{r' \,|\, \exists(r\in\Delta).~ [r/y]e_2\} \\
 }
@@ -53,7 +53,7 @@
 \begin{array}{c}
 \RULE
 {
-  \stable(\R,Q)\\
+  \stable(\R,P)\\
   \forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
   \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).~ [r/x]e
         \conj r'=\{r \with \txnf=i; \delf=\C{true}\}\}
@@ -76,7 +76,7 @@
 \begin{array}{c}
 \RULE
 {
-  \stable(\R,Q)\\
+  \stable(\R,P)\\
   \hspace*{-1.1in}\forall\stl,\stl',\stg,i.~P(\stl,\stg) \conj r.\idf \not\in
   \dom(\stl\cup\stg) \\
   \conj \stl'=\stl \cup 
@@ -120,7 +120,7 @@
 \RULE
 {
   \stable(R,\I)\spc
-  \stable(\R,I)\spc
+  \stable(R,I)\spc
   P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
   \R_l(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg')\\
   \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_c(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg')\\
