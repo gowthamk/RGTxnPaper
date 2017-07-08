@@ -1,6 +1,5 @@
 \subsection{Evaluation}
 
-<<<<<<< HEAD
 We evaluate \tool on two different applications: 1. Courseware: a
 course registration system taken from~\cite{gotsmanpopl16}, and
 % 2. RUBiS: an eBay-like auction site~\cite{rubis} that allows users to
@@ -90,12 +89,12 @@ shown in Table.~\ref{tab:tpcc}.
 &  $I_3$ & SER  &  RR  \\
 & $I_4$ & RC & RC   \\
 \hline
-\multirow{4}{*}{\C{Payment}}  & $I_1 $ 
-& RC &  RC\\ 
-&  $I_2$  &RC & RC \\
-&  $I_3 $ & RC  &  RC  \\
-& $I_4$  & RC & RC   \\
-\hline
+% \multirow{4}{*}{\C{Payment}}  & $I_1 $ 
+% & RC &  RC\\ 
+% &  $I_2$  &RC & RC \\
+% &  $I_3 $ & RC  &  RC  \\
+% & $I_4$  & RC & RC   \\
+% \hline
 \multirow{4}{*}{\C{Delivery}}  & $I_1$  
 & RC &  RC \\ 
 &  $I_2$ &SER & RR \\
@@ -117,10 +116,10 @@ districts, and each district serves 3000 customers. There are a total
 of 5 transactions in TPC-C, and given that MySQL and PostgreSQL
 support 3 isolation levels each, there are a total of $3^5 = 243$
 different configurations of isolation levels for TPC-C transactions on
-MySQL and PostgreSQL. We executed OLTP benchmark with all 243
-configurations, and found 171 of them violating at least one invariant.
-Table~\ref{fig:tpcc-eval} shows the summary of these results. As
-expected, the isolation levels that \tool infers for the TPC-C
-transactions do not result in invariant violations, either on MySQL or
-on PostgreSQL.
+MySQL and PostgreSQL. We executed the OLTP workload on the TPC-C
+benchmark with all 243 configurations, and found 171 of them violating
+at least one invariant.  Table~\ref{fig:tpcc-eval} shows the summary
+of these results. As expected, the isolation levels that \tool infers
+for the TPC-C transactions do not result in invariant violations,
+either on MySQL or on PostgreSQL.
 
