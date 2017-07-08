@@ -128,7 +128,7 @@ global database.  Intuitively, $\stg'\neq\stg$ indicates an
 interference from another concurrent transaction, and the predicates
 $\I_e$ and $\I_c$ decide if this interference is allowed or not,
 taking into account the local database state ($\stl$). For instance,
-as described in (Sec.~\ref{sec:motivation}), an SI transaction on
+as described in \S\ref{sec:motivation}, an SI transaction on
 PostgreSQL defines $\I$ as follows:
 \begin{smathpar}
 \begin{array}{lcl}
@@ -161,8 +161,8 @@ the premise $\dom(\stl)\cap\dom(s) = \emptyset$ on the
 \rulelabel{E-Delete} and \rulelabel{E-Update} rules. We refer to this
 restriction as \emph{local context independence}.  This restriction is
 easy to relax in the operational semantics and the reasoning framework
-presented in the next section; the automation framework introduced in
-Sec.~\ref{sec:inference}, however, has a non-trivial dependence on
+presented in the next section; our inference procedure described in
+\S\ref{sec:inference}, however, has a non-trivial dependence on
 this assumption. Nonetheless, we have encountered few instances in
 practice where enforcing local context independence turns out to be a
 severe restriction. Indeed, all 17 transactions in the TPC-C and TPC-E

@@ -11,7 +11,7 @@ type order_line = {ol_o_id: int; ol_d_id: int; ol_i_id: int; ol_qty: int}
 type stock = {s_i_id: int; s_d_id:int; s_qty: int}
 \end{ocaml}
 \caption{OCaml type definitions corresponding to the TPC-C schema from
-Fig.~\ref{fig:schema1}}
+Fig.~\ref{fig:schema}}
 \label{fig:ocaml-schema}
 \end{figure}
 
@@ -19,7 +19,7 @@ We have implemented our DSL to define transactions as monadic
 computations in OCaml (modulo some syntactic sugar), and our automatic
 reasoning framework as an extra frontend pass (called \tool) in the ocamlc
 4.03 compiler\footnote{The source code is available at available at
-\emph{\ldots}}. The input to \tool is a program in our DSL that
+\emph{https://goo.gl/nmUXZK}}. The input to \tool is a program in our DSL that
 describes the schema of the database as a collection of OCaml type
 definitions, and transactions as OCaml functions, whose top-level
 expression is an application of the \C{atomically\_do} combinator to a
@@ -61,13 +61,13 @@ levels as its output.
 
 \tool uses the Z3 SMT solver as its underlying reasoning engine. Each
 implication check described above is first encoded in FOL, applying
-the translation described in Sec.~\ref{sec:inference} wherever
+the translation described in \S\ref{sec:inference} wherever
 necessary.
 
 \subsection{Pragmatics}
 
 \textbf{Real-World Isolation Levels} The axiomatization of the
-isolation levels presented in Sec.~\ref{sec:isolation} leave out
+isolation levels presented in \S\ref{sec:isolation} leave out
 certain nuances of their implementations on real data stores, which
 need to be taken into account for verification to be effective in
 practice.  We consider these into account while linking \tool with

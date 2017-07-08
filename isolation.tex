@@ -2,7 +2,7 @@
 \label{sec:isolation}
 
 A distinctive characteristic of our development is that it is
-parameterized on a weak isolation specification $\I$. $\I$ can be
+parameterized on a weak isolation specification $\I$ that can be
 instantiated with the declarative characterization of an isolation
 guarantee or a concurrency control mechanism, regardless of the actual
 implementation used to realize it. This allows us to model a range of
@@ -25,7 +25,7 @@ A few well-known properties are discussed below:
 % popular off-the-shelf databases.
 
 \textbf{Unique Ids}. As the \C{new\_order} example
-(Sec.~\ref{sec:motivation}) demonstrates, enforcing global uniqueness
+(\S\ref{sec:motivation}) demonstrates, enforcing global uniqueness
 of ordered identifiers requires stronger isolation levels than the
 ones that are default on most databases (e.g., Read
 Committed). Alternatively, globally unique sequence numbers,
@@ -105,7 +105,7 @@ proposed in the database or distributed systems literature, or
 implemented by commercial vendors can also be specified within this
 framework:
 
-\textbf{Read Committed (RC) and Monotonic Atomic View (MAV)} RC
+\textbf{Read Committed (RC) and Monotonic Atomic View (MAV).} RC
 isolation allows a transaction to witness writes of committed
 transactions at any point during the transaction's execution.
 Although it offers only weak isolation guarantees, it nonetheless
@@ -136,7 +136,7 @@ RR allows \emph{phantom reads}, a phenonmenon in which a repeated
 previously returned. This specification is implemented, for e.g., in
 Microsoft's SQL server, using record-level exclusive read locks, that
 prevent a record from being modified while it is read by an
-uncommitted transaction, but not prohibiting insertion of new
+uncommitted transaction, but which does not prohibit insertion of new
 records. The ANSI SQL RR specification can be axiomatized in our
 framework, but it requires a minor extension to our operational
 semantics to track a transaction's reads. In particular, the records

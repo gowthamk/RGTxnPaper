@@ -58,7 +58,7 @@ on an implementation that satisfies the isolation specifications
   the programmer, whereas the latter describes a transaction's
   \emph{assumptions} about the operational characteristics of the
   underlying system.}.  Our proof system is essentially an adaptation
-of rely-guarantee reasoning framework~\cite{rgjones} to the setting of
+of a rely-guarantee reasoning framework~\cite{rgjones} to the setting of
 weakly isolated database transactions.  The primary challenge in the
 formulation deals with how we relate a transaction's isolation
 specification ($\I$) to its rely relation ($R$) that describes the
@@ -70,10 +70,10 @@ until it commits.  In the context of rely-guarantee, this means that
 the transaction's guarantee ($G$) should capture the aggregate effect
 of a transaction, and not its individual writes.  While shared memory
 \C{atomic} blocks also have the same characteristic, the fact that
-transactions are weakly isolated introduces complexity.  Unlike an
+transactions are weakly isolated introduces surprising complexity.  Unlike an
 \C{atomic} block, the effect of a transaction is \emph{not} a
 sequential composition of the effects of its statements because each
-statement witnesses a potentially different version of the state.
+statement can witness a potentially different version of the state.
 
 \subsection{The Rely-Guarantee Judgment}
 \label{sec:rely-guarantee}
@@ -126,9 +126,9 @@ convey the same intuition as above.
 
 \rulelabel{RG-Txn} is the top-level rule that lets us prove a
 transaction preserves the high-level invariant $I$ when executed under
-the required isolation as specified by $\I$. It relies on the
-transaction-local judgment to verify the body ($c$) of a transaction
-$i$. The precondition $P$ of $c$ must follow from the fact that the
+the required isolation as specified by $\I$. It depends on a
+transaction-local judgment to verify the body ($c$) of a transaction with
+id $i$. The precondition $P$ of $c$ must follow from the fact that the
 transaction-local database ($\stl$) is initially empty, and the global
 database satisfies the high-level invariant $I$. The rely relation
 ($\R_e$) for the local judgment is a ternary relation computed as $R$
@@ -140,10 +140,9 @@ modulo $\I_e$:
   \R_e(\stl,\stg,\stg') & \Leftrightarrow & \exists \stg_1.  R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg')
 \end{array}
 \end{smathpar}
-
-While $R$ describes changes in the global database state, $\I_e$
-constrain the global effects that will visible to the transaction.
-Recall, however that $\I_e$ uses the global state in effect at the
+\noindent While $R$ describes changes in the global database state, $\I_e$
+constrains the global effects visible to the transaction.
+Recall however that $\I_e$ uses the global state in effect at the
 point the transaction last took a step ($\stg_1$) to determine whether
 the transaction can proceed from the current global state ($\stg$).
 Moreover, the global rely relation $R$ defines the permissible
@@ -258,7 +257,7 @@ strengthening $\I$ ensures that a program can be safely executed on
 any system that offers isolation guarantees at least as strong as
 those assumed.
 
-Salient rules of transaction-local RG judgment are shown in
+Salient rules of transaction-local RG judgments are shown in
 Fig.~\ref{fig:rg-rules}. These rules (\rulelabel{RG-Update},
 \rulelabel{RG-Select}, \rulelabel{RG-Delete}, and
 \rulelabel{RG-Insert}) reflect the structure of the corresponding

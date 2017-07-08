@@ -1,12 +1,10 @@
-\subsection{Evaluation}
+\section{Evaluation}
 \label{sec:case-studies}
 
-In this section, we present our experience in running \tool on two different applications: \emph{Courseware}: a
-course registration system described by~\cite{gotsmanpopl16}, and
-% 2. RUBiS: an eBay-like auction site~\cite{rubis} that allows users to
-% bid for items on sale, and pay for items from a wallet modeled after a
-% bank account, and 
-the \emph{TPC-C} benchmark. 
+In this section, we present our experience in running \tool on two
+different applications: \emph{Courseware}: a course registration
+system described by~\cite{gotsmanpopl16}, and the \emph{TPC-C}
+benchmark.
 
 \textbf{Courseware} The Courseware application allows new courses to be
 added (via an \C{add\_course} transaction), and new students to be
@@ -53,7 +51,7 @@ conventional laptop.
 \cline{2-6}
                                  & \multicolumn{1}{l|}{\C{new\_order}} & \multicolumn{1}{l|}{\C{delivery}} & \multicolumn{1}{l|}{\C{payment}} & \multicolumn{1}{l|}{\C{order\_status}} & \multicolumn{1}{l|}{\C{stock\_level}} \\ \hline
 \multicolumn{1}{|l|}{MySQL}      & SER                                   & SER                                 & RC                                 & RC                                       & RC                                      \\ \hline
-\multicolumn{1}{|l|}{PostgreSQL} & RR                                    & RR                                  & RC                                 & RC                                       & RC                                      \\ \hline
+\multicolumn{1}{|l|}{PostgreSQL} & SI                                    & SI                                  & RC                                 & RC                                       & RC                                      \\ \hline
 \end{tabular}
 \caption{The discovered isolation levels for TPC-C transactions}
 \label{tab:tpcc}
@@ -134,8 +132,7 @@ isolation levels each, there are a total of $3^5 = 243$ different
 configurations of isolation levels for TPC-C transactions on MySQL and
 PostgreSQL. We executed the benchmark with all 243 configurations, and
 found 171 of them violated at least one of the four invariants we
-considered.  Table~\ref{fig:tpcc-eval} shows the summary of these
-results. As expected, the isolation levels that \tool infers for the
+considered.  As expected, the isolation levels that \tool infers for the
 TPC-C transactions do not result in invariant violations, either on
 MySQL or on PostgreSQL, and were determined to be the weakest safe
 assignments possible.

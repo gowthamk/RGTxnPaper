@@ -11,17 +11,18 @@ style predicate transformers can help in inferring intermediate
 assertions for regular statements, loop invariant inference remains
 challenging, even for the simple form of loops considered here.  As an
 alternative, we present an inference algorithm based on state
-transformers.  The idea is to infer the logical effect that each
-statement has on the transaction-local database state $\stl$ (i.e.,
-how it transforms $\stl$), and compose multiple such effects together
-to describe the effect of the transaction as a whole.  Importantly,
-this approach generalizes to loops, where the effect of a loop can be
-inferred as a well-defined function of the effect of its body, thanks
-to certain pleasant properties enjoyed by the database programs
-modeled by $\txnimp$.  Interpreting database semantics as functional
-transformations on sets (described in terms of their logical effects)
-enables an inference mechanism that can leverage off-the-shelf SMT
-solvers for automated verification.
+transformers that alleviates this burden.  The idea is to infer the
+logical effect that each statement has on the transaction-local
+database state $\stl$ (i.e., how it transforms $\stl$), and compose
+multiple such effects together to describe the effect of the
+transaction as a whole.  Importantly, this approach generalizes to
+loops, where the effect of a loop can be inferred as a well-defined
+function of the effect of its body, thanks to certain pleasant
+properties enjoyed by the database programs modeled by $\txnimp$.
+Interpreting database semantics as functional transformations on sets
+(described in terms of their logical effects) enables an inference
+mechanism that can leverage off-the-shelf SMT solvers for automated
+verification.
 
 \input{logic-syntax}
 
@@ -211,7 +212,7 @@ dependent type systems~\cite{KJ14}.
 \subsection{Soundness of Inference}
 
 The correspondence between the inference rules and the RG judgment of
-Sec.~\ref{sec:reasoning} is stated thus\footnote{The proof can be found in
+\S~\ref{sec:reasoning} is stated thus\footnote{The proof can be found in
 the supplementary material.}:
 \begin{theorem}
 \label{thm:inference-sound}
@@ -220,7 +221,7 @@ the supplementary material.}:
   \begin{smathpar}
   \begin{array}{c}
   \R \vdash \hoare{\lambda(\stl,\stg).~\stl=\emptyset \conj
-  I(\stg)}{c}{\lambda(\stl,\stg).\stl = \F(\emptyset,\stg)}
+  I(\stg)}{c}{\lambda(\stl,\stg).\stl \subseteq \F(\emptyset,\stg)}
   \end{array}
   \end{smathpar}
 \end{theorem}
@@ -244,8 +245,8 @@ below:
 {
   \stable(R,\I)\spc
   \stable(R,I)\\
-   \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') \spc  c \elabsto \F\\
-  \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_c(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg') \spc \stable(\R_c,\F)\\
+   \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1.  R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') \spc  c \elabsto \F\\
+  \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1.  R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg') \spc \stable(\R_c,\F)\\
   \forall \stg.~ G(\stg, F(\emptyset,\stg) \gg \stg)\spc
   \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
 }
@@ -323,7 +324,7 @@ The $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ instantiation requires $I$ to
 be drawn from {\sf EPR}+{\sf SLA}, which is expressive enough to
 describe common database integrity constraints, such as referential
 integrity, non-negativeness of all integer values in a column etc.
-The isolation specifications presented in Sec.~\ref{sec:isolation} are
+The isolation specifications presented in \S\ref{sec:isolation} are
 already simple first-order formulas that can be encoded in {\sf EPR}.
 Furthermore, it is also reasonable to expect the guarantee ($G$) of a
 transaction to be expressible in the same logic as its inferred $\F$,
