@@ -139,7 +139,7 @@ modulo $\I_e$:
   \R_l(\stl,\stg,\stg') & \Leftrightarrow & \exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg')
 \end{array}
 \end{smathpar}
-In words, if there exists $\stg_1$ which was the global database state during the last step by a transaction and if the transaction can take its next step at the current global database state $\stg$, then even after the interference, the transaction should still be able to take its next step. If there is no such state $\stg_1$, then a transaction will never be able to take its next step after the interference, and hence such interference can be safely discarded. 
+In words, if there exists $\stg_1$ which was the global database state during the last step by a transaction and if the transaction can take its next step at the current global database state $\stg$, then even after the interference, the transaction should still be able to take its next step. If there is no such state $\stg_1$, then a transaction will never be able to take its next step after the interference, and hence such interference can be safely discarded. Often, this significantly simplifies the form of $\R_l$ irrespective of $R$. For example, when a transaction is executed against a snapshot of the database (i.e. $\mathbb{I}_{ss}$), $\R_l$ will be the identity function, since if $\stg \neq \stg'$, there does not exist any $\stg_1$ which satisfies the constraint for $\R_l(\stl,\stg,\stg')$. 
 
 %\begin{smathpar}
 %\exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') \Rightarrow \forall \stg_2 
