@@ -354,6 +354,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \end{smathpar}
 \end{minipage}
 
+%\begin{minipage}
 \begin{smathpar}
 \begin{array}{ll}
   \rulelabel{E-Foreach1} & \stg \vdash (\foreache{s}{\lambda y.\lambda
@@ -365,7 +366,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \end{array}
 \end{smathpar}
 %
-\bigskip
+%\bigskip
 
 %
 \textbf{Top-Level Reduction} \quad 
@@ -598,10 +599,10 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
  \stable(R, I) \spc
   \stable(R,\I)\spc
   P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
-  R_r(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') \spc
-  R_r \vdash \rg{P}{c}{Q}\\
-  R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_c(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg')  \spc
-  \stable(R_c,Q)\\
+  \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') \spc
+  \R_e \vdash \rg{P}{c}{Q}\\
+  \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_c(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg')  \spc
+  \stable(\R_c,Q)\\
   \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
     G(\stg, \stl \gg \stg)\spc
   \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
@@ -624,7 +625,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
  \rg{I,R \cup G_2 \cup ID}{t_1}{G_1 \cup ID,I} \\
  \rg{I,R \cup G_1 \cup ID}{t_2}{G_2 \cup ID,I}
 }
-{\rg{I,R}{t1||t2}{G_1\cup G_2 \cup ID,I}}
+{\rg{I,R}{t_1||t_2}{G_1\cup G_2 \cup ID,I}}
 \end{array}
 \end{smathpar}
 \end{minipage}
@@ -738,9 +739,9 @@ Let $t_s = \ctxn{i}{\I}{c}$. Consider $\stg$ such that $I(\stg)$, and let $(t_s,
 \item $(\texttt{SKIP}, \stg_3) \rightarrow_{R}^{n_4} (\texttt{SKIP}, \stg^{'})$ where only the environment takes a step.
 \end{itemize}
 
-In the sequence $\pi_1$, $R^{n_1}(\stg, \stg_1)$. By $I(\stg)$, $HI$ and Lemma 6.3, $I(\stg_1)$. By the rule E-Txn-Start, $t.\stl = \phi, t.\stg = \stg_1$ and $t.c = c$. Hence $P(t.\stl, \stg_1)$.
+In the sequence $\pi_1$, $R^{n_1}(\stg, \stg_1)$. By $I(\stg)$, $HI$ and Lemma 3.3, $I(\stg_1)$. By the rule E-Txn-Start, $t.\stl = \phi, t.\stg = \stg_1$ and $t.c = c$. Hence $P(t.\stl, \stg_1)$.
 
-Expanding the definition of the assertion $Hc$ and instantiating it with $\stg = \stg_1$ and $\stg^{'} = \stg_2$, we would get $Q(t^{'}.\stl, \stg_2)$. However, the environment steps in run $\pi$ are in $R$, while the environment steps in assertion $Hc$ are in $\R_e$. Hence, we will now show that only environment steps in $\R_e$ can actually happen in the run $\pi$. We will show this in two steps. In the first step, we will prove that for all configurations $(t_p, \stg_p)$ in the run $\pi$ except possibly the last configuration, $\I_e(t_p.\stl, t_p.\stg, \stg_p)$. 
+Expanding the definition of the assertion $Hc$ and instantiating it with $\stg = \stg_1$ and $\stg^{'} = \stg_2$, we would get $Q(t^{'}.\stl, \stg_2)$. However, the environment steps in sequence $\pi$ are in $R$, while the environment steps in assertion $Hc$ are in $\R_e$. Hence, we will now show that only environment steps in $\R_e$ can actually happen in the sequence $\pi$. We will show this in two steps. In the first step, we will prove that for all configurations $(t_p, \stg_p)$ in the sequence $\pi$ except possibly the last configuration, $\I_e(t_p.\stl, t_p.\stg, \stg_p)$. 
 
 We will prove this by contradiction. Assume that there is a configuration $(t_1, \stg_b)$ such that $\neg \I_e( t_1.\stl, t_1.\stg, \stg_b)$. Let $(t_1, \stg_{b}^{'}) \rightarrow (t_{1}^{'}, \stg_{b}^{'})$ be the next step in $\pi$ taken by the transaction. We know that this step always exists because the last step in $\pi$ is taken by the transaction.  Then $\mathbb{I}_e(t_1.\stl, t_1.\stg, \stg_{b}^{'})$. All steps between $(t_1, \stg_b)$ and $(t_1, \stg_{b}^{'})$ are taken by the environment, i.e. $R^{k}(\stg_b, \stg_{b}^{'})$ for some $k$. However,  $\neg \I_e(t_1.\stl, t_1.\stg, \stg_b)$, the assertion $H\I$ and a simple induction on $k$ shows that $\neg \I_e(t_1.\stl, t_1.\stg, \stg_{b}^{'})$. This is a contradiction. Hence, $\I_e(t_1.\stl, t_1.\stg, \stg_b)$. 
 
@@ -748,17 +749,17 @@ Now, we will show that every environment step in $\pi$ is in $\R_e$. Assume that
 
 Note that $t^{'}.\stg = \stg_2$. Also, since all the changes in the global database state have so far been made by the environment, $I(\stg_2)$.
 
-$(t^{'}, \stg_2) \rightarrow_{R}^{n_3 - 1} (t^{'}, \stg_{2}^{'}) \rightarrow (\texttt{SKIP}, \stg_3)$, where the first $n_3-1$ steps are only performed by the environment. Since the transaction commits at state $\stg_{2}^{'}$, by the E-Commit rule, $\I_c(t^{'}.\stl, \stg_2, \stg_{2}^{'})$. We will now show that all environment steps in the above run must be in $\R_c$. Again, we will show this in two steps. Let $m = n_3 - 1$ and $(t^{'}, \stg_2) \rightarrow_R (t^{'}, \stg_{21}) \rightarrow_R (t^{'}, \stg_{22}) \ldots \rightarrow_R (t^{'}, \stg_{2m}) \rightarrow (\texttt{SKIP}, \stg_3)$. We will show that $\I_c(t^{'}.\stl, \stg_2, \stg_{2k})$ for all $k, 1 \leq k \leq m$. 
+$(t^{'}, \stg_2) \rightarrow_{R}^{n_3 - 1} (t^{'}, \stg_{2}^{'}) \rightarrow (\texttt{SKIP}, \stg_3)$, where the first $n_3-1$ steps are only performed by the environment. Since the transaction commits at state $\stg_{2}^{'}$, by the E-Commit rule, $\I_c(t^{'}.\stl, \stg_2, \stg_{2}^{'})$. We will now show that all environment steps in the above sequence must be in $\R_c$. Again, we will show this in two steps. Let $m = n_3 - 1$ and $(t^{'}, \stg_2) \rightarrow_R (t^{'}, \stg_{21}) \rightarrow_R (t^{'}, \stg_{22}) \ldots \rightarrow_R (t^{'}, \stg_{2m}) \rightarrow (\texttt{SKIP}, \stg_3)$. We will show that $\I_c(t^{'}.\stl, \stg_2, \stg_{2k})$ for all $k, 1 \leq k \leq m$. 
 
 We will prove this by contradiction. Suppose for some $i$, $\neg \I_c(t^{'}.\stl, \stg_2, \stg_{2i})$. Clearly, $R^{j}(\stg_{2i}, \stg^{'})$. Then, by $H\I$ and a simple induction on $j$, we can show that $\neg \I_c(t^{'}.\stl, \stg_2, \stg_{2}^{'})$. However, this is a contradiction. Hence, $\forall k$, $\I_c(t^{'}.\stl, \stg_2, \stg_{2k})$.
 
 Now, we will show that every environment step is in $\R_c$. Consider the step $(t^{'}, \stg_{2k}) \rightarrow_R (t^{'}, \stg_{2(k+1)})$. We have $\I_c(t^{'}.\stl, \stg_2, \stg_{2k})$ and $\I_c(t^{'}.\stl, \stg_2, \stg_{2(k+1)})$. Hence, $\stg_2$ provides the existence of $\stg_1$ in the definition of $\R_c$. Thus, $\R_c(t^{'}.\stl, \stg_{2k}, \stg_{2(k+1)})$.
 
-By $HQ$, $Q(t^{'}.\stl, \stg_2)$ and Lemma 6.3 we have $Q(t^{'}.\stl, \stg_{2}^{'})$. Since all state changes so far have been made by the environment, $I(\stg_{2}^{'})$. By $HQG$, $G(\stg_{2}^{'}, t^{'}.\stl \gg \stg_{2}^{'})$. By the E-Commit rule, $\stg_3 = (t^{'}.\stl \gg \stg_{2}^{'})$. Hence, $G(\stg_{2}^{'}, \stg_3)$. All the steps of the transaction except the commit step do not change the global database state and by $HID$ belong to $G$. The commit step satisfies $G$. This proves the \texttt{step-guaranteed} assertion. Finally, by $HG$, $I(\stg_3)$.
+By $HQ$, $Q(t^{'}.\stl, \stg_2)$ and Lemma 3.3 we have $Q(t^{'}.\stl, \stg_{2}^{'})$. Since all state changes so far have been made by the environment, $I(\stg_{2}^{'})$. By $HQG$, $G(\stg_{2}^{'}, t^{'}.\stl \gg \stg_{2}^{'})$. By the E-Commit rule, $\stg_3 = (t^{'}.\stl \gg \stg_{2}^{'})$. Hence, $G(\stg_{2}^{'}, \stg_3)$. All the steps of the transaction except the commit step do not change the global database state and by $HID$ belong to $G$. The commit step satisfies $G$. This proves the \texttt{step-guaranteed} assertion. Finally, by $HG$, $I(\stg_3)$.
 
 %{\color{red}Note : Since E-Commit is applied at $(t^{'}, \sigma_{2}^{'})$ and $t^{'}.\sigma_g = \sigma_2$, $\mathbb{I}_c(t^{'}.\sigma_l, \sigma_2, \sigma_2^{'})$. $\sigma_{2}^{'}$ can be reached from $\sigma_2$ by any number of environment steps, each of which may not obey $\mathbb{I}_c$. That is, there may exist $\sigma_3$ such that $R(\sigma_2, \sigma_3)$ and $\neg \mathbb{I}_c(t^{'}.\sigma_l, \sigma_2, \sigma_3)$. Such states will be overlooked by the $\texttt{stable}_c$ function}.
 
-All the steps in $(\texttt{SKIP}, \stg_3) \rightarrow_{R}^{n_4} (\texttt{SKIP}, \stg^{'})$ are performed by the environment. Since $I(\stg_3)$, by $HI$ and Lemma 6.3, $I(\stg^{'})$.
+All the steps in $(\texttt{SKIP}, \stg_3) \rightarrow_{R}^{n_4} (\texttt{SKIP}, \stg^{'})$ are performed by the environment. Since $I(\stg_3)$, by $HI$ and Lemma 3.3, $I(\stg^{'})$.
 \end{proof}
 
 %\RULE
@@ -924,7 +925,7 @@ Given $t, \stg$ such that $t.c = c1;c2$, $(t, \stg) \rightarrow_{R}^{m} (t_2, \s
 \begin{itemize}
 \item $(t,\stg) \rightarrow_{R}^{m_1} (t_{m}^{'}, \stg_1) \rightarrow (t_{m}, \stg_1)$, where $t_m.c = c2$. We denote this sequence as $\pi_1$.
 \item $(t_m, \stg_1) \rightarrow_{R}^{m_2} (t_m, \stg_{1}^{'}) $ where all steps are taken by the environment. This sequence is denoted as $\pi_2$.
-\item $(t_m, \stg_{1}^{'}) \rightarrow_{R}^{m_3} (t_{2}, \stg^{'}) \rightarrow (t^{'}, \stg^{'})$. This run is denoted as $\pi_3$.
+\item $(t_m, \stg_{1}^{'}) \rightarrow_{R}^{m_3} (t_{2}, \stg^{'}) \rightarrow (t^{'}, \stg^{'})$. This sequence is denoted as $\pi_3$.
 \end{itemize}
 
 By the premise of the E-Seq1 and E-Seq2 rules, all the reductions in the sequence $\pi_1$ are also applicable to $c1$. Hence, consider transaction $s$ such that $s.c = c1$, $s.\stl=t.\stl$. Then, there exists the sequence $(s, \stg)  \rightarrow_{R}^{m_1} (s_2, \stg_1) \rightarrow (s^{'}, \stg_1)$ with $s^{'}.c = \texttt{SKIP}$, $s^{'}.\stl = t_{m}.\stl$. Since $P(s.\stl, \stg)$, by H1, $Q^{'}(s^{'}.\stl, \stg_1)$. This implies $Q^{'}(t_m.\stl, \stg_1)$.
@@ -933,7 +934,7 @@ In the sequence $\pi_2$, all steps are taken by the environment. By H3, $Q^{'}(t
 
 Since $t_m.c = c2$, by H3, $Q(t^{'}.\stl, \stg^{'})$.
 
-%There exists $s$ such that $s.c = c1$, $s.\sigma_l=t.\sigma_l$, $s.\sigma_v = t.\sigma_v$ and the run $(s, \sigma) \rightarrow (s_1, \sigma) \rightarrow_{R}^{m_1} (s_2, \sigma_1) \rightarrow (s^{'}, \sigma_1)$ with $s^{'}.c = \texttt{SKIP}$. Similarly, there exists $u$ such that $u.c = c2$, $u.\sigma_l = s^{'}.\sigma_l$, $u.\sigma_v = s^{'}.\sigma_v$ and the run $(u, \sigma_{1}^{'}) \rightarrow (u_1, \sigma_{1}^{'}) \rightarrow_{R}^{m_2} (u_2, \sigma^{'}) \rightarrow (u^{'}, \sigma^{'})$ with $R^{m_3}(\sigma_1, \sigma_{1}^{'})$ and $u^{'}.c = \texttt{SKIP}$. Also, $u^{'}.\sigma_l = t^{'}.\sigma_l$ and $u^{'}.\sigma_v = t^{'}.\sigma_v$.
+%There exists $s$ such that $s.c = c1$, $s.\sigma_l=t.\sigma_l$, $s.\sigma_v = t.\sigma_v$ and the sequence $(s, \sigma) \rightarrow (s_1, \sigma) \rightarrow_{R}^{m_1} (s_2, \sigma_1) \rightarrow (s^{'}, \sigma_1)$ with $s^{'}.c = \texttt{SKIP}$. Similarly, there exists $u$ such that $u.c = c2$, $u.\sigma_l = s^{'}.\sigma_l$, $u.\sigma_v = s^{'}.\sigma_v$ and the sequence $(u, \sigma_{1}^{'}) \rightarrow (u_1, \sigma_{1}^{'}) \rightarrow_{R}^{m_2} (u_2, \sigma^{'}) \rightarrow (u^{'}, \sigma^{'})$ with $R^{m_3}(\sigma_1, \sigma_{1}^{'})$ and $u^{'}.c = \texttt{SKIP}$. Also, $u^{'}.\sigma_l = t^{'}.\sigma_l$ and $u^{'}.\sigma_v = t^{'}.\sigma_v$.
 
 %By H1, $Q^{'}(s^{'}.\sigma_l, \sigma_3, s^{'}.\sigma_v)$. By H2, $Q^{'}(s^{'}.\sigma_l, \sigma_{3}^{'}, s^{'}.\sigma_v)$. Also, $Q^{'}(u.\sigma_l, \sigma_{3}^{'}, u.\sigma_v)$. By H3, $Q(u^{'}.\sigma_l, \sigma^{'}, u^{'}.\sigma_v)$. Hence $Q(t^{'}.\sigma_l, \sigma^{'}, t^{'}.\sigma_v)$.
 
@@ -968,9 +969,9 @@ Since $P(t.\stl, \stg)$ and $R^{n_1}(\stg, \stg_1)$, by H3, we have $P(t.\stl, \
 %If $\{\mathbb{I}, I, R\} t \{G, I\}$, then $\{\mathbb{I}, I, R \cup ID\} t \{G, I\}$, where $ID$ is the identity function
 %\end{lemma}
 %\begin{proof}
-%Given $\sigma$ such that $I(\sigma)$ and the run $\pi_1$, $(t,\sigma) \rightarrow_{R \cup ID}^{n_1} (\texttt{SKIP}, \sigma^{'})$, we have to show (1) $I(\sigma^{'})$ and (2)$\texttt{commit-guarantee}(\mathbb{I}, R \cup ID, G, t, \sigma)$.
+%Given $\sigma$ such that $I(\sigma)$ and the sequence $\pi_1$, $(t,\sigma) \rightarrow_{R \cup ID}^{n_1} (\texttt{SKIP}, \sigma^{'})$, we have to show (1) $I(\sigma^{'})$ and (2)$\texttt{commit-guarantee}(\mathbb{I}, R \cup ID, G, t, \sigma)$.
 %
-%We will transform the run $\pi_1$ to run $\pi_2$ of the form $(t,\sigma) \rightarrow_{R}^{n_2} (\texttt{SKIP}, \sigma^{'})$. Consider any sequence of two steps in the run $\pi_1$ of the form $(t_1, \sigma_1) \rightarrow_{R \cup ID} (t_1, \sigma_1) \rightarrow_{R \cup ID} (t_2, \sigma_2)$, i.e. the first step is taken by the environment in the form of the $ID$ function. Then we remove the first step and obtain the valid step $(t_1, \sigma_1) \rightarrow_{R \cup ID} (t_2, \sigma_2)$. We perform this transformation from left to right (i.e. increasing values of the step index) whenever the environment takes a step in the form of the $ID$ function. It is clear that the resulting run will only have environment steps in the form of $R$. Since the run $\pi_2$ also ends in $\sigma^{'}$, by the hypothesis $I(\sigma^{'})$. Also, the commit step in the run $\pi_2$ will involve the same states as the commit step in $\pi_1$. Hence, $\texttt{commit-guarantee}(\mathbb{I}, R \cup ID, G, t, \sigma)$. 
+%We will transform the sequence $\pi_1$ to sequence $\pi_2$ of the form $(t,\sigma) \rightarrow_{R}^{n_2} (\texttt{SKIP}, \sigma^{'})$. Consider any sequence of two steps in the sequence $\pi_1$ of the form $(t_1, \sigma_1) \rightarrow_{R \cup ID} (t_1, \sigma_1) \rightarrow_{R \cup ID} (t_2, \sigma_2)$, i.e. the first step is taken by the environment in the form of the $ID$ function. Then we remove the first step and obtain the valid step $(t_1, \sigma_1) \rightarrow_{R \cup ID} (t_2, \sigma_2)$. We perform this transformation from left to right (i.e. increasing values of the step index) whenever the environment takes a step in the form of the $ID$ function. It is clear that the resulting sequence will only have environment steps in the form of $R$. Since the sequence $\pi_2$ also ends in $\sigma^{'}$, by the hypothesis $I(\sigma^{'})$. Also, the commit step in the sequence $\pi_2$ will involve the same states as the commit step in $\pi_1$. Hence, $\texttt{commit-guarantee}(\mathbb{I}, R \cup ID, G, t, \sigma)$. 
 %\end{proof}
 
 \begin{lemma}
@@ -999,9 +1000,9 @@ RG-Par is sound
 \end{array}
 \end{mathpar}
 
-Consider $\stg$ such that $I(\stg)$, and let $(t_1 || t_2, \stg) \rightarrow_{R}^{n} (\texttt{SKIP}, \stg^{'})$. We have to show (1) $I(\stg^{'})$ and (2) $\texttt{step-guaranteed}( R, G_1 \cup G_2 \cup ID, t1 || t_2, \stg)$. 
+Consider $\stg$ such that $I(\stg)$, and let $(t_1 || t_2, \stg) \rightarrow_{R}^{n} (\texttt{SKIP}, \stg^{'})$. We have to show (1) $I(\stg^{'})$ and (2) $\texttt{step-guaranteed}( R, G_1 \cup G_2 \cup ID, t_1 || t_2, \stg)$. 
 
-Suppose that $t_1$ commits before $t_2$ in the execution sequence. Consider the sequence upto (and including) the commit step of $t_1$, i.e. $(t_1 || t_2, \stg) \rightarrow_{R}^{n_1} (t_{1}^{'} || t_{2}^{'}, \stg_1) \rightarrow (t_{2}^{'}, \stg_{1}^{'})$. In this sequence, all steps apart from the steps taken by $t_1$ belong to $R \cup ID$, since any step taken by $t_2$ cannot change the global database state. Hence, there exists the sequence $(t_1, \stg) \rightarrow_{R \cup ID}^{n_1} (t_{1}^{'}, \stg_1) \rightarrow (\texttt{SKIP}, \stg_{1}^{'})$. Since $R \cup ID \subseteq R \cup G_2 \cup ID$, by H1 and Lemma, $I(\stg_{1}^{'})$ and $G_1(\stg_1, \stg_{1}^{'})$. Now, consider the entire run from the perspective of $t_2$. All steps taken by $t_1$ except the commit step do not change the global database state, and the change during the commit step belongs to $G_1$. Hence, all steps in the run apart from the steps taken by $t_2$ belong to $R \cup G_1 \cup ID$. Hence, there exists a run $(t_2, \stg) \rightarrow_{R \cup G_1 \cup ID}^{n} (\texttt{SKIP}, \stg^{'})$. By H2 $I(\stg^{'})$. 
+Suppose that $t_1$ commits before $t_2$ in the execution sequence. Consider the sequence upto (and including) the commit step of $t_1$, i.e. $(t_1 || t_2, \stg) \rightarrow_{R}^{n_1} (t_{1}^{'} || t_{2}^{'}, \stg_1) \rightarrow (t_{2}^{'}, \stg_{1}^{'})$. In this sequence, all steps apart from the steps taken by $t_1$ belong to $R \cup ID$, since any step taken by $t_2$ cannot change the global database state. Hence, there exists the sequence $(t_1, \stg) \rightarrow_{R \cup ID}^{n_1} (t_{1}^{'}, \stg_1) \rightarrow (\texttt{SKIP}, \stg_{1}^{'})$. Since $R \cup ID \subseteq R \cup G_2 \cup ID$, by H1 and Lemma 3.13, $I(\stg_{1}^{'})$ and $G_1(\stg_1, \stg_{1}^{'})$. Now, consider the entire sequence from the perspective of $t_2$. All steps taken by $t_1$ except the commit step do not change the global database state, and the change during the commit step belongs to $G_1$. Hence, all steps in the sequence apart from the steps taken by $t_2$ belong to $R \cup G_1 \cup ID$. Hence, there exists a sequence $(t_2, \stg) \rightarrow_{R \cup G_1 \cup ID}^{n} (\texttt{SKIP}, \stg^{'})$. By H2 $I(\stg^{'})$. 
 
 Finally, the commit step of $t_1$ belongs to $G_1$, while the commit step of $t_2$ belongs to $G_2$, and every other step of either transaction does not change the global database state. Hence,  $\texttt{step-guaranteed}(R, G_1 \cup G_2 \cup ID, t1 || t2, \stg)$. The proof for the case where $t_2$ commits before $t_1$ would be similar.
 \end{proof}
