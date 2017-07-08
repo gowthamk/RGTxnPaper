@@ -1,0 +1,75 @@
+\begin{theorem}
+\label{thm:inference-sound-strong}
+  \emph{Forall} i,s,$R$,$I$,$c$,$\F$, if $\stable(\R,I)$ and $c \elabsto \F$,
+  then:\\\vspace*{-0.2cm}
+  \begin{smathpar}
+  \begin{array}{c}
+  \R \vdash \hoare{\lambda(\stl,\stg).~\stl=s \conj
+  I(\stg)}{c}{\lambda(\stl,\stg).\stl = s \cup \F(s,\stg)}
+  \end{array}
+  \end{smathpar}
+\end{theorem}
+\begin{proof}
+Hypothesis:
+\begin{smathpar}
+\begin{array}{lr}
+  \stable(\R,I) & H1\\
+  c \elabsto \F & H2\\
+\end{array}
+\end{smathpar}
+Proof by induction on $H2$. The cases for SQL statements follow from
+the corresponding RG rules trivially. \C{LET}, \C{IF-THEN-ELSE}, and
+sequence case proof follows from the inductive hypothesis. The only
+interesting case is \C{FOREACH}, where the corresponding RG rule
+requires a loop invariant ($\psi$). The loop invariant is as
+following: $\psi(\stl,\stg) \Leftrightarrow \stl = y\bind(\lambda
+z.~\F_c(\stl,\stg)$, where $\F_c$ is the transformer of the loop body.
+% \begin{itemize}
+%   \item \C{INSERT}: $\F$ is:
+%   \begin{smathpar}
+%   \begin{array}{c}
+%     \stabilize{\lambda(\stl,\stg).~
+%     \{ y \,|\, y = \{x \with r.\delf=\mathit{false};\, \txnf = i\} \}}
+%   \end{array}
+%   \end{smathpar}
+%   If $\F$ is stable, we need to show the following:
+%   \begin{smathpar}
+%   \begin{array}{c}
+%     \R \vdash \hoare{\lambda(\stl,\stg).~\stl=\emptyset \conj
+%       I(\stg)}{\inserte{x}} {\lambda(\stl,\stg).\stl \subseteq \{ y
+%       \,|\, y = \{x \with r.\delf=\mathit{false};\, \txnf = i\}}
+%   \end{array}
+%   \end{smathpar}
+%   Which directly follows from the the RG rule for Insert. Since
+%   $\C{INSERT}$ doesn't read $\stg$, the proof is the same even when
+%   $\F$ is unstable.
+
+%   \item \C{UPDATE}: $\F$ is:
+%   \begin{smathpar}
+%   \begin{array}{c}
+%     \stabilize{\lambda(\stl,\stg).~ \stg \bind G }
+%   \end{array}
+%   \end{smathpar}
+%   Where $G$ is $\lambda y.~ \itel{[y/x]e_2}
+%   {\{[y/x]e_1 \with \idf=r.\idf;\,\delf = y.\delf;\,\txnf=i \}}
+%   {\emptyset}$.
+%   When 
+% \end{itemize}
+\end{proof}
+
+\begin{theorem}
+\label{thm:inference-sound}
+  \emph{Forall} i,$R$,$I$,$c$,$\F$, if $\stable(\R,I)$ and $c \elabsto \F$,
+  then:\\\vspace*{-0.2cm}
+  \begin{smathpar}
+  \begin{array}{c}
+  \R \vdash \hoare{\lambda(\stl,\stg).~\stl=\emptyset \conj
+  I(\stg)}{c}{\lambda(\stl,\stg).\stl = \F(\emptyset,\stg)}
+  \end{array}
+  \end{smathpar}
+\end{theorem}
+\begin{proof}
+  Follows from the stronger version of this theorem
+  (Theorem~\ref{thm:inference-sound-strong}) by substituting
+  $\emptyset$ for $s$.
+\end{proof}
