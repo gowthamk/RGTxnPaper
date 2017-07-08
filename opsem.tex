@@ -18,14 +18,14 @@ transactions ($\ctxn{i}{\I}{c}$) and their parallel composition
 ($c_1\,||\,c_2$). Each transaction is assumed to have a unique
 identifier $i$, and executes at the top-level; our semantics does not
 supported nested transactions. The $\I$ in the \C{TXN} block syntax is
-the transaction's isolation specification, which will be explained
-later.  Certain terms that only appear at run-time are also present in
+the transaction's isolation specification, whose purpose is explained
+below.  Certain terms that only appear at run-time are also present in
 $c$.  These include a {\sf txn} block tagged with sets ($\stl$ and
-$\stg$) of records whose meaning is explained below, and a runtime
-{\sf foreach} expression that keeps track of the set ($s_1$) of items
-already iterated, and the set ($s_2$) of items yet to be
-iterated. Note that even the surface-level syntax of the \C{FOREACH}
-command shown here is a little different from the one used in previous
+$\stg$) of records representing local and global database state, and a
+runtime {\sf foreach} expression that keeps track of the set ($s_1$)
+of items already iterated, and the set ($s_2$) of items yet to be
+iterated. Note that the surface-level syntax of the \C{FOREACH}
+command shown here is slightly different from the one used in previous
 sections; its higher-order function has two arguments, $y$ and $z$,
 which are invoked (during the reduction) with the set of
 already-iterated items, and the current item, respectively. This form
@@ -44,9 +44,9 @@ terms of an abstract machine that executes a command, and updates
 either a transaction-local ($\stl$), or global ($\stg$) database, both
 of which are modeled as a set of records of a pre-defined type, i.e.,
 they all belong to a single table.  The generalization to multiple
-tables is straightforward. The semantics assumes that the records in
-$\stg$ are uniquely identifiable through their $\idf$ field, and
-enforces this invariant wherever necessary. Certain hidden fields are
+tables is straightforward. The semantics assumes that  records in
+$\stg$ can be uniquely identified via their $\idf$ field, and
+enforces this property wherever necessary. Certain hidden fields are
 treated specially by the operational semantics, and they are hidden
 from the surface language. These include a $\txnf$ field that tracks
 the identifier of the transaction that last updated the record, and a
@@ -75,18 +75,17 @@ operation ($\gg$) is defined as follows:
 Let $\stg' = \stl\gg\stg$. A record $r$ belongs to $\stg'$ iff it
 belongs to $\stg$ and has not been updated in $\stl$, i.e., $r.\idf
 \notin \dom(\stl)$, or it belongs to $\stl$, i.e., it is either a new
-record, or an updated version of an old record, but the update is not
-a deletion ($\neg r.\delf$). Thus, flush defines the result of
-atomically applying a transaction's local writes to the global
-database.  Besides the commit, flush also helps a transaction read its
-own writes. Intuitively, the result of a read operation inside a
-transaction must be computed on the database resulting from flushing
-the current local state ($\stl$) to the global state ($\stg$). The
-abstract machine of Fig.~\ref{fig:txnimp}, however, does not let a
-transaction read its own writes. This simplifies the semantics,
-without losing any generality, since substituting $\stl\gg\stg$ for
-$\stg$ at select places in the reduction rules effectively allows
-reads of uncommitted transaction writes to be realized.
+record, or an updated version of an old record, provided the update is
+not a deletion ($\neg r.\delf$).  Besides the commit, flush also helps
+a transaction read its own writes. Intuitively, the result of a read
+operation inside a transaction must be computed on the database
+resulting from flushing the current local state ($\stl$) to the global
+state ($\stg$). The abstract machine of Fig.~\ref{fig:txnimp},
+however, does not let a transaction read its own writes. This
+simplifies the semantics, without losing any generality, since
+substituting $\stl\gg\stg$ for $\stg$ at select places in the
+reduction rules effectively allows reads of uncommitted transaction
+writes to be realized.
 
 The small-step semantics is stratified into a transaction-local
 reduction relation, and a top-level reduction relation. The
@@ -94,58 +93,57 @@ transaction-local relation ($\stg \vdash (c,\stl) \stepsto
 (c',\stl')$) defines a small-step reduction for a command inside a
 transaction, when the database state is $\stg$; the command $c$
 reduces to $c'$, while updating the transaction-local database $\stl$
-to $\stl'$. The definition assumes a meta function $\eval$ that
-evaluates expressions with no free variables to values. The reduction
-relation for SQL statements is defined straightforwardly. \C{INSERT}
-adds a new record to $\stl$ after checking the uniqueness of its
-id. \C{DELETE} finds the records in $\stg$ that match the search
-criteria defined by its boolean function argument, and adds the
-records to $\stl$ after marking them for deletion. \C{SELECT} bounds
-the name introduced by \C{LET} to the set of records from $\stg$ that
-match the search criteria, and then executes the bound command
-$c$. \C{UPDATE} uses its first function argument to compute the
-updated version of the records that match the search criteria defined
-by its second function argument. Updated records are added to $\stl$.
+to $\stl'$. The definition assumes a meta-function $\eval$ that
+evaluates closed terms to values. The reduction relation for SQL
+statements is defined straightforwardly. \C{INSERT} adds a new record
+to $\stl$ after checking the uniqueness of its id. \C{DELETE} finds
+the records in $\stg$ that match the search criteria defined by its
+Boolean function argument, and adds the records to $\stl$ after
+marking them for deletion. \C{SELECT} bounds the name introduced by
+\C{LET} to the set of records from $\stg$ that match the search
+criteria, and then executes the bound command $c$. \C{UPDATE} uses its
+first function argument to compute the updated version of the records
+that match the search criteria defined by its second function
+argument. Updated records are added to $\stl$.
 
 The reduction of \C{FOREACH} starts by first converting it to its
-run-time form to keep track of iterated items ($s_1$),
-as well as  yet-to-be-iterated items ($s_2$). Initially, $s_1$ is
-empty. As the elements are iterated, they are removed from $s_2$ and
-added to $s_1$ . Iteration involves invoking its function argument
-with $s_1$ and the current element $x$ (note: $\uplus$ in $\{x\}
-\uplus s_2$ denotes a disjoint union). The reduction ends when 
-$s_2$ becomes empty. The reduction rules for conditionals, \C{LET}
-binders, and sequences are straightforward, and ommitted for brevity.
+run-time form to keep track of iterated items ($s_1$), as well as
+yet-to-be-iterated items ($s_2$).  Iteration involves invoking its
+function argument with $s_1$ and the current element $x$ (note:
+$\uplus$ in $\{x\} \uplus s_2$ denotes a disjoint union). The
+reduction ends when $s_2$ becomes empty. The reduction rules for
+conditionals, \C{LET} binders, and sequences are standard, and
+ommitted for brevity.
 
 The top-level reduction relation defines the small-step semantics of
-transactions, and their parallel composition. A transaction always
-comes tagged with an isolation specification $\I$, which has two
-components $\I_e$ and $\I_c$, that dictate the timing and nature of
-interferences that the transaction can witness, during its execution
-($\I_e$), and when it is about to commit ($\I_c$).  Formally, $\I_e$
-and $\I_c$ are predicates over the (current) transaction-local
-database state ($\stl$), the state ($\stg$) of the global database
-when the transaction last took a step, and the current state ($\stg'$)
-of the global database.  Intuitively, $\stg'\neq\stg$ indicates an
+transactions, and their parallel composition. A transaction comes
+tagged with an isolation specification $\I$, which has two components
+$\I_e$ and $\I_c$, that dictate the timing and nature of interferences
+that the transaction can witness, during its execution ($\I_e$), and
+when it is about to commit ($\I_c$).  Formally, $\I_e$ and $\I_c$ are
+predicates over the (current) transaction-local database state
+($\stl$), the state ($\stg$) of the global database when the
+transaction last took a step, and the current state ($\stg'$) of the
+global database.  Intuitively, $\stg'\neq\stg$ indicates an
 interference from another concurrent transaction, and the predicates
 $\I_e$ and $\I_c$ decide if this interference is allowed or not,
 taking into account the local database state ($\stl$). For instance,
-as described in (Sec.~\ref{sec:motivation}), an RR transaction on
-PostgreSQL defines $\I$ as following:
+as described in \S\ref{sec:motivation}, an SI transaction on
+PostgreSQL defines $\I$ as follows:
 \begin{smathpar}
 \begin{array}{lcl}
 \I_e\,\,(\stl,\stg,\stg') & = & \stg' = \stg\\
 \I_c\,\,(\stl,\stg,\stg') & = & \forall(r\in\stl)(r'\in\stg).~ r'.\idf = r.\idf \Rightarrow r'\in\stg'.
 \end{array}
 \end{smathpar}
-For brevity in presentation, we use $\I$ instead of $\I_e$ and $\I_c$
+To simplify the presentation, we use $\I$ instead of $\I_e$ and $\I_c$
 when its destructed form is not required.
 
 The reduction of a $\ctxn{i}{\I}{c}$ begins by first converting it to
 its run-time form $\ctxnr{i}{\I,\stl,\stg}{c}$, where $\stl =
-\emptyset$, and $\stg$ the current (global) database.  Rule
+\emptyset$, and $\stg$ is the current (global) database.  Rule
 \rulelabel{E-Txn} reduces $\ctxnr{i}{\I,\stl,\stg}{c}$ under a
-database state ($\stg'$), only if the execution-time isolation
+database state ($\stg'$), only if the transaction-body isolation
 specification ($\I_e$) allows the interference between $\stg$ and
 $\stg'$. Rule \rulelabel{E-Commit} commits the transaction
 $\ctxnr{i}{\I,\stl,\stg}{c}$ by flushing its uncommitted records to
@@ -159,15 +157,15 @@ expose interferences at the commit point.
 \textbf{Local Context Independence} As mentioned previously, our
 operational semantics does not let a transaction read its own writes.
 It also does not let a transaction overwrite its own writes, due to
-the premise $\dom(\stl)\cap\dom(s) = \emptyset$ on
+the premise $\dom(\stl)\cap\dom(s) = \emptyset$ on the
 \rulelabel{E-Delete} and \rulelabel{E-Update} rules. We refer to this
-restriction as \emph{local context independence}. As such, this
-restriction is easy to relax in operational semantics and the
-reasoning framework presented in the next section, however, the
-automation framework introduced in Sec.~\ref{sec:inference} has a
-non-trivial dependence on this assumption. Nonetheless, we haven't
-found local context independence to be a severe restriction in
-practice. For instance, all 17 transactions in the TPC-C and TPC-E
+restriction as \emph{local context independence}.  This restriction is
+easy to relax in the operational semantics and the reasoning framework
+presented in the next section; our inference procedure described in
+\S\ref{sec:inference}, however, has a non-trivial dependence on
+this assumption. Nonetheless, we have encountered few instances in
+practice where enforcing local context independence turns out to be a
+severe restriction. Indeed, all 17 transactions in the TPC-C and TPC-E
 benchmarks satisfy this assumption.
 
 \input{isolation}

@@ -2,13 +2,14 @@
 \label{sec:isolation}
 
 A distinctive characteristic of our development is that it is
-parameterized on the isolation specification $\I$. $\I$ can be
+parameterized on a weak isolation specification $\I$ that can be
 instantiated with the declarative characterization of an isolation
-guarantee or a concurrency control mechanism, regardless of its actual
-implementation. This allows us to model a range of isolation
-properties that are relevant to the theory and practice of transaction
-processing systems. Few such well-known properties are discussed
-below:
+guarantee or a concurrency control mechanism, regardless of the actual
+implementation used to realize it. This allows us to model a range of
+isolation properties that are relevant to the theory and practice of
+transaction processing systems without appealing to specific
+implementation artifacts like locks, versions, logs, speculation, etc.
+A few well-known properties are discussed below:
 
 % Databases implement isolation levels through a combination of various
 % concurrency control mechanisms, which are absent from
@@ -24,18 +25,19 @@ below:
 % popular off-the-shelf databases.
 
 \textbf{Unique Ids}. As the \C{new\_order} example
-(Sec.~\ref{sec:motivation}) demonstrates, enforcing global uniqueness
-of ordered identifiers requires stronger isolation levels than ones
-that are default on most databases. Alternatively, globally unique
-sequence numbers, regardless of the isolation level, can be requested
-from a relational databases via SQL's \C{UNIQUE} and
-\C{AUTO\_INCREMENT} keywords. Our development crucially relies on the
-uniqueness of record identifiers\footnote{This has parallels in
-  real-world. For e.g., MySQL's InnoDB engine automatically adds a
-  6-byte unique identifier if none exists for a record.}, which are
-checked locally for uniqueness by the \rulelabel{E-Insert} rule. The
-global uniqueness of locally unique identifiers can be axiomatized as
-an isolation property as following:
+(\S\ref{sec:motivation}) demonstrates, enforcing global uniqueness
+of ordered identifiers requires stronger isolation levels than the
+ones that are default on most databases (e.g., Read
+Committed). Alternatively, globally unique sequence numbers,
+regardless of the isolation level, can be requested from a relational
+database via SQL's \C{UNIQUE} and \C{AUTO\_INCREMENT} keywords. Our
+development crucially relies on the uniqueness of record
+identifiers\footnote{The importance of unique ids is recognized in
+  real-world implementations.  For example, MySQL's InnoDB engine
+  automatically adds a 6-byte unique identifier if none exists for a
+  record.}, which are checked locally for uniqueness by the
+\rulelabel{E-Insert} rule.  The global uniqueness of locally unique
+identifiers can be captured as an isolation property thus:
 \begin{smathpar}
 \begin{array}{lcl}
   \I_{id}(\stl,\stg,\stg') & = & \forall(r\in\stl).~
@@ -44,15 +46,16 @@ an isolation property as following:
 \end{smathpar}
 $\I_{id}$ ensures that if the id of a record is globally unique when
 it is added to a transaction's $\stl$, it remains globally unique
-until the transaction commits. This is achieved by prohibiting the
-interference from a concurrent transaction that adds the same id. The
-axiom thus simulates a global counter protected by an exclusive lock
-without explicitly appealing to an implementation artifact.
+until the transaction commits. This would be achieved within our
+semantic framework by prohibiting the interference from a concurrent
+transaction that adds the same id. The axiom thus simulates a global
+counter protected by an exclusive lock without explicitly appealing to
+an implementation artifact.
 
 \textbf{Write-Write Conflicts}. Databases often employ a combination
 of concurrency control methods, both optimistic (e.g., speculation and
 rollback) and pessimistic (e.g., various degrees of locking), to
-eliminate write-write (ww) conflicts among concurrent
+eliminate write-write (\emph{ww}) conflicts among concurrent
 transactions. We can specify the absence of such conflicts using our
 tri-state formulation thus:
 \begin{smathpar}
@@ -102,7 +105,7 @@ proposed in the database or distributed systems literature, or
 implemented by commercial vendors can also be specified within this
 framework:
 
-\textbf{Read Committed (RC) and Monotonic Atomic View (MAV)} RC
+\textbf{Read Committed (RC) and Monotonic Atomic View (MAV).} RC
 isolation allows a transaction to witness writes of committed
 transactions at any point during the transaction's execution.
 Although it offers only weak isolation guarantees, it nonetheless
@@ -133,14 +136,15 @@ RR allows \emph{phantom reads}, a phenonmenon in which a repeated
 previously returned. This specification is implemented, for e.g., in
 Microsoft's SQL server, using record-level exclusive read locks, that
 prevent a record from being modified while it is read by an
-uncommitted transaction. The ANSI SQL RR specification can be
-axiomatized in our framework, but it requires a minor extension to our
-operational semantics to track a transaction's reads. In particular,
-the records returned by \C{SELECT} should be added to the local
-database $\stl$, but without changing their transaction identifiers
-($\txnf$ fields), and flush ($\gg$) should only flush the records that
-bear the current transaction's identifier. With this extension, ANSI
-SQL RR can be axiomatized thus:
+uncommitted transaction, but which does not prohibit insertion of new
+records. The ANSI SQL RR specification can be axiomatized in our
+framework, but it requires a minor extension to our operational
+semantics to track a transaction's reads. In particular, the records
+returned by \C{SELECT} should be added to the local database $\stl$,
+but without changing their transaction identifiers ($\txnf$ fields),
+and flush ($\gg$) should only flush the records that bear the current
+transaction's identifier. With this extension, ANSI SQL RR can be
+axiomatized thus:
 \begin{smathpar}
 \begin{array}{lcl}
   \I_e(\stl,\stg,\stg') & \Leftrightarrow & \forall(r\in\stl).
@@ -176,7 +180,7 @@ for an SI transaction on MS SQL server carries over to Postgres's RR
 and vice-versa, demonstrating the benefits of reasoning axiomatically
 about isolation properties.
 
-\textbf{Serializability (SER)} Axiomatization of serializability is
+\textbf{Serializability (SER)} The specification of serializability is
 straightforward:
 \begin{smathpar}
 \begin{array}{lcl}

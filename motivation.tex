@@ -150,6 +150,7 @@ however, interferences of various kinds are permitted, leading to
 executions superficially similar to executions permitted by concurrent
 (racy) programs~\cite{GHE15,HPQ+15}.  To illustrate, consider the
 behavior of the \C{new\_order} transaction
+when executed with a \emph{Read Committed} (RC) isolation level, the
 \begin{wrapfigure}{l}{.4\textwidth}
 \includegraphics[scale=0.45]{Figures/motiv-eg-1-b}
 \caption{\small An RC execution involving two instances ($T_1$ and
@@ -158,13 +159,12 @@ behavior of the \C{new\_order} transaction
   Both instances read the \C{d\_id} \C{District} record concurrently,
   because neither transaction is committed when the reads are
   executed.  The subsequent operations are effectively sequentialized,
-  since $T_2$ commits. Nonetheless, reading the same value for
-  \C{d\_next\_o\_id} prompts both instances to add \C{Order} records
-  with same ids, which in turn triggers a violation of TPC-C's
+  since $T_2$ commits. Nonetheless, both transactions read the same value for
+  \C{d\_next\_o\_id} resulting in them  adding \C{Order} records
+  with the same ids, which in turn triggers a violation of TPC-C's
   consistency condition.}
 \label{fig:new_order_exec}
 \end{wrapfigure}
-when executed with a \emph{Read Committed} (RC) isolation level, the
 default isolation level in 8 of the 18 databases studied
 in~\cite{bailishotos}.  An RC transaction is isolated from \emph{dirty
   writes}, i.e., writes of uncommitted transactions, but is allowed to
@@ -249,13 +249,13 @@ illustrate this idea informally, consider how we might verify that
 (SI), a stronger isolation level than RC. Snapshot isolation allows
 transactions to be executed against a private snapshot of the
 database, thus admitting concurrency, but it also requires that there
-not be any write-write conflicts (i.e,, both transactions modifying
-the same record) among concurrent transactions when they
-commit. Write-write conflicts can be eliminated in various ways, e.g.,
-through conflict detection followed by a rollback, or through
-exclusive locks, or a combination of both.  For instance, one possible
-implementation of SI, close to the one used by
-PostgreSQL~\cite{postgresiso}, executes a transaction against its
+not be any write-write conflicts (i.e,, such a conflict occurs if
+concurrentlyh executing transactions modify the same record) among
+concurrent transactions when they commit. Write-write conflicts can be
+eliminated in various ways, e.g., through conflict detection followed
+by a rollback, or through exclusive locks, or a combination of both.
+For instance, one possible implementation of SI, close to the one used
+by PostgreSQL~\cite{postgresiso}, executes a transaction against its
 private snapshot of the database, but obtains exclusive locks on the
 actual records in the database before performing writes. A write is
 performed only if the record that is to be written has not already
