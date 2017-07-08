@@ -1,0 +1,19 @@
+
+
+
+While a developer can examine the isolation level for each transaction, it is 
+an error-prone and difficult task to  determine  whether   the 
+combination of  transaction's isolations  preserve the application correctness properties.     
+Given  the three possible  isolation levels RC, RR, and SER for each five  TPC-C transaction,  
+we  run  the TPC-C benchmark  under all 243  possible   isolation combinations.  Then, 
+ for each combination, we  check whether  the four consistency conditions are maintained. 
+Out of $243$ runs, $171$ cases fails, i.e., they could not preserve the consistency conditions.  
+We have observed that \C{Delivery} and \C{New_order} transactions are  problematic when 
+there are executing under a weak isolation level. 
+While the   \C{New_order} transaction triggers an  invariant violation  under  weak isolation levels  (RC and RR),  
+out of $160$ runs in which   the  \C{Delivery}  transaction is 
+executed under  RC and RR, only $11$ runs 
+fails. 
+
+
+

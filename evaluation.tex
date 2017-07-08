@@ -2,7 +2,7 @@
 
 To explore the space of correct isolation levels for different transactions, we  also  ran a number  of experiments using  a real transaction OLTP workload   based on TPC-C benchmark.  
  The  workload  involves  a mix of five TPC-C transaction types: 
-\C{New\_Order},  \C{Payment},  \C{Delivery}, \C{Stock Level} and  \C{Order Status}, 
+\C{New\_Order},  \C{Payment},  \C{Delivery}, \C{Stock Level}, and  \C{Order Status}, 
 operating on top of  a $10$-warehouse database.  
 Each warehouse has  $10$ districts, each serving $3000$ customers. 
 TPC-C  specification model  requires  maintaining multiple   consistency conditions.  We focus  on   four conditions, named $I_1$, $I_2$, $I_3$, and $I_4$.   
