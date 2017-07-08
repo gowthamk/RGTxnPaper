@@ -1042,17 +1042,10 @@ Let $t = \ctxn{i}{\I'}{c}$. Given $\stg$ such that $I(\stg)$ and reduction seque
 For the base case, the first step is always valid irrespective of any isolation level. For the inductive case, assume that all steps upto the $k$th step of the transaction in $t$ are valid with isolation level $\mathbb{I}$. Let the $(k+1)$th step of the transaction be $(t_1, \stg_1) \rightarrow (t_2, \stg_1)$. Then $\mathbb{I}'(t_1.\stl, t_1.\stg, \stg_1)$. By H2, $\mathbb{I}(t_1.\stl, t_1.\stg, \stg_1)$. Hence, the $k+1$th step is also valid for isolation level $\mathbb{I}$. This shows that the entire reduction sequence is valid even if the isolation level of $t$ is changed to $\mathbb{I}$. Let $t' = \ctxn{i}{\I'}{c}$. Since $R' \subseteq R$, it follows that the reduction sequence $\pi' = (t', \stg) \rightarrow_{R}^{n} (\C{SKIP}, \stg')$ comprising of the same steps as $\pi$ is valid. By H1, $I(\stg')$. Finally, by $\texttt{step-guaranteed}(R, G, t', \stg)$, all global database state changes caused by $t'$ in $\pi'$ are in $G$. But these are the same global database stage changes in $\pi$. Since $G \subseteq G'$, these state changes are also in $G'$.
 \end{proof}
 
-\begin{theorem}
-\label{thm:inference-sound}
-  \emph{Forall} i,$R$,$I$,$c$,$\F$, if $\stable(\R,I)$ and $c \elabsto \F$,
-  then:\\\vspace*{-0.2cm}
-  \begin{smathpar}
-  \begin{array}{c}
-  \R \vdash \hoare{\lambda(\stl,\stg).~\stl=\emptyset \conj
-  I(\stg)}{c}{\lambda(\stl,\stg).\stl = \F(\emptyset,\stg)}
-  \end{array}
-  \end{smathpar}
-\end{theorem}
+\input{inference-rules}
+\newpage
+\input{inference-proof}
+
 % We recommend abbrvnat bibliography style.
 
 %\bibliographystyle{plainnat}

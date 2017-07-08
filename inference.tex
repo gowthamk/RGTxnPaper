@@ -219,7 +219,7 @@ the supplementary material.}:
   \begin{smathpar}
   \begin{array}{c}
   \R \vdash \hoare{\lambda(\stl,\stg).~\stl=\emptyset \conj
-  I(\stg)}{c}{\lambda(\stl,\stg).\stl \subseteq \F(\emptyset,\stg)}
+  I(\stg)}{c}{\lambda(\stl,\stg).\stl = \F(\emptyset,\stg)}
   \end{array}
   \end{smathpar}
 \end{theorem}
@@ -242,10 +242,11 @@ below:
 \RULE
 {
   \stable(R,\I)\spc
-  \stable(R,I)\\
+  \stable(R,I)\spc
    \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1.  R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') \spc  c \elabsto \F\\
   \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1.  R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg') \spc \stable(\R_c,\F)\\
-  \forall \stg.~ G(\stg, F(\emptyset,\stg) \gg \stg)\spc
+  \forall \stl,\stg.~ \stl \in F(\emptyset,\stg) \Rightarrow 
+    G(\stg, \stl\gg\stg)\spc
   \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
 }
 {

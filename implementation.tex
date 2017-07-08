@@ -39,7 +39,7 @@ can be similarly axiomatized. The concrete result of verification is
 an assignment of an isolation level of the selected data store to each
 transaction in the program.
 
-At the top-level, \tool runs a loop that pics an unverified
+At the top-level, \tool runs a loop that picks an unverified
 transaction and progressively strengthens its isolation level until it
 passes the verification. If the selected data store provides
 serializable isolation level, and if the program is sequentially

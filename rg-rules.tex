@@ -6,7 +6,7 @@
 %\fbox{\( \rg{\mathbb{I},P,R}{\txnbox{c}_i}{G,Q}\)} \quad
 %\fbox{\( \rg{\mathbb{I},P,R}{c}{G,Q}\)} \quad\\
 %
-\begin{minipage}{3.2in}
+\begin{minipage}{3.4in}
 \rulelabel{RG-Update}
 \begin{smathpar}
 \begin{array}{c}
@@ -25,7 +25,7 @@
 \end{minipage}
 %
 %
-\begin{minipage}{3in}
+\begin{minipage}{2.6in}
 \rulelabel{RG-Select}
 \begin{smathpar}
 \begin{array}{c}
@@ -34,7 +34,8 @@
   \\
   \R \vdash \hoare{P'}{c}{Q}\spc
   \stable(\R,P)\\
-  P'(\stl,\stg) \Leftrightarrow P(\stl,\stg) \wedge
+  P'(\stl,\stg) \Leftrightarrow P(\stl,\stg) \\
+  \hspace*{0.5in}\wedge
   x = \{r' \,|\, \exists(r\in\Delta).~ [r/y]e_2\} \\
 }
 {
