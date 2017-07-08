@@ -103,3 +103,30 @@ safety, or linearizability of concurrent data strucgture operations)
 and the analysis technique used to drive inference (state transformers
 vs. abstract interpretation) are quite different.
 
+\section{Conclusions}
+\label{sec:conclusions}
+
+To improve performance, modern database systems employ techniques that
+weaken the strong isolation guarantees provided by serializable
+transactions in favor of alternatives that allow a transaction to
+witness the effects of other concurrently executing transactions that
+happen commit during its execution.  Typically, it is the
+responsibility of the database programmer to determine if an available
+weak isolation level would violate a transaction's consistency
+constraints.  Although this has proven to be a difficult and
+error-prone process, there has heretofore been no attempt to formalize
+notions of weak isolation with respect to application semantics, or
+consider how we might verify the correctness of database programs that
+use weakly-isolated transactions.  In this paper, we provide such a
+formalization.  We develop a rely-guarantee proof framework cognizant
+of weak isolation semantics, and build on this foundation to devise an
+inference procedure that facilitates automated verification of
+weakly-isolated transactions, and have applied our ideas on
+widely-used database systems to justify their utility.  Our solution
+enables database applications to leverage the performance advantages
+offered by weak isolation, without compromising safety and
+correctness.
+
+
+
+

@@ -1,45 +1,51 @@
 \subsection{Evaluation}
+\label{sec:case-studies}
 
-<<<<<<< HEAD
-We evaluate \tool on two different applications: 1. Courseware: a
-course registration system taken from~\cite{gotsmanpopl16}, and
+In this section, we present our experience in running \tool on two different applications: \emph{Courseware}: a
+course registration system described by~\cite{gotsmanpopl16}, and
 % 2. RUBiS: an eBay-like auction site~\cite{rubis} that allows users to
 % bid for items on sale, and pay for items from a wallet modeled after a
 % bank account, and 
-2. The TPC-C benchmark. 
+the \emph{TPC-C} benchmark. 
 
-\textbf{Courseware} Courseware application allows new courses to be
-added (\C{add\_course} transaction), and new students to be
-registered (\C{register\_student}) into the system. A registered
-student can enroll (\C{enroll}) in one of the existing courses,
-provided that the enrollments haven't already exceeded the course
+\textbf{Courseware} The Courseware application allows new courses to be
+added (via an \C{add\_course} transaction), and new students to be
+registered (via a \C{register\_student} transaction) into a database. A registered
+student can enroll (\C{enroll}) in an existing course,
+provided that enrollment has not already exceeded the course
 capacity (\C{c\_capacity}). A course with no enrollments can be
 canceled (\C{cancel\_course}). Likewise, a student who is not enrolled
 in any course can be deregistered (\C{deregister\_student}). Besides
 \C{Student} and \C{Course} tables, there is also an \C{Enrollment}
-table tracks the many-to-many enrollment relationship between courses
+table to track the many-to-many enrollment relationship between courses
 and students. The application is required to preserve the following
-invariants on the database: 1.  $I_1$: An enrollment record should
-always refer to an existing student and an existing course, and 2.
-$I_2$: the capacity (\C{c\_capacity}) of a course should always be a
-non-negative quantity. Both $I_1$ and $I_2$ can be violated under weak
+invariants on the database:
+
+\begin{enumerate}
+\item  $I_1$: An enrollment record should always refer to an existing student and an existing course.
+\item  $I_2$: The capacity (\C{c\_capacity}) of a course should always be a
+  non-negative quantity.
+\end{enumerate}
+\noindent Both $I_1$ and $I_2$ can be violated under weak
 isolation. $I_1$ can be violated, for example, when
 \C{deregister\_student} runs concurrently with \C{enroll}, both at RC
 isolation. While the former transaction removes the student record
-after checking that no enrollments for that student exist, the latter
+after checking that no enrollments for that student exists, the latter
 transaction concurrently adds an enrollment record after checking the
-student exist. Both can succeed concurrently, resulting in an invalid
-state. Invariant $I_2$ can be violated by two \C{enroll}s, both
-reading the \C{c\_capacity}=1, and both (atomically) decrementing it,
+student exists.  Both can succeed concurrently, resulting in an
+invalid state. Invariant $I_2$ can be violated by two \C{enroll}s,
+both reading \C{c\_capacity}=1, and both (atomically) decrementing it,
 resulting in \C{c\_capacity}=-1.  We ran \tool on the courseware
 application written in our DSL, annotated with guarantees for all
-transactions, and provided the $I = I_1 \wedge I_2$ as the correctness
-condition. \tool was able to automatically discover anomalous
-executions described above, and was subsequently able to infer that
-the anomalies can be preempted by promoting the isolation level of
-\C{enroll} and \C{deregister\_student} to SER (on both MySQL and
-PostgreSQL), leaving the isolation levels of remaining transactions at
-RC.
+transactions taken from ~\cite{gotsmanpopl16}, and asserted $I = I_1
+\wedge I_2$ as the correctness condition. \tool was able to
+automatically discover the anomalous executions described above, and
+was subsequently able to infer that the anomalies can be preempted by
+promoting the isolation level of \C{enroll} and
+\C{deregister\_student} to SER (on both MySQL and PostgreSQL), leaving
+the isolation levels of remaining transactions at RC.  The total time
+for inference and verification took less than a minute running on a
+conventional laptop.
 
 \begin{table}[]
 \centering
@@ -57,70 +63,80 @@ RC.
 described in Sec.~\ref{sec:motivation}. In addition to the tables
 shown in Fig.~\ref{fig:schema}, the TPC-C schema also has
 \C{Warehouse} and \C{New\_order} tables that are relevant for
-verification. To verify TPC-C, we consider four of the twelve
+verification.  To verify TPC-C, we examined four of the twelve
 consistency conditions specified by the standard, which we name $I_1$
-to $I_4$. Consistency condition $I_1$  requires that sales bottom line
-of each warehouse equals to the sum of the sales bottom lines of all
-district served by the warehouse.  Conditions $I_2$ and $I_3$
-effectively enforce uniqueness of ids assigned to \C{Order} and
-\C{New\_order} records, respectively, under a district. Condition
-$I_4$ requires that the number of order lines under a district must
-match the sum of order line counts of all orders under the district.
+to $I_4$:
+
+\begin{enumerate}
+\item Consistency condition $I_1$  requires that the sales bottom line
+of each warehouse equals the sum of the sales bottom lines of all
+districts served by the warehouse.
+
+\item Conditions $I_2$ and $I_3$ effectively enforce uniqueness of ids assigned
+  to \C{Order} and \C{New\_order} records, respectively, under a district.
+
+
+\item  Condition $I_4$ requires that the number of order lines under a district
+  must match the sum of order line counts of all orders under the district.
 % There are five transactions in TPC-C, out of which two are read-only.
 % The three remaining transactions are \C{new\_order}, \C{delivery}, and
-% \C{payment}.  
+  % \C{payment}.
+\end{enumerate}
+
 Similar to the example discussed in Sec.~\ref{sec:motivation}, there
 are a number of ways TPC-C's transactions violate the aforementioned
 invariants under weak isolation. \tool was able to discover all such
 violations when verifying the benchmark against $I =
 \bigwedge_{i}I_i$, with guarantees of all three transactions
 provided. The isolation levels were subsequently strengthened  as
-shown in Table.~\ref{tab:tpcc}.
+shown in Table.~\ref{tab:tpcc}.  As before, inference and verification
+took less than a minute.
 
-\begin{table*}[t]\small
-\centering
-\begin{tabular}{|c|c|c|c|}
-  \hline
-\textbf{Transaction}   & \textbf{Invariant} 
-& \textbf{MySQL-Isolation} & \textbf{PostgreSQL-Isolation} \\ 
-\hline
-\multirow{4}{*}{\C{New\_Order} }  & $I_1$ 
-& RC &  RC\\ 
-&  $I_2$ &SER & RR \\
-&  $I_3$ & SER  &  RR  \\
-& $I_4$ & RC & RC   \\
-\hline
-\multirow{4}{*}{\C{Payment}}  & $I_1 $ 
-& RC &  RC\\ 
-&  $I_2$  &RC & RC \\
-&  $I_3 $ & RC  &  RC  \\
-& $I_4$  & RC & RC   \\
-\hline
-\multirow{4}{*}{\C{Delivery}}  & $I_1$  
-& RC &  RC \\ 
-&  $I_2$ &SER & RR \\
-&  $I_3$ & SER  &  RR \\
-& $I_4$  & RC & RC   \\
-\hline
-\end{tabular}
-\caption{Various invariant violations witnessed for the TPC-C
-  benchmark on MySQL and PostgreSQL}
-\label{tab:tpcc-eval}
-\end{table*}
+%% \begin{table*}[t]\small
+%% \centering
+%% \begin{tabular}{|c|c|c|c|}
+%%   \hline
+%% \textbf{Transaction}   & \textbf{Invariant} 
+%% & \textbf{MySQL-Isolation} & \textbf{PostgreSQL-Isolation} \\ 
+%% \hline
+%% \multirow{4}{*}{\C{New\_Order} }  & $I_1$ 
+%% & RC &  RC\\ 
+%% &  $I_2$ &SER & RR \\
+%% &  $I_3$ & SER  &  RR  \\
+%% & $I_4$ & RC & RC   \\
+%% \hline
+%% \multirow{4}{*}{\C{Payment}}  & $I_1 $ 
+%% & RC &  RC\\ 
+%% &  $I_2$  &RC & RC \\
+%% &  $I_3 $ & RC  &  RC  \\
+%% & $I_4$  & RC & RC   \\
+%% \hline
+%% \multirow{4}{*}{\C{Delivery}}  & $I_1$  
+%% & RC &  RC \\ 
+%% &  $I_2$ &SER & RR \\
+%% &  $I_3$ & SER  &  RR \\
+%% & $I_4$  & RC & RC   \\
+%% \hline
+%% \end{tabular}
+%% \caption{Various invariant violations witnessed for the TPC-C
+%%   benchmark on MySQL and PostgreSQL}
+%% \label{tab:tpcc-eval}
+%% \end{table*}
 
-To sanity-check the results of \tool, we conducted experiments with
-the high-contention OLTP workload  on TPC-C aiming to explore the
-space of correct isolation levels for different transactions. The
-workload involves  a mix of all five TPC-C transactions executing
-against a TPC-C database with 10 warehouses. Each warehouse has 10
-districts, and each district serves 3000 customers. There are a total
-of 5 transactions in TPC-C, and given that MySQL and PostgreSQL
-support 3 isolation levels each, there are a total of $3^5 = 243$
-different configurations of isolation levels for TPC-C transactions on
-MySQL and PostgreSQL. We executed OLTP benchmark with all 243
-configurations, and found 171 of them violating at least one invariant.
-Table~\ref{fig:tpcc-eval} shows the summary of these results. As
-expected, the isolation levels that \tool infers for the TPC-C
-transactions do not result in invariant violations, either on MySQL or
-on PostgreSQL.
+To sanity-check the results of \tool, we conducted experiments with a
+high-contention OLTP workload on TPC-C aiming to explore the space of
+correct isolation levels for different transactions. The workload
+involves a mix of all five TPC-C transactions executing against a
+TPC-C database with 10 warehouses. Each warehouse has 10 districts,
+and each district serves 3000 customers. There are a total of 5
+transactions in TPC-C, and given that MySQL and PostgreSQL support 3
+isolation levels each, there are a total of $3^5 = 243$ different
+configurations of isolation levels for TPC-C transactions on MySQL and
+PostgreSQL. We executed the benchmark with all 243 configurations, and
+found 171 of them violated at least one of the four invariants we
+considered.  Table~\ref{fig:tpcc-eval} shows the summary of these
+results. As expected, the isolation levels that \tool infers for the
+TPC-C transactions do not result in invariant violations, either on
+MySQL or on PostgreSQL, and were determined to be the weakest safe
+assignments possible.
 

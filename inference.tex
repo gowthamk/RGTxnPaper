@@ -1,7 +1,7 @@
 \section{Inference}
 \label{sec:inference}
 
-The Rely-Guarantee framework presented in the previous section
+The rely-guarantee framework presented in the previous section
 facilitates modular proofs for weakly-isolated transactions, but
 imposes a non-trivial annotation burden.  In particular, it requires
 each statement ($c$) of the transaction to be annotated with a stable
@@ -41,9 +41,7 @@ expressive enough to capture the semantics of $\txnimp$ statements (as
 well as SQL operations more generally), yet simple enough to have a
 semantics-preserving translation to a decidable fragment of
 first-order logic.
-
 \input{inference-rules}
-
 Fig.~\ref{fig:inference-rules} shows the syntax-directed state
 transformer inference rules for $\txnimp$ commands inside a
 transaction $\C{TXN}_i$.  Inference depends on the $\I$-constrained
@@ -68,11 +66,11 @@ effects can be defined thus:
   \R(\stl,\stg,\stg') \Rightarrow \F(\stl,\stg) \equiv \F(\stl,\stg')
 \end{array}
 \end{smathpar}
-where, $\bar{v}$ are the variables that occur free in $\F$; this is
+where $\bar{v}$ are the variables that occur free in $\F$; this is
 possible because of how the inference rules are structured.
 Intuitively, the stability condition requires an effect to describe
 the same set of records before and after the interference. The
-equivalence in $\SL$ translates to the equality in first-order logic,
+equivalence in $\SL$ translates to equality in first-order logic,
 as we describe below. In the inference rules, stability is
 enforced constructively by a meta function $\stabilize{\cdot}$, which
 accepts an effect and returns a new effect that is guaranteed to be
@@ -110,7 +108,7 @@ let add_interest acc_id pc = atomically @@ do
 \end{figure}
 Here, an \C{add\_interest} transaction adds a positive interest
 (\C{pc}) to the balance of a bank account, which is required to be
-positive ($I(\stg) \Leftrightarrow \forall(r\in\stg).~r.\C{bal}\ge
+non-negatives ($I(\stg) \Leftrightarrow \forall(r\in\stg).~r.\C{bal}\ge
 0$). The transaction starts by issuing a \C{select1} query, whose
 effect implicitly asserts that there exists a record in the bank
 account database that is equal to $a$
@@ -131,22 +129,25 @@ reduction rule for \C{UPDATE} declaratively specifies the set of
 updated records, the state transformer rule uses $\SL$'s bind
 operation to \emph{compute} the set. Other SQL rules do likewise. The
 rules for \C{LET} binders, conditionals, and sequences compose the
-effects inferred for their subcommands. For instance, the effect of a
-sequence of commands $c_1;c_2$ is the union of effects $F_1$ and $F_2$
-of $c_1$ and $c_2$, respectively, except that $F_2$ is applied to a
-state ($\stl$) to which $F_1$ has already been applied, reflecting
-their order of reduction. The inference rule for \C{FOREACH} takes
-advantage of the $\SL$'s bind operator to lift the effect inferred for
-the loop body to the level of the loop. Since records added to $\stl$
-in each iteration of \C{FOREACH} are independent of the previous
-iteration, sequential composition of the effects of different
-iterations is same as their parallel composition. Since the loop body
-is executed once per each $z\in x$, the effect of the the loop is the
-union of effects ($\F$) for all $z\in x$, all applied to the same
-state ($\stl$ and $\stg$). That is, $\F_{loop}(\stl,\stg) =
-\bigcup_{z\in x}\F_{body}(\stl,\stg)$. From the definition of the set
-monad's bind operator, $\F_{loop}(\stl,\stg) = x \bind (\lambda
+effects inferred for their subcommands. Thus, the effect of a sequence
+of commands $c_1;c_2$ is the union of effects $F_1$ and $F_2$ of $c_1$
+and $c_2$, respectively, except that $F_2$ is applied to a state
+($\stl$) to which $F_1$ has already been applied, reflecting their
+order of reduction. The inference rule for \C{FOREACH} takes advantage
+of the $\SL$'s bind operator to lift the effect inferred for the loop
+body to the level of the loop. Since records added to $\stl$ in each
+iteration of \C{FOREACH} are independent of the previous iteration,
+sequential composition of the effects of different iterations is same
+as their parallel composition. Since the loop body is executed once
+per each $z\in x$, the effect of the the loop is the union of effects
+($\F$) for all $z\in x$, all applied to the same state ($\stl$ and
+$\stg$). That is, $\F_{loop}(\stl,\stg) = \bigcup_{z\in
+  x}\F_{body}(\stl,\stg)$. From the definition of the set monad's bind
+operator, $\F_{loop}(\stl,\stg) = x \bind (\lambda
 z.~F_{body}(\stl,\stg))$, which mirrors the definition of the rule.
+This development mirrors ideas found in type checkers for certain
+dependent type systems~\cite{KJ14}.
+
 
 % \begin{figure}[h]
 % \begin{smathpar}

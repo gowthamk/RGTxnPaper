@@ -131,27 +131,38 @@ transaction-local judgment to verify the body ($c$) of a transaction
 $i$. The precondition $P$ of $c$ must follow from the fact that the
 transaction-local database ($\stl$) is initially empty, and the global
 database satisfies the high-level invariant $I$. The rely relation
-($\R_l$) for the local judgment is a ternary relation computed as $R$
+($\R_e$) for the local judgment is a ternary relation computed as $R$
 modulo $\I_e$:
 \begin{smathpar}
 \begin{array}{lcl}
-%\R_l(\stl,\stg,\stg') & \Leftrightarrow & R(\stg,\stg') \conj
+%\R_e(\stl,\stg,\stg') & \Leftrightarrow & R(\stg,\stg') \conj
 %\I_e(\stl,\stg,\stg')
-  \R_l(\stl,\stg,\stg') & \Leftrightarrow & \exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg')
+  \R_e(\stl,\stg,\stg') & \Leftrightarrow & \exists \stg_1.  R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg')
 \end{array}
 \end{smathpar}
-In words, if there exists $\stg_1$ which was the global database state
-during the last step by a transaction and if the transaction can take
-its next step at the current global database state $\stg$, then even
-after the interference, the transaction should still be able to take
-its next step. If there is no such state $\stg_1$, then the
-transaction will be stuck, and the interference can be safely
-discarded. Often, this significantly simplifies the form of $\R_l$
-irrespective of $R$. For example, when a transaction is executed
-against a snapshot of the database (i.e. $\mathbb{I}_{ss}$), $\R_l$
-will be the identity function, since if $\stg \neq \stg'$, there does
-not exist any $\stg_1$ which satisfies the constraint for
-$\R_l(\stl,\stg,\stg')$.
+
+While $R$ describes changes in the global database state, $\I_e$
+constrain the global effects that will visible to the transaction.
+Recall, however that $\I_e$ uses the global state in effect at the
+point the transaction last took a step ($\stg_1$) to determine whether
+the transaction can proceed from the current global state ($\stg$).
+Moreover, the global rely relation $R$ defines the permissible
+interferences from $\Delta$ to a future global state ($\Delta'$).  The
+local rely relation $\R_e$ determines allowed interferences as
+specified by $\I_e$ assuming $\stg_1$.  In effect, the existential on
+$\stg_1$ defines this reley relation to be an over-approximation on
+the interferences in the presence of which the transaction can
+proceed, simplifying verification burden.
+
+%Often, this significantly simplifies the form of $\R_l$ irrespective
+%of $R$. For example, when a transaction is executed against a
+%snapshot of the database (i.e. $\mathbb{I}_{ss}$), $\R_l$ will be the
+%identity function, since if $\stg \neq \stg'$, there does not exist
+%any $\stg_1$ which satisfies the constraint for
+%$\R_l(\stl,\stg,\stg')$.
+
+%In words, if there exists $\stg_1$ which was the global database state during the last step by a transaction and if the transaction can take its next step at the current global database state $\stg$, then even after the interference, the transaction should still be able to take its next step. 
+
 
 %\begin{smathpar}
 %\exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') \Rightarrow \forall \stg_2 
@@ -183,7 +194,7 @@ to $\stg'$.
 For the guarantee $G$ of a transaction to be valid, it must follow
 from the post-condition $Q$ of the body, provided that $Q$ is stable
 w.r.t the commit-time interference captured by $\R_c$. $\R_c$, like
-$\R_l$, is computed as a rely relation modulo isolation, except that
+$\R_e$, is computed as a rely relation modulo isolation, except that
 commit-time isolation ($\I_c$) is considered. The validity of
 $G$ is captured by the following implication:
 \begin{smathpar}
