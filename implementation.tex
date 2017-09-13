@@ -11,20 +11,20 @@ type order_line = {ol_o_id: int; ol_d_id: int; ol_i_id: int; ol_qty: int}
 type stock = {s_i_id: int; s_d_id:int; s_qty: int}
 \end{ocaml}
 \caption{OCaml type definitions corresponding to the TPC-C schema from
-Fig.~\ref{fig:schema1}}
+Fig.~\ref{fig:schema}}
 \label{fig:ocaml-schema}
 \end{figure}
 
 We have implemented our DSL to define transactions as monadic
-computations in OCaml (modulo the syntactic sugar), and our automatic
-reasoning framework as an extra frontend pass (called \tool) in ocamlc
+computations in OCaml (modulo some syntactic sugar), and our automatic
+reasoning framework as an extra frontend pass (called \tool) in the ocamlc
 4.03 compiler\footnote{The source code is available at available at
-\emph{\ldots}}. The input to \tool is a program in our DSL that
+\emph{https://goo.gl/nmUXZK}}. The input to \tool is a program in our DSL that
 describes the schema of the database as a collection of OCaml type
 definitions, and transactions as OCaml functions, whose top-level
 expression is an application of the \C{atomically\_do} combinator to a
 function of type $a \rightarrow \C{DB}\;b$, for some (base) types $a$
-and $b$. For instance, TPC-C's schema from Fig.~\ref{fig:schema1} can
+and $b$. For instance, TPC-C's schema from Fig.~\ref{fig:schema} can
 be described via the OCaml type definitions shown in
 Fig.~\ref{fig:ocaml-schema}.  \tool also requires a specification of
 the program in the form of a collection of guarantees ($G$), one per
@@ -33,69 +33,68 @@ integrity constraints on the database. An auxiliary DSL that includes
 the first-order logic (FOL) combinators has been implemented for this
 purpose. \tool's verification pass follows OCaml's type checking pass,
 hence the concrete artifact of verification is OCaml's typed AST. The
-tool is already equipped with  an axiomatization of PostgresSQL and
+tool is already equipped with  an axiomatization of PostgreSQL and
 MySQL's isolation levels expressed in our FOL DSL. Other data stores
 can be similarly axiomatized. The concrete result of verification is
 an assignment of an isolation level of the selected data store to each
 transaction in the program.
 
-At the top-level, \tool runs a loop that pics an unverified
+At the top-level, \tool runs a loop that picks an unverified
 transaction and progressively strengthens its isolation level until it
-passes the verification. If the selected data store provides
+passes verification. If the selected data store provides a
 serializable isolation level, and if the program is sequentially
-corred, then the verification is guaranteed to succeed. Within the
+correct, then the verification is guaranteed to succeed. Within the
 loop, the \tool first computes the various rely relations needed for
 verification ($R$, $\R_l$, and $\R_c$). It then traverses the AST of a
 transaction, applying the inference rules to construct a state
-tansformer, check its stability, and weaken it ($\stabilize{\cdot}$)
+transformer, check its stability, and weaken it ($\stabilize{\cdot}$)
 if it is not stable. The result of traversing the transaction's AST is
-therefore a stable state transformer ($\F$), which is then checked
-against the transaction's stated guarantee ($G$). If the check passes,
-then the guarantee is verified to check if it preserves the invariant
-$I$. The successful result from both the checks results in the
-transaction being certified correct under the current choice of its
-isolation level. Succesful verification of all transactions concludes
-the top-level execution, returning the inferred isolation levels as
-its output.
+therefore a state transformer ($\F$) that is stable w.r.t $R_l$, which
+is also stabilized against $\R_c$ (using $\stabilize{\cdot}$), and
+then checked against the transaction's stated guarantee ($G$). If the
+check passes, then the guarantee is verified to check if it preserves
+the invariant $I$. The successful result from both the checks results
+in the transaction being certified correct under the current choice of
+its isolation level. Successful verification of all transactions
+concludes the top-level execution, returning the inferred isolation
+levels as its output.
 
-\tool uses Z3 SMT solver as its underlying reasoning engine. Each
-implication check described above is first encoded in the FOL,
-applying the translation described in Sec.~\ref{sec:inference}
-wherever necessary, and the validity of the resultant formula ($\phi$)
-is decided by asking Z3 to check the satisfiability of its negation;
-unsatisfiability of $\neg\phi$ proves the validity.
+\tool uses the Z3 SMT solver as its underlying reasoning engine. Each
+implication check described above is first encoded in FOL, applying
+the translation described in \S\ref{sec:inference} wherever
+necessary.
 
 \subsection{Pragmatics}
 
 \textbf{Real-World Isolation Levels} The axiomatization of the
-isolation levels presented in Sec.~\ref{sec:isolation} leave out
+isolation levels presented in \S\ref{sec:isolation} leave out
 certain nuances of their implementations on real data stores, which
-need to be taken into account for the verification to be effective in
+need to be taken into account for verification to be effective in
 practice.  We consider these into account while linking \tool with
 store-specific semantics (isolation specifications etc). As an
-example, consider how PostgresSQL implements the \C{UPDATE} operation.
+example, consider how PostgreSQL implements an \C{UPDATE} operation.
 \C{UPDATE} first selects the records that meet the search criteria
 from the snapshot against which it is executing (the snapshot is
 established at the beginning of the transaction if the isolation level
-is RR, or at the beginning of the \C{UPDATE} statement if the
+is SI, or at the beginning of the \C{UPDATE} statement if the
 isolation level is RC). The selected records are then visited in the
-actual database (if it still exists), write locks are obtained, and
-the updatation is carried out, provided that the record still meets
-\C{UPDATE}'s search criteria. If the record in no longer meets the
+actual database (if they still exist), write locks are obtained, and
+the update is performed, provided that the record still meets
+\C{UPDATE}'s search criteria. If the record no longer meets the
 search criteria (due to a concurrent update) the record is excluded
 from the update, and the write lock is immediately released.
-Otherwise, the record remains locked till the transaction commits. 
+Otherwise, the record remains locked until the transaction commits. 
 
-Clearly, the \C{UPDATE} operation on PostgreSQL is not atomic, as the
-our formal model assumes it to be. It admits interference between the
-updatation of individual records that meet the search criteria.
-Nonetheless, through a series of relatively straightforward
-deductions, we can show that PostgreSQL's \C{UPDATE} is infact
-equivalent (in semantics) to a sequential composition of two atomic
+Clearly, this sequence of events is not atomic, unlike the assumption
+made by our formal model.  The implementation admits interference
+between the updates of individual records that meet the search
+criteria.  Nonetheless, through a series of relatively straightforward
+deductions, we can show that PostgreSQL's \C{UPDATE} is in fact
+equivalent (in behavior) to a sequential composition of two atomic
 operations $c_1;c_2$, where $c_1$ is effectively a \C{SELECT}
 operation with the same search criteria as \C{UPDATE}, and $c_2$ is
-the a slight variation of the original \C{UPDATE} that updates a
-record only if a record with the same id is present in the records
+a slight variation of the original \C{UPDATE} that updates a
+record only if a record with the same id is present in the set of records
 returned by the \C{SELECT}. This transformation is summarized below:
 \begin{smathpar}
 \begin{array}{lcl}
@@ -119,7 +118,7 @@ certain combinations of isolation levels and operations on MySQL.
 
 \textbf{Set functions} SQL's \C{SELECT} query admits projections of
 record fields, and also application of auxiliary functions such as
-\C{MAX} and \C{MIN}. For example, \C{SELECT MAX(ol\_o\_id) FROM
+\C{MAX} and \C{MIN}, e.g., \C{SELECT MAX(ol\_o\_id) FROM
 Order\_line WHERE $\ldots$}. We admit such extensions as set functions
 in our DSL (e.g., \C{project}, \C{max}, \C{min}), and axiomatize their
 behavior. For instance:
@@ -131,7 +130,26 @@ behavior. For instance:
   s).~y\le x\\
 \end{array}
 \end{smathpar}
-There are however certain set functions that 
+There are however certain set functions whose behavior cannot be
+completely axiomatized in FOL. These include \C{sum}, \C{count} etc.
+For these, we admit imprecise axiomatizations expressed as lemmas
+over these functions.
+
+\textbf{Annotation Burden} \tool significantly reduces the annotation
+burden in verifying a weakly isolated transactions by eliminating the
+need to annotate intermediate assertions and loop invariants.
+Guarantees ($G$) and global invariants ($I$), however, still need to be
+provided. Alternatively, a weakly isolated transaction $T$ can be
+verified against a generic serializability condition,  eliminating
+the need for any annotation. In this mode, \tool first infers the
+transformer $\F_{SER}$ of $T$ without considering any interference,
+which then becomes its guarantee ($G$). Doing likewise for every
+transaction results in a rely relation ($R$) that includes $\F_{SER}$
+of every transaction. Verification now proceeds by taking interference
+into account, and verifying that each transaction still yields the
+same $F$ as its $F_{SER}$. The result of this verification is an
+assignment of (possibly weak) isolation levels to transactions which
+nonetheless guarantees behavior equivalent to a  serializable execution.
 
 
 \input{evaluation}

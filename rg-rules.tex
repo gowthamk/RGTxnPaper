@@ -6,13 +6,13 @@
 %\fbox{\( \rg{\mathbb{I},P,R}{\txnbox{c}_i}{G,Q}\)} \quad
 %\fbox{\( \rg{\mathbb{I},P,R}{c}{G,Q}\)} \quad\\
 %
-\begin{minipage}{3.2in}
+\begin{minipage}{3.4in}
 \rulelabel{RG-Update}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
 {
-  \stable(\R,Q)\\
+  \stable(\R,P)\\
   \hspace*{-0.4in} \forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
   \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).[r/x]e_2 \conj\\
    r'=\{[r/x]e_1 \with \idf=r.\idf;\,\txnf=i;\,\delf=\C{false}\}\} \Rightarrow   Q(\stl',\stg)
@@ -25,7 +25,7 @@
 \end{minipage}
 %
 %
-\begin{minipage}{3in}
+\begin{minipage}{2.6in}
 \rulelabel{RG-Select}
 \begin{smathpar}
 \begin{array}{c}
@@ -33,8 +33,9 @@
 {
   \\
   \R \vdash \hoare{P'}{c}{Q}\spc
-  \stable(\R,P')\\
-  P'(\stl,\stg) \Leftrightarrow P(\stl,\stg) \wedge
+  \stable(\R,P)\\
+  P'(\stl,\stg) \Leftrightarrow P(\stl,\stg) \\
+  \hspace*{0.5in}\wedge
   x = \{r' \,|\, \exists(r\in\Delta).~ [r/y]e_2\} \\
 }
 {
@@ -53,7 +54,7 @@
 \begin{array}{c}
 \RULE
 {
-  \stable(\R,Q)\\
+  \stable(\R,P)\\
   \forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
   \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).~ [r/x]e
         \conj r'=\{r \with \txnf=i; \delf=\C{true}\}\}
@@ -76,7 +77,7 @@
 \begin{array}{c}
 \RULE
 {
-  \stable(\R,Q)\\
+  \stable(\R,P)\\
   \hspace*{-1.1in}\forall\stl,\stl',\stg,i.~P(\stl,\stg) \conj r.\idf \not\in
   \dom(\stl\cup\stg) \\
   \conj \stl'=\stl \cup 
@@ -97,7 +98,7 @@
 \RULE
 {
   \stable(\R,Q)\spc
-  \stable(\R,\psi)\\
+  \stable(\R,\psi) \spc \stable(\R, P)\\
   P \Rightarrow [\emptyset/y]\psi\spc
   \R \vdash \hoare{\psi \wedge z\in x}{c}{Q_c}\\
   Q_c \Rightarrow [y \cup \{z\}/y]\psi\spc
@@ -120,10 +121,10 @@
 \RULE
 {
   \stable(R,\I)\spc
-  \stable(\R,I)\spc
+  \stable(R,I)\spc
   P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
-  \R_l(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_e(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg')\\
-  \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. \I_c(\stl, \stg_1, \stg) \wedge R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg')\\
+  \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg')\\
+  \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg')\\
   \R_l \vdash \rg{P}{c}{Q} \spc \stable(\R_c,Q) \spc 
   \forall \stg.~G(\stg,\stg)\\
   \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 

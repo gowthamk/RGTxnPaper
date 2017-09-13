@@ -161,14 +161,14 @@ transactional programs in the presence of a weakly-isolated
 concurrency control mechanism.  Realizing that the proof burden
 imposed by these rules would likely discourage applications
 programmers from using them, we present an inference procedure based
-on a state transformer semantics that automatically verifies the
-weakest isolation level for a transaction that ensures its consistency
-requirements are maintained.  The key to inference is a novel formulation
-of database state (represented as sets of tuples) as a monad, and in
-which database computations are interpreted as transformers over these
-sets.  This interpretation leads to an encoding of database
-computations amenable for verification by off-the-shelf SMT solvers.
-The paper makes the following contributions:
+that automatically verifies the weakest isolation level for a
+transaction that ensures its consistency requirements are maintained.
+The key to inference is a novel formulation of database state
+(represented as sets of tuples) as a monad, and in which database
+computations are interpreted as state transformers over these sets.
+This interpretation leads to an encoding of database computations
+amenable for verification by off-the-shelf SMT solvers.  The paper
+makes the following contributions:
 %% We have realized these ideas as an embedded DSL within OCaml, that
 %% supports common relational SQL operations (updates, selects, inserts,
 %% deletes, joins, etc.).  Experimental results on real-world benchmarks
@@ -215,6 +215,7 @@ formalizes the proof system that we use to reason about program
 invariants, and establishes the soundness of these rules with respect
 to the semantics. \S\ref{sec:inference} describes the inference
 algorithm, and the state transformer encoding.  We describe our
-implementation, benchmark results, and case studies in
-\S\ref{sec:case-studies}.  Related work and conclusions are given in
-\S\ref{sec:relatedwork}.
+implementation in \S\ref{sec:implementation}, and provide case studies
+and benchmark results in \S\ref{sec:case-studies}.  Related work is
+given in \S\ref{sec:relatedwork}, and \S\ref{sec:conclusions} presents
+conclusions.
