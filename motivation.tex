@@ -139,7 +139,7 @@ to the size of the \C{item\_req} set, which in turn is equal to the
 the transaction's consistency condition is preserved.
 
 Because the aforementioned reasoning is reasonably simple to perform
-manually, verifying the soundess of TPC-C's consistency conditions
+manually, verifying the soundness of TPC-C's consistency conditions
 would appear to be feasible.  Serializability aids the tractability of
 verification by preventing any interference among concurrently
 executing transactions while the \C{new\_order} transaction executes,
@@ -250,7 +250,7 @@ illustrate this idea informally, consider how we might verify that
 transactions to be executed against a private snapshot of the
 database, thus admitting concurrency, but it also requires that there
 not be any write-write conflicts (i.e,, such a conflict occurs if
-concurrentlyh executing transactions modify the same record) among
+concurrently executing transactions modify the same record) among
 concurrent transactions when they commit. Write-write conflicts can be
 eliminated in various ways, e.g., through conflict detection followed
 by a rollback, or through exclusive locks, or a combination of both.
@@ -282,7 +282,7 @@ abort and roll back.
 %% \end{figure}
 
 As this discussion indicates, implementations of SI on real databases
-such as PostgresSQL are highly complicated, often running into
+such as PostgreSQL are highly complicated, often running into
 thousands of lines of code.  Nonetheless, the semantics of SI, in
 terms of how it effects transitions on the database state, can be
 captured in a fairly simple model. First, effects induced by one
@@ -570,7 +570,7 @@ The transformer for the loop itself can now be computed to be:
 \end{smathpar}
 Observe that the structure of the transformer mirrors the structure of
 the program itself. In particular, SQL statements become set
-operations, and the \C{DB} monad's $\bind$ becoms set monadic $\bind$.
+operations, and the \C{DB} monad's $\bind$ becomes set monadic $\bind$.
 The advantage of inferring such transformers is that we can now make
 use of a semantics-preserving translation from the domain of sets
 equipped with $\bind$ to a decidable fragment of first-order logic,
