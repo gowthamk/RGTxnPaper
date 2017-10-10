@@ -1060,7 +1060,7 @@ Consider $\stl, \stg, \stg', \stg_1$ and $n$ such that $R^{n-1}(\stg, \stg')$ an
 \end{proof}
 
 \begin{theorem}
-If $\I_e = \I_{ss}$, then $\forall \stl, \stg, \stg'. \R_e(\stl, \stg, \stg') \Rightarrow \stg = \stg'$ 
+If $\I_e = \I_ss$, then $\forall \stl, \stg, \stg'. \R_e(\stl, \stg, \stg') \Rightarrow \stg = \stg'$ 
 \end{theorem}
 \begin{proof}
 First, we show that 
@@ -1071,11 +1071,11 @@ $$
 $$
 Given $\stl, \stg, \stg'$ such that $\neg \I_e(\stl, \stg, \stg')$, $\stg \neq \stg'$. Since $R(\stg', \stg'')$ corresponds to the commit of a transaction, either the transaction is read-only, in which case $\stg' = \stg''$ and hence $\stg \neq \stg''$ which implies $\neg \I_e(\stl, \stg, \stg'')$, or the transaction modifies/inserts a record, in which case it will also add its own unique transaction id to the record, so that $\stg \neq \stg''$, which again implies the result.
 
-Now, consider $\stl, \stg, \stg'$ such that $\R_e(\stl, \stg, \stg')$.By definition of $\R_e$, there exists $\stg_1$ such that $\I_e(\stl, \stg_1, \stg')$. Hence, $\stg_1 = \stg'$. Now, $\I_e(\stl, \stg_1, \stg)$, because otherwise, if $\neg \I_e(\stl, \stg_1, \stg)$, then by the earlier result, $\neg \I_e((\stl, \stg_1, \stg')$ which is a contradiction. Hence, $\stg_1 = \stg$. This implies that $\stg = \stg'$.
+Now, we show that given $\stl, \stg, \stg'$ such that $\R_e(\stl, \stg, \stg')$, then $\stg = \stg'$. by definition of $\R_e$, there exists $\stg_1$ such that $\I_e(\stl, \stg_1, \stg')$. Hence, $\stg_1 = \stg'$. Now, $\I_e(\stl, \stg_1, \stg)$, because otherwise, if $\neg \I_e(\stl, \stg_1, \stg)$, then by the earlier result, $\neg \I_e((\stl, \stg_1, \stg')$ which is a contradiction. Hence, $\stg_1 = \stg$. This implies that $\stg = \stg'$.
 \end{proof}
 
 \begin{theorem}
-If $\I_e = \I_{ww}$, then $\forall \stl, \stg, \stg'. \R_e(\stl, \stg, \stg') \Rightarrow \stg = \stg'$ 
+If $\I_e = \I_ww$, then $\forall \stl, \stg, \stg'. \R_e(\stl, \stg, \stg') \Rightarrow \stg = \stg'$ 
 \end{theorem}
 
 

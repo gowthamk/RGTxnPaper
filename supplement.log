@@ -1,8 +1,8 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  7 JUL 2017 20:10
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  10 OCT 2017 13:00
 entering extended mode
- \write18 enabled.
+ restricted \write18 enabled.
  %&-line parsing enabled.
-**supplement
+**supplement.tex
 (./supplement.tex
 LaTeX2e <2016/03/31>
 Babel <3.9r> and hyphenation patterns for 83 language(s) loaded.
@@ -1523,51 +1523,51 @@ Overfull \hbox (25.26755pt too wide) in paragraph at lines 281--291
  []
 
 LaTeX Font Info:    Font shape `OT1/LinuxLibertineT-TLF/m/sc' will be
-(Font)              scaled to size 9.0pt on input line 359.
+(Font)              scaled to size 9.0pt on input line 360.
 Package microtype Info: Character `013' is missing
 (microtype)             in font `OT1/LinuxLibertineT-TLF/m/sc/9'.
 (microtype)             Ignoring protrusion settings for this character.
 [1.1{/usr/local/texlive/2016/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 Non-PDF special ignored!]
-Overfull \hbox (11.67934pt too wide) in paragraph at lines 387--398
+Overfull \hbox (11.67934pt too wide) in paragraph at lines 388--399
  $[]$ 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 371--400
+Underfull \hbox (badness 10000) in paragraph at lines 372--401
 
  []
 
 
-Overfull \hbox (2.76433pt too wide) in paragraph at lines 437--451
+Overfull \hbox (2.76433pt too wide) in paragraph at lines 438--452
  $[]$ 
  []
 
 
-Overfull \hbox (42.09613pt too wide) in paragraph at lines 456--471
+Overfull \hbox (42.09613pt too wide) in paragraph at lines 457--472
  $[]$ 
  []
 
 
-Overfull \hbox (1.66699pt too wide) in paragraph at lines 429--474
+Overfull \hbox (1.66699pt too wide) in paragraph at lines 430--475
 []$ $[]$ 
  []
 
 
-Overfull \hbox (8.70802pt too wide) in paragraph at lines 479--493
+Overfull \hbox (8.70802pt too wide) in paragraph at lines 480--494
  $[]$ 
  []
 
 
-Overfull \hbox (42.2555pt too wide) in paragraph at lines 595--613
+Overfull \hbox (7.97084pt too wide) in paragraph at lines 596--614
  $[]$ 
  []
 
 
-Underfull \vbox (badness 5893) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 LaTeX Font Info:    Try loading font information for TS1+LinuxBiolinumT-TLF on 
-input line 618.
+input line 619.
 
 (/usr/local/texlive/2016/texmf-dist/tex/latex/libertine/TS1LinuxBiolinumT-TLF.f
 d
@@ -1575,29 +1575,29 @@ File: TS1LinuxBiolinumT-TLF.fd 2012/11/26 (autoinst) Font definitions for TS1/L
 inuxBiolinumT-TLF.
 )
 LaTeX Font Info:    Font shape `TS1/LinuxBiolinumT-TLF/m/n' will be
-(Font)              scaled to size 10.0pt on input line 618.
+(Font)              scaled to size 10.0pt on input line 619.
 Package microtype Info: Loading generic settings for font family
 (microtype)             `LinuxBiolinumT-TLF' (encoding: TS1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
  [2.2]
-Overfull \hbox (34.6892pt too wide) in paragraph at lines 636--650
+Overfull \hbox (34.6892pt too wide) in paragraph at lines 637--651
  $[]$ 
  []
 
 LaTeX Font Info:    Font shape `OT1/LinuxLibertineT-TLF/m/it' will be
-(Font)              scaled to size 10.0pt on input line 660.
+(Font)              scaled to size 10.0pt on input line 661.
 LaTeX Font Info:    Font shape `OT1/LinuxLibertineT-TLF/m/it' will be
-(Font)              scaled to size 7.3pt on input line 676.
+(Font)              scaled to size 7.3pt on input line 677.
 LaTeX Font Info:    Font shape `OT1/LinuxLibertineT-TLF/m/it' will be
-(Font)              scaled to size 5.5pt on input line 676.
+(Font)              scaled to size 5.5pt on input line 677.
 
-Overfull \hbox (7.0509pt too wide) in paragraph at lines 687--691
+Overfull \hbox (7.0509pt too wide) in paragraph at lines 688--692
  $[]$ 
  []
 
 [3.3] [4.4] [5.5] [6.6] [7.7]
-Overfull \hbox (30.7705pt too wide) in paragraph at lines 1002--1003
+Overfull \hbox (30.7705pt too wide) in paragraph at lines 1003--1004
 []\OT1/LinuxLibertineT-TLF/m/n/10 (-20) Consider $\U/ntxmia/m/it/10 ^^A$ \OT1/L
 inuxLibertineT-TLF/m/n/10 (-20) such that $\OML/nxlmi/m/it/10 I\U/ntxmia/m/it/1
 0 {^^A|$\OT1/LinuxLibertineT-TLF/m/n/10 (-20) , and let $\U/ntxmia/m/it/10 {\OM
@@ -1610,13 +1610,91 @@ OML/nxlmi/m/it/10 I\U/ntxmia/m/it/10 {^^A[]|$ \OT1/LinuxLibertineT-TLF/m/n/10 (
  []
 
 [8.8]
+Overfull \hbox (26.56407pt too wide) in paragraph at lines 1059--1060
+[]\OT1/LinuxLibertineT-TLF/m/n/10 (-20) Consider $\OML/nxlmi/m/it/10 ^^N; \U/nt
+xmia/m/it/10 ^^A\OML/nxlmi/m/it/10 ; \U/ntxmia/m/it/10 ^^A[]\OML/nxlmi/m/it/10 
+; \U/ntxmia/m/it/10 ^^A[]$ \OT1/LinuxLibertineT-TLF/m/n/10 (-20) and $\OML/nxlm
+i/m/it/10 n$ \OT1/LinuxLibertineT-TLF/m/n/10 (-20) such that $\OML/nxlmi/m/it/1
+0 R[]\U/ntxmia/m/it/10 {^^A\OML/nxlmi/m/it/10 ; \U/ntxmia/m/it/10 ^^A[]|$ \OT1/
+LinuxLibertineT-TLF/m/n/10 (-20) and $\U/ntxsym/m/n/10 I[]\U/ntxmia/m/it/10 {\O
+ML/nxlmi/m/it/10 ^^N; \U/ntxmia/m/it/10 ^^A[]\OML/nxlmi/m/it/10 ; \U/ntxmia/m/i
+t/10 ^^A[]|$\OT1/LinuxLibertineT-TLF/m/n/10 (-20) . Then $\OML/nxlmi/m/it/10 R\
+U/ntxmia/m/it/10 {^^A[]\OML/nxlmi/m/it/10 ; \U/ntxmia/m/it/10 ^^A[]|$\OT1/Linux
+LibertineT-TLF/m/n/10 (-20) , $\OML/nxlmi/m/it/10 R\U/ntxmia/m/it/10 {^^A[]\OML
+/nxlmi/m/it/10 ; \U/ntxmia/m/it/10 ^^A[]|\OML/nxlmi/m/it/10 ; [] ; R\U/ntxmia/m
+/it/10 {^^A[]\OML/nxlmi/m/it/10 ; \U/ntxmia/m/it/10 ^^A[]|$\OT1/LinuxLibertineT
+-TLF/m/n/10 (-20) ,
+ []
+
+[9.9] (./inference-rules.tex
+Overfull \hbox (50.09518pt too wide) in paragraph at lines 31--40
+ $[]$ 
+ []
+
+
+Overfull \hbox (54.27962pt too wide) in paragraph at lines 44--56
+ $[]$ 
+ []
+
+
+Overfull \hbox (19.22163pt too wide) in paragraph at lines 60--73
+ $[]$ 
+ []
+
+
+Overfull \hbox (27.24554pt too wide) in paragraph at lines 78--88
+ $[]$ 
+ []
+
+
+Overfull \hbox (80.37524pt too wide) in paragraph at lines 93--104
+ $[]$ 
+ []
+
+
+Overfull \hbox (53.28311pt too wide) in paragraph at lines 109--120
+ $[]$ 
+ []
+
+
+Overfull \hbox (6.08844pt too wide) in paragraph at lines 125--135
+ $[]$ 
+ []
+
+
+Overfull \hbox (31.07591pt too wide) in paragraph at lines 142--152
+ $[]$ 
+ []
+
+) [10.10] (./inference-proof.tex [11.11]
+Overfull \hbox (9.06204pt too wide) detected at line 110
+\U/ntxsym/m/n/10 R \OMS/ntxsy/m/n/10 ` f\OML/nxlmi/m/it/10 ^^U\U/ntxmia/m/it/10
+ {\OML/nxlmi/m/it/10 ^^N; \U/ntxmia/m/it/10 ^^A|\OML/nxlmi/m/it/10 : ^^N \U/ntx
+mia/m/it/10 = \OML/nxlmi/m/it/10 s \OMS/ntxsy/m/n/10 [ \OML/nxlmi/m/it/10 y \OM
+S/ntxsy/m/n/10 ^^]\U/ntxmia/m/it/10 = {\OML/nxlmi/m/it/10 ^^Uz: \OT1/LinuxBioli
+numT-TLF/m/n/10 F\U/ntxmia/m/it/10 {\OML/nxlmi/m/it/10 s; \U/ntxmia/m/it/10 ^^A
+||  \OMS/ntxsy/m/n/10 ^  \OML/nxlmi/m/it/10 I\U/ntxmia/m/it/10 {^^A|\OMS/ntxsy/
+m/n/10 g \OT1/LinuxLibertineT-TLF/m/n/10 [\OML/nxlmi/m/it/10 c\OT1/LinuxLiberti
+neT-TLF/m/n/10 ][] \OMS/ntxsy/m/n/10 f\OML/nxlmi/m/it/10 ^^U\U/ntxmia/m/it/10 {
+\OML/nxlmi/m/it/10 ^^N; \U/ntxmia/m/it/10 ^^A|\OML/nxlmi/m/it/10 :^^N \U/ntxmia
+/m/it/10 = \OML/nxlmi/m/it/10 s \OMS/ntxsy/m/n/10 [ \OML/nxlmi/m/it/10 y \OMS/n
+txsy/m/n/10 ^^]\U/ntxmia/m/it/10 = {\OML/nxlmi/m/it/10 ^^Uz: \OT1/LinuxBiolinum
+T-TLF/m/n/10 F\U/ntxmia/m/it/10 {\OML/nxlmi/m/it/10 s; \U/ntxmia/m/it/10 ^^A|| 
+\OMS/ntxsy/m/n/10 [ \OML/nxlmi/m/it/10 F\U/ntxmia/m/it/10 {\OML/nxlmi/m/it/10 s
+ \OMS/ntxsy/m/n/10 [ \OML/nxlmi/m/it/10 y \OMS/ntxsy/m/n/10 ^^]\U/ntxmia/m/it/1
+0 = {\OML/nxlmi/m/it/10 ^^Uz: \OT1/LinuxBiolinumT-TLF/m/n/10 F\U/ntxmia/m/it/10
+ {\OML/nxlmi/m/it/10 s; \U/ntxmia/m/it/10 ^^A||\OML/nxlmi/m/it/10 ; \U/ntxmia/m
+/it/10 ^^A|\OMS/ntxsy/m/n/10 g
+ []
+
+[12.12])
 No file supplement.bbl.
-[9.9]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1051.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1051.
+[13.13]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1092.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1092.
  (./supplement.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1051.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1051.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1092.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1092.
 
 Package rerunfilecheck Info: File `supplement.out' has not changed.
 (rerunfilecheck)             Checksum: 5557BAB28579BFCCD01FFC3C70055B92;181.
@@ -1625,16 +1703,16 @@ Package rerunfilecheck Info: File `supplement.out' has not changed.
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 0.5pt have occurred.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1051.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1092.
  ) 
 Here is how much of TeX's memory you used:
- 25466 strings out of 493014
- 453502 string characters out of 6133351
- 557552 words of memory out of 5000000
- 28069 multiletter control sequences out of 15000+600000
- 101945 words of font info for 303 fonts, out of 8000000 for 9000
+ 25515 strings out of 493014
+ 454512 string characters out of 6133351
+ 557680 words of memory out of 5000000
+ 28078 multiletter control sequences out of 15000+600000
+ 103983 words of font info for 320 fonts, out of 8000000 for 9000
  1302 hyphenation exceptions out of 8191
- 60i,21n,94p,1149b,616s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 60i,21n,94p,1173b,616s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2016/texmf-dist/fonts/enc/dvips/libertine/lbtn_afusau.enc
 }{/usr/local/texlive/2016/texmf-dist/fonts/enc/dvips/libertine/lbtn_naooyc.enc}
 {/usr/local/texlive/2016/texmf-dist/fonts/enc/dvips/libertine/lbtn_tltjc6.enc}{
@@ -1654,18 +1732,21 @@ local/texlive/2016/texmf-dist/fonts/type1/public/libertine/LinLibertineTB.pfb><
 pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/newtx/fxlri-5letters
 .pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/newtx/fxlri-7letter
 s.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/txfonts/rtxmi.pfb>
-</usr/local/texlive/2016/texmf-dist/fonts/type1/public/txfonts/rtxr.pfb></usr/l
-ocal/texlive/2016/texmf-dist/fonts/type1/public/txfonts/txex.pfb></usr/local/te
-xlive/2016/texmf-dist/fonts/type1/public/txfonts/txsy.pfb></usr/local/texlive/2
-016/texmf-dist/fonts/type1/public/txfonts/txsya.pfb></usr/local/texlive/2016/te
-xmf-dist/fonts/type1/public/txfonts/txsyb.pfb></usr/local/texlive/2016/texmf-di
-st/fonts/type1/public/txfonts/txsyc.pfb></usr/local/texlive/2016/texmf-dist/fon
-ts/type1/public/newtx/zxlr.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/
-public/newtx/zxlri.pfb>
-Output written on supplement.pdf (9 pages, 595698 bytes).
+</usr/local/texlive/2016/texmf-dist/fonts/type1/public/newtx/rtxmi7.pfb></usr/l
+ocal/texlive/2016/texmf-dist/fonts/type1/public/txfonts/rtxr.pfb></usr/local/te
+xlive/2016/texmf-dist/fonts/type1/public/stmaryrd/stmary10.pfb></usr/local/texl
+ive/2016/texmf-dist/fonts/type1/public/stmaryrd/stmary9.pfb></usr/local/texlive
+/2016/texmf-dist/fonts/type1/public/txfonts/txex.pfb></usr/local/texlive/2016/t
+exmf-dist/fonts/type1/public/txfonts/txsy.pfb></usr/local/texlive/2016/texmf-di
+st/fonts/type1/public/txfonts/txsya.pfb></usr/local/texlive/2016/texmf-dist/fon
+ts/type1/public/txfonts/txsyb.pfb></usr/local/texlive/2016/texmf-dist/fonts/typ
+e1/public/txfonts/txsyc.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/pub
+lic/newtx/zxlr.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/newtx
+/zxlri.pfb>
+Output written on supplement.pdf (13 pages, 631215 bytes).
 PDF statistics:
- 174 PDF objects out of 1000 (max. 8388607)
- 144 compressed objects within 2 object streams
- 29 named destinations out of 1000 (max. 500000)
+ 214 PDF objects out of 1000 (max. 8388607)
+ 177 compressed objects within 2 object streams
+ 39 named destinations out of 1000 (max. 500000)
  51749 words of extra memory for PDF output out of 61914 (max. 10000000)
 

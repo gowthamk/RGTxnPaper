@@ -114,13 +114,13 @@ Now, since all iterations are independent of each other, $F(s \cup y \bind (\lam
 From $\stable(\R, I)$, we have $\stable(\R, P)$. Since $F$ has been stabilized using the $\stabilize{}$ function, and $\psi$ is an assertion on the union of multiple applications of $F$, it follows that $\stable(\R, \psi)$. Using the same reasoning, $\stable(\R, Q)$. Thus, all the premises of \rulelabel{RG-Foreach} are satisfied.
 
 
-%The cases for SQL statements follow fro
-%the corresponding RG rules trivially. \C{LET}, \C{IF-THEN-ELSE}, and
-%sequence case proof follows from the inductive hypothesis. The only
-%interesting case is \C{FOREACH}, where the corresponding RG rule
-%requires a loop invariant ($\psi$). The loop invariant is as
-%following: $\psi(\stl,\stg) \Leftrightarrow \stl = y\bind(\lambda
-%z.~\F_c(\stl,\stg)$, where $\F_c$ is the transformer of the loop body.
+The cases for SQL statements follow fro
+the corresponding RG rules trivially. \C{LET}, \C{IF-THEN-ELSE}, and
+sequence case proof follows from the inductive hypothesis. The only
+interesting case is \C{FOREACH}, where the corresponding RG rule
+requires a loop invariant ($\psi$). The loop invariant is as
+following: $\psi(\stl,\stg) \Leftrightarrow \stl = y\bind(\lambda
+z.~\F_c(\stl,\stg)$, where $\F_c$ is the transformer of the loop body.
 % \begin{itemize}
 %   \item \C{INSERT}: $\F$ is:
 %   \begin{smathpar}
