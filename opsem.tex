@@ -10,14 +10,14 @@ Fig.~\ref{fig:txnimp} shows the syntax and small-step semantics of
 reasoning under weak isolation. Variables ($x$), integer and Boolean
 constants ($k$), records ($r$) of named constants, sets ($s$) of such
 records, arithmetic and boolean expressions ($e_1 \odot e_2$), and
-record expressions ($\{\bar{f}=\bar{e}\}$) constitute the syntactic
+record expressions ($[\bar{f}=\bar{e}]$) constitute the syntactic
 class of expressions ($e$). Commands ($c$) include $\cskip$,
 conditional statements, \C{LET} constructs to bind names, \C{FOREACH}
-loops, SQL statements, their sequential composition ($c_1;c_2$), and
+loops, SQL statements, their sequential composition ($c_1;c_2$), 
 transactions ($\ctxn{i}{\I}{c}$) and their parallel composition
 ($c_1\,||\,c_2$). Each transaction is assumed to have a unique
 identifier $i$, and executes at the top-level; our semantics does not
-supported nested transactions. The $\I$ in the \C{TXN} block syntax is
+support nested transactions. The $\I$ in the \C{TXN} block syntax is
 the transaction's isolation specification, whose purpose is explained
 below.  Certain terms that only appear at run-time are also present in
 $c$.  These include a {\sf txn} block tagged with sets ($\stl$ and
@@ -44,10 +44,11 @@ terms of an abstract machine that executes a command, and updates
 either a transaction-local ($\stl$), or global ($\stg$) database, both
 of which are modeled as a set of records of a pre-defined type, i.e.,
 they all belong to a single table.  The generalization to multiple
-tables is straightforward. The semantics assumes that  records in
-$\stg$ can be uniquely identified via their $\idf$ field, and
+tables is straightforward, e.g., by having the machine manipulate a
+set of sets, one for each table.  The semantics assumes that records
+in $\stg$ can be uniquely identified via their $\idf$ field, and
 enforces this property wherever necessary. Certain hidden fields are
-treated specially by the operational semantics, and they are hidden
+treated specially by the operational semantics, and are hidden
 from the surface language. These include a $\txnf$ field that tracks
 the identifier of the transaction that last updated the record, and a
 $\delf$ field that flags deleted records in $\stl$.  For a set $S$ of
@@ -64,15 +65,15 @@ records\footnote{While SQL's \C{UPDATE} admits writes at the
 records, whose $\delf$ field is set to \C{true}. When the transaction
 commits, its local database is atomically \emph{flushed} to the global
 database, committing these heretofore uncommitted records. The flush
-operation ($\gg$) is defined as follows:
+operation ($\rhd$) is defined as follows:
 \begin{smathpar}
 \begin{array}{c}
-\forall r.~ r \in (\stl\gg\stg) ~\Leftrightarrow~ 
+\forall r.~ r \in (\stl\rhd\stg) ~\Leftrightarrow~ 
   (r.\idf \notin \dom(\stl) \conj r \in \stg)
 \disj (r \in \stl \conj \neg r.\delf) 
 \end{array}
 \end{smathpar}
-Let $\stg' = \stl\gg\stg$. A record $r$ belongs to $\stg'$ iff it
+Let $\stg' = \stl\rhd\stg$. A record $r$ belongs to $\stg'$ iff it
 belongs to $\stg$ and has not been updated in $\stl$, i.e., $r.\idf
 \notin \dom(\stl)$, or it belongs to $\stl$, i.e., it is either a new
 record, or an updated version of an old record, provided the update is
@@ -83,7 +84,7 @@ resulting from flushing the current local state ($\stl$) to the global
 state ($\stg$). The abstract machine of Fig.~\ref{fig:txnimp},
 however, does not let a transaction read its own writes. This
 simplifies the semantics, without losing any generality, since
-substituting $\stl\gg\stg$ for $\stg$ at select places in the
+substituting $\stl\rhd\stg$ for $\stg$ at select places in the
 reduction rules effectively allows reads of uncommitted transaction
 writes to be realized.
 
@@ -113,11 +114,11 @@ function argument with $s_1$ and the current element $x$ (note:
 $\uplus$ in $\{x\} \uplus s_2$ denotes a disjoint union). The
 reduction ends when $s_2$ becomes empty. The reduction rules for
 conditionals, \C{LET} binders, and sequences are standard, and
-omitted for brevity.
+ommitted for brevity.
 
 The top-level reduction relation defines the small-step semantics of
 transactions, and their parallel composition. A transaction comes
-tagged with an isolation specification $\I$, which has two components
+tagged with an \emph{isolation specification} $\I$, which has two components
 $\I_e$ and $\I_c$, that dictate the timing and nature of interferences
 that the transaction can witness, during its execution ($\I_e$), and
 when it is about to commit ($\I_c$).  Formally, $\I_e$ and $\I_c$ are
@@ -136,6 +137,10 @@ PostgreSQL defines $\I$ as follows:
 \I_c\,\,(\stl,\stg,\stg') & = & \forall(r\in\stl)(r'\in\stg).~ r'.\idf = r.\idf \Rightarrow r'\in\stg'.
 \end{array}
 \end{smathpar}
+This definition dictates that no change to the global database state
+can be visible to an SI transaction while it executes ($\I_e$), and
+there should be no concurrent updates to records written by the
+transaction by other concurrently executing ones ($\I_c$).
 To simplify the presentation, we use $\I$ instead of $\I_e$ and $\I_c$
 when its destructed form is not required.
 
@@ -145,14 +150,14 @@ its run-time form $\ctxnr{i}{\I,\stl,\stg}{c}$, where $\stl =
 \rulelabel{E-Txn} reduces $\ctxnr{i}{\I,\stl,\stg}{c}$ under a
 database state ($\stg'$), only if the transaction-body isolation
 specification ($\I_e$) allows the interference between $\stg$ and
-$\stg'$. Rule \rulelabel{E-Commit} commits the transaction
-$\ctxnr{i}{\I,\stl,\stg}{c}$ by flushing its uncommitted records to
-the database. This is done only if the interference between $\stg$ and
-$\stg'$ is allowed at the commit point by the isolation specification
-($\I_c$).  The distinction between $\I_e$ and $\I_c$ allows us to
-model the snapshot semantics of realistic isolation levels that
-isolate a transaction from interference during its execution, but
-expose interferences at the commit point.
+$\stg'$.   Rule \rulelabel{E-Commit} commits the
+transaction $\ctxnr{i}{\I,\stl,\stg}{c}$ by flushing its uncommitted
+records to the database. This is done only if the interference between
+$\stg$ and $\stg'$ is allowed at the commit point by the isolation
+specification ($\I_c$).  The distinction between $\I_e$ and $\I_c$
+allows us to model the snapshot semantics of realistic isolation
+levels that isolate a transaction from interference during its
+execution, but expose interferences at the commit point.
 
 \textbf{Local Context Independence} As mentioned previously, our
 operational semantics does not let a transaction read its own writes.

@@ -9,10 +9,10 @@
   violate application-specific invariants. As a result, database
   systems in practice support, and often encourage, developers to
   implement transactions using weaker alternatives. These alternatives
-  break the strong isolation guarantees offered by serializable
-  transactions to permit greater concurrency. Unfortunately, the
-  semantics of weak isolation is poorly understood, and usually
-  explained only informally in terms of low-level implementation
+  break the strong isolation guarantees offered by serializablity to
+  permit greater concurrency. Unfortunately, the semantics of weak
+  isolation is poorly understood, and usually explained only
+  informally in terms of low-level implementation
   artifacts. Consequently, verifying high-level correctness properties
   in such environments remains a challenging problem.
 
@@ -22,7 +22,7 @@
   necessary to use this logic may dissuade application developers, we
   also describe an inference procedure based on this foundation that
   ascertains the weakest isolation level that still guarantees the
-  safety of high-level consistency assertions associated with such
+  safety of high-level consistency invariants associated with such
   transactions.  The key to effective inference is the observation
   that weakly-isolated transactions can be viewed as functional
   (monadic) computations over an abstract database state, allowing us
@@ -30,9 +30,9 @@
   This interpretation enables automated verification using
   off-the-shelf SMT solvers.
   
-  Notably, our development is parametric over a transaction's specific
+  Our development is parametric over a transaction's specific
   isolation semantics, allowing it to be applicable over a range of
-  concurrency control mechanisms.  Case studies and experiments on
+  weak isolation mechanisms.  Case studies and experiments on
   real-world applications (written in an embedded DSL in OCaml)
   demonstrate the utility of our approach, and provide strong evidence
   that automated verification of weakly-isolated transactions can be
