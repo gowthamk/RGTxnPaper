@@ -599,9 +599,9 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
  \stable(R, I) \spc
   \stable(R,\I)\spc
   P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
-  \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') \spc
+  \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg) \wedge \I_e(\stl, \stg_1, \stg') \spc
   \R_e \vdash \rg{P}{c}{Q}\\
-  \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg')  \spc
+  \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg) \wedge \I_c(\stl, \stg_1, \stg')  \spc
   \stable(\R_c,Q)\\
   \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
     G(\stg, \stl \gg \stg)\spc
@@ -719,9 +719,9 @@ RG-Txn is sound.
   \stable(R, I) & HI\\
   \stable(R,\I) & H\I \\
   P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg) & HP\\ 
-  \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') & H\R_l \\
+  \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg) \wedge  \I_e(\stl, \stg_1, \stg') & H\R_l \\
   \R_e\vdash \rg{P}{c}{Q} & Hc\\
-  \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg') & H\R_c \\
+  \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg) \wedge  \I_c(\stl, \stg_1, \stg') & H\R_c \\
   \stable(\R_c,Q) & HQ \\
   \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
     G(\stg, \stl \gg \stg)\spc  & HQG \\
@@ -745,7 +745,7 @@ Expanding the definition of the assertion $Hc$ and instantiating it with $\stg =
 
 We will prove this by contradiction. Assume that there is a configuration $(t_1, \stg_b)$ such that $\neg \I_e( t_1.\stl, t_1.\stg, \stg_b)$. Let $(t_1, \stg_{b}^{'}) \rightarrow (t_{1}^{'}, \stg_{b}^{'})$ be the next step in $\pi$ taken by the transaction. We know that this step always exists because the last step in $\pi$ is taken by the transaction.  Then $\mathbb{I}_e(t_1.\stl, t_1.\stg, \stg_{b}^{'})$. All steps between $(t_1, \stg_b)$ and $(t_1, \stg_{b}^{'})$ are taken by the environment, i.e. $R^{k}(\stg_b, \stg_{b}^{'})$ for some $k$. However,  $\neg \I_e(t_1.\stl, t_1.\stg, \stg_b)$, the assertion $H\I$ and a simple induction on $k$ shows that $\neg \I_e(t_1.\stl, t_1.\stg, \stg_{b}^{'})$. This is a contradiction. Hence, $\I_e(t_1.\stl, t_1.\stg, \stg_b)$. 
 
-Now, we will show that every environment step in $\pi$ is in $\R_e$. Assume that $(t_1, \stg_a) \rightarrow_R (t_1, \stg_b)$ is an environment step such that $R(\stg_a, \stg_b)$. Then, we know that $\I_e(t_1.\stl, t_1.\stg, \stg_b)$. Hence, $t_1.\stg$ provides the existence of $\stg_1$ in the definition of $\R_e$. Thus, $\R_e(t_1.\stl, \stg_a, \stg_b)$. We can use $Hc$ and make the assertion $Q(t^{'}.\stl, \stg_2)$.
+Now, we will show that every environment step in $\pi$ is in $\R_e$. Assume that $(t_1, \stg_a) \rightarrow_R (t_1, \stg_b)$ is an environment step such that $R(\stg_a, \stg_b)$. Then, we know that $\I_e(t_1.\stl, t_1.\stg, \stg_b)$ and $\I_e(t_1.\stl, t_1.\stg, \stg_a)$. Hence, $t_1.\stg$ provides the existence of $\stg_1$ in the definition of $\R_e$. Thus, $\R_e(t_1.\stl, \stg_a, \stg_b)$. We can use $Hc$ and make the assertion $Q(t^{'}.\stl, \stg_2)$.
 
 Note that $t^{'}.\stg = \stg_2$. Also, since all the changes in the global database state have so far been made by the environment, $I(\stg_2)$.
 
@@ -753,7 +753,7 @@ $(t^{'}, \stg_2) \rightarrow_{R}^{n_3 - 1} (t^{'}, \stg_{2}^{'}) \rightarrow (\t
 
 We will prove this by contradiction. Suppose for some $i$, $\neg \I_c(t^{'}.\stl, \stg_2, \stg_{2i})$. Clearly, $R^{j}(\stg_{2i}, \stg^{'})$. Then, by $H\I$ and a simple induction on $j$, we can show that $\neg \I_c(t^{'}.\stl, \stg_2, \stg_{2}^{'})$. However, this is a contradiction. Hence, $\forall k$, $\I_c(t^{'}.\stl, \stg_2, \stg_{2k})$.
 
-Now, we will show that every environment step is in $\R_c$. Consider the step $(t^{'}, \stg_{2k}) \rightarrow_R (t^{'}, \stg_{2(k+1)})$. We have $\I_c(t^{'}.\stl, \stg_2, \stg_{2(k+1)})$. Hence, $\stg_2$ provides the existence of $\stg_1$ in the definition of $\R_c$. Thus, $\R_c(t^{'}.\stl, \stg_{2k}, \stg_{2(k+1)})$.
+Now, we will show that every environment step is in $\R_c$. Consider the step $(t^{'}, \stg_{2k}) \rightarrow_R (t^{'}, \stg_{2(k+1)})$. We have $\I_c(t^{'}.\stl, \stg_2, \stg_{2(k+1)})$ and $\I_c(t^{'}.\stl, \stg_2, \stg_{2k})$. Hence, $\stg_2$ provides the existence of $\stg_1$ in the definition of $\R_c$. Thus, $\R_c(t^{'}.\stl, \stg_{2k}, \stg_{2(k+1)})$.
 
 By $HQ$, $Q(t^{'}.\stl, \stg_2)$ and Lemma 3.3 we have $Q(t^{'}.\stl, \stg_{2}^{'})$. Since all state changes so far have been made by the environment, $I(\stg_{2}^{'})$. By $HQG$, $G(\stg_{2}^{'}, t^{'}.\stl \gg \stg_{2}^{'})$. By the E-Commit rule, $\stg_3 = (t^{'}.\stl \gg \stg_{2}^{'})$. Hence, $G(\stg_{2}^{'}, \stg_3)$. All the steps of the transaction except the commit step do not change the global database state and by $HID$ belong to $G$. The commit step satisfies $G$. This proves the \texttt{step-guaranteed} assertion. Finally, by $HG$, $I(\stg_3)$.
 

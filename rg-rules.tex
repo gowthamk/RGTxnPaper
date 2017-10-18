@@ -123,10 +123,10 @@
   \stable(R,\I)\spc
   \stable(R,I)\spc
   P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
-  \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg')\\
-  \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg')\\
-  \R_l \vdash \rg{P}{c}{Q} \spc \stable(\R_c,Q) \spc 
-  \forall \stg.~G(\stg,\stg)\\
+  \R_e = R \backslash \I_e \spc \R_c = R \backslash \I_c \spc 
+  %\R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg) \wedge \I_e(\stl, \stg_1, \stg')\\
+  %\R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1. R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg) \wedge \I_c(\stl, \stg_1, \stg')\\
+  \R_e \vdash \rg{P}{c}{Q} \spc \stable(\R_c,Q) \\ 
   \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
     G(\stg, \stl \gg \stg)\spc
   \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
