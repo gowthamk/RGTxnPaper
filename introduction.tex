@@ -24,14 +24,14 @@ further exacerbated when the database is replicated, requiring
 additional coordination
 mechanisms~\cite{cap,sernotavlbl,bailishat,bernsigmod13}.
 
-The tension between serializable transactions, which are easy to
-reason about but difficult to implement efficiently, and more
-pragmatic variants that are driven by performance and availability
-considerations, has motivated the development of weaker forms of
-transaction isolation, beginning as early as 1976~\cite{gray1976};
-these instantiations permit a transaction to witness various effects
-of newly committed, or even concurrently running, transactions while
-it executes.  The ANSI SQL 92 standard defines three such weak
+Because serializable transactions favor correctness over performance,
+there has been long-standing interest~\cite{gray1976} in the database
+community to consider weaker variants that try to recover performance,
+even at the expense of simplicity and ease of reasoning.  These
+instantiations permit a transaction to witness various effects of
+newly committed, or even concurrently running, transactions while it
+executes, thus weakening serializability's strong isolation
+guarantees.  The ANSI SQL 92 standard defines three such weak
 isolation levels which are now implemented in many relational and
 NoSQL databases. Not surprisingly, weakly-isolated transactions have
 been found to significantly outperform serializable transactions on
@@ -44,7 +44,7 @@ not offer it at all.  A 2015 study~\cite{bailisferal} of a large
 corpus of database applications finds no evidence that applications
 manifestly change the default isolation level offered by the
 database. Taken together, these studies make clear that
-weakly-isolated transactions are quite prevalent in practice, whereas
+weakly-isolated transactions are quite prevalent in practice, and
 serializable transactions are often eschewed.
 
 Unfortunately, weak isolation admits behaviors that are difficult to
@@ -75,43 +75,44 @@ strategy; indeed, 75\% of the invariants studied in~\cite{bailisferal}
 were shown to be preserved under some form of weak isolation.  When to
 use weak isolation, and in what form, is therefore a prominent
 question facing all database programmers.\footnote{This position has
-  been echoed by leading database researchers who lament the lack of a
-  better understanding of this problem.  See: {\tt
-    http://www.bailis.org/blog/understanding-weak-isolation-is-a-serious-problem}.}
+been echoed by leading database researchers who lament the lack of a
+better understanding of this problem; see e.g., {\tt
+  http://www.bailis.org/blog/understanding-weak-isolation-is-a-serious-problem}.}
 
-A major problem with weak isolation is that its semantics in the
-context of user programs is not precisely understood. The original
-proposal~\cite{gray1976} defines multiple ``degrees'' of weak
-isolation in terms of implementation details such as the nature and
-duration of locks held in each case. The ANSI SQL 92 standard defines
-four levels of isolation (including serializability) in terms of
-various undesirable \emph{phenomena} (\eg \emph{dirty reads}) each is
-required to prevent. While this is an improvement, it requires
-programmers to be prescient about the possible ways various
-undesirable phenomena might manifest in their applications, and in
-each case determine if the phenomenon can be allowed without violating
-application invariants. This is understandably hard, especially in the
-absence of any formal underpinning to define weak isolation semantics.
-Adya~\cite{adyaphd} presents the first formal definitions of some
-well-known isolation levels in the context of a sequentially
-consistent (SC) database.  However, there has been little progress
-relating Adya's system model to a formal operational semantics or a
-proof system that can facilitate rigorous correctness arguments.
-Consequently, reasoning about weak isolation remains an error prone
-endeavor, with major database vendors~\cite{postgresiso, mysqliso,
-  oracleiso} continuing to document their isolation levels primarily
-in terms of the undesirable phenomena a particular isolation level may
-induce, placing the burden on the programmer to determine application
-correctness.
+A major problem with weak isolation as currently specified is that its
+semantics in the context of user programs is not easily
+understood. The original proposal~\cite{gray1976} defines multiple
+``degrees'' of weak isolation in terms of implementation details such
+as the nature and duration of locks held in each case. The ANSI SQL 92
+standard defines four levels of isolation (including serializability)
+in terms of various undesirable \emph{phenomena} (\eg \emph{dirty
+  reads} - reading data written by an uncommitted transaction) each is
+required to prevent. While this is an improvement, this style of
+definition still requires programmers to be prescient about the
+possible ways various undesirable phenomena might manifest in their
+applications, and in each case determine if the phenomenon can be
+allowed without violating application invariants. This is
+understandably hard, especially in the absence of any formal
+underpinning to define weak isolation semantics.  Adya~\cite{adyaphd}
+presents the first formal definitions of some well-known isolation
+levels in the context of a sequentially consistent (SC) database.
+However, there has been little progress relating Adya's system model
+to a formal operational semantics or a proof system that can
+facilitate rigorous correctness arguments.  Consequently, reasoning
+about weak isolation remains an error prone endeavor, with major
+database vendors~\cite{postgresiso, mysqliso, oracleiso} continuing to
+document their isolation levels primarily in terms of the undesirable
+phenomena a particular isolation level may induce, placing the burden
+on the programmer to determine application correctness.
 
 Recent results on reasoning about application invariants in the
 presence of weak consistency~\cite{burckhardt14, redblueosdi,
-redblueatc, ecinec, gotsmanpopl16} address broadly related concerns.
+  redblueatc, ecinec, gotsmanpopl16} address broadly related concerns.
 Weak consistency is a phenomenon that manifests on replicated data
 stores, where atomic operations are concurrently executed against
 different replicas, resulting in an execution order inconsistent with
 any sequential order. In contrast, weak isolation is a property of
-concurrent transactions interfering with one another resulting in an
+concurrent transactions interfering with one another, resulting in an
 execution order that is not serializable. Unlike weak consistency,
 weak isolation can manifest even in an unreplicated setting, as
 evident from the support for weakly-isolated transactions on
@@ -154,21 +155,23 @@ conventional (unreplicated) databases as mentioned above.
 % of~\cite{gotsmanpopl16} etc). 
 
 In this paper, we propose a program logic for weakly-isolated
-transactions along with automated verification support that realizes
-this goal.  We develop a set of syntax-directed compositional proof
-rules that allow developers to build correctness proofs for
+transactions along with automated verification support to allow
+developers to verify the soundness of their applications, without
+having to resort to low-level operational reasoning as they are forced
+to do currently.  We develop a set of syntax-directed compositional
+proof rules that enable the construction of correctness proofs for
 transactional programs in the presence of a weakly-isolated
 concurrency control mechanism.  Realizing that the proof burden
-imposed by these rules would likely discourage applications
-programmers from using them, we present an inference procedure based
-that automatically verifies the weakest isolation level for a
-transaction that ensures its consistency requirements are maintained.
-The key to inference is a novel formulation of database state
-(represented as sets of tuples) as a monad, and in which database
-computations are interpreted as state transformers over these sets.
-This interpretation leads to an encoding of database computations
-amenable for verification by off-the-shelf SMT solvers.  The paper
-makes the following contributions:
+imposed by these rules may discourage applications programmers from
+using them, we also present an inference procedure based on these
+rules that automatically verifies the weakest isolation level for a
+transaction that still ensures its invariants are maintained.  The key
+to inference is a novel formulation of database state (represented as
+sets of tuples) as a monad, and in which database computations are
+interpreted as state transformers over these sets.  This
+interpretation leads to an encoding of database computations amenable
+for verification by off-the-shelf SMT solvers.  The paper makes the
+following contributions:
 %% We have realized these ideas as an embedded DSL within OCaml, that
 %% supports common relational SQL operations (updates, selects, inserts,
 %% deletes, joins, etc.).  Experimental results on real-world benchmarks
@@ -177,14 +180,14 @@ makes the following contributions:
 %% safety of realistic database computations.
 \begin{enumerate}
 \item We analyze properties of weak isolation in the context of an
-  embedded DSL for OCaml that treats SQL-based relational database
-  operations (e.g., inserts, selects, deletes, joins, updates, etc.)
-  as monadic computations over an abstract database state.
- \item We develop an operational semantics and compositional proof
-   system for this language capable of relating high-level application
-   invariants to database state, parameterized by a weak isolation
-   semantics that selectively exposes the visibility of these
-   operations to other transactions.
+    embedded DSL for OCaml that treats SQL-based relational database
+    operations (e.g., inserts, selects, deletes, joins, updates, etc.)
+    as monadic computations over an abstract database state.
+ \item We develop an operational semantics and a compositional
+   rely-guarantee style proof system for this language capable of
+   relating high-level application invariants to database state,
+   parameterized by a weak isolation semantics that selectively
+   exposes the visibility of these operations to other transactions.
  \item Exploiting the monadic definition of database state, we devise
    an inference algorithm capable of discovering the weakest isolation
    level that is sound with respect to a transaction's high-level
@@ -196,7 +199,7 @@ makes the following contributions:
  \item We present details of a realistic implementation along with an
    evaluation study on real-world database benchmarks that justify our
    approach and the utility of our proof methodology and inference
-   mechanism..
+   mechanism.
 \end{enumerate}
 \noindent Our results provide the first (to the best of our knowledge)
 formalization of weakly-isolated transactions, along with an
