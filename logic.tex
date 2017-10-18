@@ -3,37 +3,32 @@
 %
 \begin{smathpar}
 \begin{array}{lclcr}
-\mssemof{x \ALT \stl \ALT \stg \ALT \ldots} & = & (true,g_x) \ALT
-  (true,g_\stl) \ALT (true,g_\stg) \ALT \ldots & \texttt{  }
+  \mssemof{x \ALT \stl \ALT \stg \ALT \ldots} & = & \lambda
+  y.\,y \in x \ALT \lambda y.\,y\in\stl \ALT 
+  \lambda y.\,y\in\stg \ALT \ldots & \texttt{  }
   & \\
 %\fresh(g_x) \spc \fresh(g_\stl) \spc \fresh(g_\stg)\\
 %
-\mssemof{\{a \,|\, \varphi\}} & = & (\forall a.~ g(a) \Leftrightarrow \varphi,g) 
-  & \texttt{  } & \fresh(g)\\
+\mssemof{\{a \,|\, \varphi\}} & = & \lambda a.\,\varphi
+  & \texttt{  } & \\
 %
-\mssemof{\existsl(a,\phi,s)} & = &  (\phi_1 \conj \mssemof{[a'/a]\phi} 
+\mssemof{\existsl(a,\phi,s)} & = &  (\lambda y.\, [a'/a]\phi \conj
+  \mssemof{s}(y)
 % \conj \forall b.~ g(b) \Leftrightarrow g_1(b)
-  , ~g_1)
-  & \texttt{  } & (\phi_1,g_1)=\mssemof{[a'/a]s} \spc \fresh(a') 
+  & \texttt{  } & \fresh(a') 
 % \spc \fresh(g)\\
   \\
 %
-\mssemof{s_1 \bind \lambda x. s_2} & = & (\phi_1 \conj \phi_2 \conj
-  \forall a.\exists b.~ g(a) \Rightarrow g_2(b) \wedge [b/x]g_1(a) & & \\
-&& \hspace*{0.57in}\conj \forall b.\forall a.~g_2(b) \wedge [b/x]g_1(a) 
-      \Rightarrow g(a), ~g) & \texttt{  } & (\phi_1,g_1)=\mssemof{s_1} \spc
-      (\phi_2,g_2)=\mssemof{s_2} \spc \fresh(g)\\
+\mssemof{s_1 \bind \lambda y. s_2} & = & \lambda a.~
+  (\forall x.\forall y.~ \mssemof{s_1}(x) \conj \mssemof{s_2}(y) 
+   \Rightarrow g(y)) \conj g(a) & \texttt{  } &  \fresh(g)\\
 %
-\mssemof{\itel{\varphi}{s_1}{s_2}} & = & (\phi_1 \conj \phi_2 \conj
-  \forall a.~ g(a) \Leftrightarrow (\varphi \Rightarrow g_1(a))& & \\
-&&  \hspace*{1.5in}\wedge (\neg\varphi \Rightarrow g_2(a)),~g) & \texttt{  } 
-      & (\phi_1,g_1)=\mssemof{s_1} \spc
-      (\phi_2,g_2)=\mssemof{s_2} \spc \fresh(g)\\
+\mssemof{\itel{\varphi}{s_1}{s_2}} & = & \lambda a.\,
+  (\varphi \Rightarrow \mssemof{s_1}(a)) \conj 
+  (\neg\varphi \Rightarrow \mssemof{s_2}(a)) & \texttt{  } & \\
 %
-\mssemof{s_1 \cup s_2} & = & (\phi_1 \conj \phi_2 \conj
-  \forall a.~ g(a) \Leftrightarrow g_1(a) \vee g_2(a),~g) 
-  & \texttt{ } & (\phi_1,g_1)=\mssemof{s_1} \spc
-      (\phi_2,g_2)=\mssemof{s_2} \spc \fresh(g)\\
+  \mssemof{s_1 \cup s_2} & = & \lambda a.\, \mssemof{s_1}(a) \disj
+    \mssemof{s_2}(a) & \texttt{ } & \\
 \end{array}
 \end{smathpar}
 

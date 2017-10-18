@@ -109,19 +109,19 @@ let add_interest acc_id pc = atomically @@ do
 \end{figure}
 Here, an \C{add\_interest} transaction adds a positive interest
 (\C{pc}) to the balance of a bank account, which is required to be
-non-negatives ($I(\stg) \Leftrightarrow \forall(r\in\stg).~r.\C{bal}\ge
+non-negative ($I(\stg) \Leftrightarrow \forall(r\in\stg).~r.\C{bal}\ge
 0$). The transaction starts by issuing a \C{select1} query, whose
 effect implicitly asserts that there exists a record in the bank
-account database that is equal to $a$
-($\exists(r\in\stg).~r=a$). However, this assertion is unstable
-because a concurrent \C{withdraw} or \C{deposit} transactions might
-update the account balance, so that such a record no longer exists in
-the database.  Fortunately, the weakening operator
-($\stabilize{\cdot}$) allows us to weaken the assertion to $\exists
-\stg'.I(\stg') \conj \exists(r\in\stg').~a=r$ (Fig.~\ref{fig:logic}
-formalizes the encoding of {\sf exists} to logic), which is enough to
-prove that $\C{a.bal + pc*a.bal}\ge 0$, and verify that
-\C{add\_interest} preserves the positive balance invariant.
+account database that is equal to $a$ ($\exists(r\in\stg).~r=a$).
+However, this assertion is unstable because a concurrent \C{withdraw}
+or \C{deposit} transactions might update the account balance, so that
+such a record no longer exists in the database.  Fortunately, the
+weakening operator ($\stabilize{\cdot}$) allows us to weaken the
+assertion to $\exists \stg'.I(\stg') \conj \exists(r\in\stg').~a=r$
+({\sf exists} translates to $\exists$ in first-order logic, as
+formalized in Fig.~\ref{fig:logic}), which is enough to prove that
+$\C{a.bal + pc*a.bal}\ge 0$, and verify that \C{add\_interest}
+preserves the positive balance invariant.
 
 The state transformer rules, like the earlier RG rules, closely follow
 the corresponding reduction rules in Fig.~\ref{fig:txnimp}, except
@@ -226,7 +226,7 @@ the supplementary material.}:
   \end{smathpar}
 \end{theorem}
 \noindent where the set expression $\F(\emptyset,\stg)$ has a natural
-interpretation as discussed below.
+interpretation in the theory of sets.
 % Where, ${\sf true} = \lambda(\stl,\stg).~true$ and $\stable(\R,I)
 % \Leftrightarrow \forall\stl,\stg,\stg'. I(\stg) \conj
 % \R(\stl,\stg,\stg') \Rightarrow \I(\stg')$.
@@ -235,17 +235,16 @@ interpretation as discussed below.
 
 Theorem~\ref{thm:inference-sound} lets us replace the local judgment
 of the \rulelabel{RG-Txn} rule (Fig.~\ref{fig:rg-rules}) by a state
-transformer inference judgment. The soundness of a transaction's guarantee can now
-be established w.r.t the effect $\F$ of the body. The
-\rulelabel{RG-Txn} rule so updated is shown
-below:
+transformer inference judgment. The soundness of a transaction's
+guarantee can now be established w.r.t the effect $\F$ of the body.
+The \rulelabel{RG-Txn} rule so updated is shown below:
 \begin{smathpar}
 \begin{array}{c}
 \RULE
 {
   \stable(R,\I)\spc
   \stable(R,I)\spc
-   \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1.  R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') \spc  c \elabsto \F\\
+  \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1.  R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') \spc  c \Longrightarrow_{\langle i,\R_e,I \rangle}\F\\
   \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1.  R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg') \spc \stable(\R_c,\F)\\
   \forall \stl,\stg.~ \stl \in F(\emptyset,\stg) \Rightarrow 
     G(\stg, \stl\gg\stg)\spc
