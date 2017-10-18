@@ -4,31 +4,31 @@
 \begin{smathpar}
 \begin{array}{lclcr}
   \mssemof{x \ALT \stl \ALT \stg \ALT \ldots} & = & \lambda
-  y.\,y \in x \ALT \lambda y.\,y\in\stl \ALT 
-  \lambda y.\,y\in\stg \ALT \ldots & \texttt{  }
+  r.\,r \in x \ALT \lambda r.\,r\in\stl \ALT 
+  \lambda r.\,r\in\stg \ALT \ldots & \texttt{  }
   & \\
 %\fresh(g_x) \spc \fresh(g_\stl) \spc \fresh(g_\stg)\\
 %
-\mssemof{\{a \,|\, \varphi\}} & = & \lambda a.\,\varphi
+  \mssemof{\{x \,|\, \varphi\}} & = & \lambda r.\,[r/x]\varphi
   & \texttt{  } & \\
 %
-\mssemof{\existsl(a,\phi,s)} & = &  (\lambda y.\, [a'/a]\phi \conj
-  \mssemof{s}(y)
+\mssemof{\existsl(a,\phi,s)} & = &  (\lambda r.\, [a'/a]\phi \conj
+  \mssemof{s}(r)
 % \conj \forall b.~ g(b) \Leftrightarrow g_1(b)
   & \texttt{  } & \fresh(a') 
 % \spc \fresh(g)\\
   \\
 %
-\mssemof{s_1 \bind \lambda y. s_2} & = & \lambda a.~
-  (\forall x.\forall y.~ \mssemof{s_1}(x) \conj \mssemof{s_2}(y) 
-   \Leftrightarrow g(y)) \conj g(a) & \texttt{  } &  \fresh(g)\\
+\mssemof{s_1 \bind \lambda x. s_2} & = & \lambda r.~
+  (\forall a.\forall b.~ \mssemof{s_1}(a) \conj \mssemof{[a/x]s_2}(b) 
+   \Leftrightarrow g(b)) \conj g(r) & \texttt{  } &  \fresh(g)\\
 %
-\mssemof{\itel{\varphi}{s_1}{s_2}} & = & \lambda a.\,
-  (\varphi \Rightarrow \mssemof{s_1}(a)) \conj 
-  (\neg\varphi \Rightarrow \mssemof{s_2}(a)) & \texttt{  } & \\
+\mssemof{\itel{\varphi}{s_1}{s_2}} & = & \lambda r.\,
+  (\varphi \Rightarrow \mssemof{s_1}(r)) \conj 
+  (\neg\varphi \Rightarrow \mssemof{s_2}(r)) & \texttt{  } & \\
 %
-  \mssemof{s_1 \cup s_2} & = & \lambda a.\, \mssemof{s_1}(a) \disj
-    \mssemof{s_2}(a) & \texttt{ } & \\
+  \mssemof{s_1 \cup s_2} & = & \lambda r.\, \mssemof{s_1}(r) \disj
+    \mssemof{s_2}(r) & \texttt{ } & \\
 \end{array}
 \end{smathpar}
 
