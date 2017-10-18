@@ -21,7 +21,7 @@
 %
 \mssemof{s_1 \bind \lambda y. s_2} & = & \lambda a.~
   (\forall x.\forall y.~ \mssemof{s_1}(x) \conj \mssemof{s_2}(y) 
-   \Rightarrow g(y)) \conj g(a) & \texttt{  } &  \fresh(g)\\
+   \Leftrightarrow g(y)) \conj g(a) & \texttt{  } &  \fresh(g)\\
 %
 \mssemof{\itel{\varphi}{s_1}{s_2}} & = & \lambda a.\,
   (\varphi \Rightarrow \mssemof{s_1}(a)) \conj 
@@ -32,6 +32,6 @@
 \end{array}
 \end{smathpar}
 
-\caption{The syntax and semantics of the set logic.}
+\caption{Encoding $\SL$ in first-order logic}
 \label{fig:logic}
 \end{figure}

@@ -207,8 +207,6 @@ dependent type systems~\cite{KJ14}.
 %% \end{smathpar}
 %% \end{example}
 
-\input{logic}
-
 \subsection{Soundness of Inference}
 
 The correspondence between the inference rules and the RG judgment of
@@ -227,11 +225,60 @@ the supplementary material.}:
 \end{theorem}
 \noindent where the set expression $\F(\emptyset,\stg)$ has a natural
 interpretation in the theory of sets.
-% Where, ${\sf true} = \lambda(\stl,\stg).~true$ and $\stable(\R,I)
-% \Leftrightarrow \forall\stl,\stg,\stg'. I(\stg) \conj
-% \R(\stl,\stg,\stg') \Rightarrow \I(\stg')$.
+
+\begin{proof}
+  We only provide a brief proof sketch here. We prove a slightly
+  stronger statement :
+
+  \emph{Forall} i,$R$,$I$,$c$,$\F$,$s$ if $\stable(\R,I)$ and $c
+  \elabsto \F$, then:\\
+
+  \begin{smathpar}
+    \begin{array}{c}
+    \R \vdash \hoare{\lambda(\stl,\stg).~\stl=s \conj
+    I(\stg)}{c}{\lambda(\stl,\stg).\stl = \F(s,\stg)}
+    \end{array}
+  \end{smathpar}
+
+  We use structural induction on $c$ to prove the statement. Assume
+  that $P \Leftrightarrow \lambda(\stl,\stg).~\stl=s \conj I(\stg)$
+  and $Q \Leftrightarrow \lambda(\stl,\stg).\stl = \F(s,\stg)$. For
+  each type of $c$, our strategy is to show the premises of the
+  corresponding RG-rule. The base cases correspond to the INSERT,
+  UPDATE and DELETE statements. In all these cases, the form of $F$
+  directly corresponds to the condition linking the pre-condition $P$
+  and post-condition $Q$ in the premises of the RG-rules. If
+  $\stable(\R, F)$, then $\stabilize{F} = F$ and hence the proof
+  directly follows. Otherwise, $\stabilize{F} = \lambda (\stl,
+  \stg).\existsl(\stg', I(\stg'), F(\stl, \stg'))$. Since the
+  pre-condition $P(\stl, \stg)$ asserts $I(\stg)$, any state which
+  obeys $P$ provides the existential $\stg'$ in the above set
+  expression, and hence $F$ applied on that state matches the
+  condition linking $P$ and $Q$. The stability of $P$ with respect to
+  $\R$ follows directly from the stability of $I$.
+
+  The proofs for SELECT, SEQ and IF-THE-ELSE directly use the inductive
+  hypothesis to infer the RG-judgements present in the premises of
+  their corresponding RG-rules. The interesting case is the FOREACH
+  statement, for which we use the loop invariant $\psi(\stl, \stg)
+  \Leftrightarrow \stl = s \cup y \bind (\lambda z.~\F(s, \stg))$,
+  (where assuming that $c$ is the body of the loop, $c \elabsto F$) to
+  prove all the premises of \rulelabel{RG-Foreach}. Using the same
+  notation as the rule $\rulelabel{RG-Foreach}$, $y$ refers to the
+  records already processed in previous iterations of the loop, while
+  $z$ refers to the record being processed in the current iteration.
+  At the beginning of the loop $[\phi/y]\psi(\stl, \stg)$ just reduces
+  to $\stl = s$ which is implied by the pre-condition $P$. From the
+  inductive hypothesis, we can infer that each iteration corresponds
+  to the application of $F$. Since all iterations are assumed to be
+  independent of each other, and $z$ is bound to a record in $x$ for
+  each iteration, we can infer that at the end of every iteration the
+  loop invariant $[y \cup \{z\}/y]\psi$ will be satisfied. 
+\end{proof}
 
 \subsection{From $\SL$ to the first-order logic}
+
+\input{logic}
 
 Theorem~\ref{thm:inference-sound} lets us replace the local judgment
 of the \rulelabel{RG-Txn} rule (Fig.~\ref{fig:rg-rules}) by a state
