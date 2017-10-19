@@ -304,7 +304,7 @@ The \rulelabel{RG-Txn} rule so updated is shown below:
 \end{smathpar}
 Automating the application of the \rulelabel{RG-Txn} rule for a
 transaction requires automating the multiple implication checks in
-the premise. While $R$, $\R$, $\R_c$, $\I$ and $I$ are formulas in
+the premise. While $R$, $\R$, $\I$ and $I$ are formulas in
 first-order logic (FOL) with a relatively simple structure, $\F$
 is an expression in the set language $\SL$
 (Fig.~\ref{fig:logic-syntax}) with a possibly complex structure.
@@ -312,32 +312,87 @@ Fortunately, however, there exists a semantics-preserving translation
 from $\SL$ to a restricted subset of first-order logic (FOL) that
 lends itself to automatic reasoning. 
 
-The algorithm ($\mssemof{\nubar}{\cdot}$) shown in Fig.~\ref{fig:logic}
-encodes an $\SL$ expression in a decidable fragment of FOL. Given a
-set expression $s$ of $\SL$, $\mssemof{\nubar}{s}$ is a pair $(\phi,f)$, where
-$\phi$ encodes $s$ in FOL, and $f$ is a Boolean function that names
-the set defined by $s$.  Naming provides an easy handle to $s$,
-simplifying $\mssemof{\nubar}{\cdot}$.  Set variables ($x$, $\stl$, $\stg$,
-$\dots$) are encoded as unconstrained Boolean functions ($g_x$,
-$g_{\stl}$, $g_{\stg}$, $\ldots$) that are named after the variable.
-Encoding of a set literal $\{a\,|\,\varphi\}$ introduces a new Boolean
-function $g$ that is \emph{true} for only those $a$ that satisfy $\varphi$.
-Thus $g$ faithfully encodes the literal. The encoding of the
-$\existsl{}$ expression first eliminates the second-order
-quantification over sets.  Existentially bound set variable ($a$) is
-skolemized, i.e., instantiated with a new unbound variable $a'$,
-before encoding the bound expression $s$ and the first-order
-constraint $\phi$. The algorithm for encoding $\phi$, which is already
-a first-order formula, is straightforward. It basically involves
-replacing set variables with Boolean functions named after the
-variables. The first-order encoding for a bind expression describes
-the semantics of set monad's bind operator in FOL. Let $s_1$ be a set, and
-let $f$ be a function that maps each variable in $s_1$ to a new
-set. Then, $s_2 = s_1 \bind f$ if and only if for all $y\in s_2$,
-there exists an $x \in s_1$ such that $y = f(x)$, and forall $x\in
-s_1$, $f(x)\in s_2$. The encoding adds new constraints to this
-effect. Conditional set expressions and set union are encoded
-straightforwardly.
+The algorithm ($\mssemof{\cdot}{\cdot}$) shown in Fig.~\ref{fig:logic}
+translates an $\SL$ expression ($s$) to FOL. The translation is based
+on encoding a set of element type $T$ as a unary predicate on $T$.
+The predicate is represented as a meta function that accepts a
+an $x:T$ and returns a quantifier-free proposition that evaluates to
+true ($\top$) if and only if $x$ is present in the set. Alternatively,
+translation may also encode the set as a function in the logic itself,
+in which case a quantified proposition constraining the function is
+also generated. For instance, consider the set $\{1,2\}$. The
+predicate describing the set can be encoded as the function $\lambda
+\v. \v=1 \vee \v=2$, with no further constraints (i.e., with $\top$
+constraint), or it can be encoded as the function $\lambda \v. g(\v)$
+with an associated constraint ($\phi\in\Prop^1$) defining the
+uninterpreted boolean functon $g$:
+\begin{smathpar}
+  \begin{array}{lcl}
+    \phi & = & \forall \nu.~g(\nu) \Leftrightarrow \nu=1 \vee \nu=2
+  \end{array}
+\end{smathpar}
+The translation adopts one or the other approach, depending on the
+need. For uniformity, we consider the encoding of a set as pair
+($\phi$,$\G$), where $\G$ is a meta function, and $\phi$ is a FOL
+formula constraining any uninterpreted functions used in $G$.
+
+Due to the presence of bind ($\bind$) in $\SL$, a set expression $s$
+may contain free variables introduced by an enclosing binder. For
+instance, consider the $\SL$ expression $s_1\bind(\lambda x. \{ y\,|\,
+y=x+1\})$, where $s_1$ is an integer set (expression). The
+subexpression $\{ y\,|\, y=x+1\}$ (call it $s_2$) contains $x$ as a
+free variable. In such cases, the predicate associated with the
+subexpression should also be indexed by its free variables, so that a
+unique set exists for each instantiation of the free variables. For
+instance, the predicate ($\G$) associated with subexpression from the
+above example should be $\lambda\v_1.\lambda\v_2.~\v_2 = \v_1 + 1$, so
+that the set $\G\; x_1$ is different from the set $\G\; x_2$ for
+distinct $x_1,x_2 \in s_1$. Intuitively, the bind expression
+$s_1\bind(\lambda x. \{ y\,|\, y=x+1\})$ denotes the set
+$\bigcup\limits_{x\in s_1}\G\;x$.
+
+The translation algorithm (Fig.~\ref{fig:logic}) takes free variables
+into account. Given a set expression $s\in\SL$, whose (possible) free
+variables are $\nubar$ in the order of their introduction (top-most
+binder first), $\mssemof{\nubar}{s}$ returns the encoding of $s$ as
+$(\phi,\G)$.  The meta function $\G$ is a predicate indexed by the
+(possible) free variables of $s$, thus, its arity is $|\nubar| + 1$.
+Note that $\nubar$ is only a sequence of variables introduced by the
+enclosing binders of $s$, and not all may actually occur free in $s$.
+Nonetheless, its predicate $\G$ is always indexed by $|\nubar|$ free
+variables for uniformity. The translation encodes database state as an
+uninterpreted sort. Considering that the state is actually a set of
+records, we define an uninterpreted relation $\in$ to relate records
+and states. Thus, a variable set expression $\stg$ denoting a database
+state is encoded as the predicate $\lambda (\vbar,r).~r\in\stg$, where
+$|\vbar|=|\nubar|$ (predicates are uncurried for simplicity; $\vbar$
+is a comma-separated sequence; $r\not\in\SL$ is a special variable).
+The constraints associated with the encoding of a state are trivial
+($\top$). The set literal expression $\{x\,|\, \varphi\}$ is encoded
+straightforwardly. The conditional set expression is encoded as an
+if-then-else predicate in FOL, where the predicates on true and false
+branches are computed from the set subexpressions $s_1$ and $s_2$,
+respectively. The conjunction of constraints $\phi_1$ and $\phi_2$,
+from $\mssemof{\nubar}{s_1}$ and $\mssemof{\nubar}{s_2}$ (resp.), is
+propagated upwards as the constraint of the conditional expression.
+Set union expression is encoded similar.
+
+The first-order encoding of a bind expression describes the semantics
+of set monad's bind operator in FOL. Let $s_1$ be a set, and let $f =
+\lambda x.~s_2$ be a function that maps each variable in $s_1$ to a
+new set. Then, $s = s_1 \bind f$ if and only if forall $x$, $y$, if
+$x\in s_1$ and $y \in f(x)$, then  $y \in s$, and vice versa. The
+translation first encodes $s_1$ and $s_2$ to obtain predicates
+$(\phi_1,\G_1)$ and $(\phi_2,\G_2)$, respectively. Since $s_2$ is
+under a new binder that binds $x$, free variable sequence of $s_2$ is
+$\nubar,x$. For technical reasons, we substitute a fresh $a$ for $x$,
+making the sequence $\nubar,a$. The set $s$ is encoded as a a new
+uninterpreted predicate $g$ indexed by $s$'s free variables
+($\nubar$). Since the set denoted by $g$ is the result of the bind
+$s_1 \bind \lambda x.s_2$, a first-order constraint defining the bind
+operation (as described above) is generated. The constraint relates the
+predicates $\G_1$ and $\G_2$, representing $s_1$ and $s_2$ (resp.), to
+the uninterpreted predicate $g$ that represents $s$.  
 
 Observe that the encoding shown in Fig.~\ref{fig:logic} maps to
 a subset of logic that satisfies the following syntactic properties:

@@ -13,6 +13,28 @@
     \lambda (\vbar,r).\,[r/x]\varphi) & \texttt{  }
   & |\vbar|=|\nubar|\\
 %
+\mssemof{\nubar}{\itel{\varphi}{s_1}{s_2}} & = & (\phi_1 \wedge \phi_2,~
+    \lambda (\vbar,r).\, \C{if}\;\varphi\;\C{then}\; \G_1(\vbar,r)
+      \;\C{else}\; \G_2(\vbar,r) & \texttt{  } 
+  & (\phi_1,\G_1)=\mssemof{\nubar}{s_1} \spc
+    (\phi_2,\G_2)=\mssemof{\nubar}{s_2} \\
+%
+  \mssemof{\nubar}{s_1 \cup s_2} & = & (\phi_1 \wedge \phi_2,~
+      \lambda (\vbar,r).\, \G_1(\vbar,r) \vee \G_2(\vbar,r)) & \texttt{ } 
+  & (\phi_1,\G_1)=\mssemof{\nubar}{s_1} \spc
+    (\phi_2,\G_2)=\mssemof{\nubar}{s_2} \\
+%
+\mssemof{\nubar}{s_1 \bind \lambda x. s_2} & = & (\phi_1 \wedge \phi_2
+  \wedge \forall \nubar.\forall a.\forall b. ~\pi(\nubar)
+  \Leftrightarrow & \texttt{  } & \fresh(a) \spc \fresh(b) \spc 
+  \fresh(\pi) \spc \fresh(g)\\
+& & \hspace*{0.65in}\G_1(\nubar,a) \wedge \G_2(\nubar,a,b)
+    \Leftrightarrow g(\nubar,b), & \texttt{  }
+  & (\phi_1,\G_1)=\mssemof{\nubar}{s_1} \spc
+    (\phi_2,\G_2)=\mssemof{\nubar,a}{[a/x]s_2} \\
+& & ~\lambda (\vbar,r).\,\pi(\vbar) \conj g(\vbar,r))
+  & \texttt{  } & |\vbar| = |\nubar|\\
+%
 \mssemof{\nubar}{\existsl(x,\phi,s)} & = & (\phi_s \wedge 
   \forall a.\forall b.~ f(\nubar,a) \wedge 
         f(\nubar,b) \Rightarrow a = b& \texttt{  }
@@ -26,26 +48,6 @@
 % \conj \forall b.~ g(b) \Leftrightarrow g_1(b)
   & \texttt{  } & \\
 %
-\mssemof{\nubar}{s_1 \bind \lambda x. s_2} & = & (\phi_1 \wedge \phi_2
-  \wedge \forall \nubar.\forall a.\forall b. ~\pi(\nubar)
-  \Leftrightarrow & \texttt{  } & \fresh(\pi) \spc \fresh(g)\\
-& & \hspace*{0.65in}\G_1(\nubar,a) \wedge \G_2(\nubar,a,b)
-    \Leftrightarrow g(\nubar,b), & \texttt{  }
-  & (\phi_1,\G_1)=\mssemof{\nubar}{s_1} \spc
-    (\phi_2,\G_2)=\mssemof{\nubar,a}{s_2} \\
-& & ~\lambda (\vbar,r).\,\pi(\vbar) \conj g(\vbar,r))
-  & \texttt{  } & |\vbar| = |\nubar|\\
-%
-\mssemof{\nubar}{\itel{\varphi}{s_1}{s_2}} & = & (\phi_1 \wedge \phi_2,~
-    \lambda (\vbar,r).\, \C{if}\;\varphi\;\C{then}\; \G_1(\vbar,r)
-      \;\C{else}\; \G_2(\vbar,r) & \texttt{  } 
-  & (\phi_1,\G_1)=\mssemof{\nubar}{s_1} \spc
-    (\phi_2,\G_2)=\mssemof{\nubar}{s_2} \\
-%
-  \mssemof{\nubar}{s_1 \cup s_2} & = & (\phi_1 \wedge \phi_2,~
-      \lambda (\vbar,r).\, \G_1(\vbar,r) \vee \G_2(\vbar,r)) & \texttt{ } 
-  & (\phi_1,\G_1)=\mssemof{\nubar}{s_1} \spc
-    (\phi_2,\G_2)=\mssemof{\nubar}{s_2} \\
 \end{array}
 \end{smathpar}
 
