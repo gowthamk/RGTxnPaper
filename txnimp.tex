@@ -51,7 +51,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \RULE
 {
   r.\idf \not\in \dom(\stl \cup \stg)\\
-  r' = \{r \;\C{with}\; \txnf=i;\,\delf=\C{false}\}
+  r' = \langle r \;\C{with}\; \txnf=i;\,\delf=\C{false} \rangle
 }
 {
   \stg \vdash (\tbox{\inserte{r}}_i,\stl) \stepsto
@@ -70,7 +70,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 {
   \hspace*{-1in}
   s = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e)=\C{true} \\
-      \hspace*{0.1in}\conj r'=\{r \with \delf=\C{true};\, \txnf=i\}\}\spc
+      \hspace*{0.1in}\conj r'=\langle r \with \delf=\C{true};\, \txnf=i \rangle\}\spc
   \dom(\stl)\cap\dom(s) = \emptyset \spc
 % \dom(s) \cap \dom(\delta) = \emptyset
 }
@@ -111,8 +111,8 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \RULE
 {
   \hspace*{-0.2in}s = \{r' \,|\, \exists(r\in\Delta).~ 
-    \eval([r/x]e_2)=\C{true} \conj r'= \{ [r/x]e_1 \;\C{with}\\
-    \idf=r.\idf;\,\txnf=i;\,\delf = r.\delf \}\} \spc
+    \eval([r/x]e_2)=\C{true} \conj r'= \langle [r/x]e_1 \;\C{with}\\
+    \idf=r.\idf;\,\txnf=i;\,\delf = r.\delf \rangle \} \spc
   \dom(\stl) \cap \dom(s) = \emptyset
 }
 {
@@ -180,7 +180,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
   \I_c\,\,(\stl,\stg,\stg')
 }
 {
-  (\ctxnr{i}{\I,\stl,\stg}{\cskip},\stg') \stepsto (\cskip,\stl\gg\stg')
+  (\ctxnr{i}{\I,\stl,\stg}{\cskip},\stg') \stepsto (\cskip,\stl \rhd \stg')
 }
 \end{array}
 \end{smathpar}
