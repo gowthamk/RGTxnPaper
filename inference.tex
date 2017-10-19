@@ -210,8 +210,7 @@ dependent type systems~\cite{KJ14}.
 \subsection{Soundness of Inference}
 
 The correspondence between the inference rules and the RG judgment of
-\S~\ref{sec:reasoning} is stated thus\footnote{The proof can be found in
-the supplementary material.}:
+\S~\ref{sec:reasoning} is stated thus:
 \begin{theorem}
 \label{thm:inference-sound}
   \emph{Forall} i,$R$,$I$,$c$,$\F$, if $\stable(\R,I)$ and $c \elabsto \F$,
@@ -227,11 +226,12 @@ the supplementary material.}:
 interpretation in the theory of sets.
 
 \begin{proof}
-  We only provide a brief proof sketch here. We prove a slightly
+  We only provide a brief proof sketch here\footnote{The complete proof can be found in
+the supplementary material.}. We prove a slightly
   stronger statement :
 
   \emph{Forall} i,$R$,$I$,$c$,$\F$,$s$ if $\stable(\R,I)$ and $c
-  \elabsto \F$, then:\\
+  \elabsto \F$, then:
 
   \begin{smathpar}
     \begin{array}{c}
@@ -240,7 +240,7 @@ interpretation in the theory of sets.
     \end{array}
   \end{smathpar}
 
-  We use structural induction on $c$ to prove the statement. Assume
+  We use structural induction on $c$. Assume
   that $P \Leftrightarrow \lambda(\stl,\stg).~\stl=s \conj I(\stg)$
   and $Q \Leftrightarrow \lambda(\stl,\stg).\stl = \F(s,\stg)$. For
   each type of $c$, our strategy is to show the premises of the
@@ -257,11 +257,11 @@ interpretation in the theory of sets.
   condition linking $P$ and $Q$. The stability of $P$ with respect to
   $\R$ follows directly from the stability of $I$.
 
-  The proofs for SELECT, SEQ and IF-THE-ELSE directly use the inductive
+  The proofs for SELECT, SEQ and IF-THEN-ELSE directly use the inductive
   hypothesis to infer the RG-judgements present in the premises of
   their corresponding RG-rules. The interesting case is the FOREACH
   statement, for which we use the loop invariant $\psi(\stl, \stg)
-  \Leftrightarrow \stl = s \cup y \bind (\lambda z.~\F(s, \stg))$,
+  \Leftrightarrow \stl = s \cup (y \bind (\lambda z.~\F(s, \stg)))$,
   (where assuming that $c$ is the body of the loop, $c \elabsto F$) to
   prove all the premises of \rulelabel{RG-Foreach}. Using the same
   notation as the rule $\rulelabel{RG-Foreach}$, $y$ refers to the
@@ -291,10 +291,11 @@ The \rulelabel{RG-Txn} rule so updated is shown below:
 {
   \stable(R,\I)\spc
   \stable(R,I)\spc
-  \R_e(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1.  R(\stg, \stg') \wedge \I_e(\stl, \stg_1, \stg') \spc  c \Longrightarrow_{\langle i,\R_e,I \rangle}\F\\
-  \R_c(\stl,\stg,\stg') \Leftrightarrow \exists \stg_1.  R(\stg, \stg') \wedge \I_c(\stl, \stg_1, \stg') \spc \stable(\R_c,\F)\\
-  \forall \stl,\stg.~ \stl \in F(\emptyset,\stg) \Rightarrow 
-    G(\stg, \stl\gg\stg)\spc
+  P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
+  \R_e = R \backslash \I_e \spc \R_c = R \backslash \I_c \spc 
+   \R_e \vdash \rg{P}{c}{Q} \spc \stable(\R_c,Q) \\ 
+  \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
+    G(\stg, \stl \rhd \stg)\spc
   \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
 }
 {
