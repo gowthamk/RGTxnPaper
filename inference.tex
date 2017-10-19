@@ -312,12 +312,12 @@ Fortunately, however, there exists a semantics-preserving translation
 from $\SL$ to a restricted subset of first-order logic (FOL) that
 lends itself to automatic reasoning. 
 
-The algorithm ($\mssemof{\cdot}$) shown in Fig.~\ref{fig:logic}
+The algorithm ($\mssemof{\nubar}{\cdot}$) shown in Fig.~\ref{fig:logic}
 encodes an $\SL$ expression in a decidable fragment of FOL. Given a
-set expression $s$ of $\SL$, $\mssemof{s}$ is a pair $(\phi,f)$, where
+set expression $s$ of $\SL$, $\mssemof{\nubar}{s}$ is a pair $(\phi,f)$, where
 $\phi$ encodes $s$ in FOL, and $f$ is a Boolean function that names
 the set defined by $s$.  Naming provides an easy handle to $s$,
-simplifying $\mssemof{\cdot}$.  Set variables ($x$, $\stl$, $\stg$,
+simplifying $\mssemof{\nubar}{\cdot}$.  Set variables ($x$, $\stl$, $\stg$,
 $\dots$) are encoded as unconstrained Boolean functions ($g_x$,
 $g_{\stl}$, $g_{\stg}$, $\ldots$) that are named after the variable.
 Encoding of a set literal $\{a\,|\,\varphi\}$ introduces a new Boolean

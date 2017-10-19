@@ -3,32 +3,49 @@
 %
 \begin{smathpar}
 \begin{array}{lclcr}
-  \mssemof{x \ALT \stl \ALT \stg \ALT \ldots} & = & \lambda
-  r.\,r \in x \ALT \lambda r.\,r\in\stl \ALT 
-  \lambda r.\,r\in\stg \ALT \ldots & \texttt{  }
-  & \\
+  \mssemof{\nubar}{\stl \ALT \stg \ALT \ldots} & = &  
+  (\top, \lambda (\vbar,r).\,r\in\stl) \ALT 
+  (\top, \lambda (\vbar,r).\,r\in\stg) \ALT \ldots & \texttt{  }
+  & |\vbar|=|\nubar|\\
 %\fresh(g_x) \spc \fresh(g_\stl) \spc \fresh(g_\stg)\\
 %
-  \mssemof{\{x \,|\, \varphi\}} & = & \lambda r.\,[r/x]\varphi
+  \mssemof{\nubar}{\{x \,|\, \varphi\}} & = & (\top, 
+    \lambda (\vbar,r).\,[r/x]\varphi) & \texttt{  }
+  & |\vbar|=|\nubar|\\
+%
+\mssemof{\nubar}{\existsl(x,\phi,s)} & = & (\phi_s \wedge 
+  \forall a.\forall b.~ f(\nubar,a) \wedge 
+        f(\nubar,b) \Rightarrow a = b& \texttt{  }
+  & \fresh(f) \spc \fresh(\pi)\spc\fresh(g)\\
+& &\hspace*{0.2in}\wedge \forall \nubar.\forall a.\forall b.~ \pi(\nubar) 
+  \Leftrightarrow \C{if}\;f(\nubar,a) \wedge [a/x]\phi & \texttt{  }
+  & (\phi_s,\G_s)=\mssemof{\nubar,a}{[a/x]s} \\
+& & \hspace*{0.75in}\C{then}\; g(\nubar,b)=\G_s(\nubar,a,b)\;\C{else}\;\bot, 
+  & \texttt{  } & |\vbar| = |\nubar|\\
+& & ~\lambda (\vbar,r).\,\pi(\vbar) \conj g(\vbar,r))
+% \conj \forall b.~ g(b) \Leftrightarrow g_1(b)
   & \texttt{  } & \\
 %
-\mssemof{\existsl(a,\phi,s)} & = &  (\lambda r.\, [a'/a]\phi \conj
-  \mssemof{s}(r)
-% \conj \forall b.~ g(b) \Leftrightarrow g_1(b)
-  & \texttt{  } & \fresh(a') 
-% \spc \fresh(g)\\
-  \\
+\mssemof{\nubar}{s_1 \bind \lambda x. s_2} & = & (\phi_1 \wedge \phi_2
+  \wedge \forall \nubar.\forall a.\forall b. ~\pi(\nubar)
+  \Leftrightarrow & \texttt{  } & \fresh(\pi) \spc \fresh(g)\\
+& & \hspace*{0.65in}\G_1(\nubar,a) \wedge \G_2(\nubar,a,b)
+    \Leftrightarrow g(\nubar,b), & \texttt{  }
+  & (\phi_1,\G_1)=\mssemof{\nubar}{s_1} \spc
+    (\phi_2,\G_2)=\mssemof{\nubar,a}{s_2} \\
+& & ~\lambda (\vbar,r).\,\pi(\vbar) \conj g(\vbar,r))
+  & \texttt{  } & |\vbar| = |\nubar|\\
 %
-\mssemof{s_1 \bind \lambda x. s_2} & = & \lambda r.~
-  (\forall a.\forall b.~ \mssemof{s_1}(a) \conj \mssemof{[a/x]s_2}(b) 
-   \Leftrightarrow g(b)) \conj g(r) & \texttt{  } &  \fresh(g)\\
+\mssemof{\nubar}{\itel{\varphi}{s_1}{s_2}} & = & (\phi_1 \wedge \phi_2,~
+    \lambda (\vbar,r).\, \C{if}\;\varphi\;\C{then}\; \G_1(\vbar,r)
+      \;\C{else}\; \G_2(\vbar,r) & \texttt{  } 
+  & (\phi_1,\G_1)=\mssemof{\nubar}{s_1} \spc
+    (\phi_2,\G_2)=\mssemof{\nubar}{s_2} \\
 %
-\mssemof{\itel{\varphi}{s_1}{s_2}} & = & \lambda r.\,
-  (\varphi \Rightarrow \mssemof{s_1}(r)) \conj 
-  (\neg\varphi \Rightarrow \mssemof{s_2}(r)) & \texttt{  } & \\
-%
-  \mssemof{s_1 \cup s_2} & = & \lambda r.\, \mssemof{s_1}(r) \disj
-    \mssemof{s_2}(r) & \texttt{ } & \\
+  \mssemof{\nubar}{s_1 \cup s_2} & = & (\phi_1 \wedge \phi_2,~
+      \lambda (\vbar,r).\, \G_1(\vbar,r) \vee \G_2(\vbar,r)) & \texttt{ } 
+  & (\phi_1,\G_1)=\mssemof{\nubar}{s_1} \spc
+    (\phi_2,\G_2)=\mssemof{\nubar}{s_2} \\
 \end{array}
 \end{smathpar}
 
