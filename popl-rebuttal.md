@@ -90,3 +90,32 @@ Reviewer C
   Dijkstra monads to enable reasoning over both heap and database
   state.
 
+Shepard
+----------
+- The primary concern raised by reviewer B is that the fragment of FOL
+  in which the translation algorithm (Fig. 10, Sec.5) encodes set
+  expressions is not EPR, hence its decidability is doubtful. In
+  particular, the concern was that an existential quantifier follows a
+  universal quantifier in the logical encoding of bind (`>>=`), and
+  this pattern is not admitted by EPR. In the rebuttal phase we
+  addressed the concern by pointing out that the fragment, while not
+  EPR as claimed, is nonetheless decidable since it is subsumed by the
+  GKS fragment, which is known to be decidable. However, as the
+  reviewer rightly points out, there are no known results on the
+  combination of GKS and Simple Linear Arithmetic (SLA) to support
+  theorem 5.3, so SLA invariants, which are common in databases, might
+  make the encoding undecidable. While this concern can be addressed
+  by considering machine (finite-bit) arithmetic instead of SLA, we
+  decided to take a long, hard look at the encoding algorithm and see
+  if it can be simplified. In this we were successful as we were able
+  to modify our encoding to eliminate the existential altogether. Our
+  modifications are based on the observation that the semantics of
+  bind, which were previously written using two implications one of
+  which involves an existential, can be equivalently written using a
+  single bi-implication that only involves universal quantifiers. A
+  rigorous proof to this effect can be found in the techreport, while
+  an automatic Z3-assisted proof can be found
+  [here](https://rise4fun.com/Z3/G1a). As a consequence of this
+  change, the fragment of encoding is back to being EPR, hence the
+  Theorems 5.2 and 5.3 continue to hold.
+
