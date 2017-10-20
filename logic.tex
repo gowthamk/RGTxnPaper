@@ -35,18 +35,19 @@
 & & ~\lambda (\vbar,r).\,\pi(\vbar) \conj g(\vbar,r))
   & \texttt{  } & |\vbar| = |\nubar|\\
 %
-\mssemof{\nubar}{\existsl(x,\phi,s)} & = & (\phi_s \wedge 
+\mssemof{\nubar}{\existsl(\stg,\phi,s)} & = & (\phi_s \wedge 
   \forall a.\forall b.~ f(\nubar,a) \wedge 
         f(\nubar,b) \Rightarrow a = b& \texttt{  }
-  & \fresh(f) \spc \fresh(\pi)\spc\fresh(g)\\
+  & \fresh(a) \spc \fresh(b)\\
 & &\hspace*{0.2in}\wedge \forall \nubar.\forall a.\forall b.~ \pi(\nubar) 
-  \Leftrightarrow \C{if}\;f(\nubar,a) \wedge [a/x]\phi & \texttt{  }
-  & (\phi_s,\G_s)=\mssemof{\nubar,a}{[a/x]s} \\
+  \Leftrightarrow \C{if}\;f(\nubar,a) \wedge [a/\stg]\phi & \texttt{  }
+  & \fresh(f) \spc \fresh(\pi)\spc\fresh(g)\\
 & & \hspace*{0.75in}\C{then}\; g(\nubar,b)=\G_s(\nubar,a,b)\;\C{else}\;\bot, 
-  & \texttt{  } & |\vbar| = |\nubar|\\
-& & ~\lambda (\vbar,r).\,\pi(\vbar) \conj g(\vbar,r))
+  & \texttt{  } 
+  & (\phi_s,\G_s)=\mssemof{\nubar,a}{[a/\stg]s} \\
+& & ~\lambda (\vbar,r).\,\pi(\vbar) \conj g(\vbar,r)) & \texttt{  }
 % \conj \forall b.~ g(b) \Leftrightarrow g_1(b)
-  & \texttt{  } & \\
+  & |\vbar| = |\nubar|\\
 %
 \end{array}
 \end{smathpar}

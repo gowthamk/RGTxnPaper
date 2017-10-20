@@ -118,10 +118,10 @@ or \C{deposit} transactions might update the account balance, so that
 such a record no longer exists in the database.  Fortunately, the
 weakening operator ($\stabilize{\cdot}$) allows us to weaken the
 assertion to $\exists \stg'.I(\stg') \conj \exists(r\in\stg').~a=r$
-({\sf exists} translates to $\exists$ in first-order logic, as
-formalized in Fig.~\ref{fig:logic}), which is enough to prove that
-$\C{a.bal + pc*a.bal}\ge 0$, and verify that \C{add\_interest}
-preserves the positive balance invariant.
+({\sf exists} has the same semantics as $\exists$, as formalized in
+Fig.~\ref{fig:logic}), which is enough to prove that $\C{a.bal +
+pc*a.bal}\ge 0$, and verify that \C{add\_interest} preserves the
+positive balance invariant.
 
 The state transformer rules, like the earlier RG rules, closely follow
 the corresponding reduction rules in Fig.~\ref{fig:txnimp}, except
@@ -383,74 +383,127 @@ of set monad's bind operator in FOL. Let $s_1$ be a set, and let $f =
 \lambda x.~s_2$ be a function that maps each variable in $s_1$ to a
 new set. Then, $s = s_1 \bind f$ if and only if forall $x$, $y$, if
 $x\in s_1$ and $y \in f(x)$, then  $y \in s$, and vice versa. The
-translation first encodes $s_1$ and $s_2$ to obtain predicates
-$(\phi_1,\G_1)$ and $(\phi_2,\G_2)$, respectively. Since $s_2$ is
-under a new binder that binds $x$, free variable sequence of $s_2$ is
-$\nubar,x$. For technical reasons, we substitute a fresh $a$ for $x$,
-making the sequence $\nubar,a$. The set $s$ is encoded as a a new
-uninterpreted predicate $g$ indexed by $s$'s free variables
-($\nubar$). Since the set denoted by $g$ is the result of the bind
-$s_1 \bind \lambda x.s_2$, a first-order constraint defining the bind
-operation (as described above) is generated. The constraint relates
-the predicates $\G_1$ and $\G_2$, representing $s_1$ and $s_2$
-(resp.), to the uninterpreted predicate $g$ that represents $s$. The
-constraint is assigned a name ($\pi$) so that it can be enabled only
-for the choice of free variables ($\nubar$) for which $g$ needs to be
-defined; observe that the lambda returned by
-$\mssemof{\nubar}{s_1 \bind \lambda x.s_2}$ asserts $\pi(\vbar)$ only
-in conjunction with $g(\vbar,r)$, for some $r$.
+translation first encodes $s_1$ and $s_2$ to obtain $(\phi_1,\G_1)$
+and $(\phi_2,\G_2)$, respectively. Since $s_2$ is under a new binder
+that binds $x$, free variable sequence of $s_2$ is $\nubar,x$. In the
+interest of hygiene, we substitute a fresh $a$ for $x$, making the
+sequence $\nubar,a$. The set $s$ is encoded as a a new uninterpreted
+predicate $g$ indexed by $s$'s free variables ($\nubar$). Since the
+set denoted by $g$ is the result of the bind $s_1 \bind \lambda
+x.s_2$, a first-order constraint defining the bind operation (as
+described above) is generated. The constraint relates the predicates
+$\G_1$ and $\G_2$, representing $s_1$ and $s_2$ (resp.), to the
+uninterpreted predicate $g$ that represents $s$. The constraint is
+assigned a name ($\pi$) so that it can be enabled only for the choice
+of free variables ($\nubar$) for which $g$ needs to be defined;
+observe that the lambda returned by $\mssemof{\nubar}{s_1 \bind
+\lambda x.s_2}$ asserts $\pi(\vbar)$ only in conjunction with
+$g(\vbar,r)$, for some $r$.
 
-The first-order encoding of the $\existsl$ expression eliminates the
-existential by Skolemizing it. Skolemizing is the process of
-substituting an existentially bound $x$ in $\phi\in\Prop^1$ with
-$f(\nubar)$, where $f$ is a fresh uninterpreted function, and $\nubar$
-are the free variables in $\phi$ bound by enclosing universal
-quantifiers. Due to the decidability restrictions that will become
-clear shortly, the only uninterpreted functions we admit in our logic
-are boolean (i.e., predicates/relations). Consequently, Skolemizing an
-existentially bound $x:T$ with $f(\nubar):T$, where $T$ is a
-non-boolean type, is not really an option. Instead, we define $f$ as
-an uninterpreted relation that behaves as a partial function:
+The first-order encoding of the $\existsl(\stg,\phi,s)$ expression
+eliminates the existential by Skolemizing it. Skolemizing is the
+process of substituting an existentially bound $x$ in
+$\phi_x\in\Prop^1$ with $f(\nubar)$, where $f$ is a fresh
+uninterpreted function, and $\nubar$ are the free variables in
+$\phi_x$ bound by enclosing universal quantifiers. Due to the
+decidability restrictions (Sec.~\ref{sec:decidability}), the only
+uninterpreted functions we admit in our logic are boolean (i.e.,
+predicates/relations). Consequently, Skolemizing an existentially
+bound $\stg$ with $f(\nubar)$ is not really an option in our case.
+Instead, we define $f$ as an uninterpreted relation that behaves as a
+partial function:
 \begin{smathpar}
   \begin{array}{c}
     \forall \nubar.\forall a.\forall b.~f(\nubar,a) \wedge f(\nubar,b)
     \Rightarrow a = b
   \end{array}
 \end{smathpar}
-We then replace the existentially bound $x$ with a new universally
-bound $a$ in $\phi$, under the condition that $f(\nubar,a)$ holds.
-Due to the partial function property of $f$, there can be utmost one
-instantiation for $a$, as desired. There can however be no
-instantiations, i.e., no $a$ that satisfies $f(\nubar,a)$, thus
-violating the exists property. Fortunately, this problem can be solved
-in our case by observing that the existential always occurs in the
-context (antecedent) in the verification conditions (implications)
-generated by the \rulelabel{RG-Txn} rule. Intuitively, we prove that a
-set of records is equal to, or contained in, other set of records
-(e.g., $\F_1 = \F_2$ or $\F \subseteq G$) \emph{assuming} that there
-exists a state $\stg$ that satisfies $I$. If there does not exist such
-a state, then our premise itself is false, and the goal must be
-vacuously provable. We make use of this observation, and let the
-context derive $\bot$ when there does not exist a desired $a$. 
+We then replace the existentially bound $\stg$ with a new universally
+bound $a$ in $\phi$ and $s$, and define the set $[a/\stg]s$ under the
+condition that $f(\nubar,a) \conj [a/\stg]\phi$ holds. Since the
+existence of a $\stg$ that satisfies $\phi$ is axiomatized tp
+define $s$, if the aforementioned condition does not hold, i.e., if
+there does exist such a $\stg$, we let the context derive $\bot$.
 
+\noindent {\bf Example} Let us reconsider the  TPC-C \C{new\_order}
+transaction from Sec.~\ref{sec:motivation}. Recall that the state
+transformer ($\T$) for the foreach loop shown in
+Fig.~\ref{fig:foreach_code} is (\C{k1}, \C{k2}, and \C{k3} are
+constants):
+\begin{smathpar}
+\begin{array}{l}
+  \lambda(\stl,\stg).~ \stl \cup \C{item\_reqs}\bind
+      (\lambda\C{item\_req}.~ \F_U(\stl,\stg) \cup \F_I(\stl,\stg))
+\end{array}
+\end{smathpar}
+Where:
+\begin{smathpar}
+  \begin{array}{lcl}
+    \F_U & = & \lambda(\stl,\stg).~ \stg \bind(\lambda s. 
+                \itel{{\sf table}(s) = \C{Stock} \conj 
+                  s.\C{s\_i\_id} = \C{item\_req.ol\_i\_id}\\
+         &   & \hspace*{0.9in}}
+                     {\{ \langle \C{s\_i\_id}=s.\C{s\_i\_id};\, 
+                                 \C{s\_d\_id}=s.\C{s\_d\_id};\,
+                                 \C{s\_qty} = \C{k1}\rangle \}\\
+         &   & \hspace*{0.9in}} {\emptyset}) \\
+    \F_I & = & \lambda(\stl,\stg).~ \{\langle\C{ol\_o\_id}=\C{k2},\,
+                 \C{ol\_d\_id}=\C{k3},\, \C{ol\_i\_id}=\C{item\_req.ol\_i\_id},\, 
+                 \C{ol\_qty}=\C{item\_req.ol\_qty}\rangle\}\\
+  \end{array}
+\end{smathpar}
+For any $\stl$ and $\stg$, $\F_U(\stl,\stg)$ and $\F_I(\stl,\stg)$ are
+expressions in $\SL$, so can be translated to FOL by the encoding
+algorithm in Fig.~\ref{fig:logic}. Since the iteration variable
+\C{item\_req} occurs free in these expressions, the appropriate
+application of the encoding algorithm is
+$\mssemof{\C{item\_req}}{\F_U(\stl,\stg)}$ and
+$\mssemof{\C{item\_req}}{\F_I(\stl,\stg)}$, which result in
+$(\phi_U,\G_U)$ and $(\phi_I,\G_I)$, respectively, where $\phi_U$,
+$\phi_I$, $\G_U$, $\G_I$ are as shown below:
+\begin{smathpar}
+  \begin{array}{lcl}
+    \phi_U & = & \forall \C{item\_req}.\forall s. \forall s'.~  \\
+    & & \hspace*{0.1in}\pi(\C{item\_req}) \Leftrightarrow(s \in \stg) \conj 
+        (\itec{{\sf table}(s)=\C{Stock} \wedge 
+              s.\C{s\_i\_id} = \C{item\_req.ol\_i\_id}\\
+    & & \hspace*{1.45in}}
+              {s' = \langle \C{s\_i\_id}=s.\C{s\_i\_id};\, 
+                            \C{s\_d\_id}=s.\C{s\_d\_id};\,
+                            \C{s\_qty} = \C{k1}\rangle\\
+    & & \hspace*{1.45in}} {\bot}) \\
+    & & \hspace*{1.2in} \Leftrightarrow g(\C{item\_req},s')\\
+    \G_U & = & \lambda (\C{item\_req},r).~ \pi(\C{item\_req}) 
+        \wedge g(\C{item\_req},r)\\
+    \phi_I & = & \top \\ 
+    \G_U & = & \lambda (\C{item\_req},r).~ 
+        r = \langle \C{ol\_o\_id}=\C{k2},\,
+                    \C{ol\_d\_id}=\C{k3},\, 
+                    \C{ol\_i\_id}=\C{item\_req.ol\_i\_id},\, 
+                    \C{ol\_qty}=\C{item\_req.ol\_qty}
+             \rangle\\
+  \end{array}
+\end{smathpar}
 
+\subsection{Decidability}
+\label{sec:decidability} %this label is referenced earlier.
 
 Observe that the encoding shown in Fig.~\ref{fig:logic} maps to
 a subset of logic that satisfies the following syntactic properties:
 \begin{itemize}
   \item All quantification is first-order; second-order objects, such
     as sets and functions, are never quantified.
-  \item Quantifiers appear only at the prenex position, i.e., at the
-    beginning of a quantified formula.  
+  \item All quantifiers are universal, and appear only at the prenex
+    position, i.e., at the beginning of a quantified formula.  
   \item All function symbols, modulo those that might appear in
     $\varphi\in\Prop^0$, are uninterpreted and Boolean.
 \end{itemize}
-This fragment of FOL known as EPR (Effectively Propositional logic)
-is known to be decidable~\cite{z3epr}. The language of encoding, however, is a
-combination of {\sf EPR} with (a). $\Prop^0$, the theory from which
-quantifier-free propositions ($\varphi$) that encode object language
-expressions are drawn, and (b).  $\Prop^1$, the theory from which
-invariants ($I$) are drawn. We write $\SL[\Prop^0,\Prop^1]$ to
+This fragment of FOL known as EPR (Effectively Propositional logic) is
+known to be decidable~\cite{z3epr}. The language of encoding, however,
+is a combination of {\sf EPR} with (a). $\Prop^0$, the theory from
+which quantifier-free propositions ($\varphi$) that encode object
+language expressions are drawn, and (b).  $\Prop^1$, the theory from
+which invariants ($I$) are drawn. We write $\SL[\Prop^0,\Prop^1]$ to
 highlight the parameterization of $\SL$ on $\Prop^0$ and $\Prop^1$,
 and state the following theorem:
 \begin{theorem}

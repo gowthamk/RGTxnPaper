@@ -312,7 +312,7 @@ transaction's ($T$) lifetime:
 \begin{itemize}
   \item While $T$ executes, $\Delta' = \Delta$.
   \item After $T$ finishes execution, but before it commits its local
-    state $\delta$, $\forall(x\in\mathit{dom}(delta)).~\Delta'(x) = \Delta(x)$.
+    state $\delta$, $\forall(x\in\mathit{dom}(\delta)).~\Delta'(x) = \Delta(x)$.
 \end{itemize}
 
 % nor $T$'s effects are
@@ -426,9 +426,9 @@ reason about the safety of such interferences with respect to
 %% where (stable) intermediary assertions and loop invariants remain a
 %% major source of annotation burden.
 
-We approach the verification problem by first observing that a typical
+We approach the verification problem by first observing that a
 relational database is a significantly simpler abstraction than shared
-memory.  Its primary data structure is a table, with no primitive
+memory. Its primary data structure is a table, with no primitive
 support for pointers, linked data structures, or aliasing.  Although a
 database essentially abstracts a mutable state, this state is managed
 through a well-defined fixed number of interfaces (SQL statements),
@@ -514,13 +514,16 @@ updates. An update statement filters the records that match the search
 criteria from $\Delta$ and computes the updated records that are to be
 added to the local database. Thus, the state transformer for the
 update statement (call it $\T_U$) is the following function on
-sets\footnote{$\bind$ has higher precedence than $\cup$.}:
+sets\footnote{$\bind$ has higher precedence than $\cup$; angle braces
+($\langle \ldots \rangle$) are used to denote records in math}:
 \begin{smathpar}
 \begin{array}{l}
   \lambda(\stl,\stg).~ \stl \cup \stg \bind(\lambda s. 
       \itel{{\sf table}(s) = \C{Stock} \conj 
         s.\C{s\_i\_id} = \C{item\_req.ol\_i\_id}\\\hspace*{1.3in}}
-           {\{ \langle s\ {\sf with}\  s_\C{qty} = \C{k1}\rangle \}\\\hspace*{1.3in}}
+           {\{ \langle \C{s\_i\_id}=s.\C{s\_i\_id};\, 
+                       \C{s\_d\_id}=s.\C{s\_d\_id};\,
+                       \C{s\_qty} = \C{k1}\rangle \}\\\hspace*{1.3in}}
            {\emptyset})
 \end{array}
 \end{smathpar}
@@ -556,19 +559,19 @@ statement can be similarly constructed:
 \begin{smathpar}
 \begin{array}{l}
   \lambda(\stl,\stg).~ \stl \cup
-       \{\langle\C{ol\_o\_id}=\C{k2},
+       \{\langle\C{ol\_o\_id}=\C{k2},\,
                  \C{ol\_d\_id}=\C{k3},\, \C{ol\_i\_id}=\C{item\_req.ol\_i\_id},\, 
                  \C{ol\_qty}=\C{item\_req.ol\_qty}\rangle\}
  
 \end{array}
 \end{smathpar}
-Observe that both transformers are of the form $T(\delta,\Delta) =
-\stl \cup F(\stl,\stg)$, where $F$ is a function that returns the set
-of records added  to the transaction-local database
-($\stl$). Let $\F_U$ and $\F_I$ be the corresponding functions for
-$\T_U$ and $\T_I$ shown above. The state transformation induced by the
-loop body in Fig.~\ref{fig:new_order_code} can be expressed as the
-following composition of $\F_U$ and $\F_I$:
+Observe that both transformers are of the form $\T(\delta,\Delta) =
+\stl \cup \F(\stl,\stg)$, where $\F$ is a function that returns the
+set of records added  to the transaction-local database ($\stl$). Let
+$\F_U$ and $\F_I$ be the corresponding functions for $\T_U$ and $\T_I$
+shown above. The state transformation induced by the loop body in
+Fig.~\ref{fig:new_order_code} can be expressed as the following
+composition of $\F_U$ and $\F_I$:
 \begin{smathpar}
 \begin{array}{l}
   \lambda(\stl,\stg).~ \stl \cup \F_U(\stl,\stg) \cup \F_I(\stl,\stg)
