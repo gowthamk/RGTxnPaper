@@ -79,9 +79,9 @@
 {
   \stable(\R,P)\\
   \forall\stl,\stl',\stg,i.~P(\stl,\stg) \conj j \not\in
-  \dom(\stl\cup\stg) \\
-  \conj \stl'=\stl \cup 
-  \{\langle x \with \idf=j;\,\txnf=i;\,\delf=\C{false}\rangle\} \Rightarrow Q(\stl',\stg)
+  \dom(\stl\cup\stg) \conj \\
+  \stl'=\stl \cup 
+  \{\langle x \with \idf=j;\,\txnf=i;\,\delf=\C{false}\rangle\}\\ \Rightarrow Q(\stl',\stg)
 }
 {
   \R \vdash \hoare{P}{\inserte{x}}{Q}
