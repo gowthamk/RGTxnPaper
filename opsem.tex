@@ -13,7 +13,7 @@ records, arithmetic and boolean expressions ($e_1 \odot e_2$), and
 record expressions ($[\bar{f}=\bar{e}]$) constitute the syntactic
 class of expressions ($e$). Commands ($c$) include $\cskip$,
 conditional statements, \C{LET} constructs to bind names, \C{FOREACH}
-loops, SQL statements, their sequential composition ($c_1;c_2$), 
+loops, SQL statements, their sequential composition ($c_1;c_2$),
 transactions ($\ctxn{i}{\I}{c}$) and their parallel composition
 ($c_1\,||\,c_2$). Each transaction is assumed to have a unique
 identifier $i$, and executes at the top-level; our semantics does not
@@ -30,7 +30,14 @@ sections; its higher-order function has two arguments, $y$ and $z$,
 which are invoked (during the reduction) with the set of
 already-iterated items, and the current item, respectively. This form
 of \C{FOREACH} lends itself to inductive reasoning that will be useful
-for verification (Sec.~\ref{sec:reasoning}).
+for verification (Sec.~\ref{sec:reasoning}).  Our language ensures
+that all effectful actions are encapsulated within database commands,
+and that all shared state among processes are only manipulated via
+transactions and its supported operations.  In particular, we do not
+consider programs in which objects resident on e.g., the OCaml heap
+are concurrently manipulated by OCaml expressions as well as database
+actions.
+
 
 % also We let $T_i$ for $i \in \matshbb{N}$
 % range over transaction identifiers. When it is evident we are

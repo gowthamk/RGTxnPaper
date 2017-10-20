@@ -126,15 +126,12 @@ Due to the presence of local and global database states, and the
 availability of an isolation specification, we use multiple
 definitions of stability in Fig.~\ref{fig:rg-rules}, but they all
 convey the same intuition as above. In our setting, we only need to prove the stability of an assertion ($\phi$) against those environment steps which lead to a global database state on which the transaction itself can take its next step according to its isolation specification ($\I$). 
-
 \begin{smathpar}
 \begin{array}{lcl}
 \stable(R, \phi) & \Leftrightarrow & \forall \stl, \stg, \stg'. \phi(\stl, \stg) \wedge R^{*}(\stg, \stg') \wedge \I(\stl, \stg, \stg') \Rightarrow \phi(\stl, \stg')
 \end{array}
 \end{smathpar}
-
-
-A characteristic of RG reasoning is that stability of an assertion is
+\noindent A characteristic of RG reasoning is that stability of an assertion is
 always proven w.r.t to $R$, and not $R^{*}$, although interference may
 include multiple environment steps, and $R$ only captures a single
 step. This is nonetheless sound due to inductive reasoning: if $\phi$
@@ -175,33 +172,28 @@ considering those environment steps which in addition to preserving
 $\phi$, also preserve the condition that the transaction can continue
 to take its next step, i.e. the condition $\I$ holds on both the
 beginning and the end states.
-
  \begin{smathpar}
    \forall \stl, \stg, \stg', \stg_1. \phi(\stl, \stg) \wedge \I(\stl, \stg_1, \stg) \wedge R^{*}(\stg, \stg') \wedge \I(\stl, \stg_1, \stg')
    \Rightarrow \phi(\stl, \stg')
 \end{smathpar}
-
-
-In the above condition, we use a separate notation ($\stg_1$) for the
-global database state that the transaction witnessed during its last
-step. $\phi$ does not constrain this global database state, but the
-stability of $\I$ ensures that any database state constrained by $\phi$
-must also obey $\I$. We can now replace the transitive closure in the
-above condition with the single step relation $R$, backed by the
-inductive argument for stability. Pushing the universal quantifier for
-$\stg_1$ inside the antecedent and separating the predicates involving
-$\stg_1$, we can rewrite the condition in the form below, by defining
-a new ternary relation $R \backslash \I$, which can be thought of as
-$R$ modulo $\I$:
-
+Here, we use a separate notation ($\stg_1$) for the global database
+state that the transaction witnessed during its last step. $\phi$ does
+not constrain this global database state, but the stability of $\I$
+ensures that any database state constrained by $\phi$ must also obey
+$\I$. We can now replace the transitive closure in the rule with the
+single step relation $R$, backed by the inductive argument for
+stability. Pushing the universal quantifier for $\stg_1$ inside the
+antecedent and separating the predicates involving $\stg_1$, we can
+rewrite the condition in the form below, by defining a new ternary
+relation $R \backslash \I$, which can be thought of as $R$ modulo
+$\I$:
 \begin{smathpar}
 \begin{array}{lcl}
 \stable((R \backslash \I), \phi) & \Leftrightarrow & \forall \stl,\stg,\stg'. \phi(\stl,\stg) \wedge (R \backslash \I)(\stl,\stg,\stg') \Rightarrow \phi(\stl,\stg')\\
 (R \backslash \I)(\stl, \stg, \stg') & \Leftrightarrow & \exists \stg_1. R(\stg, \stg') \wedge \I(\stl, \stg_1, \stg) \wedge \I(\stl, \stg_1, \stg')
 \end{array}
 \end{smathpar}
-
-The above condition often significantly simplifies the form of $R
+This condition often significantly simplifies the form of $R
 \backslash \I$ irrespective of $R$. For example, when a transaction is
 executed against a snapshot of the database (i.e. $\mathbb{I}_{ss}$),
 $R \backslash \I_{ss}$ will be the identity function, since if $\stg
@@ -217,10 +209,15 @@ transaction-local judgment to verify the body ($c$) of a transaction
 with id $i$. The precondition $P$ of $c$ must follow from the fact
 that the transaction-local database ($\stl$) is initially empty, and
 the global database satisfies the high-level invariant $I$. The rely
-relation ($\R_e$) is obtained from the global rely relation $R$ and the
-isolation specification $\I_e$ as explained above. Recall that $\I_e$
-constrains the global effects visible to the transaction while it is
-executing but has not yet committed.
+relation ($\R_e$) is obtained from the global rely relation $R$ and
+the isolation specification $\I_e$ as explained above. Recall that
+$\I_e$ constrains the global effects visible to the transaction while
+it is executing but has not yet committed, and $P$ and $Q$ of the
+transaction-local RG judgment are binary assertions; they relate local
+and global database states. The local judgment rules require one or
+both of them to be stable with respect to the constrained rely
+relation $\R_e$.
+
 
 %for the local judgment is a ternary relation computed as $R$
 %modulo $\I_e$:
@@ -259,10 +256,6 @@ executing but has not yet committed.
 %that interference. This is sensible considering such interference is
 %prevented in the operational semantics. 
 
-Recall that $P$ and $Q$ of the transaction-local RG judgment are
-binary assertions; they relate local and global database states. The
-local judgment rules require one or both of them to be stable with
-respect to the constrained rely relation $\R_e$.
 
 %The
 %stability of a binary assertion $Q$ w.r.t a ternary rely relation $\R$
@@ -293,7 +286,7 @@ In other words, if $Q$ relates the transaction-local database state
 ($\stl$) to the state of the global database ($\stg$) before a transaction
 commits, then $G$ must relate the states of the global database before
 and after the commit. The act of commit is captured by the flush
-operation ($\stl\rhd\stg$). Once we establish the validity of $G$ as a
+action ($\stl\rhd\stg$). Once we establish the validity of $G$ as a
 faithful representative of the transaction, we can verify that the
 transaction preserves the high-level invariant $I$ by checking the
 stability of $I$ w.r.t $G$, i.e., $\forall \stg,\stg'.~I(\stg) \wedge
@@ -434,12 +427,62 @@ Definition~\ref{def:rg-semantics}.
 \end{theorem}
 
 
-\begin{proof}
-Here, we provide only a brief proof sketch\footnote{The complete proof is provided in the supplementary material.}. The most important rule is the top-level rule \rulelabel{RG-Txn}, which proves that a transaction $c$ which begins its execution in global database state satisfying $I$ and suffering interference $R$ while executing under isolation specification $\I$ finishes its execution in a database state also satisfying $I$, and also guarantees that its commit step satisfies $G$. The rule uses the transaction-local RG judgement $\R_e \vdash \rg{P}{c}{Q}$. By \rulelabel{E-Txn-Start}, the local and global database states at the start of a transaction satisfy $P$, and the only challenge is that environment steps in an execution covered by $\R_e \vdash \rg{P}{c}{Q}$ are in $\R_e$, while the top-level judgement requires environment steps in $R$. We show that it is enough to consider only those enviroment steps in $\R_e$. First, we use an inductive argument and stability of $\I_e$ ($\stable(R, \I_e)$) to show that any execution in which the transaction completes all its steps must always preserve the isolation specification $\I_e$ after every environment step. Intuitively, this is because once $\I_e$ gets broken after some environment step, it will continue to remain broken and the transaction would not be able to proceed (according to \rulelabel{E-Txn}). Since $\R_e$ contains exactly those environment steps which preserve $\I_e$, the local-level RG judgement can be soundly used, which guarantees that after the transaction finishes its execution, its local state $\stl$ and global state $\stg$ will satisfy the assertion $Q$. Environment steps between the last step of the transaction and its commit step can modify the global state, and hence we also require $Q$ to be stable againt $R$. Again, we use an inductive argument, the stability of $\I_c$, and the fact that the transaction must execute its commit step to show that all environment steps must preserve $\I_c$, and hence it is enough to require $\stable(\R_c, Q)$. $Q$ guarantees that the commit step is in $G$, and $G$ in turn guarantees that after execution, the global database state will obey the invariant $I$.
+\paragraph{{\sc Proof Sketch.}}  The most important rule is the top-level
+rule \rulelabel{RG-Txn}, which proves that a transaction $c$ which
+begins its execution in global database state satisfying $I$ and
+encountering interference $R$ while executing under isolation
+specification $\I$ finishes its execution in a database state also
+satisfying $I$, and also guarantees that its commit step satisfies
+$G$. The rule uses the transaction-local RG judgement $\R_e \vdash
+\rg{P}{c}{Q}$. By \rulelabel{E-Txn-Start}, the local and global
+database states at the start of a transaction satisfy $P$, and the
+only challenge is that environment steps in an execution covered by
+$\R_e \vdash \rg{P}{c}{Q}$ are in $\R_e$, while the top-level
+judgement requires environment steps in $R$. We show that it is enough
+to consider only those enviroment steps in $\R_e$. First, we use an
+inductive argument and stability of $\I_e$ ($\stable(R, \I_e)$) to
+show that any execution in which the transaction completes all its
+steps must always preserve the isolation specification $\I_e$ after
+every environment step. Intuitively, this is because once $\I_e$ gets
+broken after some environment step, it will continue to remain broken
+and the transaction would not be able to proceed (according to
+\rulelabel{E-Txn}). Since $\R_e$ contains exactly those environment
+steps which preserve $\I_e$, the local-level RG judgement can be
+soundly used, which guarantees that after the transaction finishes its
+execution, its local state $\stl$ and global state $\stg$ will satisfy
+the assertion $Q$. Environment steps between the last step of the
+transaction and its commit step can modify the global state, and hence
+we also require $Q$ to be stable againt $R$. Again, we use an
+inductive argument, the stability of $\I_c$, and the fact that the
+transaction must execute its commit step to show that all environment
+steps must preserve $\I_c$, and hence it is enough to require
+$\stable(\R_c, Q)$. $Q$ guarantees that the commit step is in $G$, and
+$G$ in turn guarantees that after execution, the global database state
+will obey the invariant $I$.
 
-The local RG-judgement rules are mostly straightforward and directly follow from the operational semantics. At this point, the transaction can only change its local database state by adding new records to it, and hence all the rules have the form : $P(\stl, \stg)$ and $\stl'$ is the new state should satisfy $Q(\stl', \stg)$. An important thing to note is that the rules for Update, Select, Delete and Insert only require the pre-condition $P$ to be stable against interference. This is because the local RG-judgement rules only make assertions about the database state just after the transaction takes its last step. For the aforementioned commands, the last step would be the only step taken by the transaction, and hence $Q$ would not be affected by any environment steps, but instead directly reflect the changes made by the command (the environment steps between the last execution step of the transaction and the commit step would be controlled by $\I_c$ and would be taken care of by $\stable(\R_c, Q)$ at the top level). 
+%% The local RG-judgement rules are mostly straightforward and directly
+%% follow from the operational semantics. At this point, the transaction
+%% can only change its local database state by adding new records to it,
+%% and hence all the rules have the form : $P(\stl, \stg)$ and $\stl'$ is
+%% the new state should satisfy $Q(\stl', \stg)$. Note that note is that
+%% the {\sc RG-Update}, {\sf RG-Select}, {\sc RG-Delete} and {\sc
+%%   RG-Insert} rules only require the pre-condition $P$ to be stable
+%% against interference. This is because the these rules only make
+%% assertions about the database state just after the transaction takes
+%% its last step. For the aforementioned commands, the last step would be
+%% the only step taken by the transaction, and hence $Q$ would not be
+%% affected by any environment steps, but instead directly reflect the
+%% changes made by the command (the environment steps between the last
+%% execution step of the transaction and the commit step would be
+%% controlled by $\I_c$ and would be taken care of by $\stable(\R_c, Q)$
+%% at the top level).
 
-The rule $\rulelabel{RG-Foreach}$ makes use of an inductive loop invariant $\psi$ which assumes that the variable $y$ is bound to records which have been processed in previous iterations and $z$ is bound to the record processed in the current iteration. Since the operational semantics ensure that every iteration processes a unique record, the proof is straightforward.  
-\end{proof}
+%% The rule $\rulelabel{RG-Foreach}$ makes use of an inductive loop
+%% invariant $\psi$ which assumes that the variable $y$ is bound to
+%% records which have been processed in previous iterations and $z$ is
+%% bound to the record processed in the current iteration. Since the
+%% operational semantics ensure that every iteration processes a unique
+%% record, the proof is straightforward.
+
 
 		

@@ -97,6 +97,7 @@ $\stabilize{\cdot}$, while being simple, is nonetheless useful because
 of the $I(\stg')$ assumption on the existentially bound $\stg'$. The
 example in Fig.~\ref{fig:weakening-example} demonstrates. 
 \begin{figure}[h]
+\begin{center}
 \begin{ocaml}
 let add_interest acc_id pc = atomically @@ do
   let a = SQL.select1 BankAccount (fun acc -> acc.id = acc_id);
@@ -104,6 +105,7 @@ let add_interest acc_id pc = atomically @@ do
   SQL.update BankAccount (fun acc -> {acc with bal = acc.bal + y})
                          (fun acc -> acc.id = acc_id)
 \end{ocaml}
+\end{center}
 \caption{A transaction that deposits an interest to a bank account.}
 \label{fig:weakening-example}
 \end{figure}
@@ -209,11 +211,13 @@ dependent type systems~\cite{KJ14}.
 
 \subsection{Soundness of Inference}
 
-The correspondence between the inference rules and the RG judgment of
-\S~\ref{sec:reasoning} is stated thus:
+We can now establish a correspondence between the inference rules given
+above and the RG judgment of \S\ref{sec:reasoning}:
 \begin{theorem}
-\label{thm:inference-sound}
-  \emph{Forall} i,$R$,$I$,$c$,$\F$, if $\stable(\R,I)$ and $c \elabsto \F$,
+  \label{thm:inference-sound}
+  Let the set expression $\F(\emptyset,\stg)$ have a natural interpretation
+  in the theory of sets.  Then, for all $i$,$R$,$I$,$c$,$\F$,
+  if $\stable(\R,I)$ and $c \elabsto \F$,
   then:\\\vspace*{-0.2cm}
   \begin{smathpar}
   \begin{array}{c}
@@ -222,59 +226,49 @@ The correspondence between the inference rules and the RG judgment of
   \end{array}
   \end{smathpar}
 \end{theorem}
-\noindent where the set expression $\F(\emptyset,\stg)$ has a natural
-interpretation in the theory of sets.
 
-\begin{proof}
-  We only provide a brief proof sketch here\footnote{The complete proof can be found in
-the supplementary material.}. We prove a slightly
-  stronger statement :
-
-  \emph{Forall} i,$R$,$I$,$c$,$\F$,$s$ if $\stable(\R,I)$ and $c
-  \elabsto \F$, then:
-
+\paragraph{{\sc Proof Sketch.}} We prove a slightly stronger statement :
+For all  $i$,$R$,$I$,$c$,$\F$,$s$ if $\stable(\R,I)$ and $c \elabsto \F$, then:
   \begin{smathpar}
     \begin{array}{c}
     \R \vdash \hoare{\lambda(\stl,\stg).~\stl=s \conj
     I(\stg)}{c}{\lambda(\stl,\stg).\stl = \F(s,\stg)}
     \end{array}
   \end{smathpar}
+The proof follows by structural induction on $c$. Assume that $P
+\Leftrightarrow \lambda(\stl,\stg).~\stl=s \conj I(\stg)$ and $Q
+\Leftrightarrow \lambda(\stl,\stg).\stl = \F(s,\stg)$. For each type
+of $c$, our strategy is to show the premises of the corresponding
+RG-rule. The base cases correspond to \C{INSERT}, \C{UPDATE} and \C{DELETE}
+statements. In all these cases, the form of $\F$ directly corresponds
+to the condition linking the pre-condition $P$ and post-condition $Q$
+in the premises of the RG-rules. If $\stable(\R, \F)$, then
+$\stabilize{\F} = \F$ and hence the proof directly follows. Otherwise,
+$\stabilize{\F} = \lambda (\stl, \stg).\existsl(\stg', I(\stg'),
+\F(\stl, \stg'))$. Since the pre-condition $P(\stl, \stg)$ asserts
+$I(\stg)$, any state which obeys $P$ provides the existential $\stg'$
+in the above set expression, and hence $\F$ applied on that state
+matches the condition linking $P$ and $Q$. The stability of $P$ with
+respect to $\R$ follows directly from the stability of $I$.
 
-  We use structural induction on $c$. Assume
-  that $P \Leftrightarrow \lambda(\stl,\stg).~\stl=s \conj I(\stg)$
-  and $Q \Leftrightarrow \lambda(\stl,\stg).\stl = \F(s,\stg)$. For
-  each type of $c$, our strategy is to show the premises of the
-  corresponding RG-rule. The base cases correspond to the INSERT,
-  UPDATE and DELETE statements. In all these cases, the form of $F$
-  directly corresponds to the condition linking the pre-condition $P$
-  and post-condition $Q$ in the premises of the RG-rules. If
-  $\stable(\R, F)$, then $\stabilize{F} = F$ and hence the proof
-  directly follows. Otherwise, $\stabilize{F} = \lambda (\stl,
-  \stg).\existsl(\stg', I(\stg'), F(\stl, \stg'))$. Since the
-  pre-condition $P(\stl, \stg)$ asserts $I(\stg)$, any state which
-  obeys $P$ provides the existential $\stg'$ in the above set
-  expression, and hence $F$ applied on that state matches the
-  condition linking $P$ and $Q$. The stability of $P$ with respect to
-  $\R$ follows directly from the stability of $I$.
-
-  The proofs for SELECT, SEQ and IF-THEN-ELSE directly use the inductive
-  hypothesis to infer the RG-judgements present in the premises of
-  their corresponding RG-rules. The interesting case is the FOREACH
-  statement, for which we use the loop invariant $\psi(\stl, \stg)
-  \Leftrightarrow \stl = s \cup (y \bind (\lambda z.~\F(s, \stg)))$,
-  (where assuming that $c$ is the body of the loop, $c \elabsto F$) to
-  prove all the premises of \rulelabel{RG-Foreach}. Using the same
-  notation as the rule $\rulelabel{RG-Foreach}$, $y$ refers to the
-  records already processed in previous iterations of the loop, while
-  $z$ refers to the record being processed in the current iteration.
-  At the beginning of the loop $[\phi/y]\psi(\stl, \stg)$ just reduces
-  to $\stl = s$ which is implied by the pre-condition $P$. From the
-  inductive hypothesis, we can infer that each iteration corresponds
-  to the application of $F$. Since all iterations are assumed to be
-  independent of each other, and $z$ is bound to a record in $x$ for
-  each iteration, we can infer that at the end of every iteration the
-  loop invariant $[y \cup \{z\}/y]\psi$ will be satisfied. 
-\end{proof}
+The proofs for \C{SELECT}, sequencing, and conditionals use use the
+inductive hypothesis to infer the RG-judgements present in the
+premises of their corresponding RG-rules. The interesting case is the
+\C{FOREACH} statement, for which we use the loop invariant
+$\psi(\stl, \stg) \Leftrightarrow \stl = s \cup (y \bind (\lambda
+z.~\F(s, \stg)))$, (where assuming that $c$ is the body of the loop,
+$c \elabsto \F$) to prove all the premises of
+\rulelabel{RG-Foreach}. Using the same notation as the rule
+$\rulelabel{RG-Foreach}$, $y$ refers to the records already processed
+in previous iterations of the loop, while $z$ refers to the record
+being processed in the current iteration.  At the beginning of the
+loop $[\phi/y]\psi(\stl, \stg)$ just reduces to $\stl = s$ which is
+implied by the pre-condition $P$. From the inductive hypothesis, we
+can infer that each iteration corresponds to the application of
+$F$. Since all iterations are assumed to be independent of each other,
+and $z$ is bound to a record in $x$ for each iteration, we conclude
+that at the end of every iteration, the loop invariant $[y \cup
+  \{z\}/y]\psi$ will be satisfied.
 
 \subsection{From $\SL$ to the first-order logic}
 
@@ -316,15 +310,14 @@ lends itself to automatic reasoning.
 The algorithm ($\mssemof{\cdot}{\cdot}$) shown in Fig.~\ref{fig:logic}
 translates an $\SL$ expression ($s$) to FOL. The translation is based
 on encoding a set of element type $T$ as a unary predicate on $T$.
-The predicate is represented as a meta function that accepts a
-an $x:T$ and returns a quantifier-free proposition that evaluates to
+The predicate is represented as a meta function that accepts an
+$x:T$ and returns a quantifier-free proposition that evaluates to
 true ($\top$) if and only if $x$ is present in the set. Alternatively,
 translation may also encode the set as a function in the logic itself,
 in which case a quantified proposition constraining the function is
 also generated. For instance, consider the set $\{1,2\}$. The
 predicate describing the set can be encoded as the function $\lambda
-\v. \v=1 \vee \v=2$, with no further constraints (i.e., with $\top$
-constraint), or it can be encoded as the function $\lambda \v. g(\v)$
+\v. \v=1 \vee \v=2$, with no further constraints, or it can be encoded as the function $\lambda \v. g(\v)$
 with an associated constraint ($\phi\in\Prop^1$) defining the
 uninterpreted boolean functon $g$:
 \begin{smathpar}
@@ -344,8 +337,8 @@ y=x+1\})$, where $s_1$ is an integer set (expression). The
 subexpression $\{ y\,|\, y=x+1\}$ (call it $s_2$) contains $x$ as a
 free variable. In such cases, the predicate associated with the
 subexpression should also be indexed by its free variables, so that a
-unique set exists for each instantiation of the free variables. For
-instance, the predicate ($\G$) associated with subexpression from the
+unique set exists for each instantiation of the free variables. Thus,
+the predicate ($\G$) associated with the subexpression from the
 above example should be $\lambda\v_1.\lambda\v_2.~\v_2 = \v_1 + 1$, so
 that the set $\G\; x_1$ is different from the set $\G\; x_2$ for
 distinct $x_1,x_2 \in s_1$. Intuitively, the bind expression
@@ -369,7 +362,7 @@ state is encoded as the predicate $\lambda (\vbar,r).~r\in\stg$, where
 $|\vbar|=|\nubar|$ (predicates are uncurried for simplicity; $\vbar$
 is a comma-separated sequence; $r\not\in\SL$ is a special variable).
 The constraints associated with the encoding of a state are trivial
-($\top$). The set literal expression $\{x\,|\, \varphi\}$ is encoded
+(denoted $\top$). The set literal expression $\{x\,|\, \varphi\}$ is encoded
 straightforwardly. The conditional set expression is encoded as an
 if-then-else predicate in FOL, where the predicates on true and false
 branches are computed from the set subexpressions $s_1$ and $s_2$,
@@ -379,15 +372,15 @@ propagated upwards as the constraint of the conditional expression.
 Set union expression is encoded similarly.
 
 The first-order encoding of a bind expression describes the semantics
-of set monad's bind operator in FOL. Let $s_1$ be a set, and let $f =
+of the set monad's bind operator in FOL. Let $s_1$ be a set, and let $f =
 \lambda x.~s_2$ be a function that maps each variable in $s_1$ to a
 new set. Then, $s = s_1 \bind f$ if and only if forall $x$, $y$, if
 $x\in s_1$ and $y \in f(x)$, then  $y \in s$, and vice versa. The
 translation first encodes $s_1$ and $s_2$ to obtain $(\phi_1,\G_1)$
 and $(\phi_2,\G_2)$, respectively. Since $s_2$ is under a new binder
-that binds $x$, free variable sequence of $s_2$ is $\nubar,x$. In the
+that binds $x$, the free variable sequence of $s_2$ is $\nubar,x$. In the
 interest of hygiene, we substitute a fresh $a$ for $x$, making the
-sequence $\nubar,a$. The set $s$ is encoded as a a new uninterpreted
+sequence $\nubar,a$. The set $s$ is encoded as a new uninterpreted
 predicate $g$ indexed by $s$'s free variables ($\nubar$). Since the
 set denoted by $g$ is the result of the bind $s_1 \bind \lambda
 x.s_2$, a first-order constraint defining the bind operation (as
@@ -396,7 +389,7 @@ $\G_1$ and $\G_2$, representing $s_1$ and $s_2$ (resp.), to the
 uninterpreted predicate $g$ that represents $s$. The constraint is
 assigned a name ($\pi$) so that it can be enabled only for the choice
 of free variables ($\nubar$) for which $g$ needs to be defined;
-observe that the lambda returned by $\mssemof{\nubar}{s_1 \bind
+observe that the lambda expression returned by $\mssemof{\nubar}{s_1 \bind
 \lambda x.s_2}$ asserts $\pi(\vbar)$ only in conjunction with
 $g(\vbar,r)$, for some $r$.
 
@@ -421,13 +414,13 @@ partial function:
 We then replace the existentially bound $\stg$ with a new universally
 bound $a$ in $\phi$ and $s$, and define the set $[a/\stg]s$ under the
 condition that $f(\nubar,a) \conj [a/\stg]\phi$ holds. Since the
-existence of a $\stg$ that satisfies $\phi$ is axiomatized tp
+existence of a $\stg$ that satisfies $\phi$ is axiomatized to
 define $s$, if the aforementioned condition does not hold, i.e., if
 there does exist such a $\stg$, we let the context derive $\bot$.
 
 \noindent {\bf Example} Let us reconsider the  TPC-C \C{new\_order}
 transaction from Sec.~\ref{sec:motivation}. Recall that the state
-transformer ($\T$) for the foreach loop shown in
+transformer for the \C{foreach} loop shown in
 Fig.~\ref{fig:foreach_code} is (\C{k1}, \C{k2}, and \C{k3} are
 constants):
 \begin{smathpar}
@@ -436,7 +429,7 @@ constants):
       (\lambda\C{item\_req}.~ \F_U(\stl,\stg) \cup \F_I(\stl,\stg))
 \end{array}
 \end{smathpar}
-Where:
+where:
 \begin{smathpar}
   \begin{array}{lcl}
     \F_U & = & \lambda(\stl,\stg).~ \stg \bind(\lambda s. 
@@ -458,7 +451,7 @@ algorithm in Fig.~\ref{fig:logic}. Since the iteration variable
 \C{item\_req} occurs free in these expressions, the appropriate
 application of the encoding algorithm is
 $\mssemof{\C{item\_req}}{\F_U(\stl,\stg)}$ and
-$\mssemof{\C{item\_req}}{\F_I(\stl,\stg)}$, which result in
+$\mssemof{\C{item\_req}}{\F_I(\stl,\stg)}$, which results in
 $(\phi_U,\G_U)$ and $(\phi_I,\G_I)$, respectively, where $\phi_U$,
 $\phi_I$, $\G_U$, $\G_I$ are as shown below:
 \begin{smathpar}

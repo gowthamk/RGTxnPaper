@@ -26,7 +26,7 @@
 
 \begin{center} 
 %
-\begin{minipage}{3.5in}
+%\begin{minipage}{3.5in}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
@@ -34,18 +34,18 @@
 }
 {
   \inserte{x} ~\elabsto~ \stabilize{\lambda(\stl,\stg).~
-    \{ y \,|\, y = \{x \with r.\delf=\mathit{false};\, \txnf = i\} \}}
+    \{ y \,|\, y = \{\langle x \with r.\delf=\mathtt{false};\, \txnf = i\rangle \}}
 }
 \end{array}
 \end{smathpar}
-\end{minipage}
-\begin{minipage}{3.5in}
+%\end{minipage}
+%\begin{minipage}{3.5in}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
 {
   G = \lambda y.~ \itel{[y/x]e_2}
-      {\{[y/x]e_1 \with \idf=r.\idf;\,\delf = y.\delf;\,\txnf=i \}}
+      {\{\langle[y/x]e_1 \with \idf=r.\idf;\,\delf = y.\delf;\,\txnf=i\rangle \}}
       {\emptyset}
 }
 {
@@ -54,14 +54,14 @@
 }
 \end{array}
 \end{smathpar}
-\end{minipage}
-\begin{minipage}{3in}
+%\end{minipage}
+%\begin{minipage}{3in}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
 {
   G = \lambda y.~ \itel{[y/x]e}
-      {\{y \with \delf = true;\,\txnf=i \}}
+      {\{\langle y \with \delf = \mathtt{true};\,\txnf=i\rangle \}}
       {\emptyset}
 }
 {
@@ -71,9 +71,9 @@
 }
 \end{array}
 \end{smathpar}
-\end{minipage}
+%\end{minipage}
 
-\begin{minipage}{2.7in}
+%\begin{minipage}{2.7in}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
@@ -86,15 +86,15 @@
 }
 \end{array}
 \end{smathpar}
-\end{minipage}
+%\end{minipage}
 
-\begin{minipage}{3in}
+%\begin{minipage}{3in}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
 {
   c \elabsto \F \spc
-  G = \lambda r.~ \itel{[r/x]e}{\{r\}}{\emptyset}
+  G = \lambda r.~ \itel{[r/x]e}{\{x\ |\ x = r \}}{\emptyset}
 }
 {
   \lete{y}{\selecte{\lambda x.e}}{c} ~\elabsto~  
@@ -102,9 +102,9 @@
 }
 \end{array}
 \end{smathpar}
-\end{minipage}
+%\end{minipage}
 
-\begin{minipage}{3.2in}
+%\begin{minipage}{3.2in}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
@@ -118,9 +118,9 @@
 }
 \end{array}
 \end{smathpar}
-\end{minipage}
+%\end{minipage}
 
-\begin{minipage}{3in}
+%\begin{minipage}{3in}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
@@ -133,11 +133,11 @@
 }
 \end{array}
 \end{smathpar}
-\end{minipage}
+%\end{minipage}
 %
 
 %
-\begin{minipage}{3in}
+%\begin{minipage}{3in}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
@@ -150,7 +150,7 @@
 }
 \end{array}
 \end{smathpar}
-\end{minipage}
+%\end{minipage}
 
 \end{center}
 %
