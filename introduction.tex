@@ -179,27 +179,25 @@ following contributions:
 %% weakly isolated transactions, an important advance in improving the
 %% safety of realistic database computations.
 \begin{enumerate}
-\item We analyze properties of weak isolation in the context of an
-    embedded DSL for OCaml that treats SQL-based relational database
-    operations (e.g., inserts, selects, deletes, joins, updates, etc.)
-    as monadic computations over an abstract database state.
- \item We develop an operational semantics and a compositional
-   rely-guarantee style proof system for this language capable of
-   relating high-level application invariants to database state,
-   parameterized by a weak isolation semantics that selectively
-   exposes the visibility of these operations to other transactions.
- \item Exploiting the monadic definition of database state, we devise
-   an inference algorithm capable of discovering the weakest isolation
-   level that is sound with respect to a transaction's high-level
-   consistency requirements.  The algorithm interprets database
-   operations as state transformers expressed in a language amenable
-   for translation into a decidable fragment of first-order logic, and
-   is thus suitable for automated verification using off-the-shelf SMT
-   solvers.
- \item We present details of a realistic implementation along with an
-   evaluation study on real-world database benchmarks that justify our
-   approach and the utility of our proof methodology and inference
-   mechanism.
+  \item We analyze properties of weak isolation in the context of a
+    DSL embedded in OCaml that treats SQL-based relational database
+    operations (e.g., inserts, selects, deletes, updates, etc.) as
+    computations over an abstract database state.
+  \item We develop an operational semantics and a compositional
+    rely-guarantee style proof system for this language capable of
+    relating high-level application invariants to database state,
+    parameterized by a weak isolation semantics that selectively
+    exposes the visibility of these operations to other transactions.
+  \item We devise an inference algorithm capable of discovering the
+    weakest isolation level that is sound with respect to a
+    transaction's high-level consistency requirements. The algorithm
+    interprets database operations as state transformers expressed in
+    a language amenable for translation into a decidable fragment of
+    first-order logic, and is thus suitable for automated verification
+    using off-the-shelf SMT solvers.
+  \item We present details of an implementation along with an
+    evaluation study on real database benchmarks that justify our
+    approach, and demonstrate the utility of our inference mechanism.
 \end{enumerate}
 \noindent Our results provide the first (to the best of our knowledge)
 formalization of weakly-isolated transactions, along with an

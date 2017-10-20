@@ -98,9 +98,9 @@ of the $I(\stg')$ assumption on the existentially bound $\stg'$. The
 example in Fig.~\ref{fig:weakening-example} demonstrates. 
 \begin{figure}[h]
 \begin{ocaml}
-let add_interest acc_id pc = atomically @@ do
-  let a = SQL.select1 BankAccount (fun acc -> acc.id = acc_id);
-  let y = a.bal + pc*a.bal;
+let add_interest acc_id pc = atomically_do @@ fun () ->
+  let a = SQL.select1 BankAccount (fun acc -> acc.id = acc_id) in
+  let y = a.bal + pc*a.bal in
   SQL.update BankAccount (fun acc -> {acc with bal = acc.bal + y})
                          (fun acc -> acc.id = acc_id)
 \end{ocaml}
