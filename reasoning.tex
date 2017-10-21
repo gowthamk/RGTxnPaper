@@ -70,7 +70,7 @@ until it commits.  In the context of rely-guarantee, this means that
 the transaction's guarantee ($G$) should capture the aggregate effect
 of a transaction, and not its individual writes.  While shared memory
 \C{atomic} blocks also have the same characteristic, the fact that
-transactions are weakly-isolated introduces surprising complexity.
+transactions are weakly-isolated introduces non-trivial complexity.
 Unlike an \C{atomic} block, the effect of a transaction is \emph{not}
 a sequential composition of the effects of its statements because each
 statement can witness a potentially different version of the state.
@@ -125,7 +125,11 @@ states:
 Due to the presence of local and global database states, and the
 availability of an isolation specification, we use multiple
 definitions of stability in Fig.~\ref{fig:rg-rules}, but they all
-convey the same intuition as above. In our setting, we only need to prove the stability of an assertion ($\phi$) against those environment steps which lead to a global database state on which the transaction itself can take its next step according to its isolation specification ($\I$). 
+convey the same intuition as above. In our setting, we only need to
+prove the stability of an assertion ($\phi$) against those environment
+steps which lead to a global database state on which the transaction
+itself can take its next step according to its isolation specification
+($\I$). 
 \begin{smathpar}
 \begin{array}{lcl}
 \stable(R, \phi) & \Leftrightarrow & \forall \stl, \stg, \stg'. \phi(\stl, \stg) \wedge R^{*}(\stg, \stg') \wedge \I(\stl, \stg, \stg') \Rightarrow \phi(\stl, \stg')
@@ -165,13 +169,13 @@ satisfied by the isolation axioms from Sec.~\ref{sec:isolation}. For
 instance, $\I_{ss}$, the snapshot axiom, is stable because if
 $\I_{ss}$ is invalid ($\neg\I_{ss}$), then an interference has already
 modified a record, and no further interference will restore the
-original record, because the original record bears the id of a
-transaction that has already committed. We can now generalize the
-stability condition for any arbitrary assertion $\phi$ by only
-considering those environment steps which in addition to preserving
-$\phi$, also preserve the condition that the transaction can continue
-to take its next step, i.e. the condition $\I$ holds on both the
-beginning and the end states.
+original record, because new commits bear new transaction ids
+different from the transaction id (\C{txn} field) of the original
+record. We can now generalize the stability condition for any
+arbitrary assertion $\phi$ by only considering those environment steps
+which in addition to preserving $\phi$, also preserve the condition
+that the transaction can continue to take its next step, i.e. the
+condition $\I$ holds on both the beginning and the end states.
  \begin{smathpar}
    \forall \stl, \stg, \stg', \stg_1. \phi(\stl, \stg) \wedge \I(\stl, \stg_1, \stg) \wedge R^{*}(\stg, \stg') \wedge \I(\stl, \stg_1, \stg')
    \Rightarrow \phi(\stl, \stg')
@@ -388,13 +392,14 @@ The semantics of the global and transaction-local RG judgments are
 defined thus:
 \begin{smathpar}
 \begin{array}{lclr}
-\R \vdash \hoare{P}{c}{Q} & \defeq & \forall \stl,\stl',\stg,\stg'.~ P(\stl,\stg) \conj (\tbox{c}_i,\stl,\stg) \rstepssto{n}
+\R \vdash \hoare{P}{c}{Q} & \defeq & \forall
+  \stl,\stl',\stg,\stg',\nubar.~ P(\stl,\stg) \conj (\tbox{c}_i,\stl,\stg) \rstepssto{n}
   (\tbox{\cskip}_i, \stl',\stg')
-  \Rightarrow Q(\stl',\stg') \\
+  \Rightarrow Q(\stl',\stg') & \nubar = \texttt{freevars}(c)\\
 \rg{I,R}{c}{G,I} & \defeq &  \forall \stg.\, I(\stg)
   \Rightarrow (\forall \stg'.\; (c,\stg) 
     \rstepssto{n} (\cskip,\stg') \Rightarrow I(\stg')) \\
-&&\hspace*{0.5in}\conj \texttt{step-guaranteed}(R,G,c,\stg)\\
+&&\hspace*{0.6in}\conj \texttt{step-guaranteed}(R,G,c,\stg)\\
 \end{array}
 \end{smathpar}
 

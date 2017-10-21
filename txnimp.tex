@@ -14,13 +14,14 @@
   {i,j} \in \mathbb{N} \qquad
   {\odot} \in \{+,-,\le,\ge,=\}\qquad
   {k} \in \mathbb{Z}\cup\mathbb{B} \qquad
-  {\rec} \in \{\bar{f}=\bar{k}\}\
+  {\rec} \in \langle \bar{f}=\bar{k}\rangle\
 }\\
-{\stl,\stg,s} & \in & \mathtt{State} & \coloneqq &  \Pow{\{\bar{f}=\bar{k}\}} \\
+{\stl,\stg,s} & \in & \mathtt{State} & \coloneqq &  \Pow{\langle
+  \bar{f}=\bar{k} \rangle} \\
 {\I_e, \I_c }  & \in & \mathtt{Isolation Spec} & \coloneqq & (\stl,\stg,\stg') \rightarrow \Prop\\
 v & \in & \mathtt{Values} & \coloneqq & k \ALT \rec \ALT s\\
 e & \in & \mathtt{Expressions} & \coloneqq & k \ALT x \ALT x.f 
-    \ALT \{\bar{f}=\bar{e}\} \ALT e_1 \odot e_2\\ 
+    \ALT \langle \bar{f}=\bar{e} \rangle \ALT e_1 \odot e_2\\ 
 c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
     \ALT \ite{e}{c_1}{c_2}\ALT c_1;c_2 \ALT \inserte{x}  \\
 &&&&\ALT \deletee{\lambda x.e}

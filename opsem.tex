@@ -10,8 +10,8 @@ Fig.~\ref{fig:txnimp} shows the syntax and small-step semantics of
 reasoning under weak isolation. Variables ($x$), integer and Boolean
 constants ($k$), records ($r$) of named constants, sets ($s$) of such
 records, arithmetic and boolean expressions ($e_1 \odot e_2$), and
-record expressions ($[\bar{f}=\bar{e}]$) constitute the syntactic
-class of expressions ($e$). Commands ($c$) include $\cskip$,
+record expressions ($\langle \bar{f}=\bar{e} \rangle$) constitute the
+syntactic class of expressions ($e$). Commands ($c$) include $\cskip$,
 conditional statements, \C{LET} constructs to bind names, \C{FOREACH}
 loops, SQL statements, their sequential composition ($c_1;c_2$),
 transactions ($\ctxn{i}{\I}{c}$) and their parallel composition

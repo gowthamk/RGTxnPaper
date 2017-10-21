@@ -34,9 +34,9 @@
   \\
   \R \vdash \hoare{P'}{c}{Q}\spc
   \stable(\R,P)\\
-  P'(\stl,\stg) \Leftrightarrow P(\stl,\stg) \\
-  \hspace*{0.5in}\wedge
-  x = \{r' \,|\, \exists(r\in\Delta).~ [r/y]e_2\} \\
+  \hspace*{-0.3in} P'(\stl,\stg) \Leftrightarrow P(\stl,\stg) \\
+  \hspace*{0.6in}\conj
+  x = \{r \,|\, r\in\Delta \wedge [r/y]e\} \\
 }
 {
   \R \vdash \hoare{P}{\lete{x}{\selecte{\lambda y.e}}{c}}{Q}
