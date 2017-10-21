@@ -37,7 +37,9 @@ set expression $s$, a monadic composition of two set expressions
 conditional set expression where the condition is a propositional
 formula, and a union of two set expressions. Symbols $\stl$ and $\stg$
 are also variables in $\SL$, but are used to denote local and database
-states, respectively.  The language is carefully chosen to be
+states, respectively. Constant sets can be written using the set
+literatl expressions. For e.g., the set $\{1,2\}$ can be written as
+$\{x \,|\, x=1 \vee x=2\}$. The language is carefully chosen to be
 expressive enough to capture the semantics of $\txnimp$ statements (as
 well as SQL operations more generally), yet simple enough to have a
 semantics-preserving translation to a decidable fragment of
@@ -86,16 +88,17 @@ an existentially bound $\stg'$ as described below:
 \end{array}
 \end{smathpar}
 Observe that when $\F$ is not stable, then $\stabilize{\F}$ returns a
-transformer $\F'$ that simply ignores its $\stg$ argument in favor of a generic
-$\stg'$, making $\F'$ trivially stable. It is safe to assume
+transformer $\F'$ that simply ignores its $\stg$ argument in favor of
+a generic $\stg'$, making $\F'$ trivially stable. It is safe to assume
 $I(\stg')$ because all verified transactions preserve the invariant,
 and hence only valid database states will ever be witnessed. From the
 perspective of RG reasoning, $\stabilize{\cdot}$ effectively weakens
 the post-condition of a statement, as done by the
-\rulelabel{RG-Conseq} rule for transaction-bound commands.  The weakening semantics chosen by
-$\stabilize{\cdot}$, while being simple, is nonetheless useful because
-of the $I(\stg')$ assumption on the existentially bound $\stg'$. The
-example in Fig.~\ref{fig:weakening-example} demonstrates. 
+\rulelabel{RG-Conseq} rule for transaction-bound commands.  The
+weakening semantics chosen by $\stabilize{\cdot}$, while being simple,
+is nonetheless useful because of the $I(\stg')$ assumption on the
+existentially bound $\stg'$. The example in
+Fig.~\ref{fig:weakening-example} demonstrates. 
 \begin{figure}[h]
 \begin{center}
 \begin{ocaml}
@@ -110,20 +113,27 @@ let add_interest acc_id pc = atomically_do @@ fun () ->
 \label{fig:weakening-example}
 \end{figure}
 Here, an \C{add\_interest} transaction adds a positive interest
-(\C{pc}) to the balance of a bank account, which is required to be
-non-negative ($I(\stg) \Leftrightarrow \forall(r\in\stg).~r.\C{bal}\ge
-0$). The transaction starts by issuing a \C{select1} query, whose
-effect implicitly asserts that there exists a record in the bank
-account database that is equal to $a$ ($\exists(r\in\stg).~r=a$).
-However, this assertion is unstable because a concurrent \C{withdraw}
-or \C{deposit} transactions might update the account balance, so that
-such a record no longer exists in the database.  Fortunately, the
-weakening operator ($\stabilize{\cdot}$) allows us to weaken the
-assertion to $\exists \stg'.I(\stg') \conj \exists(r\in\stg').~a=r$
-({\sf exists} has the same semantics as $\exists$, as formalized in
-Fig.~\ref{fig:logic}), which is enough to prove that $\C{a.bal +
-pc*a.bal}\ge 0$, and verify that \C{add\_interest} preserves the
-positive balance invariant.
+(determined by \C{pc}) to the balance of a bank account, which is
+required to be non-negative ($I(\stg) \Leftrightarrow
+\forall(r\in\stg).~r.\C{bal}\ge 0$). The transaction starts by issuing
+a \C{select1} query, whose effect ($\F$) is essentially a singleton
+set containing a record $r$ whose id is \C{acc\_id} (i.e.,
+$\F(\stl,\stg) = \{r \,|\, r\in\stg \wedge r.\C{id} = \C{acc\_id}\}$).
+However, this effect is unstable because $\F(\stl,\stg')$ may not be
+the same set as $\F(\stl,\stg)$ when $\stg'\neq\stg$. A record
+$r\in\stg$ whose $\C{id}=\C{acc\_id}$ may have its balance updated by
+a concurrent \C{withdraw} or \C{deposit} transaction in $\stg'$,
+making the record in $\stg'$ different from the record in $\stg$.
+Hence the stability check fails.  Fortunately, the weakening operator
+($\stabilize{\cdot}$) allows us to weaken the effect to
+$\existsl(\stg, I(\stg), \{ r \,|\, r\in\stg \wedge
+r.\C{id}=\C{acc\_id}\})$, which effectively asserts that the
+\C{select1} query returns a record with $\C{id}=\C{acc\_id}$ from
+\emph{some} database state that satisfies the non-negative balance
+invariant $I$.  This weakened assertion is nonetheless enough to
+deduce that $\C{a.bal}\ge0$, and subsequently prove that $\C{a.bal +
+pc*a.bal}\ge 0$, allowing us to verify the \C{add\_interest}
+transaction.
 
 The state transformer rules, like the earlier RG rules, closely follow
 the corresponding reduction rules in Fig.~\ref{fig:txnimp}, except
