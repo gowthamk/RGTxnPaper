@@ -293,23 +293,40 @@ The \rulelabel{RG-Txn} rule so updated is shown below:
 \begin{array}{c}
 \RULE
 {
-  \stable(R,\I)\spc
-  \stable(R,I)\spc
-  P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
-  \R_e = R \backslash \I_e \spc \R_c = R \backslash \I_c \spc 
-   \R_e \vdash \rg{P}{c}{Q} \spc \stable(\R_c,Q) \\ 
-  \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
-    G(\stg, \stl \rhd \stg)\spc
-  \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
+   \stable(R,\I)\spc
+   \stable(R,I)\\
+   \R_e = R \backslash \I_e \spc \R_c = R \backslash \I_c \spc  
+   c \elabsto \F \spc \stable(\R_c,\F)\\
+   \forall \stl,\stg.~ \stl = F(\emptyset,\stg) \Rightarrow 
+   G(\stg, \stl\gg\stg)\spc
+   \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
 }
 {
   \rg{I,R}{\ctxn{i}{\I}{c}}{G,I}
 }
 \end{array}
 \end{smathpar}
+% \begin{smathpar}
+% \begin{array}{c}
+% \RULE
+% {
+%   \stable(R,\I)\spc
+%   \stable(R,I)\spc
+%   P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
+%   \R_e = R \backslash \I_e \spc \R_c = R \backslash \I_c \spc 
+%    \R_e \vdash \rg{P}{c}{Q} \spc \stable(\R_c,Q) \\ 
+%   \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
+%     G(\stg, \stl \rhd \stg)\spc
+%   \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
+% }
+% {
+%   \rg{I,R}{\ctxn{i}{\I}{c}}{G,I}
+% }
+% \end{array}
+% \end{smathpar}
 Automating the application of the \rulelabel{RG-Txn} rule for a
 transaction requires automating the multiple implication checks in
-the premise. While $R$, $\R$, $\I$ and $I$ are formulas in
+the premise. While $R$, $G$, $\I$ and $I$ are formulas in
 first-order logic (FOL) with a relatively simple structure, $\F$
 is an expression in the set language $\SL$
 (Fig.~\ref{fig:logic-syntax}) with a possibly complex structure.
