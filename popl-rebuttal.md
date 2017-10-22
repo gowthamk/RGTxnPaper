@@ -75,7 +75,7 @@ Reviewer B
   the loop variable $z$, but not on local ($\delta$) and global
   ($\Delta$) states (observe that ${\sf F}$ is applied to the same
   $\delta$ and $\Delta$ forall $z$). While independence on $\Delta$ is
-  gauranteed by the stability condition (checked separately), the
+  guaranteed by the stability condition (checked separately), the
   independence on the local state $\delta$ is simply assumed.
 
 
@@ -108,14 +108,90 @@ Shepard
   by considering machine (finite-bit) arithmetic instead of SLA, we
   decided to take a long, hard look at the encoding algorithm and see
   if it can be simplified. In this we were successful as we were able
-  to modify our encoding to eliminate the existential altogether. Our
+  to modify our bind encoding to eliminate the existential altogether. Our
   modifications are based on the observation that the semantics of
   bind, which were previously written using two implications one of
   which involves an existential, can be equivalently written using a
   single bi-implication that only involves universal quantifiers. A
-  rigorous proof to this effect can be found in the techreport, while
-  an automatic Z3-assisted proof can be found
-  [here](https://rise4fun.com/Z3/G1a). As a consequence of this
-  change, the fragment of encoding is back to being EPR, hence the
-  Theorems 5.2 and 5.3 continue to hold.
+  formal proof to this effect is given below, while an automatic
+  Z3-assisted proof can be found [here](https://rise4fun.com/Z3/G1a).
+  As a consequence of this change, the fragment of encoding is back to
+  being EPR, hence the Theorems 5.2 and 5.3 continue to hold. We have
+  also tightened our treatment of free variables in the encoding
+  algorithm, and added an example to Sec. 5.2 to demonstrate how
+  exactly the encoding works.
+
+#### Bind Theorem and Proof ####
+
+Theorem:
+  Let S be a set containing elements of type T, and let R be a binary
+  relation over T. Let S1 be a T set defined using the following two
+  implications (note: (x,y: T) is a shorthand for (x:T, y:T)):
+
+           ∀(x,y: T). x∈S ∧ R(x,y) ⇒ y∈S1			(Call it H0)
+           ∀(y: T). y∈S1 ⇒ ∃(x:T). x∈S ∧ R(x,y)		(H1)
+
+  Likewise, let S2 be a T set defined via a single bi-implication as
+  following:
+
+          ∀(x,y: T). x∈S ∧ R(x,y) ⇔ y∈S2			(H2)
+
+  Then, S1 = S2. That is:
+
+          ∀(y: T). y∈S1 ⇔ y∈S2        (G)
+
+Proof:
+  We will show G be proving the following two implications (goals)
+  separately:
+
+        ∀(y: T). y∈S1 ⇒ y∈S2					(G0)
+        ∀(y: T). y∈S2 ⇒ y∈S1					(G1)
+
+  Let us first note that H2 is a conjunction of the following two
+  hypothesis:
+
+          ∀(x,y: T). x∈S ∧ R(x,y) ⇒ y∈S2			(H3)
+          ∀(x,y: T). y∈S2 ⇒ x∈S ∧ R(x,y)			(H4)
+
+  Proof of G0:
+  Intros on the goal G0 introduces a new y0:T, gives us the following
+  hypothesis:
+
+          y0∈S1							(H5)
+
+  And reduces the goal to proving that y0∈S2.  Instantiating H1 with
+  (y:=y0), and then applying it on H5 gives:
+
+          ∃(x:T). x∈S ∧ R(x,y0)				(H6)
+
+  Destructing the existential in H6 introduces a new x0:T, and gives the
+  following:
+
+          x0∈S ∧ R(x0,y0)				(H7)
+
+  Now, instantiating H3 with (x:=x0)(y:=y0), and applying it on H7 gives
+  y0∈S2, which is what needs to be proven.
+
+  Proof of G1:
+  Intros on the goal G1 introduces a new y0:T, gives us the following
+  hypothesis:
+
+          y0∈S2					(H8)
+
+  And reduces the goal to proving that y0∈S1. At this point we prove a
+  simple lemma that asserts the non-emptiness of type T:
+
+          ∃(x:T)			(Lemma1)
+
+  The proof for Lemma1 requires an evidence for a value of type T, which
+  is readily available in the form of y0:T.  Destructing the existential
+  in Lemma1 introduces a new x0:T into the context (note that x0 may or
+  may not be equal to y0). Now instantiating H4 with (x:=x0)(y:=y0), and
+  then applying it on H8 gives:
+
+          x0∈S ∧ R(x0,y0)				(H9)
+
+  Finally, instantiating H0 with (x:=x0)(y:=y0), and applying it on H9
+  gives y0∈S1, which is what needs to be proven.
+Qed.
 
