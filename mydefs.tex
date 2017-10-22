@@ -112,6 +112,8 @@ morekeywords={module, match, when, @@deriving, not, : , txn_do, do, SQL/\\}
 \newcommand{\code}[1]{{\tt #1}}
 \newcommand{\spc}[0]{\quad}
 \newcommand{\ALT}{~\mid~}
+\newcommand{\llangle}{\langle}
+\newcommand{\rrangle}{\rangle}
 \newcommand{\rel}[1]{{R}_{\mathit{#1}}}
 \newcommand{\conj}{~\wedge~}
 \newcommand{\disj}{~\vee~}
@@ -123,8 +125,8 @@ morekeywords={module, match, when, @@deriving, not, : , txn_do, do, SQL/\\}
 %\newcommand{\coloneqq}{::=}
 \newcommand{\qqquad}{\quad\quad}
 \newcommand{\cskip}{\C{SKIP}}
-\newcommand{\ctxnr}[3]{{\sf txn}_{#1}\langle #2 \rangle\{#3\}}
-\newcommand{\ctxn}[3]{\C{TXN}_{#1}\langle #2 \rangle\{#3\}}
+\newcommand{\ctxnr}[3]{{\sf txn}_{#1}\llangle #2 \rrangle\{#3\}}
+\newcommand{\ctxn}[3]{\C{TXN}_{#1}\llangle #2 \rrangle\{#3\}}
 \newcommand{\catomic}[1]{\C{ATOMIC}\{#1\}}
 \newcommand{\stepsto}{\longrightarrow}
 \newcommand{\rstepsto}{\longrightarrow_{R}}
@@ -203,7 +205,7 @@ morekeywords={module, match, when, @@deriving, not, : , txn_do, do, SQL/\\}
 \newcommand{\ite}[3]{\C{IF}\;#1\;\C{THEN}\;#2\;\C{ELSE}\;#3}
 \newcommand{\lete}[3]{\C{LET}\;#1=#2\;\C{IN}\;#3}
 \newcommand{\foreache}[2]{\texttt{FOREACH}\;#1\;\texttt{DO}\;#2}
-\newcommand{\foreachr}[3]{{\sf foreach}\langle #1 \rangle\;#2\;{\sf do}\;#3}
+\newcommand{\foreachr}[3]{{\sf foreach}\llangle #1 \rrangle\;#2\;{\sf do}\;#3}
 \newcommand{\inserte}[1]{\texttt{INSERT}\;#1}
 \newcommand{\selecte}[1]{\texttt{SELECT}\;#1}
 \newcommand{\deletee}[1]{\texttt{DELETE}\;#1}

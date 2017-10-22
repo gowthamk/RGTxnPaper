@@ -38,7 +38,7 @@ conditional set expression where the condition is a propositional
 formula, and a union of two set expressions. Symbols $\stl$ and $\stg$
 are also variables in $\SL$, but are used to denote local and database
 states, respectively. Constant sets can be written using the set
-literatl expressions. For e.g., the set $\{1,2\}$ can be written as
+literal expressions. For e.g., the set $\{1,2\}$ can be written as
 $\{x \,|\, x=1 \vee x=2\}$. The language is carefully chosen to be
 expressive enough to capture the semantics of $\txnimp$ statements (as
 well as SQL operations more generally), yet simple enough to have a
@@ -65,11 +65,11 @@ stable w.r.t the rely relation $\R$. The stability condition on
 effects can be defined thus:
 \begin{smathpar}
 \begin{array}{lcl}
-  \stable(\R,\F) & \Leftrightarrow & \forall \stl,\stg,\stg',\bar{v}.~
+  \stable(\R,\F) & \Leftrightarrow & \forall \stl,\stg,\stg',\nubar.~
   \R(\stl,\stg,\stg') \Rightarrow \F(\stl,\stg) \equiv \F(\stl,\stg')
 \end{array}
 \end{smathpar}
-where $\bar{v}$ are the variables that occur free in $\F$; this is
+where $\nubar$ are the variables that occur free in $\F$; this is
 possible because of how the inference rules are structured.
 Intuitively, the stability condition requires an effect to describe
 the same set of records before and after the interference. The
@@ -262,7 +262,7 @@ matches the condition linking $P$ and $Q$. The stability of $P$ with
 respect to $\R$ follows directly from the stability of $I$.
 
 The proofs for \C{SELECT}, sequencing, and conditionals use use the
-inductive hypothesis to infer the RG-judgements present in the
+inductive hypothesis to infer the RG-judgments present in the
 premises of their corresponding RG-rules. The interesting case is the
 \C{FOREACH} statement, for which we use the loop invariant
 $\psi(\stl, \stg) \Leftrightarrow \stl = s \cup (y \bind (\lambda
@@ -293,23 +293,40 @@ The \rulelabel{RG-Txn} rule so updated is shown below:
 \begin{array}{c}
 \RULE
 {
-  \stable(R,\I)\spc
-  \stable(R,I)\spc
-  P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
-  \R_e = R \backslash \I_e \spc \R_c = R \backslash \I_c \spc 
-   \R_e \vdash \rg{P}{c}{Q} \spc \stable(\R_c,Q) \\ 
-  \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
-    G(\stg, \stl \rhd \stg)\spc
-  \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
+   \stable(R,\I)\spc
+   \stable(R,I)\\
+   \R_e = R \backslash \I_e \spc \R_c = R \backslash \I_c \spc  
+   c \elabsto \F \spc \stable(\R_c,\F)\\
+   \forall \stl,\stg.~ \stl = F(\emptyset,\stg) \Rightarrow 
+   G(\stg, \stl\gg\stg)\spc
+   \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
 }
 {
   \rg{I,R}{\ctxn{i}{\I}{c}}{G,I}
 }
 \end{array}
 \end{smathpar}
+% \begin{smathpar}
+% \begin{array}{c}
+% \RULE
+% {
+%   \stable(R,\I)\spc
+%   \stable(R,I)\spc
+%   P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
+%   \R_e = R \backslash \I_e \spc \R_c = R \backslash \I_c \spc 
+%    \R_e \vdash \rg{P}{c}{Q} \spc \stable(\R_c,Q) \\ 
+%   \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
+%     G(\stg, \stl \rhd \stg)\spc
+%   \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
+% }
+% {
+%   \rg{I,R}{\ctxn{i}{\I}{c}}{G,I}
+% }
+% \end{array}
+% \end{smathpar}
 Automating the application of the \rulelabel{RG-Txn} rule for a
 transaction requires automating the multiple implication checks in
-the premise. While $R$, $\R$, $\I$ and $I$ are formulas in
+the premise. While $R$, $G$, $\I$ and $I$ are formulas in
 first-order logic (FOL) with a relatively simple structure, $\F$
 is an expression in the set language $\SL$
 (Fig.~\ref{fig:logic-syntax}) with a possibly complex structure.
@@ -320,16 +337,17 @@ lends itself to automatic reasoning.
 The algorithm ($\mssemof{\cdot}{\cdot}$) shown in Fig.~\ref{fig:logic}
 translates an $\SL$ expression ($s$) to FOL. The translation is based
 on encoding a set of element type $T$ as a unary predicate on $T$.
-The predicate is represented as a meta function that accepts an
-$x:T$ and returns a quantifier-free proposition that evaluates to
-true ($\top$) if and only if $x$ is present in the set. Alternatively,
-translation may also encode the set as a function in the logic itself,
-in which case a quantified proposition constraining the function is
-also generated. For instance, consider the set $\{1,2\}$. The
-predicate describing the set can be encoded as the function $\lambda
-\v. \v=1 \vee \v=2$, with no further constraints, or it can be encoded as the function $\lambda \v. g(\v)$
-with an associated constraint ($\phi\in\Prop^1$) defining the
-uninterpreted boolean functon $g$:
+The predicate is represented as a meta function that accepts an $x:T$
+and returns a quantifier-free proposition that evaluates to true
+($\top$) if and only if $x$ is present in the set. Alternatively,
+translation may also encode the set as a predicate in the logic
+itself, in which case a quantified proposition constraining the
+predicate is also generated. For instance, consider the set $\{1,2\}$.
+The predicate describing the set can be encoded as the function
+$\lambda \v. \v=1 \vee \v=2$, with no further constraints, or it can
+be encoded as the function $\lambda \v. g(\v)$ with an associated
+constraint ($\phi\in\Prop^1$) defining the uninterpreted boolean
+function (i.e., uninterpreted predicate) $g$:
 \begin{smathpar}
   \begin{array}{lcl}
     \phi & = & \forall \nu.~g(\nu) \Leftrightarrow \nu=1 \vee \nu=2
@@ -338,7 +356,7 @@ uninterpreted boolean functon $g$:
 The translation adopts one or the other approach, depending on the
 need. For uniformity, we consider the encoding of a set as pair
 ($\phi$,$\G$), where $\G$ is a meta function, and $\phi$ is a FOL
-formula constraining any uninterpreted functions used in $G$.
+formula constraining any uninterpreted predicates used in $G$.
 
 Due to the presence of bind ($\bind$) in $\SL$, a set expression $s$
 may contain free variables introduced by an enclosing binder. For
@@ -366,7 +384,7 @@ enclosing binders of $s$, and not all may actually occur free in $s$.
 Nonetheless, its predicate $\G$ is always indexed by $|\nubar|$ free
 variables for uniformity. The translation encodes database state as an
 uninterpreted sort. Considering that the state is actually a set of
-records, we define an uninterpreted relation $\in$ to relate records
+records, we define an uninterpreted relation ``$\in$'' to relate records
 and states. Thus, a variable set expression $\stg$ denoting a database
 state is encoded as the predicate $\lambda (\vbar,r).~r\in\stg$, where
 $|\vbar|=|\nubar|$ (predicates are uncurried for simplicity; $\vbar$

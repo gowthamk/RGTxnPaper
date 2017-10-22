@@ -70,7 +70,7 @@ until it commits.  In the context of rely-guarantee, this means that
 the transaction's guarantee ($G$) should capture the aggregate effect
 of a transaction, and not its individual writes.  While shared memory
 \C{atomic} blocks also have the same characteristic, the fact that
-transactions are weakly-isolated introduces surprising complexity.
+transactions are weakly-isolated introduces non-trivial complexity.
 Unlike an \C{atomic} block, the effect of a transaction is \emph{not}
 a sequential composition of the effects of its statements because each
 statement can witness a potentially different version of the state.
@@ -125,80 +125,80 @@ states:
 Due to the presence of local and global database states, and the
 availability of an isolation specification, we use multiple
 definitions of stability in Fig.~\ref{fig:rg-rules}, but they all
-convey the same intuition as above. In our setting, we only need to prove the stability of an assertion ($\phi$) against those environment steps which lead to a global database state on which the transaction itself can take its next step according to its isolation specification ($\I$). 
+convey the same intuition as above. In our setting, we only need to
+prove the stability of an assertion ($\phi$) against those environment
+steps which lead to a global database state on which the transaction
+itself can take its next step according to its isolation specification
+($\I$). 
 \begin{smathpar}
 \begin{array}{lcl}
 \stable(R, \phi) & \Leftrightarrow & \forall \stl, \stg, \stg'. \phi(\stl, \stg) \wedge R^{*}(\stg, \stg') \wedge \I(\stl, \stg, \stg') \Rightarrow \phi(\stl, \stg')
 \end{array}
 \end{smathpar}
-\noindent A characteristic of RG reasoning is that stability of an assertion is
-always proven w.r.t to $R$, and not $R^{*}$, although interference may
-include multiple environment steps, and $R$ only captures a single
-step. This is nonetheless sound due to inductive reasoning: if $\phi$
-is preserved by every step of $R$, then $\phi$ is preserved by
-$R^{*}$, and vice-versa.  However, such reasoning does not extend
-naturally to isolation-constrained interference because $R^{*}$ modulo
-$\I$ is not same as $\R^{*}$; the former is a transitive relation
-constrained by $\I$, whereas the latter is the transitive closure of
-a constrained relation. This means, unfortunately, that we cannot directly replace $R^{*}$
-by $R$ in the above condition because of our need to consider the weak
-isolation specification $\I$ that selectively exposes interferences.
+\noindent A characteristic of RG reasoning is that stability of an
+assertion is always proven w.r.t to $R$, and not $R^{*}$, although
+interference may include multiple environment steps, and $R$ only
+captures a single step. This is nonetheless sound due to inductive
+reasoning: if $\phi$ is preserved by every step of $R$, then $\phi$ is
+preserved by $R^{*}$, and vice-versa.  However, such reasoning does
+not extend naturally to isolation-constrained interference because
+$R^{*}$ modulo $\I$ is not same as $\R^{*}$; the former is a
+transitive relation constrained by $\I$, whereas the latter is the
+transitive closure of a relation constrained by $\I$. This means,
+unfortunately, that we cannot directly replace $R^{*}$ by $R$ in the
+above condition.
 
 To obtain an equivalent form in our setting, we require an additional
 condition on the isolation specification, which we call the
 \emph{stability condition on $\I$}.  The condition requires $\I$ to
-allow interferences $R^{*}(\stg,\stg'')$, for two database states
-$\stg$ and $\stg''$, only if it also allows interference for every
-prefix of $R^{*}(\stg,\stg'')$. In other words, if $\I$ disallows
-interference from $\stg$ to $\stg'$, then an $R$-step from $\stg'$ to
-$\stg''$ should not make the interference from $\stg$ to $\stg''$
-valid.  This stability condition on $\I$ is defined formally thus:
+admit the interference of multiple $R$ steps (i.e.,
+$R^{*}(\stg,\stg'')$, for two database states $\stg$ and $\stg''$),
+only if it also admits interference of each $R$ step along the way.
+Formally:
 \begin{smathpar}
 \begin{array}{lcl}
   \stable(R,\I) & \Leftrightarrow & \forall \stl,\stg,\stg',\stg''.~
-  \neg\I(\stl,\stg,\stg') \conj R(\stg',\stg'') \Rightarrow
-  \neg\I(\stl,\stg,\stg'')
+  \I(\stl,\stg,\stg'') \conj R(\stg',\stg'') \Rightarrow
+  \I(\stl,\stg,\stg') \conj \I(\stl,\stg',\stg'')
 \end{array}
 \end{smathpar}
 It can be easily verified that the above stability condition is
 satisfied by the isolation axioms from Sec.~\ref{sec:isolation}. For
-instance, $\I_{ss}$, the snapshot axiom, is stable because if
-$\I_{ss}$ is invalid ($\neg\I_{ss}$), then an interference has already
-modified a record, and no further interference will restore the
-original record, because the original record bears the id of a
-transaction that has already committed. We can now generalize the
-stability condition for any arbitrary assertion $\phi$ by only
-considering those environment steps which in addition to preserving
-$\phi$, also preserve the condition that the transaction can continue
-to take its next step, i.e. the condition $\I$ holds on both the
-beginning and the end states.
- \begin{smathpar}
-   \forall \stl, \stg, \stg', \stg_1. \phi(\stl, \stg) \wedge \I(\stl, \stg_1, \stg) \wedge R^{*}(\stg, \stg') \wedge \I(\stl, \stg_1, \stg')
-   \Rightarrow \phi(\stl, \stg')
-\end{smathpar}
-Here, we use a separate notation ($\stg_1$) for the global database
-state that the transaction witnessed during its last step. $\phi$ does
-not constrain this global database state, but the stability of $\I$
-ensures that any database state constrained by $\phi$ must also obey
-$\I$. We can now replace the transitive closure in the rule with the
-single step relation $R$, backed by the inductive argument for
-stability. Pushing the universal quantifier for $\stg_1$ inside the
-antecedent and separating the predicates involving $\stg_1$, we can
-rewrite the condition in the form below, by defining a new ternary
-relation $R \backslash \I$, which can be thought of as $R$ modulo
-$\I$:
+instance, $\I_{ss}$, the snapshot axiom, is stable because if a the
+state is unmodified between $\stg$ and $\stg''$, then it is clearly
+unmodified between $\stg$ and $\stg'$, and also between $\stg'$ and
+$\stg''$, where $\stg'$ is an intermediary state.  Modifying and
+restoring the state $\stg$ is not possible because each new commit
+bears a new transaction id different from the transaction ids (\C{txn}
+fields) present in $\stg$. 
+
+The stability condition on $\I$ guarantees that an interference from
+$R^*$ is admissible only if the interference due to each individual
+$R$ step is admissible. In other words, it makes isolation-constrained
+$R^*$ relation equal to the transitive closure of the
+isolation-constrained $R$ relation. We call $R$ constrained by
+isolation $\I$ as $R$ modulo $\I$ ($R\backslash \I$; written shortly
+as $\R$), which is the following ternary relation:
 \begin{smathpar}
-\begin{array}{lcl}
-\stable((R \backslash \I), \phi) & \Leftrightarrow & \forall \stl,\stg,\stg'. \phi(\stl,\stg) \wedge (R \backslash \I)(\stl,\stg,\stg') \Rightarrow \phi(\stl,\stg')\\
-(R \backslash \I)(\stl, \stg, \stg') & \Leftrightarrow & \exists \stg_1. R(\stg, \stg') \wedge \I(\stl, \stg_1, \stg) \wedge \I(\stl, \stg_1, \stg')
-\end{array}
+  \begin{array}{lcl}
+    (R \backslash \I)(\stl, \stg, \stg') & \Leftrightarrow & R(\stg,
+      \stg') \wedge \I(\stl, \stg, \stg')\\
+  \end{array}
+\end{smathpar}
+It is now enough to prove the stability of an RG assertion $\phi$
+w.r.t $R\backslash \I$:
+\begin{smathpar}
+  \begin{array}{lcl}
+    \stable((R \backslash \I), \phi) & \Leftrightarrow & \forall
+      \stl,\stg,\stg'.~ \phi(\stl,\stg) \wedge (R \backslash \I)(\stl,\stg,\stg') \Rightarrow \phi(\stl,\stg')\\
+  \end{array}
 \end{smathpar}
 This condition often significantly simplifies the form of $R
 \backslash \I$ irrespective of $R$. For example, when a transaction is
 executed against a snapshot of the database (i.e. $\mathbb{I}_{ss}$),
-$R \backslash \I_{ss}$ will be the identity function, since if $\stg
-\neq \stg'$, there does not exist any $\stg_1$ which satisfies the
-constraint for $(R \backslash \I_{ss})(\stl,\stg,\stg')$.
+$R \backslash \I_{ss}$ will be the identity function, since any
+non-trivial interference will violate the $\stg' = \stg$ condition
+imposed by $\I_{ss}$.
 
 \subsubsection{Rules}
 
@@ -388,13 +388,14 @@ The semantics of the global and transaction-local RG judgments are
 defined thus:
 \begin{smathpar}
 \begin{array}{lclr}
-\R \vdash \hoare{P}{c}{Q} & \defeq & \forall \stl,\stl',\stg,\stg'.~ P(\stl,\stg) \conj (\tbox{c}_i,\stl,\stg) \rstepssto{n}
+\R \vdash \hoare{P}{c}{Q} & \defeq & \forall
+  \stl,\stl',\stg,\stg',\nubar.~ P(\stl,\stg) \conj (\tbox{c}_i,\stl,\stg) \rstepssto{n}
   (\tbox{\cskip}_i, \stl',\stg')
-  \Rightarrow Q(\stl',\stg') \\
+  \Rightarrow Q(\stl',\stg') & \nubar = \texttt{freevars}(c)\\
 \rg{I,R}{c}{G,I} & \defeq &  \forall \stg.\, I(\stg)
   \Rightarrow (\forall \stg'.\; (c,\stg) 
     \rstepssto{n} (\cskip,\stg') \Rightarrow I(\stg')) \\
-&&\hspace*{0.5in}\conj \texttt{step-guaranteed}(R,G,c,\stg)\\
+&&\hspace*{0.6in}\conj \texttt{step-guaranteed}(R,G,c,\stg)\\
 \end{array}
 \end{smathpar}
 
@@ -433,13 +434,13 @@ begins its execution in global database state satisfying $I$ and
 encountering interference $R$ while executing under isolation
 specification $\I$ finishes its execution in a database state also
 satisfying $I$, and also guarantees that its commit step satisfies
-$G$. The rule uses the transaction-local RG judgement $\R_e \vdash
+$G$. The rule uses the transaction-local RG judgment $\R_e \vdash
 \rg{P}{c}{Q}$. By \rulelabel{E-Txn-Start}, the local and global
 database states at the start of a transaction satisfy $P$, and the
 only challenge is that environment steps in an execution covered by
 $\R_e \vdash \rg{P}{c}{Q}$ are in $\R_e$, while the top-level
-judgement requires environment steps in $R$. We show that it is enough
-to consider only those enviroment steps in $\R_e$. First, we use an
+judgment requires environment steps in $R$. We show that it is enough
+to consider only those environment steps in $\R_e$. First, we use an
 inductive argument and stability of $\I_e$ ($\stable(R, \I_e)$) to
 show that any execution in which the transaction completes all its
 steps must always preserve the isolation specification $\I_e$ after
@@ -447,12 +448,12 @@ every environment step. Intuitively, this is because once $\I_e$ gets
 broken after some environment step, it will continue to remain broken
 and the transaction would not be able to proceed (according to
 \rulelabel{E-Txn}). Since $\R_e$ contains exactly those environment
-steps which preserve $\I_e$, the local-level RG judgement can be
+steps which preserve $\I_e$, the local-level RG judgment can be
 soundly used, which guarantees that after the transaction finishes its
 execution, its local state $\stl$ and global state $\stg$ will satisfy
 the assertion $Q$. Environment steps between the last step of the
 transaction and its commit step can modify the global state, and hence
-we also require $Q$ to be stable againt $R$. Again, we use an
+we also require $Q$ to be stable against $R$. Again, we use an
 inductive argument, the stability of $\I_c$, and the fact that the
 transaction must execute its commit step to show that all environment
 steps must preserve $\I_c$, and hence it is enough to require

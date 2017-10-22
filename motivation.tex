@@ -138,7 +138,7 @@ to the size of the \C{item\_reqs} set, which in turn is equal to the
 the transaction's consistency condition is preserved.
 
 Because the aforementioned reasoning is reasonably simple to perform
-manually, verifying the soundess of TPC-C's consistency conditions
+manually, verifying the soundness of TPC-C's consistency conditions
 would appear to be feasible.  Serializability aids the tractability of
 verification by preventing any interference among concurrently
 executing transactions while the \C{new\_order} transaction executes,
@@ -236,7 +236,7 @@ While reasoning in terms of anomalies is cumbersome and inadequate,
 reasoning about weak isolation in terms of
 traces~\cite{adyaphd,gotsmanconcur15} on memory read and write actions
 can complicate high-level reasoning.  A possible alternative would be
-to utilize concurrent program verfication methods where the
+to utilize concurrent program verification methods where the
 implementation details. of weak isolation are interleaved within the
 program, yielding a (more-or-less) conventional concurrent program;
 but, considering the size and complexity of real-world transaction
@@ -284,7 +284,7 @@ abort and roll back.
 %% \end{figure}
 
 As this discussion hints, implementations of SI on real databases
-such as PostgresSQL are highly complicated, often running into
+such as PostgreSQL are highly complicated, often running into
 thousands of lines of code.  Nonetheless, the semantics of SI, in
 terms of how it effects transitions on the database state, can be
 captured in a fairly simple model. First, effects induced by one
@@ -375,17 +375,17 @@ transaction.  First, since the database does not change ($\Delta' =
 \Delta$) during execution of the transaction's body, we can reason
 about \C{new\_order} as though it executed in complete isolation until
 its commit point, leading to a verification process similar to what
-would been applied when reasoning sequentially.  When \C{new\_order}
-finishes execution, however, but before it commits, the SI
-axiomatization shown above requires us to consider global state
+would have been applied when reasoning sequentially.  When
+\C{new\_order} finishes execution, however, but before it commits, the
+SI axiomatization shown above requires us to consider global state
 transitions $\stg \longrightarrow \stg'$ that do not include changes
 to the records ($\stl$) written by \C{new\_order}, i.e.,
-$\forall(x\in\mathit{dom}(\delta)).~\Delta'(x) = \Delta(x)$.  The axiomatization
-precludes any execution in which there are concurrent updates to
-shared table fields (e.g., \C{d\_next\_o\_id} on the same \C{District}
-table), but does not prohibit interferences that write to different
-tables, or write to different records in the same table.  We need to
-reason about the safety of such interferences with respect to
+$\forall(x\in\mathit{dom}(\delta)).~\Delta'(x) = \Delta(x)$.  The
+axiomatization precludes any execution in which there are concurrent
+updates to shared table fields (e.g., \C{d\_next\_o\_id} on the same
+\C{District} table), but does not prohibit interferences that write to
+different tables, or write to different records in the same table.  We
+need to reason about the safety of such interferences with respect to
 \C{new\_order}'s consistency invariants.
 
 %% Since concurrent
@@ -586,7 +586,7 @@ The transformer for the loop itself can now be computed to be:
 \end{smathpar}
 Observe that the structure of the transformer mirrors the structure of
 the program itself. In particular, SQL statements become set
-operations, and the \C{foreach} combinator becoms set monad's bind
+operations, and the \C{foreach} combinator becomes set monad's bind
 ($\bind$) combinator.  As we demonstrate, the advantage of inferring
 such transformers is that we can now make use of a
 semantics-preserving translation from the domain of sets equipped with

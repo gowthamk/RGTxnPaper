@@ -34,7 +34,7 @@
 }
 {
   \inserte{x} ~\elabsto~ \stabilize{\lambda(\stl,\stg).~
-    \{ y \,|\, y = \{\langle x \with r.\delf=\mathtt{false};\, \txnf = i\rangle \}}
+    \{ r \,|\, r = \{\langle x \with \delf=\mathtt{false};\, \txnf = i\rangle \}}
 }
 \end{array}
 \end{smathpar}
@@ -44,8 +44,8 @@
 \begin{array}{c}
 \RULE
 {
-  G = \lambda y.~ \itel{[y/x]e_2}
-      {\{\langle[y/x]e_1 \with \idf=r.\idf;\,\delf = y.\delf;\,\txnf=i\rangle \}}
+  G = \lambda r.~ \itel{[r/x]e_2}
+      {\{r' \,|\, r' = \langle[r/x]e_1 \with \idf=r.\idf;\,\delf = r.\delf;\,\txnf=i\rangle \}}
       {\emptyset}
 }
 {
@@ -60,8 +60,8 @@
 \begin{array}{c}
 \RULE
 {
-  G = \lambda y.~ \itel{[y/x]e}
-      {\{\langle y \with \delf = \mathtt{true};\,\txnf=i\rangle \}}
+  G = \lambda r.~ \itel{[r/x]e}
+      {\{r' \,|\, r' = \langle r \with \delf = \mathtt{true};\,\txnf=i\rangle \}}
       {\emptyset}
 }
 {
@@ -94,7 +94,7 @@
 \RULE
 {
   c \elabsto \F \spc
-  G = \lambda r.~ \itel{[r/x]e}{\{x\ |\ x = r \}}{\emptyset}
+  G = \lambda r.~ \itel{[r/x]e}{\{r' \,|\, r' = r \}}{\emptyset}
 }
 {
   \lete{y}{\selecte{\lambda x.e}}{c} ~\elabsto~  

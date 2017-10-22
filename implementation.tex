@@ -17,27 +17,26 @@ Fig.~\ref{fig:schema}}
 
 We have implemented our DSL to define transactions as monadic
 computations in OCaml (modulo some syntactic sugar), and our automatic
-reasoning framework as an extra frontend pass (called \tool) in the ocamlc
-4.03 compiler\footnote{The source code is available at available at
-\emph{https://goo.gl/nmUXZK}}. The input to \tool is a program in our DSL that
-describes the schema of the database as a collection of OCaml type
-definitions, and transactions as OCaml functions, whose top-level
-expression is an application of the \C{atomically\_do} combinator to a
-function of type $a \rightarrow \C{DB}\;b$, for some (base) types $a$
-and $b$. For instance, TPC-C's schema from Fig.~\ref{fig:schema} can
-be described via the OCaml type definitions shown in
-Fig.~\ref{fig:ocaml-schema}.  \tool also requires a specification of
-the program in the form of a collection of guarantees ($G$), one per
-transaction, and an invariant $I$ that is a conjunction of the
-integrity constraints on the database. An auxiliary DSL that includes
-the first-order logic (FOL) combinators has been implemented for this
-purpose. \tool's verification pass follows OCaml's type checking pass,
-hence the concrete artifact of verification is OCaml's typed AST. The
-tool is already equipped with  an axiomatization of PostgreSQL and
-MySQL's isolation levels expressed in our FOL DSL. Other data stores
-can be similarly axiomatized. The concrete result of verification is
-an assignment of an isolation level of the selected data store to each
-transaction in the program.
+reasoning framework as an extra frontend pass (called \tool) in the
+ocamlc 4.03 compiler\footnote{The source code is available at
+available at \emph{https://goo.gl/nmUXZK}}. The input to \tool is a
+program in our DSL that describes the schema of the database as a
+collection of OCaml type definitions, and transactions as OCaml
+functions, whose top-level expression is an application of the
+\C{atomically\_do} combinator. For instance, TPC-C's schema from
+Fig.~\ref{fig:schema} can be described via the OCaml type definitions
+shown in Fig.~\ref{fig:ocaml-schema}.  \tool also requires a
+specification of the program in the form of a collection of guarantees
+($G$), one per transaction, and an invariant $I$ that is a conjunction
+of the integrity constraints on the database. An auxiliary DSL that
+includes the first-order logic (FOL) combinators has been implemented
+for this purpose. \tool's verification pass follows OCaml's type
+checking pass, hence the concrete artifact of verification is OCaml's
+typed AST. The tool is already equipped with  an axiomatization of
+PostgreSQL and MySQL's isolation levels expressed in our FOL DSL.
+Other data stores can be similarly axiomatized. The concrete result of
+verification is an assignment of an isolation level of the selected
+data store to each transaction in the program.
 
 At the top-level, \tool runs a loop that picks an unverified
 transaction and progressively strengthens its isolation level until it
@@ -49,7 +48,7 @@ verification ($R$, $\R_l$, and $\R_c$). It then traverses the AST of a
 transaction, applying the inference rules to construct a state
 transformer, check its stability, and weaken it ($\stabilize{\cdot}$)
 if it is not stable. The result of traversing the transaction's AST is
-therefore a state transformer ($\F$) that is stable w.r.t $R_l$, which
+therefore a state transformer ($\F$) that is stable w.r.t $\R_l$, which
 is also stabilized against $\R_c$ (using $\stabilize{\cdot}$), and
 then checked against the transaction's stated guarantee ($G$). If the
 check passes, then the guarantee is verified to check if it preserves
@@ -67,7 +66,7 @@ necessary.
 \subsection{Pragmatics}
 
 \textbf{Real-World Isolation Levels} The axiomatization of the
-isolation levels presented in \S\ref{sec:isolation} leave out
+isolation levels presented in \S\ref{sec:isolation} leaves out
 certain nuances of their implementations on real data stores, which
 need to be taken into account for verification to be effective in
 practice.  We consider these into account while linking \tool with
