@@ -75,7 +75,7 @@ Reviewer B
   the loop variable $z$, but not on local ($\delta$) and global
   ($\Delta$) states (observe that ${\sf F}$ is applied to the same
   $\delta$ and $\Delta$ forall $z$). While independence on $\Delta$ is
-  gauranteed by the stability condition (checked separately), the
+  guaranteed by the stability condition (checked separately), the
   independence on the local state $\delta$ is simply assumed.
 
 
@@ -90,14 +90,18 @@ Reviewer C
   Dijkstra monads to enable reasoning over both heap and database
   state.
 
-Shepherd ----------
+Shepherd
+----------
 
 Dear Peter -
 
 Please find attached a revised near-final version of our POPL
-submission.  As per your guidance, while we have addressed the
-comments from reviewers (A) and (C), we have taken special care
-to consider the issues raised by reviewer (B).
+submission.  Besides numerous minor changes throughout in response to
+general themes raised in the reviews (e.g., the issue of of heap state
+raised by reviewer (C) is addressed in Sec. 3 (last two sentences of
+para. 1)), the most significant change from the original submission
+deal with issues raised specifically by reviewer (B), which is
+consistent with your guidance as well.
 
 The primary concern raised by the reviewer is that the fragment of FOL
 in which the translation algorithm (Fig. 10, Sec.5) encodes set
@@ -134,4 +138,69 @@ Sincerely,
 Gowtham (for Kartik, Mahsa, and Suresh)
 
 ---------------------------------------
+
+Theorem:
+  Let S be a set containing elements of type T, and let R be a binary
+  relation over T. Let S1 be a T set defined using the following two
+  implications (note: (x,y: T) is a shorthand for (x:T, y:T)):
+
+           ∀(x,y: T). x∈S ∧ R(x,y) ⇒ y∈S1			(Call it H0)
+           ∀(y: T). y∈S1 ⇒ ∃(x:T). x∈S ∧ R(x,y)		(H1)
+
+  Likewise, let S2 be a T set defined via a single bi-implication as
+  following:
+
+          ∀(x,y: T). x∈S ∧ R(x,y) ⇔ y∈S2			(H2)
+
+  Then, S1 = S2. That is:
+
+          ∀(y: T). y∈S1 ⇔ y∈S2        (G)
+
+Proof:
+  We will show G by proving the following two implications (goals)
+  separately:
+
+        ∀(y: T). y∈S1 ⇒ y∈S2					(G0)
+        ∀(y: T). y∈S2 ⇒ y∈S1					(G1)
+
+  Let us first note that H2 is a conjunction of the following two
+  hypothesis:
+
+          ∀(x,y: T). x∈S ∧ R(x,y) ⇒ y∈S2			(H3)
+          ∀(x,y: T). y∈S2 ⇒ x∈S ∧ R(x,y)			(H4)
+
+  Proof of G0:
+  Intros on the goal G0 introduces a new y0:T, gives us the following
+  hypothesis:
+
+          y0∈S1							(H5)
+
+  And reduces the goal to proving that y0∈S2.  Instantiating H1 with
+  (y:=y0), and then applying it on H5 gives:
+
+          ∃(x:T). x∈S ∧ R(x,y0)				(H6)
+
+  Destructing the existential in H6 introduces a new x0:T, and gives the
+  following:
+
+          x0∈S ∧ R(x0,y0)				(H7)
+
+  Now, instantiating H3 with (x:=x0)(y:=y0), and applying it on H7 gives
+  y0∈S2, which is what needs to be proven.
+
+  Proof of G1:
+  Intros on the goal G1 introduces a new y0:T, gives us the following
+  hypothesis:
+
+          y0∈S2					(H8)
+
+  And reduces the goal to proving that y0∈S1. Instantiating H4 with
+  (x:=y0)(y:=y0), and then applying it on H8 gives:
+
+          y0∈S ∧ R(y0,y0)				(H9)
+
+  Finally, instantiating H0 with (x:=y0)(y:=y0), and applying it on H9
+  gives y0∈S1, which is what needs to be proven.
+Qed.
+
 
