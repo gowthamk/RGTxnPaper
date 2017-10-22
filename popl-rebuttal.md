@@ -121,6 +121,15 @@ Shepard
   algorithm, and added an example to Sec. 5.2 to demonstrate how
   exactly the encoding works.
 
+- We added the following note to the end of the first paragraph of
+  Sec. 3 to address reviewer C's comment about heap manipulating
+  programs: "Our language ensures that all effectful actions are
+  encapsulated within database commands, and that all shared state
+  among processes are only manipulated via transactions and its
+  supported operations.  In particular, we do not consider programs in
+  which objects resident on e.g., the OCaml heap are concurrently
+  manipulated by OCaml expressions as well as database actions."
+
 #### Bind Theorem and Proof ####
 
 Theorem:
