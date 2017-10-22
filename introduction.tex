@@ -156,7 +156,7 @@ conventional (unreplicated) databases as mentioned above.
 
 In this paper, we propose a program logic for weakly-isolated
 transactions along with automated verification support to allow
-developers to verify the soundness of their applications, without
+developers verify the soundness of their applications, without
 having to resort to low-level operational reasoning as they are forced
 to do currently.  We develop a set of syntax-directed compositional
 proof rules that enable the construction of correctness proofs for
@@ -165,8 +165,8 @@ concurrency control mechanism.  Realizing that the proof burden
 imposed by these rules may discourage applications programmers from
 using them, we also present an inference procedure based on these
 rules that automatically verifies the weakest isolation level for a
-transaction that still ensures its invariants are maintained.  The key
-to inference is a novel formulation of database state (represented as
+transaction while ensuring its invariants are maintained.  The key to
+inference is a novel formulation of database state (represented as
 sets of tuples) as a monad, and in which database computations are
 interpreted as state transformers over these sets.  This
 interpretation leads to an encoding of database computations amenable

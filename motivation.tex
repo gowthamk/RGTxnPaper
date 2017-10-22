@@ -386,7 +386,7 @@ updates to shared table fields (e.g., \C{d\_next\_o\_id} on the same
 \C{District} table), but does not prohibit interferences that write to
 different tables, or write to different records in the same table.  We
 need to reason about the safety of such interferences with respect to
-\C{new\_order}'s consistency invariants.
+\C{new\_order}'s consistency invariants to verify \C{new\_order}.
 
 %% Since concurrent
 %% \C{new\_order} transactions that write to the same \C{District} record
@@ -549,7 +549,7 @@ sets\footnote{$\bind$ has higher precedence than $\cup$; angle braces
 Here, the set bind operator extracts record elements ($\C{s}$) from
 the database, checks the precondition of the update action, and if
 satisfied, constructs a new set containing a single record that is
-identical to $\C{s}$ except that it binds field $\C{s_{qty}}$ to value
+identical to $\C{s}$ except that it binds field $\C{s\_qty}$ to value
 $\C{k_1}$.  This new set is added (via set union) to the existing
 local database state $\delta$.\footnote{For now, assume that the
   record being added to $\stl$ is not already present in $\stl$.}

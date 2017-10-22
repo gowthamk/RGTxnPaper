@@ -31,7 +31,7 @@ set transformations (see Fig.~\ref{fig:logic-syntax}). The language
 admits only set expressions that include variables ($x$), literals of
 the form $\{x \,|\, \varphi\}$ where $\varphi$ is a propositional
 (quantifier-free) formula on $x$, a restricted form of existential
-quantification that binds a set $x$ satisfying proposition $\phi$ in a
+quantification that binds a set $\stg$ satisfying proposition $\phi$ in a
 set expression $s$, a monadic composition of two set expressions
 ($s_1$ and $s_2$) composed using a bind ($\bind$) operation, a
 conditional set expression where the condition is a propositional
@@ -149,13 +149,14 @@ and $c_2$, respectively, except that $F_2$ is applied to a state
 order of reduction. The inference rule for \C{FOREACH} takes advantage
 of the $\SL$'s bind operator to lift the effect inferred for the loop
 body to the level of the loop. Since records added to $\stl$ in each
-iteration of \C{FOREACH} are independent of the previous iteration,
-sequential composition of the effects of different iterations is same
-as their parallel composition. Since the loop body is executed once
-per each $z\in x$, the effect of the the loop is the union of effects
-($\F$) for all $z\in x$, all applied to the same state ($\stl$ and
-$\stg$). That is, $\F_{loop}(\stl,\stg) = \bigcup_{z\in
-  x}\F_{body}(\stl,\stg)$. From the definition of the set monad's bind
+iteration of \C{FOREACH} are independent of the previous iteration
+(recall local context independence; Sec. ~\ref{sec:opsem}), sequential
+composition of the effects of different iterations is same as their
+parallel composition. Since the loop body is executed once per each
+$z\in x$, the effect of the the loop is the union of effects ($\F$)
+for all $z\in x$, all applied to the same state ($\stl$ and $\stg$).
+That is, $\F_{loop}(\stl,\stg) = \bigcup_{z\in
+x}\F_{body}(\stl,\stg)$. From the definition of the set monad's bind
 operator, $\F_{loop}(\stl,\stg) = x \bind (\lambda
 z.~F_{body}(\stl,\stg))$, which mirrors the definition of the rule.
 This development mirrors ideas found in type checkers for certain
