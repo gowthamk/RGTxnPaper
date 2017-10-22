@@ -97,15 +97,15 @@ Dear Peter -
 
 Please find attached a revised near-final version of our POPL
 submission.  Besides numerous minor changes throughout in response to
-general themes raised in the reviews (e.g., the issue of of heap state
+general themes raised in the reviews (e.g., the issue of heap state
 raised by reviewer (C) is addressed in Sec. 3 (last two sentences of
-para. 1)), the most significant change from the original submission
+para. 1)), the most significant changes from the original submission
 deal with issues raised specifically by reviewer (B), which is
 consistent with your guidance as well.
 
 The primary concern raised by the reviewer is that the fragment of FOL
 in which the translation algorithm (Fig. 10, Sec.5) encodes set
-expressions is not EPR, and hence raises doubts about its
+expressions is not EPR, and hence this raises doubts about its
 decidability.  In particular, the concern was that an existential
 quantifier follows a universal quantifier in the logical encoding of
 bind (`>>=`), and this pattern is not admitted by EPR. In our
@@ -118,20 +118,22 @@ known results on the combination of GKS and Simple Linear Arithmetic
 databases, might still make the encoding undecidable.  While this
 concern can be addressed by considering machine (finite-bit)
 arithmetic instead of SLA, we decided a better approach would be
-revisit our encoding algorithm to see if it could be simplified.  We
-were successful in this effort and were able to modify our encoding to
-eliminate the existential altogether. Our modifications are based on
-the observation that the semantics of bind, which were previously
-written using two implications one of which involves an existential,
-can be equivalently written using a single bi-implication that only
-involves universal quantifiers. A proof of the equivalence between the
-two encodings is given below; an automatic Z3-assisted proof, can be
-found [here](https://rise4fun.com/Z3/G1a). As a consequence of this
-change, the fragment of encoding is now unambiguously in EPR, and
-hence Theorems 5.2 and 5.3 hold without the need for any modification
-or qualification.  We believe this new development addresses the main
-concerns of reviewer B, and trust that you will consider the revision
-suitable for acceptance.
+revisit our encoding algorithm to see if it could be simplified.
+
+We are pleased to report that we were successful in this effort and
+were able to modify our encoding to eliminate the existential
+altogether. Our modifications are based on the observation that the
+semantics of bind, which were previously written using two
+implications one of which involves an existential, can be equivalently
+written using a single bi-implication that only involves universal
+quantifiers. A proof of the equivalence between the two encodings is
+given below; a mechanized Z3-assisted proof can be found at:
+https://rise4fun.com/Z3/G1a. As a consequence of this change, the
+fragment of encoding is now unambiguously in EPR, and hence Theorems
+5.2 and 5.3 hold without the need for any modification or
+qualification.  We believe this new development addresses the main
+concerns of reviewer B, and consequently trust that you will consider
+the revision suitable for acceptance.
 
 Sincerely,
 

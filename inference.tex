@@ -149,8 +149,9 @@ and $c_2$, respectively, except that $F_2$ is applied to a state
 order of reduction. The inference rule for \C{FOREACH} takes advantage
 of the $\SL$'s bind operator to lift the effect inferred for the loop
 body to the level of the loop. Since records added to $\stl$ in each
-iteration of \C{FOREACH} are independent of the previous iteration,
-sequential composition of the effects of different iterations is same
+iteration of \C{FOREACH} are independent of the previous iteration (the
+rule assumes local context independence as discussed in \S\ref{sec:opsem}),
+the sequential composition of the effects of different iterations is the same
 as their parallel composition. Since the loop body is executed once
 per each $z\in x$, the effect of the the loop is the union of effects
 ($\F$) for all $z\in x$, all applied to the same state ($\stl$ and
@@ -158,8 +159,8 @@ $\stg$). That is, $\F_{loop}(\stl,\stg) = \bigcup_{z\in
   x}\F_{body}(\stl,\stg)$. From the definition of the set monad's bind
 operator, $\F_{loop}(\stl,\stg) = x \bind (\lambda
 z.~F_{body}(\stl,\stg))$, which mirrors the definition of the rule.
-This development mirrors ideas found in type checkers for certain
-dependent type systems~\cite{KJ14}.
+%This development mirrors ideas found in type checkers for certain
+%dependent type systems~\cite{KJ14}.
 
 
 % \begin{figure}[h]
