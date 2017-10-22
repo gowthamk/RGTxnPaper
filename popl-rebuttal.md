@@ -178,20 +178,12 @@ Proof:
 
           y0∈S2					(H8)
 
-  And reduces the goal to proving that y0∈S1. At this point we prove a
-  simple lemma that asserts the non-emptiness of type T:
+  And reduces the goal to proving that y0∈S1. Instantiating H4 with
+  (x:=y0)(y:=y0), and then applying it on H8 gives:
 
-          ∃(x:T)			(Lemma1)
+          y0∈S ∧ R(y0,y0)				(H9)
 
-  The proof for Lemma1 requires an evidence for a value of type T, which
-  is readily available in the form of y0:T.  Destructing the existential
-  in Lemma1 introduces a new x0:T into the context (note that x0 may or
-  may not be equal to y0). Now instantiating H4 with (x:=x0)(y:=y0), and
-  then applying it on H8 gives:
-
-          x0∈S ∧ R(x0,y0)				(H9)
-
-  Finally, instantiating H0 with (x:=x0)(y:=y0), and applying it on H9
+  Finally, instantiating H0 with (x:=y0)(y:=y0), and applying it on H9
   gives y0∈S1, which is what needs to be proven.
 Qed.
 
