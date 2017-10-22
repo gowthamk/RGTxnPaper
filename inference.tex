@@ -143,9 +143,9 @@ updated records, the state transformer rule uses $\SL$'s bind
 operation to \emph{compute} the set. Other SQL rules do likewise. The
 rules for \C{LET} binders, conditionals, and sequences compose the
 effects inferred for their subcommands. Thus, the effect of a sequence
-of commands $c_1;c_2$ is the union of effects $F_1$ and $F_2$ of $c_1$
-and $c_2$, respectively, except that $F_2$ is applied to a state
-($\stl$) to which $F_1$ has already been applied, reflecting their
+of commands $c_1;c_2$ is the union of effects $\F_1$ and $\F_2$ of $c_1$
+and $c_2$, respectively, except that $\F_2$ is applied to a state
+($\stl$) to which $\F_1$ has already been applied, reflecting their
 order of reduction. The inference rule for \C{FOREACH} takes advantage
 of the $\SL$'s bind operator to lift the effect inferred for the loop
 body to the level of the loop. Since records added to $\stl$ in each
@@ -159,8 +159,8 @@ That is, $\F_{loop}(\stl,\stg) = \bigcup_{z\in
 x}\F_{body}(\stl,\stg)$. From the definition of the set monad's bind
 operator, $\F_{loop}(\stl,\stg) = x \bind (\lambda
 z.~F_{body}(\stl,\stg))$, which mirrors the definition of the rule.
-This development mirrors ideas found in type checkers for certain
-dependent type systems~\cite{KJ14}.
+%This development mirrors ideas found in type checkers for certain
+%dependent type systems~\cite{KJ14}.
 
 
 % \begin{figure}[h]
@@ -276,7 +276,7 @@ being processed in the current iteration.  At the beginning of the
 loop $[\phi/y]\psi(\stl, \stg)$ just reduces to $\stl = s$ which is
 implied by the pre-condition $P$. From the inductive hypothesis, we
 can infer that each iteration corresponds to the application of
-$F$. Since all iterations are assumed to be independent of each other,
+$\F$. Since all iterations are assumed to be independent of each other,
 and $z$ is bound to a record in $x$ for each iteration, we conclude
 that at the end of every iteration, the loop invariant $[y \cup
   \{z\}/y]\psi$ will be satisfied.
@@ -297,7 +297,7 @@ The \rulelabel{RG-Txn} rule so updated is shown below:
    \stable(R,\I)\spc
    \stable(R,I)\\
    \R_e = R \backslash \I_e \spc \R_c = R \backslash \I_c \spc  
-   c \elabsto \F \spc \stable(\R_c,\F)\\
+   c \Longrightarrow_{\langle i,\R_e,I \rangle}\F \spc \stable(\R_c,\F)\\
    \forall \stl,\stg.~ \stl = F(\emptyset,\stg) \Rightarrow 
    G(\stg, \stl\gg\stg)\spc
    \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\

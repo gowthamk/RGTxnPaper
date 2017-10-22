@@ -90,47 +90,56 @@ Reviewer C
   Dijkstra monads to enable reasoning over both heap and database
   state.
 
-Shepard
+Shepherd
 ----------
-- The primary concern raised by reviewer B is that the fragment of FOL
-  in which the translation algorithm (Fig. 10, Sec.5) encodes set
-  expressions is not EPR, hence its decidability is doubtful. In
-  particular, the concern was that an existential quantifier follows a
-  universal quantifier in the logical encoding of bind (`>>=`), and
-  this pattern is not admitted by EPR. In the rebuttal phase we
-  addressed the concern by pointing out that the fragment, while not
-  EPR as claimed, is nonetheless decidable since it is subsumed by the
-  GKS fragment, which is known to be decidable. However, as the
-  reviewer rightly points out, there are no known results on the
-  combination of GKS and Simple Linear Arithmetic (SLA) to support
-  theorem 5.3, so SLA invariants, which are common in databases, might
-  make the encoding undecidable. While this concern can be addressed
-  by considering machine (finite-bit) arithmetic instead of SLA, we
-  decided to take a long, hard look at the encoding algorithm and see
-  if it can be simplified. In this we were successful as we were able
-  to modify our bind encoding to eliminate the existential altogether. Our
-  modifications are based on the observation that the semantics of
-  bind, which were previously written using two implications one of
-  which involves an existential, can be equivalently written using a
-  single bi-implication that only involves universal quantifiers. A
-  formal proof to this effect is given below, while an automatic
-  Z3-assisted proof can be found [here](https://rise4fun.com/Z3/G1a).
-  As a consequence of this change, the fragment of encoding is back to
-  being EPR, hence the Theorems 5.2 and 5.3 continue to hold. We have
-  also tightened our treatment of free variables in the encoding
-  algorithm, and added an example to Sec. 5.2 to demonstrate how
-  exactly the encoding works.
 
-- We added the following note to the end of the first paragraph of
-  Sec. 3 to address reviewer C's comment about heap manipulating
-  programs: "Our language ensures that all effectful actions are
-  encapsulated within database commands, and that all shared state
-  among processes are only manipulated via transactions and its
-  supported operations.  In particular, we do not consider programs in
-  which objects resident on e.g., the OCaml heap are concurrently
-  manipulated by OCaml expressions as well as database actions."
+Dear Peter -
 
-#### Bind Theorem and Proof ####
+Please find attached a revised near-final version of our POPL
+submission.  Besides numerous minor changes throughout in response to
+general themes raised in the reviews (e.g., the issue of heap state
+raised by reviewer (C) is addressed in Sec. 3 (last two sentences of
+para. 1)), the most significant changes from the original submission
+deal with issues raised specifically by reviewer (B), which is
+consistent with your guidance as well.
+
+The primary concern raised by the reviewer is that the fragment of FOL
+in which the translation algorithm (Fig. 10, Sec.5) encodes set
+expressions is not EPR, and hence this raises doubts about its
+decidability.  In particular, the concern was that an existential
+quantifier follows a universal quantifier in the logical encoding of
+bind (`>>=`), and this pattern is not admitted by EPR. In our
+rebuttal, we addressed the concern by pointing out that the fragment,
+while not EPR as claimed, is nonetheless decidable since it is
+subsumed by GKS (Godel-Kalmar-Schutte), which is known to be
+decidable. However, as the reviewer correctly points out, there are no
+known results on the combination of GKS and Simple Linear Arithmetic
+(SLA) to support theorem 5.3, so SLA invariants, which are common in
+databases, might still make the encoding undecidable.  While this
+concern can be addressed by considering machine (finite-bit)
+arithmetic instead of SLA, we decided a better approach would be
+revisit our encoding algorithm to see if it could be simplified.
+
+We are pleased to report that we were successful in this effort and
+were able to modify our encoding to eliminate the existential
+altogether. Our modifications are based on the observation that the
+semantics of bind, which were previously written using two
+implications one of which involves an existential, can be equivalently
+written using a single bi-implication that only involves universal
+quantifiers. A proof of the equivalence between the two encodings is
+given below; a mechanized Z3-assisted proof can be found at:
+https://rise4fun.com/Z3/G1a. As a consequence of this change, the
+fragment of encoding is now unambiguously in EPR, and hence Theorems
+5.2 and 5.3 hold without the need for any modification or
+qualification.  We believe this new development addresses the main
+concerns of reviewer B, and consequently trust that you will consider
+the revision suitable for acceptance.
+
+Sincerely,
+
+Gowtham (for Kartik, Mahsa, and Suresh)
+
+---------------------------------------
 
 Theorem:
   Let S be a set containing elements of type T, and let R be a binary
@@ -150,7 +159,7 @@ Theorem:
           ∀(y: T). y∈S1 ⇔ y∈S2        (G)
 
 Proof:
-  We will show G be proving the following two implications (goals)
+  We will show G by proving the following two implications (goals)
   separately:
 
         ∀(y: T). y∈S1 ⇒ y∈S2					(G0)
@@ -195,4 +204,5 @@ Proof:
   Finally, instantiating H0 with (x:=y0)(y:=y0), and applying it on H9
   gives y0∈S1, which is what needs to be proven.
 Qed.
+
 

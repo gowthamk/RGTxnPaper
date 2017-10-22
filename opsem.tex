@@ -93,7 +93,7 @@ however, does not let a transaction read its own writes. This
 simplifies the semantics, without losing any generality, since
 substituting $\stl\rhd\stg$ for $\stg$ at select places in the
 reduction rules effectively allows reads of uncommitted transaction
-writes to be realized.
+writes to be realized, if so desired.
 
 The small-step semantics is stratified into a transaction-local
 reduction relation, and a top-level reduction relation. The
@@ -174,11 +174,11 @@ the premise $\dom(\stl)\cap\dom(s) = \emptyset$ on the
 restriction as \emph{local context independence}.  This restriction is
 easy to relax in the operational semantics and the reasoning framework
 presented in the next section; our inference procedure described in
-\S\ref{sec:inference}, however, has a non-trivial dependence on
-this assumption. Nonetheless, we have encountered few instances in
+\S\ref{sec:inference}, however, has a non-trivial dependence on this
+assumption.  Nonetheless, we have encountered few instances in
 practice where enforcing local context independence turns out to be a
-severe restriction. Indeed, all 17 transactions in the TPC-C and TPC-E
-benchmarks satisfy this assumption.
+severe restriction. Indeed, all of the transactions we have considered
+in our benchmarks (e.g., TPC-C) satisfy this assumption.
 
 \input{isolation}
 
