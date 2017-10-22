@@ -284,7 +284,7 @@ abort and roll back.
 %% \end{figure}
 
 As this discussion hints, implementations of SI on real databases
-such as PostgresSQL are highly complicated, often running into
+such as PostgreSQL are highly complicated, often running into
 thousands of lines of code.  Nonetheless, the semantics of SI, in
 terms of how it effects transitions on the database state, can be
 captured in a fairly simple model. First, effects induced by one
@@ -375,17 +375,17 @@ transaction.  First, since the database does not change ($\Delta' =
 \Delta$) during execution of the transaction's body, we can reason
 about \C{new\_order} as though it executed in complete isolation until
 its commit point, leading to a verification process similar to what
-would been applied when reasoning sequentially.  When \C{new\_order}
-finishes execution, however, but before it commits, the SI
-axiomatization shown above requires us to consider global state
+would have been applied when reasoning sequentially.  When
+\C{new\_order} finishes execution, however, but before it commits, the
+SI axiomatization shown above requires us to consider global state
 transitions $\stg \longrightarrow \stg'$ that do not include changes
 to the records ($\stl$) written by \C{new\_order}, i.e.,
-$\forall(x\in\mathit{dom}(\delta)).~\Delta'(x) = \Delta(x)$.  The axiomatization
-precludes any execution in which there are concurrent updates to
-shared table fields (e.g., \C{d\_next\_o\_id} on the same \C{District}
-table), but does not prohibit interferences that write to different
-tables, or write to different records in the same table.  We need to
-reason about the safety of such interferences with respect to
+$\forall(x\in\mathit{dom}(\delta)).~\Delta'(x) = \Delta(x)$.  The
+axiomatization precludes any execution in which there are concurrent
+updates to shared table fields (e.g., \C{d\_next\_o\_id} on the same
+\C{District} table), but does not prohibit interferences that write to
+different tables, or write to different records in the same table.  We
+need to reason about the safety of such interferences with respect to
 \C{new\_order}'s consistency invariants.
 
 %% Since concurrent
