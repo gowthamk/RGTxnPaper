@@ -490,11 +490,11 @@ $\phi_I$, $\G_U$, $\G_I$ are as shown below:
     & & \hspace*{0.3in}(s \in \stg) \conj 
         (\itec{{\sf table}(s)=\C{Stock} \wedge 
               s.\C{s\_i\_id} = \C{item\_req.ol\_i\_id}\\
-    & & \hspace*{1.45in}}
+    & & \hspace*{0.85in}}
               {s' = \langle \C{s\_i\_id}=s.\C{s\_i\_id};\, 
                             \C{s\_d\_id}=s.\C{s\_d\_id};\,
                             \C{s\_qty} = \C{k1}\rangle\\
-    & & \hspace*{1.45in}} {\bot}) \Rightarrow g_0(\C{item\_req},s')\\
+    & & \hspace*{0.85in}} {\bot}) \Rightarrow g_0(\C{item\_req},s')\\
     & & \conj \hspace*{0.08in}\forall \C{item\_req}.\forall s'. \exists s.~ 
         \pi_2(\C{item\_req}) \Leftrightarrow \\
     & & \hspace*{0.28in} g_0(\C{item\_req},s') \Rightarrow (s \in \stg) \conj
@@ -524,13 +524,13 @@ $(\phi,\G)$, as defined below:
 \begin{smathpar}
   \begin{array}{lcl}
     \phi & = & \phi_I \conj \phi_U \conj \\
-    & & \hspace*{0.2in}\forall \C{ireq}. \forall s.~ 
-        \pi_3 \Leftrightarrow (\C{ireq} \in \C{item\_reqs} \conj 
-        (\G_U(\C{ireq},s') \vee \G_I(\C{ireq},s'))
+    & & \hspace*{0.2in}\forall \C{item\_req}. \forall s.~ 
+        \pi_3 \Leftrightarrow (\C{item\_req} \in \C{item\_reqs} \conj 
+        (\G_U(\C{item\_req},s') \vee \G_I(\C{item\_req},s'))
         \Rightarrow g_1(s))\\
-    & & \conj \hspace*{0.05in}\forall s.\exists \C{ireq}. ~ 
-        \pi_4 \Leftrightarrow (g_1(s) \Rightarrow (\C{ireq} \in \C{item\_reqs} 
-        \conj (\G_U(\C{ireq},s') \vee \G_I(\C{ireq},s')))\\
+    & & \conj \hspace*{0.05in}\forall s.\exists \C{item\_req}. ~ 
+        \pi_4 \Leftrightarrow (g_1(s) \Rightarrow (\C{item\_req} \in \C{item\_reqs} 
+        \conj (\G_U(\C{item\_req},s') \vee \G_I(\C{item\_req},s')))\\
     \G & = & \lambda(r).~\pi_3 \wedge \pi_4 \wedge g_1(r)\\
   \end{array}
 \end{smathpar}
@@ -540,46 +540,112 @@ $(\phi,\G)$, as defined below:
 \label{sec:decidability} %this label is referenced earlier.
 
 Observe that the encoding shown in Fig.~\ref{fig:logic} maps to
-a subset of logic that satisfies the following syntactic properties:
+a fragment of FOL that satisfies the following syntactic properties:
 \begin{itemize}
-  \item All quantification is first-order; second-order objects, such
-    as sets and functions, are never quantified.
-  \item All quantifiers are universal, and appear only at the prenex
-    position, i.e., at the beginning of a quantified formula.  
   \item All function symbols, modulo those that might appear in
     $\varphi\in\Prop^0$, are uninterpreted and Boolean.
+  \item All quantification is first-order; second-order objects, such
+    as sets and functions, are never quantified.
+  \item Quantifiers appear only at the prenex position, i.e., at the
+    beginning of a quantified formula.
 \end{itemize}
-This fragment of FOL known as EPR (Effectively Propositional logic) is
-known to be decidable~\cite{z3epr}. The language of encoding, however,
-is a combination of {\sf EPR} with (a). $\Prop^0$, the theory from
-which quantifier-free propositions ($\varphi$) that encode object
-language expressions are drawn, and (b).  $\Prop^1$, the theory from
-which invariants ($I$) are drawn. We write $\SL[\Prop^0,\Prop^1]$ to
-highlight the parameterization of $\SL$ on $\Prop^0$ and $\Prop^1$,
-and state the following theorem:
+The simple syntactic structure of the fragment already makes is
+amenable for automatic reasoning via an off-the-shelf SMT solver, such
+as Z3. The decidability of this fragment, however, is more subtle and
+discussed below.
+
+Consider a set expression $s$ with no free variables (i.e., $\nubar =
+\emptyset$, like $\T(\stl,\stg)$ from the above example). Let
+$(\phi,G) = \mssemof{\emptyset}{s}$. Note that $\phi$ is a conjunction
+of (a).  $\phi_i$'s, where each $\phi_i$ results from encoding a
+subexpression $s_i$ of $s$, and (b). a $\phi_s$, resulting from
+encoding $s$ itself (i.e., its top-level expression). From Fig.~\ref{fig:logic},
+it is clear that $\phi_s$ is either $\top$ (for the first four cases),
+or it is a prenex-quantified formula, where quantification is either
+$\forall^2$, or $\exists$, or $\forall\exists$. Generalizing this
+observation, for a set expression $s$ with $|\nubar|$ free variables,
+$\phi_s$, if quantified, is a prenex-quantified formula, where
+quantification assumes one among the forms of $\forall^{|\nubar|+2}$,
+or $\forall^{|\nubar|}\exists$, or $\forall^{|\nubar|+1}\exists$.  In
+other words, the number of $\forall$ quantifiers preceding an
+$\exists$ quantifier is utmost two more than the number of free
+variables ($\nubar$) in $s$. For the convenience of this discussion,
+let us call $\forall^{|\nubar|+1}\exists$ as the prenex signature of
+$\phi_s$. 
+
+Next, in Fig.~\ref{fig:logic}, observe that the (ordered) set $\nubar$
+is extended only in the encoding rules for $\bind$ and $\existsl$
+expression. Since $\existsl$ is a result of a particular choice of the
+weakening semantics (Sec.~\ref{sec:inference}), let us ignore it to
+focus on the core set expression language. This leaves $\bind$ as the
+only case where $\nubar$ is extended.  Since an occurance of $\bind$
+adds one to $|\nubar|$, if $s$ is a subexpression of a top-level
+$\bind$ expression (like $\F_U(\stl,\stg)$ from the above example),
+then the prenex signature of $\phi_s$ is $\forall^2\exists$.
+Furthermore, if the subexpressions of $s$ are not $\bind$ expressions,
+then none of the $\phi_i$'s are quantified, and the prenex signature
+of $\phi = \bigwedge_i\phi_i \wedge \phi_s$ remains
+$\forall^2\exists$.  The fragment of FOL that admits formulas with
+prenex signatures of form $\forall^2\exists^*$ is called
+Godel-Kalmar-Schutte ({\sf GKS}) fragment, which is known to be
+decidable. The language of encoding, however, is a combination of {\sf
+GKS} with (a). $\Prop^0$, the theory from which quantifier-free
+propositions ($\varphi$) that encode object language expressions are
+drawn, and (b).  $\Prop^1$, the theory from which invariants ($I$) are
+drawn. Thus the encoding is decidable if the combination of ${\sf GKS}
++ \Prop^0 + \Prop^1$ is decidable.
+
+To formally state the above property, let $\SL[n,\Prop^0,\Prop^1]$
+denote the core set expression language that admits $n$ nested $\bind$
+expressions, and allows program's (boolean) expressions ($e$), and
+invariants ($\I$) to be drawn from theories $\Prop^0$ and $\Prop^1$,
+respectively. Then, we have the following result:
 \begin{theorem}
-  $\SL[\Prop^0,\Prop^1]$ is decidable if ${\sf EPR}+\Prop^0+\Prop^1$
+  $\SL[0,\Prop^0,\Prop^1]$ is decidable if ${\sf GKS}+\Prop^0+\Prop^1$
   is decidable.
 \end{theorem}
-A useful instantiation of $\SL$ is $\SL[{\sf SLA},{\sf EPR}+{\sf
-SLA}]$, where ${\sf SLA}$ is the theory of simple linear arithmetic.
-Since {\sf EPR}+{\sf SLA} is known to be decidable~\cite{eprsla}:
-\begin{theorem}
-  $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ is decidable.
-\end{theorem}
-The $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ instantiation requires $I$ to
-be drawn from {\sf EPR}+{\sf SLA}, which is expressive enough to
-describe common database integrity constraints, such as referential
-integrity, non-negativeness of all integer values in a column etc.
-The isolation specifications presented in \S\ref{sec:isolation} are
-already simple first-order formulas that can be encoded in {\sf EPR}.
-Furthermore, it is also reasonable to expect the guarantee ($G$) of a
-transaction to be expressible in the same logic as its inferred $\F$,
-since $\F$ (without the stability check) is essentially a complete
-characterization of the transaction, while $G$ is only an abstraction.
-Thus, with $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ as the language of
-inference, the verification problem for weakly isolated transactions
-is decidable. Moreover, off-the-shelf SMT solvers (e.g., Z3) are
-equipped with efficient decision procedures for ${\sf EPR}+{\sf SLA}$,
-making automated verification a practical exercise.
+The $n=0$ case denotes the lack of nested bind expressions. Since
+nested \C{foreach} statements are the only program constructs in
+$\txnimp$ that lead to nested bind expressions, the $n=0$ case
+essentially denotes the encoding language for $\txnimp$ programs
+without nested \C{foreach} loops. Observe that the \C{new\_order}
+transaction (Fig.~\ref{fig:new_order_code}) satisfies this constraint.
+Indeed, the restricted language without nested \C{foreach} loops is
+nonetheless expressive enough to cover all TPC-C transactions.
+
+% This
+% fragment of FOL known as EPR (Effectively Propositional
+% logic) is
+% known to be decidable~\cite{z3epr}. The language of encoding, however,
+% is a combination of {\sf EPR} with (a). $\Prop^0$, the theory from
+% which quantifier-free propositions ($\varphi$) that encode object
+% language expressions are drawn, and (b).  $\Prop^1$, the theory from
+% which invariants ($I$) are drawn. We write $\SL[\Prop^0,\Prop^1]$ to
+% highlight the parameterization of $\SL$ on $\Prop^0$ and $\Prop^1$,
+% and state the following theorem:
+% \begin{theorem}
+%   $\SL[\Prop^0,\Prop^1]$ is decidable if ${\sf EPR}+\Prop^0+\Prop^1$
+%   is decidable.
+% \end{theorem}
+% A useful instantiation of $\SL$ is $\SL[{\sf SLA},{\sf EPR}+{\sf
+% SLA}]$, where ${\sf SLA}$ is the theory of simple linear arithmetic.
+% Since {\sf EPR}+{\sf SLA} is known to be decidable~\cite{eprsla}:
+% \begin{theorem}
+%   $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ is decidable.
+% \end{theorem}
+% The $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ instantiation requires $I$ to
+% be drawn from {\sf EPR}+{\sf SLA}, which is expressive enough to
+% describe common database integrity constraints, such as referential
+% integrity, non-negativeness of all integer values in a column etc.
+% The isolation specifications presented in \S\ref{sec:isolation} are
+% already simple first-order formulas that can be encoded in {\sf EPR}.
+% Furthermore, it is also reasonable to expect the guarantee ($G$) of a
+% transaction to be expressible in the same logic as its inferred $\F$,
+% since $\F$ (without the stability check) is essentially a complete
+% characterization of the transaction, while $G$ is only an abstraction.
+% Thus, with $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ as the language of
+% inference, the verification problem for weakly isolated transactions
+% is decidable. Moreover, off-the-shelf SMT solvers (e.g., Z3) are
+% equipped with efficient decision procedures for ${\sf EPR}+{\sf SLA}$,
+% making automated verification a practical exercise.
 
