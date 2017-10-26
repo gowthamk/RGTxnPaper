@@ -74,7 +74,7 @@ Intuitively, the stability condition requires an effect to describe
 the same set of records before and after an interference. The
 equivalence in $\SL$ translates to equality in first-order logic, as
 we describe below. In the inference rules, stability is enforced
-constructively by a meta function $\stabilize{\cdot}$, which accepts
+constructively by a meta-function $\stabilize{\cdot}$, which accepts
 an effect and returns a new effect that is guaranteed to be stable
 under $\R$.  $\stabilize{\cdot}$ achieves the stability guarantee by
 abstracting away the bound global state ($\stg$) in an unstable $\F$
@@ -365,7 +365,7 @@ instance, consider the $\SL$ expression $s_1\bind(\lambda x. \{ y\,|\,
 y=x+1\})$, where $s_1$ is an integer set (expression). The
 subexpression $\{ y\,|\, y=x+1\}$ (call it $s_2$) contains $x$ as a
 free variable. In such cases, the predicate associated with the
-subexpression should also be indexed by its free variables, so that a
+subexpression should also be indexed by its free variables so that a
 unique set exists for each instantiation of the free variables. Thus,
 the predicate ($\G$) associated with the subexpression from the
 above example should be $\lambda\v_1.\lambda\v_2.~\v_2 = \v_1 + 1$, so
@@ -378,7 +378,7 @@ The translation algorithm (Fig.~\ref{fig:logic}) takes free variables
 into account. Given a set expression $s\in\SL$, whose (possible) free
 variables are $\nubar$ in the order of their introduction (top-most
 binder first), $\mssemof{\nubar}{s}$ returns the encoding of $s$ as
-$(\phi,\G)$.  The meta function $\G$ is a predicate indexed by the
+$(\phi,\G)$.  The meta-function $\G$ is a predicate indexed by the
 (possible) free variables of $s$, and thus its arity is $|\nubar| + 1$.
 Note that $\nubar$ is only a sequence of variables introduced by the
 enclosing binders of $s$, and not all may actually occur free in $s$.
@@ -575,19 +575,19 @@ $\phi_s$.
 
 Next, in Fig.~\ref{fig:logic}, observe that the (ordered) set $\nubar$
 is extended only in the encoding rules for $\bind$ and $\existsl$
-expression. Since $\existsl$ is a result of a particular choice of the
-weakening semantics (Sec.~\ref{sec:inference}), let us ignore it to
+expressions. Since $\existsl$ is a result of a particular choice of the
+weakening semantics (Sec.~\ref{sec:inference}), let us ignore it for now to
 focus on the core set expression language. This leaves $\bind$ as the
-only case where $\nubar$ is extended.  Since an occurance of $\bind$
+only case where $\nubar$ is extended.  Since an occurrence of $\bind$
 adds one to $|\nubar|$, if $s$ is a subexpression of a top-level
-$\bind$ expression (like $\F_U(\stl,\stg)$ from the above example),
+{\sf bind} expression (like $\F_U(\stl,\stg)$ from the above example),
 then the prenex signature of $\phi_s$ is $\forall^2\exists$.
-Furthermore, if the subexpressions of $s$ are not $\bind$ expressions,
+Furthermore, if the subexpressions of $s$ are not {\sf bind} expressions,
 then none of the $\phi_i$'s are quantified, and the prenex signature
 of $\phi = \bigwedge_i\phi_i \wedge \phi_s$ remains
 $\forall^2\exists$.  The fragment of FOL that admits formulas with
-prenex signatures of form $\forall^2\exists^*$ is called
-Godel-Kalmar-Schutte ({\sf GKS}) fragment, which is known to be
+prenex signatures of form $\forall^2\exists^*$ is called the
+Godel-Kalmar-Schutte ({\sf GKS}) fragment~\cite{...}, which is known to be
 decidable. The language of encoding, however, is a combination of {\sf
 GKS} with (a). $\Prop^0$, the theory from which quantifier-free
 propositions ($\varphi$) that encode object language expressions are
@@ -596,22 +596,22 @@ drawn. Thus the encoding is decidable if the combination of ${\sf GKS}
 + \Prop^0 + \Prop^1$ is decidable.
 
 To formally state the above property, let $\SL[n,\Prop^0,\Prop^1]$
-denote the core set expression language that admits $n$ nested $\bind$
-expressions, and allows program's (boolean) expressions ($e$), and
+denote the core set expression language that admits $n$ nested {\sf bind}
+expressions, and allows program (Boolean) expressions ($e$), and
 invariants ($\I$) to be drawn from theories $\Prop^0$ and $\Prop^1$,
-respectively. Then, we have the following result:
+respectively. Then:
 \begin{theorem}
   $\SL[0,\Prop^0,\Prop^1]$ is decidable if ${\sf GKS}+\Prop^0+\Prop^1$
   is decidable.
 \end{theorem}
-The $n=0$ case denotes the lack of nested bind expressions. Since
-nested \C{foreach} statements are the only program constructs in
-$\txnimp$ that lead to nested bind expressions, the $n=0$ case
-essentially denotes the encoding language for $\txnimp$ programs
+The $n=0$ case denotes the lack of nested {\sf bind}
+expressions. Since nested \C{foreach} statements are the only program
+constructs in $\txnimp$ that lead to nested bind expressions, this
+instantiation denotes the encoding language for $\txnimp$ programs
 without nested \C{foreach} loops. Observe that the \C{new\_order}
 transaction (Fig.~\ref{fig:new_order_code}) satisfies this constraint.
-Indeed, the restricted language without nested \C{foreach} loops is
-nonetheless expressive enough to cover all TPC-C transactions.
+Indeed, this restricted language is nonetheless expressive enough to
+cover all of the benchmarks we have considered.
 
 A useful instantiation of $\SL$ is $\SL[{\sf BV},{\sf GKS}+{\sf BV}]$,
 where ${\sf BV}$ is the theory of bit-vector arithmetic, which is
