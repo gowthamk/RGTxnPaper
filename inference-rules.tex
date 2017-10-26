@@ -82,7 +82,7 @@
 }
 {
   \lete{x}{e}{c} ~\elabsto~  
-    \stabilize{\lambda(\stl,\stg).~ [e/x]\,\F(\stl,\stg)}\\
+    {\lambda(\stl,\stg).~ [e/x]\,\F(\stl,\stg)}\\
 }
 \end{array}
 \end{smathpar}
@@ -94,11 +94,13 @@
 \RULE
 {
   c \elabsto \F \spc
-  G = \lambda r.~ \itel{[r/x]e}{\{r' \,|\, r' = r \}}{\emptyset}
+  G = \lambda r.~ \itel{[r/x]e}{\{r' \,|\, r' = r \}}{\emptyset}\spc
+  \F' = \stabilize{\lambda(\stl,\stg).~\stg \bind G}
+
 }
 {
   \lete{y}{\selecte{\lambda x.e}}{c} ~\elabsto~  
-    \stabilize{\lambda (\stl,\stg).~ [(\stg \bind G)/y]\,\F(\stl,\stg)}\\
+    \lambda (\stl,\stg).~ [\F'(\stl, \stg)/y]\,\F(\stl,\stg)\\
 }
 \end{array}
 \end{smathpar}

@@ -401,51 +401,47 @@ propagated upwards as the constraint of the conditional expression.
 A set union expression is encoded similarly.
 
 The first-order encoding of a bind expression describes the semantics
-of the set monad's bind operator in FOL. Let $s_1$ be a set, and let $f =
-\lambda x.~s_2$ be a function that maps each variable in $s_1$ to a
-new set. Then, $s = s_1 \bind f$ if and only if forall $x$, $y$, if
-$x\in s_1$ and $y \in f(x)$, then  $y \in s$, and vice versa. The
-translation first encodes $s_1$ and $s_2$ to obtain $(\phi_1,\G_1)$
-and $(\phi_2,\G_2)$, respectively. Since $s_2$ is under a new binder
-that binds $x$, the free variable sequence of $s_2$ is $\nubar,x$. In the
-interest of hygiene, we substitute a fresh $a$ for $x$, making the
-sequence $\nubar,a$. The set $s$ is encoded as a new uninterpreted
-predicate $g$ indexed by $s$'s free variables ($\nubar$). Since the
-set denoted by $g$ is the result of the bind $s_1 \bind \lambda
-x.s_2$, a first-order constraint defining the bind operation (as
-described above) is generated. The constraint relates the predicates
-$\G_1$ and $\G_2$, representing $s_1$ and $s_2$ (resp.), to the
-uninterpreted predicate $g$ that represents $s$. The constraint is
-assigned a name ($\pi$) so that it can be enabled only for the choice
-of free variables ($\nubar$) for which $g$ needs to be defined;
-observe that the lambda expression returned by $\mssemof{\nubar}{s_1 \bind
-\lambda x.s_2}$ asserts $\pi(\vbar)$ only in conjunction with
-$g(\vbar,r)$, for some $r$.
+of the set monad's bind operator in FOL. Let $s_1$ be a set, and let
+$f$ be a function that maps each variable in $s_1$ to a new set. Then,
+$s_2 = s_1 \bind f$ if and only if for all $y\in s_2$, there exists an
+$x \in s_1$ such that $y = f(x)$, and forall $x\in s_1$, $f(x)\in
+s_2$. The encoding essentially adds new constraints to this effect.
+The translation first encodes $s_1$ and $s_2$ to obtain
+$(\phi_1,\G_1)$ and $(\phi_2,\G_2)$, respectively. Since $s_2$ is
+under a new binder that binds $x$, the free variable sequence of $s_2$
+is $\nubar,x$. In the interest of hygiene, we substitute a fresh $a$
+for $x$, making the sequence $\nubar,a$. The set $s$ is encoded as a
+new uninterpreted predicate $g$ indexed by $s$'s free variables
+($\nubar$). Since the set denoted by $g$ is the result of the bind
+$s_1 \bind \lambda x.s_2$, first-order constraints defining the bind
+operation (as described above) are generated. The constraints relate
+the predicates $\G_1$ and $\G_2$, representing $s_1$ and $s_2$
+(resp.), to the uninterpreted predicate $g$ that represents $s$. The
+constraints are assigned names ($\pi_1$ and $\pi_2$) to give them an
+easy handle.
 
 The first-order encoding of the $\existsl(\stg,\phi,s)$ expression
-eliminates the existential by Skolemizing it. Skolemizing is the
+essentially Skolemizes the existential. Skolemizing is the
 process of substituting an existentially bound $x$ in
 $\phi_x\in\Prop^1$ with $f(\nubar)$, where $f$ is a fresh
-uninterpreted function, and $\nubar$ are the free variables in
-$\phi_x$ bound by enclosing universal quantifiers. Due to the
+uninterpreted function (called the Skolem function), and $\nubar$ are
+the free variables in $\phi_x$ bound by enclosing universal
+quantifiers. Due to the
 decidability restrictions (Sec.~\ref{sec:decidability}), the only
 uninterpreted functions we admit in our logic are boolean (i.e.,
-predicates/relations). Consequently, Skolemizing an existentially
-bound $\stg$ with $f(\nubar)$ is not really an option in our case.
-Instead, we define $f$ as an uninterpreted relation that behaves as a
-partial function:
+predicates/relations). Consequently, we cannot define the Skolem
+function $f$ directly. Instead, we define it via an uninterpreted
+relation, by explicitly asserting the function property:
 \begin{smathpar}
   \begin{array}{c}
-    \forall \nubar.\forall a.\forall b.~f(\nubar,a) \wedge f(\nubar,b)
-    \Rightarrow a = b
+    (\forall \nubar.\forall a.\forall b.~f(\nubar,a) \wedge f(\nubar,b)
+    \Rightarrow a = b)
+    ~~\conj~~ (\forall \nubar.\exists a. f(\nubar,a))
   \end{array}
 \end{smathpar}
 We then replace the existentially bound $\stg$ with a new universally
-bound $a$ in $\phi$ and $s$, and define the set $[a/\stg]s$ under the
-condition that $f(\nubar,a) \conj [a/\stg]\phi$ holds. Since the
-existence of a $\stg$ that satisfies $\phi$ is axiomatized to
-define $s$, if the aforementioned condition does not hold, i.e., if
-there does exist such a $\stg$, we let the context derive $\bot$.
+bound $a$ in $\phi$ and $s$, such that $f(\nubar,a) $ holds, before
+encoding the existentially bound $s$.
 
 \noindent {\bf Example} Let us reconsider the  TPC-C \C{new\_order}
 transaction from Sec.~\ref{sec:motivation}. Recall that the state
@@ -542,8 +538,8 @@ $(\phi,\G)$, as defined below:
 Observe that the encoding shown in Fig.~\ref{fig:logic} maps to
 a fragment of FOL that satisfies the following syntactic properties:
 \begin{itemize}
-  \item All function symbols, modulo those that might appear in
-    $\varphi\in\Prop^0$, are uninterpreted and Boolean.
+  \item All function symbols, modulo those that are drawn from
+    $\Prop^0$ and $\Prop^1$, are uninterpreted and Boolean.
   \item All quantification is first-order; second-order objects, such
     as sets and functions, are never quantified.
   \item Quantifiers appear only at the prenex position, i.e., at the
@@ -568,75 +564,93 @@ $\phi_s$, if quantified, is a prenex-quantified formula, where
 quantification assumes one among the forms of $\forall^{|\nubar|+2}$,
 or $\forall^{|\nubar|}\exists$, or $\forall^{|\nubar|+1}\exists$.  In
 other words, the number of $\forall$ quantifiers preceding an
-$\exists$ quantifier is utmost two more than the number of free
+$\exists$ quantifier is utmost one more than the number of free
 variables ($\nubar$) in $s$. For the convenience of this discussion,
 let us call $\forall^{|\nubar|+1}\exists$ as the prenex signature of
 $\phi_s$. 
 
 Next, in Fig.~\ref{fig:logic}, observe that the (ordered) set $\nubar$
-is extended only in the encoding rules for $\bind$ and $\existsl$
-expressions. Since $\existsl$ is a result of a particular choice of the
-weakening semantics (Sec.~\ref{sec:inference}), let us ignore it for now to
-focus on the core set expression language. This leaves $\bind$ as the
-only case where $\nubar$ is extended.  Since an occurrence of $\bind$
-adds one to $|\nubar|$, if $s$ is a subexpression of a top-level
-{\sf bind} expression (like $\F_U(\stl,\stg)$ from the above example),
-then the prenex signature of $\phi_s$ is $\forall^2\exists$.
-Furthermore, if the subexpressions of $s$ are not {\sf bind} expressions,
-then none of the $\phi_i$'s are quantified, and the prenex signature
-of $\phi = \bigwedge_i\phi_i \wedge \phi_s$ remains
-$\forall^2\exists$.  The fragment of FOL that admits formulas with
-prenex signatures of form $\forall^2\exists^*$ is called the
-Godel-Kalmar-Schutte ({\sf GKS}) fragment~\cite{...}, which is known to be
-decidable. The language of encoding, however, is a combination of {\sf
-GKS} with (a). $\Prop^0$, the theory from which quantifier-free
-propositions ($\varphi$) that encode object language expressions are
-drawn, and (b).  $\Prop^1$, the theory from which invariants ($I$) are
-drawn. Thus the encoding is decidable if the combination of ${\sf GKS}
-+ \Prop^0 + \Prop^1$ is decidable.
+is extended only in the encoding rule for $\bind$. Since an occurrence
+of $\bind$ adds one to $|\nubar|$, if $s$ is a bind expression nested
+inside a top-level bind expression (like $\F_U(\stl,\stg)$ from
+the above example), then the prenex signature of $\phi_s$ is
+$\forall^2\exists$.  Furthermore, if the subexpressions of $s$ are
+neither {bind} nor $\existsl$ expressions, then none of the
+$\phi_i$'s are quantified, and the prenex signature of $\phi =
+\bigwedge_i\phi_i \wedge \phi_s$ remains $\forall^2\exists$. Similar
+observation holds when $s$ is an $\existsl$ expression nested inside a
+top-level {bind} expression.  Since $\existsl$ is generated as a
+result of stabilizing a SQL command transformer, which is always a
+non-nested bind expression, the subexpression ($s'$) of $\existsl$ is
+a non-nested bind expression. $s'$ is however nested inside the
+top-level bind expression, hence its prenex signature is
+$\forall^2\exists$.  Since $\existsl$ doesn't extend $\nubar$, the
+prenex signature of $s$ remains $\forall^2\exists$. When $s$ is an
+expression other than $\bind$ or $\existsl$, then $\phi_s$ is not a
+quantified formula, and its prenex signature is trivially subsumed by
+$\forall^2\exists$. Thus, for the subset of $\SL$, where bind
+expressions are restricted to one level of nesting, the FOL formulas
+generated by the encoding have the prenex signature as
+$\forall^2\exists$.
 
-To formally state the above property, let $\SL[n,\Prop^0,\Prop^1]$
-denote the core set expression language that admits $n$ nested {\sf bind}
-expressions, and allows program (Boolean) expressions ($e$), and
-invariants ($\I$) to be drawn from theories $\Prop^0$ and $\Prop^1$,
-respectively. Then:
+The fragment of FOL that admits formulas with prenex signatures of
+form $\forall^2\exists^*$ is called the G\"odel-K\'almar-Sch\"utte ({\sf
+GKS}) fragment~\cite{gks}, which is known to be decidable. The
+language of encoding, however, is a combination of {\sf GKS} with (a).
+$\Prop^0$, the theory from which quantifier-free propositions
+($\varphi$) that encode object language expressions are drawn, and
+(b). $\Prop^1$, the theory from which invariants ($I$) are drawn. Thus
+the encoding of the subset of $\SL$ described above is decidable if the
+combination of ${\sf GKS} + \Prop^0 + \Prop^1$ is decidable. We write
+$\SL[\Prop^0,\Prop^1]$ to highlight the parameterization of $\SL$ on
+$\Prop^0$ and $\Prop^1$.  The discussion in the previous paragraph
+points to the existence of subsets in $\SL[\Prop^0,\Prop^1]$ that are
+decidable:
 \begin{theorem}
-  $\SL[0,\Prop^0,\Prop^1]$ is decidable if ${\sf GKS}+\Prop^0+\Prop^1$
-  is decidable.
+  There exists an $\SL'[\Prop^0,\Prop^1] \subset \SL[\Prop^0,\Prop^1]$
+  such that $\SL'$ is decidable if ${\sf GKS}+\Prop^0+\Prop^1$ is
+  decidable.
 \end{theorem}
-The $n=0$ case denotes the lack of nested {\sf bind}
-expressions. Since nested \C{foreach} statements are the only program
-constructs in $\txnimp$ that lead to nested bind expressions, this
-instantiation denotes the encoding language for $\txnimp$ programs
-without nested \C{foreach} loops. Observe that the \C{new\_order}
-transaction (Fig.~\ref{fig:new_order_code}) satisfies this constraint.
-Indeed, this restricted language is nonetheless expressive enough to
-cover all of the benchmarks we have considered.
+An example of such an $\SL'$ is the subset described above: $\SL$ with
+bind expressions confined to one level of nesting. We denote this
+subset as $\SL^1[\Prop^0,\Prop^1]$, for which we assert decidability:
+\begin{theorem}
+  $\SL^1[\Prop^0,\Prop^1]$ is decidable if ${\sf GKS}+\Prop^0+\Prop^1$ is
+  decidable.
+\end{theorem}
+$\SL^1$ is a useful subset of $\SL$, for it corresponds to $\txnimp$
+programs without nested \C{foreach} loops. Observe that the
+\C{new\_order} transaction (Fig.~\ref{fig:new_order_code}) belongs to
+this subset.  Indeed, $\SL^1$, while being a restricted version of
+$\SL$, is nonetheless expressive enough to cover all the benchmarks we
+considered in Sec.~\ref{sec:case-studies}.
 
-A useful instantiation of $\SL$ is $\SL[{\sf BV},{\sf GKS}+{\sf BV}]$,
-where ${\sf BV}$ is the theory of bit-vector arithmetic, which is
-generally used to encode the finite-bit arithmetic of real programs.
-Bit-vector arithmetic has a finite quantifier-free
-axiomatization, 
-Since {\sf EPR}+{\sf SLA} is known to be decidable~\cite{eprsla}:
+A useful instantiation of $\SL^1$ is $\SL[{\sf BV},{\sf GKS}+{\sf
+BV}]$, where ${\sf BV}$ is the theory of bit-vector arithmetic, which
+is often used to encode the finite-bit integer arithmetic of real
+programs. Finite-bit integer arithmetic has a finite axiomatization in
+{\sf GKS}. For instance, 32-bit integers can be encoded as $2^{32}$
+distinct constants of an uninterpreted sort $T$, while integer
+operations like addition and multiplication can be encoded as
+uninterpreted functions whose properties are enumerated for the entire
+domain of $T$. Thus {\sf BV} is subsumed by {\sf GKS}. Since the
+latter is decidable, the combination is decidable:
 \begin{theorem}
-  $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ is decidable.
+  $\SL^1[{\sf GKS},{\sf GKS}+{\sf BV}]$ is decidable.
 \end{theorem}
-The $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ instantiation requires $I$ to
-be drawn from {\sf EPR}+{\sf SLA}, which is expressive enough to
+The $\SL^1[{\sf BV},{\sf GKS}+{\sf BV}]$ instantiation requires $I$ to
+be drawn from {\sf GKS}+{\sf BV}, which is expressive enough to
 describe common database integrity constraints, such as referential
 integrity, non-negativeness of all integer values in a column etc.
 The isolation specifications presented in \S\ref{sec:isolation} are
-already simple first-order formulas that can be encoded in {\sf EPR}.
+already simple first-order formulas that can be encoded in {\sf GKS}.
 Furthermore, it is also reasonable to expect the guarantee ($G$) of a
 transaction to be expressible in the same logic as its inferred $\F$,
 since $\F$ (without the stability check) is essentially a complete
 characterization of the transaction, while $G$ is only an abstraction.
-Thus, with $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ as the language of
+Thus, with $\SL^1[{\sf GKS},{\sf GKS}+{\sf BV}]$ as the language of
 inference, the verification problem for weakly isolated transactions
-is decidable. Moreover, off-the-shelf SMT solvers (e.g., Z3) are
-equipped with efficient decision procedures for ${\sf EPR}+{\sf SLA}$,
-making automated verification a practical exercise.
+is decidable.
 
 % This
 % fragment of FOL known as EPR (Effectively Propositional
