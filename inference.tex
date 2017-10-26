@@ -449,7 +449,7 @@ there does exist such a $\stg$, we let the context derive $\bot$.
 
 \noindent {\bf Example} Let us reconsider the  TPC-C \C{new\_order}
 transaction from Sec.~\ref{sec:motivation}. Recall that the state
-transformer for the \C{foreach} loop shown in
+transformer ($\T$) for the \C{foreach} loop shown in
 Fig.~\ref{fig:foreach_code} is (\C{k1}, \C{k2}, and \C{k3} are
 constants):
 \begin{smathpar}
@@ -485,20 +485,30 @@ $(\phi_U,\G_U)$ and $(\phi_I,\G_I)$, respectively, where $\phi_U$,
 $\phi_I$, $\G_U$, $\G_I$ are as shown below:
 \begin{smathpar}
   \begin{array}{lcl}
-    \phi_U & = & \forall \C{item\_req}.\forall s. \forall s'.~  \\
-    & & \hspace*{0.1in}\pi(\C{item\_req}) \Leftrightarrow(s \in \stg) \conj 
+    \phi_U & = & \hspace*{0.2in}\forall \C{item\_req}.\forall s. \forall s'.~ 
+        \pi_1(\C{item\_req}) \Leftrightarrow \\
+    & & \hspace*{0.3in}(s \in \stg) \conj 
         (\itec{{\sf table}(s)=\C{Stock} \wedge 
               s.\C{s\_i\_id} = \C{item\_req.ol\_i\_id}\\
     & & \hspace*{1.45in}}
               {s' = \langle \C{s\_i\_id}=s.\C{s\_i\_id};\, 
                             \C{s\_d\_id}=s.\C{s\_d\_id};\,
                             \C{s\_qty} = \C{k1}\rangle\\
-    & & \hspace*{1.45in}} {\bot}) \\
-    & & \hspace*{1.2in} \Leftrightarrow g(\C{item\_req},s')\\
-    \G_U & = & \lambda (\C{item\_req},r).~ \pi(\C{item\_req}) 
-        \wedge g(\C{item\_req},r)\\
-    \phi_I & = & \top \\ 
-    \G_U & = & \lambda (\C{item\_req},r).~ 
+    & & \hspace*{1.45in}} {\bot}) \Rightarrow g_0(\C{item\_req},s')\\
+    & & \conj \hspace*{0.08in}\forall \C{item\_req}.\forall s'. \exists s.~ 
+        \pi_2(\C{item\_req}) \Leftrightarrow \\
+    & & \hspace*{0.28in} g_0(\C{item\_req},s') \Rightarrow (s \in \stg) \conj
+        (\itec{{\sf table}(s)=\C{Stock} \wedge 
+              s.\C{s\_i\_id} = \C{item\_req.ol\_i\_id}\\
+    & & \hspace*{1.8in}}
+              {s' = \langle \C{s\_i\_id}=s.\C{s\_i\_id};\, 
+                            \C{s\_d\_id}=s.\C{s\_d\_id};\,
+                            \C{s\_qty} = \C{k1}\rangle\\
+    & & \hspace*{1.8in}} {\bot}) \\
+    \G_U & = & \lambda (\C{item\_req},r).~ \pi_1(\C{item\_req}) \wedge 
+        \pi_2(\C{item\_req}) \wedge g_0(\C{item\_req},r)\\
+        \phi_I & = & \top \\ 
+    \G_I & = & \lambda (\C{item\_req},r).~ 
         r = \langle \C{ol\_o\_id}=\C{k2},\,
                     \C{ol\_d\_id}=\C{k3},\, 
                     \C{ol\_i\_id}=\C{item\_req.ol\_i\_id},\, 
@@ -506,6 +516,25 @@ $\phi_I$, $\G_U$, $\G_I$ are as shown below:
              \rangle\\
   \end{array}
 \end{smathpar}
+Since the transformer ($\T$) of the \C{foreach} loop is not nested
+does not contain any free iteration variables, the appropriate
+application of the encoding algorithm  is
+$\mssemof{\emptyset}{\T(\stl,\stg)}$, which results in the
+$(\phi,\G)$, as defined below:
+\begin{smathpar}
+  \begin{array}{lcl}
+    \phi & = & \phi_I \conj \phi_U \conj \\
+    & & \hspace*{0.2in}\forall \C{ireq}. \forall s.~ 
+        \pi_3 \Leftrightarrow (\C{ireq} \in \C{item\_reqs} \conj 
+        (\G_U(\C{ireq},s') \vee \G_I(\C{ireq},s'))
+        \Rightarrow g_1(s))\\
+    & & \conj \hspace*{0.05in}\forall s.\exists \C{ireq}. ~ 
+        \pi_4 \Leftrightarrow (g_1(s) \Rightarrow (\C{ireq} \in \C{item\_reqs} 
+        \conj (\G_U(\C{ireq},s') \vee \G_I(\C{ireq},s')))\\
+    \G & = & \lambda(r).~\pi_3 \wedge \pi_4 \wedge g_1(r)\\
+  \end{array}
+\end{smathpar}
+
 
 \subsection{Decidability}
 \label{sec:decidability} %this label is referenced earlier.

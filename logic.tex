@@ -13,10 +13,10 @@
   & |\vbar|=|\nubar|\\
 %
 \mssemof{\nubar}{\itel{\varphi}{s_1}{s_2}} & = & (\phi_1 \wedge \phi_2,~
-    \lambda (\vbar,r).\, \C{if}\;\varphi\;\C{then}\; \G_1(\vbar,r)
-      \;\C{else}\; \G_2(\vbar,r) & \texttt{  } 
-  & (\phi_1,\G_1)=\mssemof{\nubar}{s_1} \spc
-    (\phi_2,\G_2)=\mssemof{\nubar}{s_2} \\
+    \lambda (\vbar,r).\, \C{if}\;\varphi\;\C{then}\; \G_1(\vbar,r) 
+  & \texttt{  }& (\phi_1,\G_1)=\mssemof{\nubar}{s_1}\\
+& & \hspace*{1in}\;\C{else}\; \G_2(\vbar,r) & \texttt{  } 
+  & (\phi_2,\G_2)=\mssemof{\nubar}{s_2} \\
 %
   \mssemof{\nubar}{s_1 \cup s_2} & = & (\phi_1 \wedge \phi_2,~
       \lambda (\vbar,r).\, \G_1(\vbar,r) \vee \G_2(\vbar,r)) & \texttt{ } 
@@ -24,25 +24,32 @@
     (\phi_2,\G_2)=\mssemof{\nubar}{s_2} \\
 %
 \mssemof{\nubar}{s_1 \bind \lambda x. s_2} & = & (\phi_1 \wedge \phi_2
-  \wedge \forall \nubar.\forall a.\forall b. ~\pi(\nubar)
-  \Leftrightarrow & \texttt{  } & \fresh(a) \spc \fresh(b) \spc 
-  \fresh(\pi) \spc \fresh(g)\\
+  \wedge \forall \nubar.\forall a.\forall b. ~\pi_1(\nubar)
+  \Leftrightarrow & \texttt{  } &  
+  \fresh(\pi_1) \spc \fresh(\pi_2) \spc \fresh(g)\\
 & & \hspace*{0.65in}\G_1(\nubar,a) \wedge \G_2(\nubar,a,b)
-    \Leftrightarrow g(\nubar,b), & \texttt{  }
-  & (\phi_1,\G_1)=\mssemof{\nubar}{s_1} \spc
-    (\phi_2,\G_2)=\mssemof{\nubar,a}{[a/x]s_2} \\
-& & ~\lambda (\vbar,r).\,\pi(\vbar) \conj g(\vbar,r))
+    \Rightarrow g(\nubar,b) & \texttt{  }
+  & (\phi_1,\G_1)=\mssemof{\nubar}{s_1} \\
+& & \hspace*{0.5in}\wedge \forall \nubar.\forall b.\exists a.~ 
+    \pi_2(\nubar) \Leftrightarrow  & \texttt{  } 
+  & (\phi_2,\G_2)=\mssemof{\nubar,a}{[a/x]s_2}\\
+& & \hspace*{0.65in}g(\nubar,b) \Rightarrow 
+    \G_1(\nubar,a) \wedge \G_2(\nubar,a,b), & \texttt{  } 
+  & \fresh(a) \spc \fresh(b) \spc\\
+& & ~\lambda (\vbar,r).\,\pi_1(\vbar) \conj \pi_2(\vbar) \conj g(\vbar,r))
   & \texttt{  } & |\vbar| = |\nubar|\\
 %
 \mssemof{\nubar}{\existsl(\stg,\phi,s)} & = & (\phi_s \wedge 
-  \forall a.\forall b.~ f(\nubar,a) \wedge 
+  \forall \nubar.\forall a.\forall b.~ f(\nubar,a) \wedge 
         f(\nubar,b) \Rightarrow a = b& \texttt{  }
   & \fresh(a) \spc \fresh(b)\\
+& &\hspace*{0.2in} \wedge \forall \nubar.\exists a.~ f(\nubar,a) & \texttt{  }
+  & \fresh(f) \\
 & &\hspace*{0.2in}\wedge \forall \nubar.\forall a.\forall b.~ \pi(\nubar) 
-  \Leftrightarrow \C{if}\;f(\nubar,a) \wedge [a/\stg]\phi & \texttt{  }
-  & \fresh(f) \spc \fresh(\pi)\spc\fresh(g)\\
-& & \hspace*{0.75in}\C{then}\; g(\nubar,b)=\G_s(\nubar,a,b)\;\C{else}\;\bot, 
-  & \texttt{  } 
+  \Leftrightarrow f(\nubar,a) \wedge [a/\stg]\phi & \texttt{  } 
+  & \fresh(\pi)\spc\fresh(g)\\
+  & & \hspace*{1.25in}\Rightarrow  
+  g(\nubar,b)=\G_s(\nubar,a,b), & \texttt{  } 
   & (\phi_s,\G_s)=\mssemof{\nubar,a}{[a/\stg]s} \\
 & & ~\lambda (\vbar,r).\,\pi(\vbar) \conj g(\vbar,r)) & \texttt{  }
 % \conj \forall b.~ g(b) \Leftrightarrow g_1(b)
