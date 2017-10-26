@@ -37,18 +37,17 @@ set expression $s$, a monadic composition of two set expressions
 conditional set expression where the condition is a propositional
 formula, and a union of two set expressions. Symbols $\stl$ and $\stg$
 are also variables in $\SL$, but are used to denote local and database
-states, respectively. Constant sets can be written using the set
-literal expressions. For e.g., the set $\{1,2\}$ can be written as
+states, respectively. Constant sets can be written using set
+literal expressions. For example, the set $\{1,2\}$ can be written as
 $\{x \,|\, x=1 \vee x=2\}$. The language is carefully chosen to be
 expressive enough to capture the semantics of $\txnimp$ statements (as
 well as SQL operations more generally), yet simple enough to have a
-semantics-preserving translation to a decidable fragment of
-first-order logic.
+semantics-preserving translation amenable for automated verification.
 \input{inference-rules}
 Fig.~\ref{fig:inference-rules} shows the syntax-directed state
 transformer inference rules for $\txnimp$ commands inside a
 transaction $\C{TXN}_i$.  Inference depends on the $\I$-constrained
-rely relation $\R$, and the high-level invariant $I$ for the reasons
+rely relation $\R$, and the high-level invariant $I$ for reasons
 that will become clear shortly.  Inference rules compute, for each
 command $c$, a (meta) function $\F$ that returns a set as an
 expression in $\SL$, given a pair of sets ($\stl$ and $\stg$) that
@@ -72,14 +71,14 @@ effects can be defined thus:
 where $\nubar$ are the variables that occur free in $\F$; this is
 possible because of how the inference rules are structured.
 Intuitively, the stability condition requires an effect to describe
-the same set of records before and after the interference. The
-equivalence in $\SL$ translates to equality in first-order logic,
-as we describe below. In the inference rules, stability is
-enforced constructively by a meta function $\stabilize{\cdot}$, which
-accepts an effect and returns a new effect that is guaranteed to be
-stable under $\R$.  $\stabilize{\cdot}$ achieves the stability
-guarantee by abstracting away the bound $\stg$ in an unstable $\F$ to
-an existentially bound $\stg'$ as described below:
+the same set of records before and after an interference. The
+equivalence in $\SL$ translates to equality in first-order logic, as
+we describe below. In the inference rules, stability is enforced
+constructively by a meta function $\stabilize{\cdot}$, which accepts
+an effect and returns a new effect that is guaranteed to be stable
+under $\R$.  $\stabilize{\cdot}$ achieves the stability guarantee by
+abstracting away the bound global state ($\stg$) in an unstable $\F$
+to an existentially bound $\stg'$ as described below:
 \begin{smathpar}
 \begin{array}{lcll}
   \stabilize{\F} & = & \F & \texttt{if } \stable(\R,\F).\\
@@ -87,18 +86,18 @@ an existentially bound $\stg'$ as described below:
       & \texttt{otherwise. }\stg'\texttt{ is a fresh name.}\\
 \end{array}
 \end{smathpar}
-Observe that when $\F$ is not stable, then $\stabilize{\F}$ returns a
+Observe that when $\F$ is not stable, $\stabilize{\F}$ returns a
 transformer $\F'$ that simply ignores its $\stg$ argument in favor of
 a generic $\stg'$, making $\F'$ trivially stable. It is safe to assume
-$I(\stg')$ because all verified transactions preserve the invariant,
-and hence only valid database states will ever be witnessed. From the
-perspective of RG reasoning, $\stabilize{\cdot}$ effectively weakens
-the post-condition of a statement, as done by the
+$I(\stg')$ because all verified transactions must preserve the
+invariant, and hence only valid database states will ever be
+witnessed. From the perspective of RG reasoning, $\stabilize{\cdot}$
+effectively weakens the post-condition of a statement, as done by the
 \rulelabel{RG-Conseq} rule for transaction-bound commands.  The
 weakening semantics chosen by $\stabilize{\cdot}$, while being simple,
-is nonetheless useful because of the $I(\stg')$ assumption on the
-existentially bound $\stg'$. The example in
-Fig.~\ref{fig:weakening-example} demonstrates. 
+is nonetheless useful because of the $I(\stg')$ assumption imposed on
+the existentially bound $\stg'$. The example in
+Fig.~\ref{fig:weakening-example} demonstrates.
 \begin{figure}[h]
 \begin{center}
 \begin{ocaml}
@@ -143,20 +142,21 @@ updated records, the state transformer rule uses $\SL$'s bind
 operation to \emph{compute} the set. Other SQL rules do likewise. The
 rules for \C{LET} binders, conditionals, and sequences compose the
 effects inferred for their subcommands. Thus, the effect of a sequence
-of commands $c_1;c_2$ is the union of effects $\F_1$ and $\F_2$ of $c_1$
-and $c_2$, respectively, except that $\F_2$ is applied to a state
-($\stl$) to which $\F_1$ has already been applied, reflecting their
-order of reduction. The inference rule for \C{FOREACH} takes advantage
-of the $\SL$'s bind operator to lift the effect inferred for the loop
-body to the level of the loop. Since records added to $\stl$ in each
-iteration of \C{FOREACH} are independent of the previous iteration
-(recall local context independence; Sec. ~\ref{sec:opsem}), sequential
-composition of the effects of different iterations is same as their
+of commands $c_1;c_2$ is the union of effects $\F_1$ and $\F_2$ of
+$c_1$ and $c_2$, respectively, except that $\F_2$ is applied to a
+state ($\stl$) to which $\F_1$ has already been applied, reflecting
+their order of reduction. The inference rule for \C{FOREACH} takes
+advantage of the $\SL$'s bind operator to lift the effect inferred for
+the loop body to the level of the loop. Since records added to $\stl$
+in each iteration of \C{FOREACH} are independent of the previous
+iteration (recall that we make a local context independence assumption
+about database programs; Sec. ~\ref{sec:opsem}), sequential
+composition of the effects of different iterations is the same as their
 parallel composition. Since the loop body is executed once per each
-$z\in x$, the effect of the the loop is the union of effects ($\F$)
+$z\in x$, the effect of the the loop is a union of effects ($\F$)
 for all $z\in x$, all applied to the same state ($\stl$ and $\stg$).
 That is, $\F_{loop}(\stl,\stg) = \bigcup_{z\in
-x}\F_{body}(\stl,\stg)$. From the definition of the set monad's bind
+  x}\F_{body}(\stl,\stg)$. From the definition of the set monad's bind
 operator, $\F_{loop}(\stl,\stg) = x \bind (\lambda
 z.~F_{body}(\stl,\stg))$, which mirrors the definition of the rule.
 %This development mirrors ideas found in type checkers for certain
@@ -341,7 +341,7 @@ on encoding a set of element type $T$ as a unary predicate on $T$.
 The predicate is represented as a meta function that accepts an $x:T$
 and returns a quantifier-free proposition that evaluates to true
 ($\top$) if and only if $x$ is present in the set. Alternatively,
-translation may also encode the set as a predicate in the logic
+the translation may also encode the set as a predicate in the logic
 itself, in which case a quantified proposition constraining the
 predicate is also generated. For instance, consider the set $\{1,2\}$.
 The predicate describing the set can be encoded as the function
@@ -379,7 +379,7 @@ into account. Given a set expression $s\in\SL$, whose (possible) free
 variables are $\nubar$ in the order of their introduction (top-most
 binder first), $\mssemof{\nubar}{s}$ returns the encoding of $s$ as
 $(\phi,\G)$.  The meta function $\G$ is a predicate indexed by the
-(possible) free variables of $s$, thus, its arity is $|\nubar| + 1$.
+(possible) free variables of $s$, and thus its arity is $|\nubar| + 1$.
 Note that $\nubar$ is only a sequence of variables introduced by the
 enclosing binders of $s$, and not all may actually occur free in $s$.
 Nonetheless, its predicate $\G$ is always indexed by $|\nubar|$ free
@@ -398,7 +398,7 @@ branches are computed from the set subexpressions $s_1$ and $s_2$,
 respectively. The conjunction of constraints $\phi_1$ and $\phi_2$,
 from $\mssemof{\nubar}{s_1}$ and $\mssemof{\nubar}{s_2}$ (resp.), is
 propagated upwards as the constraint of the conditional expression.
-Set union expression is encoded similarly.
+A set union expression is encoded similarly.
 
 The first-order encoding of a bind expression describes the semantics
 of the set monad's bind operator in FOL. Let $s_1$ be a set, and let $f =
