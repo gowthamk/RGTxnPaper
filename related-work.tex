@@ -30,11 +30,11 @@ is not immediately apparent if their specification formalism is
 amenable for use within a verification toolchain.  ~\cite{WB17}
 presents a dynamic analysis for weak isolation that attempts to
 discover weak isolation anomalies from SQL log files.  Their solution,
-while capable of identifying database attacks due to the use of weaker
-isolation levels than necessary, does not consider how to verify
-application correctness, infer proper isolation levels, or formally
-reason about the relationship between weak-isolation levels and
-application invariants.
+while capable of identifying database attacks due to the use of
+incorrect (excessively weak) isolation levels, does not consider how
+to verify application correctness, infer proper isolation levels, or
+formally reason about the relationship between weak-isolation levels
+and application invariants.
 
 \vspace*{-4pt}
 \paragraph{Reasoning under weak isolation.} In~\cite{feketessi}, Fekete
