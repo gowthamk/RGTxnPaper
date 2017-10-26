@@ -613,6 +613,31 @@ transaction (Fig.~\ref{fig:new_order_code}) satisfies this constraint.
 Indeed, the restricted language without nested \C{foreach} loops is
 nonetheless expressive enough to cover all TPC-C transactions.
 
+A useful instantiation of $\SL$ is $\SL[{\sf BV},{\sf GKS}+{\sf BV}]$,
+where ${\sf BV}$ is the theory of bit-vector arithmetic, which is
+generally used to encode the finite-bit arithmetic of real programs.
+Bit-vector arithmetic has a finite quantifier-free
+axiomatization, 
+Since {\sf EPR}+{\sf SLA} is known to be decidable~\cite{eprsla}:
+\begin{theorem}
+  $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ is decidable.
+\end{theorem}
+The $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ instantiation requires $I$ to
+be drawn from {\sf EPR}+{\sf SLA}, which is expressive enough to
+describe common database integrity constraints, such as referential
+integrity, non-negativeness of all integer values in a column etc.
+The isolation specifications presented in \S\ref{sec:isolation} are
+already simple first-order formulas that can be encoded in {\sf EPR}.
+Furthermore, it is also reasonable to expect the guarantee ($G$) of a
+transaction to be expressible in the same logic as its inferred $\F$,
+since $\F$ (without the stability check) is essentially a complete
+characterization of the transaction, while $G$ is only an abstraction.
+Thus, with $\SL[{\sf SLA},{\sf EPR}+{\sf SLA}]$ as the language of
+inference, the verification problem for weakly isolated transactions
+is decidable. Moreover, off-the-shelf SMT solvers (e.g., Z3) are
+equipped with efficient decision procedures for ${\sf EPR}+{\sf SLA}$,
+making automated verification a practical exercise.
+
 % This
 % fragment of FOL known as EPR (Effectively Propositional
 % logic) is
