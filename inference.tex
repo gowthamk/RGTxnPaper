@@ -169,20 +169,21 @@ rules for \C{LET} binders, conditionals, and sequences compose the
 effects inferred for their subcommands. Thus, the effect of a sequence
 of commands $c_1;c_2$ is the union of effects $\F_1$ and $\F_2$ of
 $c_1$ and $c_2$, respectively, except that $\F_2$ is computed in a
-context that includes $\F_1$. The inference rule for \C{FOREACH} takes
-advantage of the $\SL$'s bind operator to lift the effect inferred for
-the loop body to the level of the loop. Since records added to $\stl$
-in each iteration of \C{FOREACH} are independent of the previous
-iteration (recall that we make a local context independence assumption
-about database programs; Sec. ~\ref{sec:opsem}), sequential
-composition of the effects of different iterations is the same as
-their parallel composition. Since the loop body is executed once per
-each $z\in x$, the effect of the the loop is a union of effects ($\F$)
-for all $z\in x$, all applied to the same state ($\stl$ and $\stg$).
-That is, $\F_{loop}(\stg) = \bigcup_{z\in
+context that includes $\F_1$ (we write $\F_1 \cup \F_2$ as a shorthand
+for $\lambda(\stg).~\F_1(\stg) \cup \F_2(\stg)$). The inference rule
+for \C{FOREACH} takes advantage of the $\SL$'s bind operator to lift
+the effect inferred for the loop body to the level of the loop. Since
+records added to $\stl$ in each iteration of \C{FOREACH} are
+independent of the previous iteration (recall that we make a local
+context independence assumption about database programs; Sec.
+~\ref{sec:opsem}), sequential composition of the effects of different
+iterations is the same as their parallel composition. Since the loop
+body is executed once per each $z\in x$, the effect of the the loop is
+a union of effects ($\F$) for all $z\in x$, all applied to the same
+state ($\stl$ and $\stg$).  That is, $\F_{loop}(\stg) = \bigcup_{z\in
 x}\F_{body}(\stg)$. From the definition of the set monad's bind
-operator, $\F_{loop}(\stg) = x \bind (\lambda
-z.~F_{body}(\stg))$, which mirrors the definition of the rule.
+operator, $\F_{loop}(\stg) = x \bind (\lambda z.~F_{body}(\stg))$,
+which mirrors the definition of the rule.
 %This development mirrors ideas found in type checkers for certain
 %dependent type systems~\cite{KJ14}.
 
