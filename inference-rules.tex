@@ -1,7 +1,7 @@
 \begin{figure}
 \raggedright
 %
-\fbox {\(c \elabsto \F \)}\\
+\fbox {\(\Fx \vdash c \elabsto \F \)}\\
 %
 
 % \renewcommand{\arraystretch}{1.2}
@@ -33,13 +33,17 @@
 {
 }
 {
-  \inserte{x} ~\elabsto~ \stabilize{\lambda(\stl,\stg).~
-    \{ r \,|\, r = \{\langle x \with \delf=\mathtt{false};\, \txnf = i\rangle \}}
+  \Fx \vdash \inserte{x} ~\elabsto~ \stabilize
+    {\inctxt{\Fx}
+            {\lambda(\stg).~ \{ r \,|\, r = 
+              \{\langle x \with \delf=\mathtt{false};\, 
+                \txnf = i\rangle \}}}
 }
 \end{array}
 \end{smathpar}
 %\end{minipage}
 %\begin{minipage}{3.5in}
+
 \begin{smathpar}
 \begin{array}{c}
 \RULE
@@ -49,13 +53,14 @@
       {\emptyset}
 }
 {
-  \updatee{\lambda x.e_1}{\lambda x.e_2}  ~\elabsto~
-  \stabilize{\lambda(\stl,\stg).~ \stg \bind G } 
+  \Fx \vdash \updatee{\lambda x.e_1}{\lambda x.e_2}  ~\elabsto~
+  \stabilize{\inctxt{\Fx}{\lambda(\stg).~ \stg \bind G }}
 }
 \end{array}
 \end{smathpar}
 %\end{minipage}
 %\begin{minipage}{3in}
+
 \begin{smathpar}
 \begin{array}{c}
 \RULE
@@ -65,9 +70,8 @@
       {\emptyset}
 }
 {
-  \deletee{\lambda x.e}  ~\elabsto~
-  \stabilize{
-  \lambda(\stl,\stg).~ \stg \bind G \} }
+  \Fx \vdash \deletee{\lambda x.e}  ~\elabsto~
+  \stabilize{\inctxt{\Fx}{\lambda(\stg).~ \stg \bind G }}
 }
 \end{array}
 \end{smathpar}
@@ -78,11 +82,11 @@
 \begin{array}{c}
 \RULE
 {
-  c \elabsto \F \spc
+  \Fx \vdash c \elabsto \F \spc
 }
 {
-  \lete{x}{e}{c} ~\elabsto~  
-    {\lambda(\stl,\stg).~ [e/x]\,\F(\stl,\stg)}\\
+  \Fx \vdash \lete{x}{e}{c} ~\elabsto~  
+    {\lambda(\stg).~ [e/x]\,\F(\stg)}\\
 }
 \end{array}
 \end{smathpar}
@@ -93,14 +97,14 @@
 \begin{array}{c}
 \RULE
 {
-  c \elabsto \F \spc
+  \Fx \vdash c \elabsto \F \\
   G = \lambda r.~ \itel{[r/x]e}{\{r' \,|\, r' = r \}}{\emptyset}\spc
-  \F' = \stabilize{\lambda(\stl,\stg).~\stg \bind G}
+  \F' = \stabilize{\inctxt{\Fx}{\lambda(\stg).~\stg \bind G}}
 
 }
 {
-  \lete{y}{\selecte{\lambda x.e}}{c} ~\elabsto~  
-    \lambda (\stl,\stg).~ [\F'(\stl, \stg)/y]\,\F(\stl,\stg)\\
+  \Fx \vdash \lete{y}{\selecte{\lambda x.e}}{c} ~\elabsto~  
+    \lambda (\stg).~ [\F'(\stg)/y]\,\F(\stg)\\
 }
 \end{array}
 \end{smathpar}
@@ -111,12 +115,12 @@
 \begin{array}{c}
 \RULE
 {
-  c_1 \elabsto \F_1 \spc
-  c_2 \elabsto \F_2 
+  \Fx \vdash c_1 \elabsto \F_1 \spc
+  \Fx \vdash c_2 \elabsto \F_2 
 }
 {
-  \ite{e}{c_1}{c_2} ~\elabsto~
-    \lambda(\stl,\stg).~\itel{e}{\F_1(\stl,\stg)}{\F_2(\stl,\stg)}\\
+  \Fx \vdash \ite{e}{c_1}{c_2} ~\elabsto~
+    \lambda(\stg).~\itel{e}{\F_1(\stg)}{\F_2(\stg)}\\
 }
 \end{array}
 \end{smathpar}
@@ -127,11 +131,11 @@
 \begin{array}{c}
 \RULE
 {
-  c_1 \elabsto \F_1 \spc
-  c_2 \elabsto \F_2 
+  \Fx \vdash c_1 \elabsto \F_1 \spc
+  \Fx \cup \F_1 \vdash c_2 \elabsto \F_2 
 }
 {
-  c_1;c_2 ~\elabsto~  \lambda(\stl,\stg).~\F_1(\stl,\stg) \cup \F_2(\stl \cup \F_1(\stl,\stg),\stg)
+  \Fx \vdash c_1;c_2 ~\elabsto~  \lambda(\stg).~\F_1(\stg) \cup \F_2(\stl \cup \F_1(\stg),\stg)
 }
 \end{array}
 \end{smathpar}
@@ -144,11 +148,11 @@
 \begin{array}{c}
 \RULE
 {
-  c \elabsto \F \spc
+  \Fx \vdash c \elabsto \F \spc
 }
 {
-  \foreache{x}{\lambda y.\lambda z.~c} ~\elabsto~
-  \lambda(\stl,\stg).~ x\bind(\lambda z.~\F(\stl,\stg))
+  \Fx \vdash \foreache{x}{\lambda y.\lambda z.~c} ~\elabsto~
+  \lambda(\stg).~ x\bind(\lambda z.~\F(\stg))
 }
 \end{array}
 \end{smathpar}
