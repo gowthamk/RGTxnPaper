@@ -43,46 +43,71 @@ $\{x \,|\, x=1 \vee x=2\}$. The language is carefully chosen to be
 expressive enough to capture the semantics of $\txnimp$ statements (as
 well as SQL operations more generally), yet simple enough to have a
 semantics-preserving translation amenable for automated verification.
+
 \input{inference-rules}
+
 Fig.~\ref{fig:inference-rules} shows the syntax-directed state
 transformer inference rules for $\txnimp$ commands inside a
-transaction $\C{TXN}_i$.  Inference depends on the $\I$-constrained
-rely relation $\R$, and the high-level invariant $I$ for reasons
-that will become clear shortly.  Inference rules compute, for each
-command $c$, a (meta) function $\F$ that returns a set as an
-expression in $\SL$, given a pair of sets ($\stl$ and $\stg$) that
-describe local and a global database states, respectively. The
-expression returned by $\F(\stl,\stg)$ (abstractly) describes the set
-of records that get added to $\stl$ as a result of executing $c$ under
-$\stl$ and $\stg$.  Thus, $\F$ captures the \emph{effect} part of the
-state transformer of $c$, which is the function
-$\lambda(\stl,\stg).~\stl \cup \F(\stl,\stg)$\footnote{Recall that the
-  operational semantics treats deletion of records as the addition of
-  the deleted record with its \C{del} field set to true in the local
-  store.}. For $\F$ to be useful in RG verification, it needs to be
-stable w.r.t the rely relation $\R$. The stability condition on
-effects can be defined thus:
+transaction $\C{TXN}_i$. The rules compute, for each command $c$, a
+(meta) function $\F$ that returns a set of records as an expression in
+$\SL$, given a global database $\stg$. Intuitively, $\F(\stg)$
+abstracts the set of records added to the local database $\stl$ as a
+result of executing $c$ under $\stg$ (i.e., $\stg \vdash
+(\tbox{c}_i,\stl) \stepsto^{*}_{R} (\tbox{\cskip}_i, \stl \cup
+\F(\stg))$)\footnote{Recall that the operational semantics treats 
+  deletion of records as the addition of the deleted record with its
+  \C{del} field set to true in the local store.}. Note that $\F$
+actually captures the \emph{effect} part of the state transformer,
+but we nonetheless refer to it as a transformer. Since the execution
+is subject to isolation-constrained interference, the inference
+judgment depends on the isolation-constrained rely relation $\R$,
+which is used to enforce the stability of the state transformer $\F$.
+Recall that $\R$ is a tri-state rely relation over $\stl$, $\stg$ and
+$\stg'$, that admits an interference from $\stg$ and $\stg'$ depending
+on the local database state $\stl$. Thus, the stability of the state
+transformer $\F$ of $c$ with respect to $\R$ needs to take into
+account the (possible) prior state of the local database $\stl$, which
+depends on the context (sequence of previous commands) of $c$, and
+computed by the corresponding state transformer $\Fx$. Thus, the
+semantics of the state transformer can be understood in terms of the
+RG judgment as following (formalized as
+Theorem~\ref{thm:inference-sound} in Sec.~\ref{sec:inference-sound}):
+\begin{smathpar}
+  \begin{array}{c}
+    \R \vdash \hoare{\lambda(\stl,\stg).~ \stl = \Fx(\stg)}{c}
+    {\lambda(\stl,\stg).~ \stl = \Fx(\stg) \cup \F(\stg)}
+  \end{array}
+\end{smathpar}
+In the above RG judgment, let us call the pre-condition $P$, and
+post-condition $Q$. The stability condition on the state transformer
+$\F$ can be derived from the stability condition on $Q$. Observe that
+for $Q$ to be stable, $\Fx(\stg') \cup \F(\stg')$ must be equal to
+$\Fx(\stg) \cup \F(\stg)$, where $\stg$ and $\stg')$ are related by
+$R$ (ignore $\I$ for the moment). Assuming that $P$ is stable,
+$\Fx(\stg')=\Fx(\stg)$ is already given, leaving $\F(\stg')=\F(\stg)$
+to be enforced. Thus, the stability of $\F$ in in the context of $\Fx$
+(written $\inctxt{\Fx}{\F}$) is defined as following:
 \begin{smathpar}
 \begin{array}{lcl}
-  \stable(\R,\F) & \Leftrightarrow & \forall \stl,\stg,\stg',\nubar.~
-  \R(\stl,\stg,\stg') \Rightarrow \F(\stl,\stg) \equiv \F(\stl,\stg')
+  \stable(\R,\inctxt{\Fx}{\F}) & \Leftrightarrow & \forall \stg,\stg',\nubar.~
+  \R(\Fx(\stg) \cup \F(\stg),\stg,\stg') \Rightarrow \F(\stg) = \F(\stg')
 \end{array}
 \end{smathpar}
 where $\nubar$ are the variables that occur free in $\F$; this is
-possible because of how the inference rules are structured.
-Intuitively, the stability condition requires an effect to describe
-the same set of records before and after an interference. The
-equivalence in $\SL$ translates to equality in first-order logic, as
-we describe below. In the inference rules, stability is enforced
+possible because of how the inference rules are structured. The
+equality in $\SL$ translates to equivalence in first-order logic, as
+we describe later. In the inference rules, stability is enforced
 constructively by a meta-function $\stabilize{\cdot}$, which accepts
-an effect and returns a new effect that is guaranteed to be stable
-under $\R$.  $\stabilize{\cdot}$ achieves the stability guarantee by
-abstracting away the bound global state ($\stg$) in an unstable $\F$
-to an existentially bound $\stg'$ as described below:
+a transformer $\F$ (in its context $\Fx$) and returns a new
+transformer that is guaranteed to be stable under $\R$.
+$\stabilize{\cdot}$ achieves the stability guarantee by abstracting
+away the bound global state ($\stg$) in an unstable $\F$ to an
+existentially bound $\stg'$ as described below:
 \begin{smathpar}
 \begin{array}{lcll}
-  \stabilize{\F} & = & \F & \texttt{if } \stable(\R,\F).\\
-  & = & \lambda (\stl,\stg).~\existsl(\stg',I(\stg'),\F(\stl,\stg')) 
+  \stabilize{\inctxt{\Fx}{\F}} & = & \F & \texttt{if }
+  \stable(\R,\inctxt{\Fx}{\F}).\\
+  & = & \lambda (\stg).~\existsl(\stg',I(\stg'),\F(\stg')) 
       & \texttt{otherwise. }\stg'\texttt{ is a fresh name.}\\
 \end{array}
 \end{smathpar}
@@ -96,7 +121,7 @@ effectively weakens the post-condition of a statement, as done by the
 \rulelabel{RG-Conseq} rule for transaction-bound commands.  The
 weakening semantics chosen by $\stabilize{\cdot}$, while being simple,
 is nonetheless useful because of the $I(\stg')$ assumption imposed on
-the existentially bound $\stg'$. The example in
+an existentially bound $\stg'$. The example in
 Fig.~\ref{fig:weakening-example} demonstrates.
 \begin{figure}[h]
 \begin{center}
@@ -115,11 +140,11 @@ Here, an \C{add\_interest} transaction adds a positive interest
 (determined by \C{pc}) to the balance of a bank account, which is
 required to be non-negative ($I(\stg) \Leftrightarrow
 \forall(r\in\stg).~r.\C{bal}\ge 0$). The transaction starts by issuing
-a \C{select1} query, whose effect ($\F$) is essentially a singleton
+a \C{select1} query, whose transformer $\F$ is essentially a singleton
 set containing a record $r$ whose id is \C{acc\_id} (i.e.,
-$\F(\stl,\stg) = \{r \,|\, r\in\stg \wedge r.\C{id} = \C{acc\_id}\}$).
-However, this effect is unstable because $\F(\stl,\stg')$ may not be
-the same set as $\F(\stl,\stg)$ when $\stg'\neq\stg$. A record
+$\F(\stg) = \{r \,|\, r\in\stg \wedge r.\C{id} = \C{acc\_id}\}$).
+However, $\F$ is unstable because $\F(\stg')$ may not be
+the same set as $\F(\stg)$ when $\stg'\neq\stg$. A record
 $r\in\stg$ whose $\C{id}=\C{acc\_id}$ may have its balance updated by
 a concurrent \C{withdraw} or \C{deposit} transaction in $\stg'$,
 making the record in $\stg'$ different from the record in $\stg$.
@@ -143,22 +168,22 @@ operation to \emph{compute} the set. Other SQL rules do likewise. The
 rules for \C{LET} binders, conditionals, and sequences compose the
 effects inferred for their subcommands. Thus, the effect of a sequence
 of commands $c_1;c_2$ is the union of effects $\F_1$ and $\F_2$ of
-$c_1$ and $c_2$, respectively, except that $\F_2$ is applied to a
-state ($\stl$) to which $\F_1$ has already been applied, reflecting
-their order of reduction. The inference rule for \C{FOREACH} takes
-advantage of the $\SL$'s bind operator to lift the effect inferred for
-the loop body to the level of the loop. Since records added to $\stl$
-in each iteration of \C{FOREACH} are independent of the previous
-iteration (recall that we make a local context independence assumption
-about database programs; Sec. ~\ref{sec:opsem}), sequential
-composition of the effects of different iterations is the same as their
-parallel composition. Since the loop body is executed once per each
-$z\in x$, the effect of the the loop is a union of effects ($\F$)
-for all $z\in x$, all applied to the same state ($\stl$ and $\stg$).
-That is, $\F_{loop}(\stl,\stg) = \bigcup_{z\in
-  x}\F_{body}(\stl,\stg)$. From the definition of the set monad's bind
-operator, $\F_{loop}(\stl,\stg) = x \bind (\lambda
-z.~F_{body}(\stl,\stg))$, which mirrors the definition of the rule.
+$c_1$ and $c_2$, respectively, except that $\F_2$ is computed in a
+context that includes $\F_1$ (we write $\F_1 \cup \F_2$ as a shorthand
+for $\lambda(\stg).~\F_1(\stg) \cup \F_2(\stg)$). The inference rule
+for \C{FOREACH} takes advantage of the $\SL$'s bind operator to lift
+the effect inferred for the loop body to the level of the loop. Since
+records added to $\stl$ in each iteration of \C{FOREACH} are
+independent of the previous iteration (recall that we make a local
+context independence assumption about database programs; Sec.
+~\ref{sec:opsem}), sequential composition of the effects of different
+iterations is the same as their parallel composition. Since the loop
+body is executed once per each $z\in x$, the effect of the the loop is
+a union of effects ($\F$) for all $z\in x$, all applied to the same
+state ($\stl$ and $\stg$).  That is, $\F_{loop}(\stg) = \bigcup_{z\in
+x}\F_{body}(\stg)$. From the definition of the set monad's bind
+operator, $\F_{loop}(\stg) = x \bind (\lambda z.~F_{body}(\stg))$,
+which mirrors the definition of the rule.
 %This development mirrors ideas found in type checkers for certain
 %dependent type systems~\cite{KJ14}.
 
@@ -221,31 +246,32 @@ z.~F_{body}(\stl,\stg))$, which mirrors the definition of the rule.
 %% \end{example}
 
 \subsection{Soundness of Inference}
+\label{sec:inference-sound}
 
-We can now establish a correspondence between the inference rules given
-above and the RG judgment of \S\ref{sec:reasoning}:
+We now formally state the correspondence between the inference rules
+given above and the RG judgment of \S\ref{sec:reasoning}:
 \begin{theorem}
   \label{thm:inference-sound}
-  Let the set expression $\F(\emptyset,\stg)$ have a natural interpretation
-  in the theory of sets.  Then, for all $i$,$R$,$I$,$c$,$\F$,
-  if $\stable(\R,I)$ and $c \elabsto \F$,
-  then:\\\vspace*{-0.2cm}
+  For all $i$,$R$,$I$,$c$,$\Fx$, $\F$, if $\stable(\R,I)$ and $\Fx
+  \vdash c \elabsto \F$, then:\\\vspace*{-0.2cm}
   \begin{smathpar}
   \begin{array}{c}
-  \R \vdash \hoare{\lambda(\stl,\stg).~\stl=\emptyset \conj
-  I(\stg)}{c}{\lambda(\stl,\stg).\stl = \F(\emptyset,\stg)}
+    \R \vdash \hoare{\lambda(\stl,\stg).~\stl=\Fx(\stg) \conj
+    I(\stg)}{c}{\lambda(\stl,\stg).~\stl = \Fx(\stg) \cup \F(\stg)
+    \conj I(\stg)}
   \end{array}
   \end{smathpar}
 \end{theorem}
 
-\paragraph{{\sc Proof Sketch.}} We prove a slightly stronger statement :
-For all  $i$,$R$,$I$,$c$,$\F$,$s$ if $\stable(\R,I)$ and $c \elabsto \F$, then:
-  \begin{smathpar}
-    \begin{array}{c}
-    \R \vdash \hoare{\lambda(\stl,\stg).~\stl=s \conj
-    I(\stg)}{c}{\lambda(\stl,\stg).\stl = \F(s,\stg)}
-    \end{array}
-  \end{smathpar}
+\paragraph{{\sc Proof Sketch.}} 
+% We prove a slightly stronger statement :
+% For all  $i$,$R$,$I$,$c$,$\F$,$s$ if $\stable(\R,I)$ and $c \elabsto \F$, then:
+%   \begin{smathpar}
+%     \begin{array}{c}
+%     \R \vdash \hoare{\lambda(\stl,\stg).~\stl=s \conj
+%     I(\stg)}{c}{\lambda(\stl,\stg).\stl = \F(s,\stg)}
+%     \end{array}
+%   \end{smathpar}
 The proof follows by structural induction on $c$. Assume that $P
 \Leftrightarrow \lambda(\stl,\stg).~\stl=s \conj I(\stg)$ and $Q
 \Leftrightarrow \lambda(\stl,\stg).\stl = \F(s,\stg)$. For each type
@@ -255,8 +281,8 @@ statements. In all these cases, the form of $\F$ directly corresponds
 to the condition linking the pre-condition $P$ and post-condition $Q$
 in the premises of the RG-rules. If $\stable(\R, \F)$, then
 $\stabilize{\F} = \F$ and hence the proof directly follows. Otherwise,
-$\stabilize{\F} = \lambda (\stl, \stg).\existsl(\stg', I(\stg'),
-\F(\stl, \stg'))$. Since the pre-condition $P(\stl, \stg)$ asserts
+$\stabilize{\F} = \lambda (\stg).\existsl(\stg', I(\stg'),
+\F( \stg'))$. Since the pre-condition $P(\stl, \stg)$ asserts
 $I(\stg)$, any state which obeys $P$ provides the existential $\stg'$
 in the above set expression, and hence $\F$ applied on that state
 matches the condition linking $P$ and $Q$. The stability of $P$ with
@@ -289,17 +315,18 @@ Theorem~\ref{thm:inference-sound} lets us replace the local judgment
 of the \rulelabel{RG-Txn} rule (Fig.~\ref{fig:rg-rules}) by a state
 transformer inference judgment. The soundness of a transaction's
 guarantee can now be established w.r.t the effect $\F$ of the body.
-The \rulelabel{RG-Txn} rule so updated is shown below:
+The \rulelabel{RG-Txn} rule so updated is shown below ($\Fempty =
+\lambda(\stg).~\emptyset$ denotes an empty context):
 \begin{smathpar}
 \begin{array}{c}
 \RULE
 {
    \stable(R,\I)\spc
    \stable(R,I)\\
-   \R_e = R \backslash \I_e \spc \R_c = R \backslash \I_c \spc  
-   c \Longrightarrow_{\langle i,\R_e,I \rangle}\F \spc \stable(\R_c,\F)\\
-   \forall \stl,\stg.~ \stl = F(\emptyset,\stg) \Rightarrow 
-   G(\stg, \stl\gg\stg)\spc
+   \R_e = R \backslash \I_e \spc \R_c = R \backslash \I_c \spc
+   \Fempty \vdash c \Longrightarrow_{\langle i,\R_e,I \rangle}\F \\
+   \stable(\R_c,\inctxt{\Fempty}{\F}) \spc
+   \forall \stg.~ G(\stg,\F(\stg)) \spc
    \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
 }
 {
