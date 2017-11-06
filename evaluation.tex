@@ -3,8 +3,7 @@
 
 In this section, we present our experience in running \thetool on two
 different applications: \emph{Courseware}: a course registration
-system described by~\cite{gotsmanpopl16}, and the \emph{TPC-C}
-benchmark.
+system described by~\cite{gotsmanpopl16}, and the TPC-C benchmark.
 
 \begin{figure}[!t]
 \begin{ocaml}
@@ -19,9 +18,8 @@ benchmark.
                                                      e.e_c_id = cid) in
     if crse.c_capacity > 0 && Set.is_empty s_c_enrs then
       (SQL.insert Enrollment {e_id=new_id (); e_s_id=sid; e_c_id=cid};
-       SQL.update Course 
-         (fun c -> {c with c_capacity = c.c_capacity - 1})
-         (fun c -> c.c_id = cid))
+       SQL.update Course (fun c -> {c with c_capacity = c.c_capacity - 1})
+                         (fun c -> c.c_id = cid))
     else ()
 
   let deregister_student_txn sid = 
@@ -64,7 +62,7 @@ concurrently adds an enrollment record after checking the student
 exists.  Both can succeed concurrently, resulting in an invalid state.
 Invariant $I_2$ can be violated by two \C{enroll}s, both reading
 \C{c\_capacity}=1, and both (atomically) decrementing it, resulting in
-\C{c\_capacity}=-1.  We ran \thetool on the courseware application
+\C{c\_capacity}=-1.  We ran \thetool on the Courseware application
 (Fig.~\ref{fig:courseware_code}) after annotating transactions with
 their respective guarantees, and asserting $I = I_1 \wedge I_2$ as the
 correctness condition. The guarantees $G_e$ and $G_d$ for \C{enroll}

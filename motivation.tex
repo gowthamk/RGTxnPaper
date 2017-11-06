@@ -13,22 +13,24 @@ using the \C{atomically\_do} combinator provided by the DSL.
 let new_order (d_id, c_id, item_reqs) = atomically_do @@ fun () ->
   let dist = SQL.select1 District (fun d -> d.d_id = d_id) in
   let o_id = dist.d_next_o_id in
-  SQL.update(* UPDATE *) District 
-            (* SET *)(fun d -> {d with d_next_o_id =d_next_o_id + 1})
-            (* WHERE *)(fun d -> d.d_id = d_id );
-  SQL.insert(* INSERT INTO *) Order (* VALUES *){o_id=o_id;  
-            o_d_id=d_id; o_c_id=c_id; o_ol_cnt=S.size item_reqs; };
-  foreach item_reqs @@ fun item_req ->
-    let stk = SQL.select1(* SELECT * FROM *) Stock 
-              (* WHERE *)(fun s -> s.s_i_id = item_req.ol_i_id 
-                                  && s.s_d_id = d_id)(* LIMIT 1 *); 
-    let s_qty' = if stk.s_qty >= item_req.ol_qty + 10 
-                then stk.s_qty - item_req.ol_qty 
-                else stk.s_qty - item_req.ol_qty + 91 in
-        SQL.update Stock (fun s -> {s with s_qty = s_qty'}) 
-                         (fun s -> s.s_i_id = item_req.ol_i_id);
-        SQL.insert Order_line {ol_o_id=o_id; ol_d_id=d_id; 
-                               ol_i_id=item_req.ol_i_id; ol_qty=item_req.ol_qty}
+  begin
+    SQL.update(* UPDATE *) District 
+              (* SET *)(fun d -> {d with d_next_o_id = d.d_next_o_id + 1})
+              (* WHERE *)(fun d -> d.d_id = d_id );
+    SQL.insert(* INSERT INTO *) Order (* VALUES *){o_id=o_id;  
+              o_d_id=d_id; o_c_id=c_id; o_ol_cnt=S.size item_reqs; };
+    foreach item_reqs @@ fun item_req ->
+      let stk = SQL.select1(* SELECT * FROM *) Stock 
+                (* WHERE *)(fun s -> s.s_i_id = item_req.ol_i_id &&
+                                     s.s_d_id = d_id)(* LIMIT 1 *) in
+      let s_qty' = if stk.s_qty >= item_req.ol_qty + 10 
+                  then stk.s_qty - item_req.ol_qty 
+                  else stk.s_qty - item_req.ol_qty + 91 in
+      SQL.update Stock (fun s -> {s with s_qty = s_qty'}) 
+                       (fun s -> s.s_i_id = item_req.ol_i_id);
+      SQL.insert Order_line {ol_o_id=o_id; ol_d_id=d_id; 
+                             ol_i_id=item_req.ol_i_id; ol_qty=item_req.ol_qty}
+  end
  
 \end{ocaml}
 \caption{TPC-C \C{new\_order} transaction}
