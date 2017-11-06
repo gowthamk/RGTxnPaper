@@ -57,22 +57,25 @@ result of executing $c$ under $\stg$ (i.e., $\stg \vdash
 (\tbox{c}_i,\stl) \stepsto^{*}_{R} (\tbox{\cskip}_i, \stl \cup
 \F(\stg))$)\footnote{Recall that the operational semantics treats 
   deletion of records as the addition of the deleted record with its
-  \C{del} field set to true in the local store.}. Note that $\F$
-actually captures the \emph{effect} part of the state transformer,
-but we nonetheless refer to it as a transformer. Since the execution
-is subject to isolation-constrained interference, the inference
-judgment depends on the isolation-constrained rely relation $\R$,
-which is used to enforce the stability of the state transformer $\F$.
-Recall that $\R$ is a tri-state rely relation over $\stl$, $\stg$ and
-$\stg'$, that admits an interference from $\stg$ and $\stg'$ depending
-on the local database state $\stl$. Thus, the stability of the state
-transformer $\F$ of $c$ with respect to $\R$ needs to take into
-account the (possible) prior state of the local database $\stl$, which
-depends on the context (sequence of previous commands) of $c$, and
-computed by the corresponding state transformer $\Fx$. Thus, the
-semantics of the state transformer can be understood in terms of the
-RG judgment as following (formalized as
-Theorem~\ref{thm:inference-sound} in Sec.~\ref{sec:inference-sound}):
+  \C{del} field set to true in the local store.}. Note that the
+function $\F$ we call state transformer here is actually the
+\emph{effect} part of the state transformer introduced in
+Sec.~\ref{sec:motivation}, which is a function $\T$ of form
+$\lambda(\stl,\stg).~\stl \cup \F(\stg)$. Nonetheless, we keep
+referring to $\F$ as state transformer. Since the execution is subject
+to isolation-constrained interference, the inference judgment depends
+on the isolation-constrained rely relation $\R$, which is used to
+enforce the stability of the state transformer $\F$.  Recall that $\R$
+is a tri-state rely relation over $\stl$, $\stg$ and $\stg'$, that
+admits an interference from $\stg$ and $\stg'$ depending on the local
+database state $\stl$. Thus, the stability of the state transformer
+$\F$ of $c$ with respect to $\R$ needs to take into account the
+(possible) prior state of the local database $\stl$, which depends on
+the context (sequence of previous commands) of $c$, and computed by
+the corresponding state transformer $\Fx$. Thus, the semantics of the
+state transformer can be understood in terms of the RG judgment as
+following (formalized as Theorem~\ref{thm:inference-sound} in
+Sec.~\ref{sec:inference-sound}):
 \begin{smathpar}
   \begin{array}{c}
     \R \vdash \hoare{\lambda(\stl,\stg).~ \stl = \Fx(\stg)}{c}
@@ -183,7 +186,7 @@ context independence assumption about database programs; Sec.
 iterations is the same as their parallel composition. Since the loop
 body is executed once per each $z\in x$, the effect of the the loop is
 a union of effects ($\F$) for all $z\in x$, all applied to the same
-state ($\stl$ and $\stg$).  That is, $\F_{loop}(\stg) = \bigcup_{z\in
+state ($\stg$).  That is, $\F_{loop}(\stg) = \bigcup_{z\in
 x}\F_{body}(\stg)$. From the definition of the set monad's bind
 operator, $\F_{loop}(\stg) = x \bind (\lambda z.~F_{body}(\stg))$,
 which mirrors the definition of the rule.
@@ -481,32 +484,31 @@ constants):
 \begin{smathpar}
 \begin{array}{l}
   \lambda(\stl,\stg).~ \stl \cup \C{item\_reqs}\bind
-      (\lambda\C{item\_req}.~ \F_U(\stl,\stg) \cup \F_I(\stl,\stg))
+      (\lambda\C{item\_req}.~ \F_U(\stg) \cup \F_I(\stg))
 \end{array}
 \end{smathpar}
 where:
 \begin{smathpar}
   \begin{array}{lcl}
-    \F_U & = & \lambda(\stl,\stg).~ \stg \bind(\lambda s. 
+    \F_U & = & \lambda(\stg).~ \stg \bind(\lambda s. 
                 \itel{{\sf table}(s) = \C{Stock} \conj 
                   s.\C{s\_i\_id} = \C{item\_req.ol\_i\_id}\\
-         &   & \hspace*{0.9in}}
+         &   & \hspace*{0.8in}}
                      {\{ \langle \C{s\_i\_id}=s.\C{s\_i\_id};\, 
                                  \C{s\_d\_id}=s.\C{s\_d\_id};\,
                                  \C{s\_qty} = \C{k1}\rangle \}\\
-         &   & \hspace*{0.9in}} {\emptyset}) \\
-    \F_I & = & \lambda(\stl,\stg).~ \{\langle\C{ol\_o\_id}=\C{k2},\,
+         &   & \hspace*{0.8in}} {\emptyset}) \\
+    \F_I & = & \lambda(\stg).~ \{\langle\C{ol\_o\_id}=\C{k2},\,
                  \C{ol\_d\_id}=\C{k3},\, \C{ol\_i\_id}=\C{item\_req.ol\_i\_id},\, 
                  \C{ol\_qty}=\C{item\_req.ol\_qty}\rangle\}\\
   \end{array}
 \end{smathpar}
-For any $\stl$ and $\stg$, $\F_U(\stl,\stg)$ and $\F_I(\stl,\stg)$ are
-expressions in $\SL$, so can be translated to FOL by the encoding
-algorithm in Fig.~\ref{fig:logic}. Since the iteration variable
-\C{item\_req} occurs free in these expressions, the appropriate
-application of the encoding algorithm is
-$\mssemof{\C{item\_req}}{\F_U(\stl,\stg)}$ and
-$\mssemof{\C{item\_req}}{\F_I(\stl,\stg)}$, which results in
+For any $\stg$, $\F_U(\stg)$ and $\F_I(\stg)$ are expressions in
+$\SL$, so can be translated to FOL by the encoding algorithm in
+Fig.~\ref{fig:logic}. Since the iteration variable \C{item\_req}
+occurs free in these expressions, the appropriate application of the
+encoding algorithm is $\mssemof{\C{item\_req}}{\F_U(\stg)}$ and
+$\mssemof{\C{item\_req}}{\F_I(\stg)}$, which results in
 $(\phi_U,\G_U)$ and $(\phi_I,\G_I)$, respectively, where $\phi_U$,
 $\phi_I$, $\G_U$, $\G_I$ are as shown below:
 \begin{smathpar}
@@ -603,7 +605,7 @@ Next, in Fig.~\ref{fig:logic}, observe that the (ordered) set $\nubar$
 is extended only in the encoding rule for $\bind$. Since an occurrence
 of $\bind$ adds a quantifier to $|\nubar|$, if $s$ is a bind
 expression nested inside a top-level bind expression (like
-$\F_U(\stl,\stg)$ from the above example), then the prenex signature
+$\F_U(\stg)$ from the above example), then the prenex signature
 of $\phi_s$ is $\forall^2\exists$.  Furthermore, if the subexpressions
 of $s$ are neither {bind} nor $\existsl$ expressions, then none of the
 $\phi_i$'s are quantified, and the prenex signature of $\phi = \bigwedge_i\phi_i \wedge \phi_s$

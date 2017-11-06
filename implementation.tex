@@ -134,21 +134,22 @@ completely axiomatized in FOL. These include \C{sum}, \C{count} etc.
 For these, we admit imprecise axiomatizations expressed as lemmas
 over these functions.
 
-\textbf{Annotation Burden} \thetool significantly reduces the annotation
-burden in verifying a weakly isolated transactions by eliminating the
-need to annotate intermediate assertions and loop invariants.
-Guarantees ($G$) and global invariants ($I$), however, still need to be
-provided. Alternatively, a weakly isolated transaction $T$ can be
-verified against a generic serializability condition,  eliminating
-the need for any annotation. In this mode, \thetool first infers the
-transformer $\F_{SER}$ of $T$ without considering any interference,
-which then becomes its guarantee ($G$). Doing likewise for every
-transaction results in a rely relation ($R$) that includes $\F_{SER}$
-of every transaction. Verification now proceeds by taking interference
-into account, and verifying that each transaction still yields the
-same $F$ as its $F_{SER}$. The result of this verification is an
-assignment of (possibly weak) isolation levels to transactions which
-nonetheless guarantees behavior equivalent to a  serializable execution.
+\textbf{Annotation Burden} \thetool significantly reduces the
+annotation burden in verifying a weakly isolated transactions by
+eliminating the need to annotate intermediate assertions and loop
+invariants.  Guarantees ($G$) and global invariants ($I$), however,
+still need to be provided. Alternatively, a weakly isolated
+transaction $T$ can be verified against a generic serializability
+condition,  eliminating the need for guarantee annotations. In this
+mode, \thetool first infers the transformer $\F_{SER}$ of $T$ without
+considering any interference, which then becomes its guarantee ($G$).
+Doing likewise for every transaction results in a rely relation ($R$)
+that includes $\F_{SER}$ of every transaction. Verification now
+proceeds by taking interference into account, and verifying that each
+transaction still yields the same $F$ as its $F_{SER}$. The result of
+this verification is an assignment of (possibly weak) isolation levels
+to transactions which nonetheless guarantees behavior equivalent to a
+serializable execution.
 
 
 \input{evaluation}
