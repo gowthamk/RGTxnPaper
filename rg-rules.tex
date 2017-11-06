@@ -6,7 +6,7 @@
 %\fbox{\( \rg{\mathbb{I},P,R}{\txnbox{c}_i}{G,Q}\)} \quad
 %\fbox{\( \rg{\mathbb{I},P,R}{c}{G,Q}\)} \quad\\
 %
-\begin{minipage}{3.4in}
+\begin{minipage}{3.6in}
 \rulelabel{RG-Update}
 \begin{smathpar}
 \begin{array}{c}
@@ -33,10 +33,10 @@
 {
   \\
   \R \vdash \hoare{P'}{c}{Q}\spc
-  \stable(\R,P)\\
-  \hspace*{-0.3in} P'(\stl,\stg) \Leftrightarrow P(\stl,\stg) \\
-  \hspace*{0.6in}\conj
-  x = \{r \,|\, r\in\Delta \wedge [r/y]e\} \\
+  \stable(\R,P')\\
+  P(\stl,\stg) \conj
+    x = \{r \,|\, r\in\Delta \wedge [r/y]e\} \Rightarrow
+  P'(\stl,\stg)\\
 }
 {
   \R \vdash \hoare{P}{\lete{x}{\selecte{\lambda y.e}}{c}}{Q}
@@ -71,7 +71,7 @@
 \bigskip
 
 %
-\begin{minipage}{3.2in}
+\begin{minipage}{3.4in}
 \rulelabel{RG-Insert}
 \begin{smathpar}
 \begin{array}{c}
@@ -81,7 +81,7 @@
   \forall\stl,\stl',\stg,i.~P(\stl,\stg) \conj j \not\in
   \dom(\stl\cup\stg) \conj \\
   \stl'=\stl \cup 
-  \{\langle x \with \idf=j;\,\txnf=i;\,\delf=\C{false}\rangle\}\\ \Rightarrow Q(\stl',\stg)
+  \{\langle x \with \idf=j;\,\txnf=i;\,\delf=\C{false}\rangle\} \Rightarrow Q(\stl',\stg)
 }
 {
   \R \vdash \hoare{P}{\inserte{x}}{Q}
@@ -91,7 +91,7 @@
 \end{minipage}
 %
 %
-\begin{minipage}{3in}
+\begin{minipage}{2.8in}
 \rulelabel{RG-Foreach}
 \begin{smathpar}
 \begin{array}{c}
@@ -114,7 +114,7 @@
 \bigskip
 
 %
-\begin{minipage}{3.9in}
+\begin{minipage}{3.5in}
 \rulelabel{RG-Txn}
 \begin{smathpar}
 \begin{array}{c}
@@ -145,9 +145,9 @@
 {
   \rg{I,R}{\ctxn{i}{\I}{c}}{G,I}\\
   \I' \Rightarrow \I \spc 
-  R' \subseteq R \\
-  \stable(R',\I')\spc
+  R' \subseteq R \spc
   G \subseteq G' \\
+  \stable(R',\I')\spc
   \forall \stg,\stg'.~I(\stg) \wedge G'(\stg,\stg') \Rightarrow I(\stg')\\
 }
 {
