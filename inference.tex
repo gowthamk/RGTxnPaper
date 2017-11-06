@@ -18,31 +18,32 @@ multiple such effects together to describe the effect of the
 transaction as a whole.  Importantly, this approach generalizes to
 loops, where the effect of a loop can be inferred as a well-defined
 function of the effect of its body, thanks to certain pleasant
-properties enjoyed by the database programs modeled by $\txnimp$.
-Interpreting database semantics as functional transformations on sets
-(described in terms of their logical effects) enables an inference
-mechanism that can leverage off-the-shelf SMT solvers for automated
-verification.
+properties enjoyed by the database programs modeled by our core
+language.  Interpreting database semantics as functional
+transformations on sets (described in terms of their logical effects)
+enables an inference mechanism that can leverage off-the-shelf SMT
+solvers for automated verification.
 
 \input{logic-syntax}
 
 At the core of our approach is a simple language ($\SL$) to express
 set transformations (see Fig.~\ref{fig:logic-syntax}). The language
-admits only set expressions that include variables ($x$), literals of
-the form $\{x \,|\, \varphi\}$ where $\varphi$ is a propositional
+admits set expressions that include variables ($x$), literals of the
+form $\{x \,|\, \varphi\}$ where $\varphi$ is a propositional
 (quantifier-free) formula on $x$, a restricted form of existential
-quantification that binds a set $\stg$ satisfying proposition $\phi$ in a
-set expression $s$, a monadic composition of two set expressions
+quantification that binds a set $\stg$ satisfying proposition $\phi$
+in a set expression $s$, a monadic composition of two set expressions
 ($s_1$ and $s_2$) composed using a bind ($\bind$) operation, a
 conditional set expression where the condition is a propositional
 formula, and a union of two set expressions. Symbols $\stl$ and $\stg$
 are also variables in $\SL$, but are used to denote local and database
-states, respectively. Constant sets can be written using set
-literal expressions. For example, the set $\{1,2\}$ can be written as
-$\{x \,|\, x=1 \vee x=2\}$. The language is carefully chosen to be
-expressive enough to capture the semantics of $\txnimp$ statements (as
-well as SQL operations more generally), yet simple enough to have a
-semantics-preserving translation amenable for automated verification.
+states (also represented as sets), respectively. Constant sets can be
+written using set literal expressions. For example, the set $\{1,2\}$
+can be written as $\{x \,|\, x=1 \vee x=2\}$. The language is
+carefully chosen to be expressive enough to capture the semantics of
+$\txnimp$ statements (as well as SQL operations more generally), yet
+simple enough to have a semantics-preserving translation amenable for
+automated verification.
 
 \input{inference-rules}
 
@@ -78,11 +79,13 @@ Theorem~\ref{thm:inference-sound} in Sec.~\ref{sec:inference-sound}):
     {\lambda(\stl,\stg).~ \stl = \Fx(\stg) \cup \F(\stg)}
   \end{array}
 \end{smathpar}
-In the above RG judgment, let us call the pre-condition $P$, and
-post-condition $Q$. The stability condition on the state transformer
+In the above RG judgment, let us call the pre-condition
+($\hoare{\lambda(\stl,\stg).~ \stl = \Fx(\stg)}$) $P$, and
+post-condition (${\lambda(\stl,\stg).~ \stl = \Fx(\stg) \cup
+  \F(\stg)}$), $Q$. The stability condition on the state transformer
 $\F$ can be derived from the stability condition on $Q$. Observe that
 for $Q$ to be stable, $\Fx(\stg') \cup \F(\stg')$ must be equal to
-$\Fx(\stg) \cup \F(\stg)$, where $\stg$ and $\stg')$ are related by
+$\Fx(\stg) \cup \F(\stg)$, where $\stg$ and $\stg'$ are related by
 $R$ (ignore $\I$ for the moment). Assuming that $P$ is stable,
 $\Fx(\stg')=\Fx(\stg)$ is already given, leaving $\F(\stg')=\F(\stg)$
 to be enforced. Thus, the stability of $\F$ in in the context of $\Fx$
@@ -288,7 +291,7 @@ in the above set expression, and hence $\F$ applied on that state
 matches the condition linking $P$ and $Q$. The stability of $P$ with
 respect to $\R$ follows directly from the stability of $I$.
 
-The proofs for \C{SELECT}, sequencing, and conditionals use use the
+The proofs for \C{SELECT}, sequencing, and conditionals use the
 inductive hypothesis to infer the RG-judgments present in the
 premises of their corresponding RG-rules. The interesting case is the
 \C{FOREACH} statement, for which we use the loop invariant
