@@ -13,22 +13,24 @@ using the \C{atomically\_do} combinator provided by the DSL.
 let new_order (d_id, c_id, item_reqs) = atomically_do @@ fun () ->
   let dist = SQL.select1 District (fun d -> d.d_id = d_id) in
   let o_id = dist.d_next_o_id in
-  SQL.update(* UPDATE *) District 
-            (* SET *)(fun d -> {d with d_next_o_id =d_next_o_id + 1})
-            (* WHERE *)(fun d -> d.d_id = d_id );
-  SQL.insert(* INSERT INTO *) Order (* VALUES *){o_id=o_id;  
-            o_d_id=d_id; o_c_id=c_id; o_ol_cnt=S.size item_reqs; };
-  foreach item_reqs @@ fun item_req ->
-    let stk = SQL.select1(* SELECT * FROM *) Stock 
-              (* WHERE *)(fun s -> s.s_i_id = item_req.ol_i_id 
-                                  && s.s_d_id = d_id)(* LIMIT 1 *); 
-    let s_qty' = if stk.s_qty >= item_req.ol_qty + 10 
-                then stk.s_qty - item_req.ol_qty 
-                else stk.s_qty - item_req.ol_qty + 91 in
-        SQL.update Stock (fun s -> {s with s_qty = s_qty'}) 
-                         (fun s -> s.s_i_id = item_req.ol_i_id);
-        SQL.insert Order_line {ol_o_id=o_id; ol_d_id=d_id; 
-                               ol_i_id=item_req.ol_i_id; ol_qty=item_req.ol_qty}
+  begin
+    SQL.update(* UPDATE *) District 
+              (* SET *)(fun d -> {d with d_next_o_id = d.d_next_o_id + 1})
+              (* WHERE *)(fun d -> d.d_id = d_id );
+    SQL.insert(* INSERT INTO *) Order (* VALUES *){o_id=o_id;  
+              o_d_id=d_id; o_c_id=c_id; o_ol_cnt=S.size item_reqs; };
+    foreach item_reqs @@ fun item_req ->
+      let stk = SQL.select1(* SELECT * FROM *) Stock 
+                (* WHERE *)(fun s -> s.s_i_id = item_req.ol_i_id &&
+                                     s.s_d_id = d_id)(* LIMIT 1 *) in
+      let s_qty' = if stk.s_qty >= item_req.ol_qty + 10 
+                  then stk.s_qty - item_req.ol_qty 
+                  else stk.s_qty - item_req.ol_qty + 91 in
+      SQL.update Stock (fun s -> {s with s_qty = s_qty'}) 
+                       (fun s -> s.s_i_id = item_req.ol_i_id);
+      SQL.insert Order_line {ol_o_id=o_id; ol_d_id=d_id; 
+                             ol_i_id=item_req.ol_i_id; ol_qty=item_req.ol_qty}
+  end
  
 \end{ocaml}
 \caption{TPC-C \C{new\_order} transaction}
@@ -515,8 +517,9 @@ updates. An update statement filters the records that match the search
 criteria from $\Delta$ and computes the updated records that are to be
 added to the local database. Thus, the state transformer for the
 update statement (call it $\T_U$) is the following function on
-sets\footnote{$\bind$ has higher precedence than $\cup$; angle braces
-($\langle \ldots \rangle$) are used to denote records in math}:
+sets\footnote{Bind ($\bind$) has higher precedence than union
+($\cup$). Angle braces ($\langle \ldots \rangle$) are used to denote
+records in math}:
 \begin{smathpar}
 \begin{array}{l}
   \lambda(\stl,\stg).~ \stl \cup \stg \bind(\lambda \C{s}. 
@@ -566,7 +569,7 @@ statement can be similarly constructed:
 \end{array}
 \end{smathpar}
 Observe that both transformers are of the form $\T(\delta,\Delta) =
-\stl \cup \F(\stl,\stg)$, where $\F$ is a function that returns the
+\stl \cup \F(\stg)$, where $\F$ is a function that returns the
 set of records added  to the transaction-local database ($\stl$). Let
 $\F_U$ and $\F_I$ be the corresponding functions for $\T_U$ and $\T_I$
 shown above. The state transformation induced by the loop body in
@@ -574,14 +577,14 @@ Fig.~\ref{fig:new_order_code} can be expressed as the following
 composition of $\F_U$ and $\F_I$:
 \begin{smathpar}
 \begin{array}{l}
-  \lambda(\stl,\stg).~ \stl \cup \F_U(\stl,\stg) \cup \F_I(\stl,\stg)
+  \lambda(\stl,\stg).~ \stl \cup \F_U(\stg) \cup \F_I(\stg)
 \end{array}
 \end{smathpar}
 The transformer for the loop itself can now be computed to be:
 \begin{smathpar}
 \begin{array}{l}
   \lambda(\stl,\stg).~ \stl \cup \C{item\_reqs}\bind
-      (\lambda\C{item\_req}.~ \F_U(\stl,\stg) \cup \F_I(\stl,\stg))
+      (\lambda\C{item\_req}.~ \F_U(\stg) \cup \F_I(\stg))
 \end{array}
 \end{smathpar}
 Observe that the structure of the transformer mirrors the structure of
