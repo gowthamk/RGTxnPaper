@@ -79,17 +79,17 @@ Theorem~\ref{thm:inference-sound} in Sec.~\ref{sec:inference-sound}):
     {\lambda(\stl,\stg).~ \stl = \Fx(\stg) \cup \F(\stg)}
   \end{array}
 \end{smathpar}
-In the above RG judgment, let us call the pre-condition
-($\hoare{\lambda(\stl,\stg).~ \stl = \Fx(\stg)}$) $P$, and
-post-condition (${\lambda(\stl,\stg).~ \stl = \Fx(\stg) \cup
-  \F(\stg)}$), $Q$. The stability condition on the state transformer
-$\F$ can be derived from the stability condition on $Q$. Observe that
-for $Q$ to be stable, $\Fx(\stg') \cup \F(\stg')$ must be equal to
-$\Fx(\stg) \cup \F(\stg)$, where $\stg$ and $\stg'$ are related by
-$R$ (ignore $\I$ for the moment). Assuming that $P$ is stable,
-$\Fx(\stg')=\Fx(\stg)$ is already given, leaving $\F(\stg')=\F(\stg)$
-to be enforced. Thus, the stability of $\F$ in in the context of $\Fx$
-(written $\inctxt{\Fx}{\F}$) is defined as following:
+In the above RG judgment, let $P$ denote the pre-condition
+$\lambda(\stl,\stg).~ \stl = \Fx(\stg)$, and let $Q$ denote the
+post-condition $\lambda(\stl,\stg).~ \stl = \Fx(\stg) \cup \F(\stg)$.
+The stability condition on the state transformer $\F$ can be derived
+from the stability condition on $Q$. Observe that for $Q$ to be
+stable, $\Fx(\stg') \cup \F(\stg')$ must be equal to $\Fx(\stg) \cup
+\F(\stg)$, where $\stg$ and $\stg'$ are related by $R$ (ignore $\I$
+for the moment). Assuming that $P$ is stable, $\Fx(\stg')=\Fx(\stg)$
+is already given, leaving $\F(\stg')=\F(\stg)$ to be enforced. Thus,
+the stability of $\F$ in in the context of $\Fx$ (written
+$\inctxt{\Fx}{\F}$) is defined as following:
 \begin{smathpar}
 \begin{array}{lcl}
   \stable(\R,\inctxt{\Fx}{\F}) & \Leftrightarrow & \forall \stg,\stg',\nubar.~
