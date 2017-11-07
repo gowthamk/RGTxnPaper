@@ -2,7 +2,7 @@
 \label{sec:motivation}
 
 We present our ideas in the context of a DSL embedded in OCaml that
-manages an abstract database state, and allows it be manipulated via a
+manages an abstract database state that can be manipulated via a
 well-defined \C{SQL} interface. Arbitrary database computations can be
 built around this interface, which can then be run as transactions
 using the \C{atomically\_do} combinator provided by the DSL.
@@ -150,7 +150,7 @@ isolation\footnote{Weak isolation does not violate atomicity as long
 however, interferences of various kinds are permitted, leading to
 executions superficially similar to executions permitted by concurrent
 (racy) programs~\cite{GHE15,HPQ+15}.  To illustrate, consider the
-behavior of the \C{new\_order} transaction when executed under
+behavior of the \C{new\_order} transaction when executed under a
 \emph{Read Committed} (RC) isolation level, the default isolation
 level in 8 of the 18 databases studied in~\cite{bailishotos}.
 \begin{wrapfigure}{l}{.4\textwidth}
@@ -205,7 +205,7 @@ The figure depicts an execution as a series of SQL operations. In the
 execution, the \C{new\_order} instance $T_1$ (green) reads the
 \C{d\_next\_o\_id} field of the district record for \C{d\_id}, but
 before it increments the field, another \C{new\_order} instance
-($T_2$) begins its execution and commits. Note that $T_2$ reads the
+$T_2$ (red) begins its execution and commits. Note that $T_2$ reads the
 same \C{d\_next\_o\_id} value as $T_1$, and inserts new \C{Order} and
 \C{Order\_line} records with their \C{o\_id} and \C{ol\_o\_id} fields
 (resp.) equal to \C{d\_next\_o\_id}. $T_2$ also increments the
@@ -213,19 +213,19 @@ same \C{d\_next\_o\_id} value as $T_1$, and inserts new \C{Order} and
 allowed because reads typically do not obtain a mutually exclusive
 lock on most databases. After $T_2$'s commit, $T_1$ resumes execution
 and adds new \C{Order} and \C{Order\_line} fields with the same order
-id as $T_1$. Thus, by the end of the execution, \C{Order\_line}
+id as $T_1$. Thus, at the end of the execution, \C{Order\_line}
 records inserted by $T_1$ and $T_2$ all bear the same order id. There
 are also two \C{Order} records with the same district id (\C{d\_id})
 and order id, none of whose \C{o\_ol\_cnt} reflects the actual number
 of \C{Order\_line} records inserted with that order id.  This clearly
 violates TPC-C's consistency condition.
 
-Clearly, this example does not exhibit any of the anomalies that
+This example does not exhibit any of the anomalies that
 \emph{characterize} RC isolation~\cite{berenson}\footnote{Berenson et
 al~\cite{berenson} characterize isolation levels in terms of the
-anomalies they \emph{admit}. For e.g., RC is characterized by
+anomalies they \emph{admit}. For example, RC is characterized by
 \emph{lost writes} because it admits the anomaly.}. For instance,
-there are no \emph{lost writes} - both concurrent transactions' writes
+there are no \emph{lost writes} since both concurrent transactions' writes
 are present in the final state of the database.  Program analyses that
 aim to determine appropriate isolation by checking for possible
 manifestations of RC-induced anomalies would fail to identify grounds

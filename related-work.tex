@@ -1,4 +1,3 @@
-\vspace*{-6pt}
 \section{Related Work}
 \label{sec:relatedwork}
 
@@ -9,21 +8,20 @@ dependencies that are forbidden in each case. The operational nature
 of Adya's specifications make them suitable for runtime monitoring and
 anomaly detection~\cite{kemmevldb,feketesigmod08,pssi2011}, whereas
 the declarative nature of our specifications make them suitable for
-formal reasoning about program behavior. Sivaramakrishnan \emph{et
-al.}~\cite{pldi15} specify isolation levels declaratively as trace
-well-formedness conditions, but their specifications implicitly assume
-a complete trace with only committed transactions, making it difficult
-to reason about a program as it builds the trace. Cerone \emph{et
-al.}~\cite{gotsmanconcur15} specify isolation levels with atomic
-visibility, but their specifications are also for complete traces.
-Both the aforementioned specification frameworks use the vocabulary
-introduced in~\cite{burckhardt14}. However, none of them are equipped
-with a reasoning framework that can use such specifications to verify
-programs under weak isolation.
+formal reasoning about program behavior. ~\cite{pldi15} specify
+isolation levels declaratively as trace well-formedness conditions,
+but their specifications implicitly assume a complete trace with only
+committed transactions, making it difficult to reason about a program
+as it builds the trace. ~\cite{gotsmanconcur15} specify isolation
+levels with atomic visibility, but their specifications are also for
+complete traces.  Both the aforementioned specification frameworks use
+the vocabulary introduced in~\cite{burckhardt14}. However, none of
+them are equipped with a reasoning framework that can use such
+specifications to verify programs under weak isolation.
 
-Recent work by Crooks \emph{et al.}~\cite{CPA+17} also explores the
-use of a state-based interpretation of isolation as we do, and share
-our position that enables specification of weak isolation that are not
+Recent work described in~\cite{CPA+17} also explores the
+use of a state-based interpretation of isolation as we do, and 
+like our approach, develops specifications of weak isolation that are not
 tied to implementation-specific artifacts.  However, they do not
 consider verification (manual or automated) of client programs, and it
 is not immediately apparent if their specification formalism is
@@ -36,13 +34,12 @@ to verify application correctness, infer proper isolation levels, or
 formally reason about the relationship between weak-isolation levels
 and application invariants.
 
-\vspace*{-4pt}
-\paragraph{Reasoning under weak isolation.} In~\cite{feketessi}, Fekete
-\emph{et al.} propose a theory to characterize non-serializable
-executions that arise under {\sc si}. Fekete~\cite{fekete2005} also
-proposes an algorithm that allocates either {\sc si} or {\sc ser}
-isolation levels to transactions while guaranteeing
-serializability. In~\cite{gotsmanpodc16}, Cerone \emph{et al.} improve
+\paragraph{Reasoning under weak isolation.} ~\cite{feketessi} propose
+a theory to characterize non-serializable executions that arise under
+{\sc si}. They also propose an algorithm that
+allocates either {\sc si} or {\sc ser} isolation levels to
+transactions while guaranteeing
+serializability. ~\cite{gotsmanpodc16} improve
 on Adya's {\sc si} specification and use it to derive a static
 analysis that determines the safety of substituting {\sc si} with a
 weaker variant called \iso{Parallel Snapshot Isolation}~\cite{psi}.
@@ -52,10 +49,8 @@ invariants into account.  Bernstein \emph{et al.}~\cite{bern2000}
 propose informal semantic conditions to ensure the satisfaction of
 application invariants under weaker isolation levels.  All these
 techniques are tailor-made for a finite set of well-understood
-isolation levels (rooted in~\cite{berenson}) under a pre-defined store
-consistency model.
+isolation levels (rooted in~\cite{berenson}).
 
-\vspace*{-4pt}
 \paragraph{Reasoning under weak consistency.} There have been several
 recent proposals to reason about programs executing under weak
 consistency~\cite{bailisvldb, alvarocalm, gotsmanpopl16,redblueatc,
@@ -67,14 +62,14 @@ consistency~\cite{lbc16,gotsmanpopl16}). All these efforts involve
 proving that atomic and fully isolated operations preserve application
 invariants when executed under these consistency levels.  In contrast,
 our focus in on reasoning in the presence of weakly-isolated
-transactions under a strongly consistent store.  Gotsman \emph{et
-al.}~\cite{gotsmanpopl16} adapt \iso{Parallel Snapshot Isolation} to a
-transaction-less setting by interpreting it as a consistency level
-that serializes writes to objects; a dedicated proof rule is developed
-to help prove prove program invariants hold under this model. By
-parameterizing our proof system over a gamut of weak isolation
-specifications, we avoid the need to define a separate proof rule for
-each new isolation level we may encounter.
+transactions under a strongly consistent store.  ~\cite{gotsmanpopl16}
+adapt \iso{Parallel Snapshot Isolation} to a transaction-less setting
+by interpreting it as a consistency level that serializes writes to
+objects; a dedicated proof rule is developed to help prove prove
+program invariants hold under this model. By parameterizing our proof
+system over a gamut of weak isolation specifications, we avoid the
+need to define a separate proof rule for each new isolation level we
+may encounter.
 
 %% \vspace*{-4pt}
 %% \paragraph{Reasoning under relaxed memory.} The reasoning mechanisms
@@ -92,8 +87,7 @@ each new isolation level we may encounter.
 %% JMM in terms of memory reorderings, and an operational instantiation
 %% consistent with the TSO memory model.
 
-\vspace*{-4pt}
-\paragraph{Inference.}  Prior work by Vafeiadis~\cite{Vaf10,Vaf10a}
+\paragraph{Inference.}  ~\cite{Vaf10,Vaf10a}
 describe \emph{action inference}, an inference procedure for computing
 rely and guarantee relations in the context of RGSep~\cite{VP07}, an
 integration of rely-guarantee and separation logic~\cite{Rey02} that

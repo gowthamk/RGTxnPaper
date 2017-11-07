@@ -60,9 +60,9 @@ result of executing $c$ under $\stg$ (i.e., $\stg \vdash
   \C{del} field set to true in the local store.}. Note that the
 function $\F$ we call state transformer here is actually the
 \emph{effect} part of the state transformer introduced in
-Sec.~\ref{sec:motivation}, which is a function $\T$ of form
-$\lambda(\stl,\stg).~\stl \cup \F(\stg)$. Nonetheless, we keep
-referring to $\F$ as state transformer. Since the execution is subject
+Sec.~\ref{sec:motivation}, which is a function $\T$ of the form
+$\lambda(\stl,\stg).~\stl \cup \F(\stg)$. Nonetheless, for simplicity,
+we will continue to refer to $\F$ as state transformer. Since the execution is subject
 to isolation-constrained interference, the inference judgment depends
 on the isolation-constrained rely relation $\R$, which is used to
 enforce the stability of the state transformer $\F$.  Recall that $\R$

@@ -156,22 +156,22 @@ conventional (unreplicated) databases as mentioned above.
 
 In this paper, we propose a program logic for weakly-isolated
 transactions along with automated verification support to allow
-developers verify the soundness of their applications, without
+developers to verify the soundness of their applications, without
 having to resort to low-level operational reasoning as they are forced
 to do currently.  We develop a set of syntax-directed compositional
 proof rules that enable the construction of correctness proofs for
 transactional programs in the presence of a weakly-isolated
 concurrency control mechanism.  Realizing that the proof burden
 imposed by these rules may discourage applications programmers from
-using them, we also present an inference procedure based on these
-rules that automatically verifies the weakest isolation level for a
-transaction while ensuring its invariants are maintained.  The key to
-inference is a novel formulation of database state (represented as
-sets of tuples) as a monad, and in which database computations are
-interpreted as state transformers over these sets.  This
-interpretation leads to an encoding of database computations amenable
-for verification by off-the-shelf SMT solvers.  The paper makes the
-following contributions:
+using them, we also present an inference procedure that automatically
+verifies the weakest isolation level for a transaction while ensuring
+its invariants are maintained.  The key to inference is a novel
+formulation of database state (represented as sets of tuples) as a
+monad, and in which database computations are interpreted as state
+transformers over these sets.  This interpretation leads to an
+encoding of database computations amenable for verification by
+off-the-shelf SMT solvers.  The paper makes the following
+contributions:
 %% We have realized these ideas as an embedded DSL within OCaml, that
 %% supports common relational SQL operations (updates, selects, inserts,
 %% deletes, joins, etc.).  Experimental results on real-world benchmarks
@@ -199,13 +199,13 @@ following contributions:
     evaluation study on real database benchmarks that justify our
     approach, and demonstrate the utility of our inference mechanism.
 \end{enumerate}
-\noindent Our results provide the first (to the best of our knowledge)
-formalization of weakly-isolated transactions, along with an
-expressive and compositional proof automation framework capable of
-verifying the safety of high-level consistency conditions attached to
-these transactions.  Collectively, these contributions allow
-weakly-isolated transactions to enjoy the same rigorous reasoning
-capabilities as their strongly-isolated (serializable) counterparts.
+\noindent Our results provide the first formalization of
+weakly-isolated transactions, along with an expressive and
+compositional proof automation framework capable of verifying the
+safety of high-level consistency conditions attached to these
+transactions.  Collectively, these contributions allow weakly-isolated
+transactions to enjoy the same rigorous reasoning capabilities as
+their strongly-isolated (serializable) counterparts.
 
 The remainder of the paper is organized as follows. The next section
 provides motivation and background on serializable and weakly-isolated
@@ -218,5 +218,5 @@ to the semantics. \S\ref{sec:inference} describes the inference
 algorithm, and the state transformer encoding.  We describe our
 implementation in \S\ref{sec:implementation}, and provide case studies
 and benchmark results in \S\ref{sec:case-studies}.  Related work is
-given in \S\ref{sec:relatedwork}, and \S\ref{sec:conclusions} presents
-conclusions.
+given in \S\ref{sec:relatedwork}, and \S\ref{sec:conclusions} concludes.
+
