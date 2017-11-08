@@ -87,7 +87,7 @@ in the database.
       records whose \C{ol\_o\_id} is equal to the order's id.  }
 		\label{fig:tpcc_db1}
 	\end{subfigure}
-  \hspace*{.4in}
+  \hspace*{.2in}
 	\begin{subfigure}{0.52\textwidth}
 		\includegraphics[width=0.9\textwidth]{Figures/schema2}
     \caption{The database in Fig.~\ref{fig:tpcc_db1} after correctly
@@ -139,20 +139,6 @@ to the size of the \C{item\_reqs} set, which in turn is equal to the
 \C{Order} record's \C{o\_ol\_cnt} field; these constraints ensure that
 the transaction's consistency condition is preserved.
 
-Because the aforementioned reasoning is reasonably simple to perform
-manually, verifying the soundness of TPC-C's consistency conditions
-would appear to be feasible.  Serializability aids the tractability of
-verification by preventing any interference among concurrently
-executing transactions while the \C{new\_order} transaction executes,
-essentially yielding serial behaviors.  Under weak
-isolation\footnote{Weak isolation does not violate atomicity as long
-  as the witnessed effects are those of committed transactions},
-however, interferences of various kinds are permitted, leading to
-executions superficially similar to executions permitted by concurrent
-(racy) programs~\cite{GHE15,HPQ+15}.  To illustrate, consider the
-behavior of the \C{new\_order} transaction when executed under a
-\emph{Read Committed} (RC) isolation level, the default isolation
-level in 8 of the 18 databases studied in~\cite{bailishotos}.
 \begin{wrapfigure}{l}{.4\textwidth}
 \includegraphics[scale=0.45]{Figures/motiv-eg-1-b}
 \caption{\small An RC execution involving two instances ($T_1$ and
@@ -167,6 +153,20 @@ level in 8 of the 18 databases studied in~\cite{bailishotos}.
   consistency condition.}
 \label{fig:new_order_exec}
 \end{wrapfigure}
+Because the aforementioned reasoning is reasonably simple to perform
+manually, verifying the soundness of TPC-C's consistency conditions
+would appear to be feasible.  Serializability aids the tractability of
+verification by preventing any interference among concurrently
+executing transactions while the \C{new\_order} transaction executes,
+essentially yielding serial behaviors.  Under weak
+isolation\footnote{Weak isolation does not violate atomicity as long
+  as the witnessed effects are those of committed transactions},
+however, interferences of various kinds are permitted, leading to
+executions superficially similar to executions permitted by concurrent
+(racy) programs~\cite{GHE15,HPQ+15}.  To illustrate, consider the
+behavior of the \C{new\_order} transaction when executed under a
+\emph{Read Committed} (RC) isolation level, the default isolation
+level in 8 of the 18 databases studied in~\cite{bailishotos}.
 An executing RC transaction is isolated from \emph{dirty writes},
 i.e., writes of uncommitted transactions, but is allowed to witness
 the writes of concurrent transactions as soon as they are committed.
@@ -562,8 +562,8 @@ statement can be similarly constructed:
 \begin{smathpar}
 \begin{array}{l}
   \lambda(\stl,\stg).~ \stl \cup
-       \{\langle\C{ol\_o\_id}=\C{k2},\,
-                 \C{ol\_d\_id}=\C{k3},\, \C{ol\_i\_id}=\C{item\_req.ol\_i\_id},\, 
+       \{\langle\C{ol\_o\_id}=\C{k2};\,
+                 \C{ol\_d\_id}=\C{k3};\, \C{ol\_i\_id}=\C{item\_req.ol\_i\_id};\, 
                  \C{ol\_qty}=\C{item\_req.ol\_qty}\rangle\}
  
 \end{array}

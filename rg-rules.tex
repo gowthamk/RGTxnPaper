@@ -6,46 +6,68 @@
 %\fbox{\( \rg{\mathbb{I},P,R}{\txnbox{c}_i}{G,Q}\)} \quad
 %\fbox{\( \rg{\mathbb{I},P,R}{c}{G,Q}\)} \quad\\
 %
-\begin{minipage}{3.6in}
-\rulelabel{RG-Update}
-\begin{smathpar}
-\begin{array}{c}
-\RULE
-{
-  \stable(\R,P)\\
-  \hspace*{-0.4in} \forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
-  \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).[r/x]e_2 \conj\\
-   r'=\langle[r/x]e_1 \with \idf=r.\idf;\,\txnf=i;\,\delf=\C{false}\rangle\} \Rightarrow   Q(\stl',\stg)
-}
-{
-  \R \vdash \hoare{P}{\updatee{\lambda x.e_1}{\lambda x.e_2}}{Q}
-}
-\end{array}
-\end{smathpar}
-\end{minipage}
+\bigskip
+
 %
-%
-\begin{minipage}{2.6in}
 \rulelabel{RG-Select}
+\begin{center}
 \begin{smathpar}
 \begin{array}{c}
 \RULE
 {
-  \\
-  \R \vdash \hoare{P'}{c}{Q}\spc
-  \stable(\R,P')\\
   P(\stl,\stg) \conj
     x = \{r \,|\, r\in\Delta \wedge [r/y]e\} \Rightarrow
-  P'(\stl,\stg)\\
+  P'(\stl,\stg)\spc
+  \R \vdash \hoare{P'}{c}{Q}\spc
+  \stable(\R,P')
 }
 {
   \R \vdash \hoare{P}{\lete{x}{\selecte{\lambda y.e}}{c}}{Q}
 }
 \end{array}
 \end{smathpar}
-\end{minipage}
+\end{center}
 %
-\bigskip
+
+%
+\rulelabel{RG-Insert}
+\begin{center}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \stable(\R,P)\\
+  \forall\stl,\stl',\stg,i.~P(\stl,\stg) \conj j \not\in
+  \dom(\stl\cup\stg) \conj 
+  \stl'=\stl \cup 
+  \{\langle x \with \idf=j;\,\txnf=i;\,\delf=\C{false}\rangle\} \Rightarrow Q(\stl',\stg)
+}
+{
+  \R \vdash \hoare{P}{\inserte{x}}{Q}
+}
+\end{array}
+\end{smathpar}
+\end{center}
+%
+%
+\rulelabel{RG-Update}
+\begin{center}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \hspace*{-1.2in} \stable(\R,P)\spc
+  \forall\stl,\stl',\stg.~P(\stl,\stg) \conj 
+  \stl' = \stl \cup \{r' \,|\, \exists(r\in\Delta).[r/x]e_2 \conj\\
+   \hspace*{1.3in}r'=\langle[r/x]e_1 \with \idf=r.\idf;\,\txnf=i;\,\delf=\C{false}\rangle\} \Rightarrow   Q(\stl',\stg)
+}
+{
+  \R \vdash \hoare{P}{\updatee{\lambda x.e_1}{\lambda x.e_2}}{Q}
+}
+\end{array}
+\end{smathpar}
+\end{center}
+%
 
 %
 \begin{minipage}{3.2in}
@@ -71,26 +93,6 @@
 \bigskip
 
 %
-\begin{minipage}{3.4in}
-\rulelabel{RG-Insert}
-\begin{smathpar}
-\begin{array}{c}
-\RULE
-{
-  \stable(\R,P)\\
-  \forall\stl,\stl',\stg,i.~P(\stl,\stg) \conj j \not\in
-  \dom(\stl\cup\stg) \conj \\
-  \stl'=\stl \cup 
-  \{\langle x \with \idf=j;\,\txnf=i;\,\delf=\C{false}\rangle\} \Rightarrow Q(\stl',\stg)
-}
-{
-  \R \vdash \hoare{P}{\inserte{x}}{Q}
-}
-\end{array}
-\end{smathpar}
-\end{minipage}
-%
-%
 \begin{minipage}{2.8in}
 \rulelabel{RG-Foreach}
 \begin{smathpar}
@@ -106,31 +108,6 @@
 }
 {
   \R \vdash \hoare{P}{\foreache{x}{\lambda y.\lambda z.c}}{Q}
-}
-\end{array}
-\end{smathpar}
-\end{minipage}
-%
-\bigskip
-
-%
-\begin{minipage}{3.5in}
-\rulelabel{RG-Txn}
-\begin{smathpar}
-\begin{array}{c}
-\RULE
-{
-  \stable(R,\I)\spc
-  \stable(R,I)\spc
-  P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
-  \R_e = R \backslash \I_e \spc \R_c = R \backslash \I_c \spc 
-   \R_e \vdash \rg{P}{c}{Q} \spc \stable(\R_c,Q) \\ 
-  \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
-    G(\stg, \stl \rhd \stg)\spc
-  \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
-}
-{
-  \rg{I,R}{\ctxn{i}{\I}{c}}{G,I}
 }
 \end{array}
 \end{smathpar}
@@ -157,6 +134,35 @@
 \end{smathpar}
 \end{minipage}
 %
+\bigskip
+
+%
+\rulelabel{RG-Txn}
+\begin{center}
+%\begin{minipage}{3.5in}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \stable(R,\I)\spc
+  \stable(R,I)\spc
+  \R_e = R \backslash \I_e \spc 
+  \R_c = R \backslash \I_c \spc 
+  P(\stl,\stg) \Leftrightarrow \stl=\emptyset \wedge I(\stg)\\
+   \R_e \vdash \rg{P}{c}{Q} \spc \stable(\R_c,Q) \spc
+  \forall \stl,\stg.~ Q(\stl,\stg) \Rightarrow 
+    G(\stg, \stl \rhd \stg)\spc
+  \forall \stg,\stg'.~I(\stg) \wedge G(\stg,\stg') \Rightarrow I(\stg')\\
+}
+{
+  \rg{I,R}{\ctxn{i}{\I}{c}}{G,I}
+}
+\end{array}
+\end{smathpar}
+%\end{minipage}
+\end{center}
+%
+
 
 \caption{\small \txnimp: Rely-Guarantee Rules}
 \label{fig:rg-rules}

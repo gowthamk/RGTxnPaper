@@ -1,5 +1,4 @@
-%\renewcommand{\ctxn}[3]{\C{TXN}_{#1}\langle #2 \rangle\{#3\}}
-\begin{figure*}[!ht]
+\begin{figure*}[!t]
 \raggedright
 %
 \textbf{Syntax}\\
@@ -45,7 +44,10 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \textbf{Local Reduction} \quad 
 \fbox {\(\stg \vdash (\tbox{c}_i,\stl) \stepsto (\tbox{c'}_i,\stl')\)}\\
 %
-\begin{minipage}{2.8in}
+\bigskip
+
+%
+\begin{minipage}{2.45in}
 \rulelabel{E-Insert}
 \begin{smathpar}
 \begin{array}{c}
@@ -63,30 +65,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \end{minipage}
 %
 %
-\begin{minipage}{2.8in}
-\rulelabel{E-Delete}
-\begin{smathpar}
-\begin{array}{c}
-\RULE
-{
-  \hspace*{-1in}
-  s = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e)=\C{true} \\
-      \hspace*{0.1in}\conj r'=\langle r \with \delf=\C{true};\, \txnf=i \rangle\}\spc
-  \dom(\stl)\cap\dom(s) = \emptyset \spc
-% \dom(s) \cap \dom(\delta) = \emptyset
-}
-{
-  \stg \vdash (\tbox{\deletee{\lambda x.e}}_i,\stl) \stepsto 
-  (\tbox{\cskip}_i,\stl \cup s)
-}
-\end{array}
-\end{smathpar}
-\end{minipage}
-%
-\bigskip
-
-%
-\begin{minipage}{2.8in}
+\begin{minipage}{2.6in}
 \rulelabel{E-Select}
 \begin{smathpar}
 \begin{array}{c}
@@ -104,6 +83,30 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \end{smathpar}
 \end{minipage}
 %
+\bigskip
+
+%
+\begin{minipage}{2.5in}
+\rulelabel{E-Delete}
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \dom(\stl)\cap\dom(s) = \emptyset \\
+  \hspace*{-0.4in}
+  s = \{r' \,|\, \exists(r\in\Delta).~ \eval([r/x]e)=\C{true} \\
+      \hspace*{0.2in}\conj r'=\langle r \with \delf=\C{true};\,
+      \txnf=i \rangle\}\\
+% \dom(s) \cap \dom(\delta) = \emptyset
+}
+{
+  \stg \vdash (\tbox{\deletee{\lambda x.e}}_i,\stl) \stepsto 
+  (\tbox{\cskip}_i,\stl \cup s)
+}
+\end{array}
+\end{smathpar}
+\end{minipage}
+%
 %
 \begin{minipage}{2.8in}
 \rulelabel{E-Update}
@@ -111,10 +114,11 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \begin{array}{c}
 \RULE
 {
-  \hspace*{-0.2in}s = \{r' \,|\, \exists(r\in\Delta).~ 
-    \eval([r/x]e_2)=\C{true} \conj r'= \langle [r/x]e_1 \;\C{with}\\
-    \idf=r.\idf;\,\txnf=i;\,\delf = r.\delf \rangle \} \spc
-  \dom(\stl) \cap \dom(s) = \emptyset
+  \dom(\stl) \cap \dom(s) = \emptyset\\
+  \hspace*{-0.8in}s = \{r' \,|\, \exists(r\in\Delta).~ 
+    \eval([r/x]e_2)=\C{true} \conj \\
+  r'= \langle [r/x]e_1 \;\C{with}\;
+    \idf=r.\idf;\,\txnf=i;\,\delf = r.\delf \rangle \}
 }
 {
   \stg \vdash (\tbox{\updatee{\lambda x.e_1}{\lambda x.e_2}}_i,\stl) 
@@ -124,6 +128,7 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \end{smathpar}
 \end{minipage}
 %
+\bigskip
 
 \begin{smathpar}
 \begin{array}{ll}
@@ -131,8 +136,8 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
     z.c}}_i,\stl) \stepsto (\tbox{\foreachr{\emptyset}{s}{\lambda
     y.\lambda z. c}}_i,\stl)\\
   \rulelabel{E-Foreach2} & \stg \vdash (\tbox{\foreachr{s_1}{\{r\} \uplus s_2}
-    {\lambda y.\lambda z.c}}_i,\stl) \stepsto (\tbox{[r/z][s_1/y]c;\,
-    \foreachr{s_1 \cup \{r\}}{s_2}{\lambda y.\lambda z. c}}_i,\stl)\\
+    {\lambda y.\lambda z.c}}_i,\stl) \stepsto (\tbox{[r/z][s_1/y]c;\,\\
+    & \hspace*{2.5in}\foreachr{s_1 \cup \{r\}}{s_2}{\lambda y.\lambda z. c}}_i,\stl)\\
   \rulelabel{E-Foreach3} & \stg \vdash (\tbox{\foreachr{s}{\emptyset}
     {\lambda y.\lambda z.c}}_i,\stl) \stepsto (\tbox{\cskip}_i,\stl)\\
 \end{array}
@@ -144,17 +149,18 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \textbf{Top-Level Reduction} \quad 
 \fbox {\((c,\stg) \stepsto (c',\stg')\)}\\
 %
-\begin{minipage}{3in}
+\bigskip
+
+\begin{minipage}{2.5in}
   \rulelabel{E-Txn-Start}
   \begin{smathpar}
   \begin{array}{c}
-    \RULE{}
+    \RULE{\\}
          {(\ctxn{i}{\I}{c},\stg) \stepsto (\ctxnr{i}{\I,\emptyset,\stg}{c},\stg)}
   \end{array}
   \end{smathpar}
 \end{minipage}%
-\hfill
-\begin{minipage}{3in}
+\begin{minipage}{2.3in}
 \rulelabel{E-Txn}
 \begin{smathpar}
 \begin{array}{c}
@@ -170,6 +176,8 @@ c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
 \end{array}
 \end{smathpar}
 \end{minipage}\\
+%
+\bigskip
 
 \begin{center}
 \begin{minipage}{3in}

@@ -19,11 +19,11 @@ We have implemented our DSL to define transactions as monadic
 computations in OCaml (modulo some syntactic sugar), and our automatic
 reasoning framework as an extra frontend pass (called \thetool) in the
 ocamlc 4.03 compiler\footnote{The source code is available at
-available at \emph{https://goo.gl/nmUXZK}}. The input to \thetool is a
-program in our DSL that describes the schema of the database as a
-collection of OCaml type definitions, and transactions as OCaml
-functions, whose top-level expression is an application of the
-\C{atomically\_do} combinator. For instance, TPC-C's schema from
+available at \url{https://github.com/gowthamk/acidifier}}. The input
+to \thetool is a program in our DSL that describes the schema of the
+database as a collection of OCaml type definitions, and transactions
+as OCaml functions, whose top-level expression is an application of
+the \C{atomically\_do} combinator. For instance, TPC-C's schema from
 Fig.~\ref{fig:schema} can be described via the OCaml type definitions
 shown in Fig.~\ref{fig:ocaml-schema}.  \thetool also requires a
 specification of the program in the form of a collection of guarantees

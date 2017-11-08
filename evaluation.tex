@@ -22,7 +22,7 @@ system described by~\cite{gotsmanpopl16}, and the TPC-C benchmark.
                          (fun c -> c.c_id = cid))
     else ()
 
-  let deregister_student_txn sid = 
+  let deregister_txn sid = 
     let s_enrs = SQL.select [Enrollment] (fun e -> e.e_s_id = sid) in
     if Set.is_empty s_enrs then
       SQL.delete Student (fun s -> s.s_id = sid)
@@ -34,16 +34,16 @@ system described by~\cite{gotsmanpopl16}, and the TPC-C benchmark.
 
 \textbf{Courseware} The Courseware application allows new courses to be
 added (via an \C{add\_course} transaction), and new students to be
-registered (via a \C{register\_student} transaction) into a database. A registered
+registered (via a \C{register} transaction) into a database. A registered
 student can enroll (\C{enroll}) in an existing course,
 provided that enrollment has not already exceeded the course
 capacity (\C{c\_capacity}). A course with no enrollments can be
 canceled (\C{cancel\_course}). Likewise, a student who is not enrolled
-in any course can be deregistered (\C{deregister\_student}). Besides
+in any course can be deregistered (\C{deregister}). Besides
 \C{Student} and \C{Course} tables, there is also an \C{Enrollment}
 table to track the many-to-many enrollment relationship between
 courses and students. The simplified code for the Courseware
-application with only \C{enroll} and \C{deregister\_student}
+application with only \C{enroll} and \C{deregister}
 transactions is shown in Fig.~\ref{fig:courseware_code}. The
 application is required to preserve the following invariants on the
 database:
@@ -54,7 +54,7 @@ database:
   non-negative quantity.
 \end{enumerate}
 \noindent Both $I_1$ and $I_2$ can be violated under weak isolation.
-$I_1$ can be violated, for example, when \C{deregister\_student} runs
+$I_1$ can be violated, for example, when \C{deregister} runs
 concurrently with \C{enroll}, both at RC isolation. While the former
 transaction removes the student record after checking that no
 enrollments for that student exists, the latter transaction
@@ -66,7 +66,7 @@ Invariant $I_2$ can be violated by two \C{enroll}s, both reading
 (Fig.~\ref{fig:courseware_code}) after annotating transactions with
 their respective guarantees, and asserting $I = I_1 \wedge I_2$ as the
 correctness condition. The guarantees $G_e$ and $G_d$ for \C{enroll}
-and \C{deregister\_student} transactions, respectively, are shown below:
+and \C{deregister} transactions, respectively, are shown below:
 \begin{smathpar}
   \begin{array}{lcl}
     G_e(\stg,\stg') & \Leftrightarrow & \stg_s'=\stg_s
@@ -75,8 +75,8 @@ and \C{deregister\_student} transactions, respectively, are shown below:
         \itel{c.\C{c\_id}=\C{cid}\\
     & & \hspace*{1.15in}}
           {\existsl(c',~c'.\C{id}=c.\C{id} \wedge
-              c'.\C{c\_name}=c.\C{c\_name} \wedge c'.\C{c\_capacity}\ge0,
-              ~\{c'\})\\
+              c'.\C{c\_name}=c.\C{c\_name} \\
+    & & \hspace*{2.6in}\wedge~ c'.\C{c\_capacity}\ge0, ~\{c'\})\\
     & & \hspace*{1.15in}}
           {\{c\}}\\
     & & \hspace*{0.15in}\conj \stg_e = \stg_e' \bind \lambda e.~ 
@@ -112,7 +112,7 @@ insert a new \C{Enrollment} record by stating that $\stg_e$, the
 \C{Enrollment} table in the pre-state, contains all records $e$ from
 $\stg_e'$, the table in the post-state, except when $e.\C{e\_c\_id}$ and
 $e.\C{e\_s\_id}$ match \C{cid} and \C{sid}, respectively. The
-guarantee $G_d$ of \C{deregister\_student} asserts that the
+guarantee $G_d$ of \C{deregister} asserts that the
 transaction doesn't write to \C{Course} and \C{Enrollment} tables. The
 transaction might however delete a \C{Student} record bearing an
 \C{id}=\C{sid} (formally, $\stg_s' = \stg_s \bind \lambda s.~
@@ -125,7 +125,7 @@ With help of the guarantees, such as those described above, \thetool
 was able to automatically discover the aforementioned anomalous
 executions, and was subsequently able to infer that the anomalies can
 be preempted by promoting the isolation level of \C{enroll} and
-\C{deregister\_student} to SER (on both MySQL and PostgreSQL), leaving
+\C{deregister} to SER (on both MySQL and PostgreSQL), leaving
 the isolation levels of remaining transactions at RC. The total time
 for inference and verification took less than a minute running on a
 conventional laptop.

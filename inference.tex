@@ -498,9 +498,10 @@ where:
                                  \C{s\_d\_id}=s.\C{s\_d\_id};\,
                                  \C{s\_qty} = \C{k1}\rangle \}\\
          &   & \hspace*{0.8in}} {\emptyset}) \\
-    \F_I & = & \lambda(\stg).~ \{\langle\C{ol\_o\_id}=\C{k2},\,
-                 \C{ol\_d\_id}=\C{k3},\, \C{ol\_i\_id}=\C{item\_req.ol\_i\_id},\, 
-                 \C{ol\_qty}=\C{item\_req.ol\_qty}\rangle\}\\
+    \F_I & = & \lambda(\stg).~ \{\langle\C{ol\_o\_id}=\C{k2};\,
+                 \C{ol\_d\_id}=\C{k3};\,
+                 \C{ol\_i\_id}=\C{item\_req.ol\_i\_id};\,\\
+         &   & \hspace*{2.3in}\C{ol\_qty}=\C{item\_req.ol\_qty}\rangle\}\\
   \end{array}
 \end{smathpar}
 For any $\stg$, $\F_U(\stg)$ and $\F_I(\stg)$ are expressions in
@@ -513,7 +514,7 @@ $(\phi_U,\G_U)$ and $(\phi_I,\G_I)$, respectively, where $\phi_U$,
 $\phi_I$, $\G_U$, $\G_I$ are as shown below:
 \begin{smathpar}
   \begin{array}{lcl}
-    \phi_U & = & \hspace*{0.2in}\forall \C{item\_req}.\forall s. \forall s'.~ 
+    \phi_U & = & \hspace*{0.1in}\forall \C{item\_req}.\forall s. \forall s'.~ 
         \pi_1(\C{item\_req}) \Leftrightarrow \\
     & & \hspace*{0.3in}(s \in \stg) \conj 
         (\itec{{\sf table}(s)=\C{Stock} \wedge 
@@ -523,42 +524,41 @@ $\phi_I$, $\G_U$, $\G_I$ are as shown below:
                             \C{s\_d\_id}=s.\C{s\_d\_id};\,
                             \C{s\_qty} = \C{k1}\rangle\\
     & & \hspace*{0.85in}} {\bot}) \Rightarrow g_0(\C{item\_req},s')\\
-    & & \conj \hspace*{0.08in}\forall \C{item\_req}.\forall s'. \exists s.~ 
+    & & \hspace*{-0.05in}\conj \forall \C{item\_req}.\forall s'. \exists s.~ 
         \pi_2(\C{item\_req}) \Leftrightarrow \\
-    & & \hspace*{0.28in} g_0(\C{item\_req},s') \Rightarrow (s \in \stg) \conj
-        (\itec{{\sf table}(s)=\C{Stock} \wedge 
+    & & \hspace*{0.15in} g_0(\C{item\_req},s') \Rightarrow s \in \stg \conj
+        \itec{{\sf table}(s)=\C{Stock} \wedge 
               s.\C{s\_i\_id} = \C{item\_req.ol\_i\_id}\\
-    & & \hspace*{1.8in}}
+    & & \hspace*{1.6in}}
               {s' = \langle \C{s\_i\_id}=s.\C{s\_i\_id};\, 
                             \C{s\_d\_id}=s.\C{s\_d\_id};\,
                             \C{s\_qty} = \C{k1}\rangle\\
-    & & \hspace*{1.8in}} {\bot}) \\
+    & & \hspace*{1.6in}} {\bot} \\
     \G_U & = & \lambda (\C{item\_req},r).~ \pi_1(\C{item\_req}) \wedge 
         \pi_2(\C{item\_req}) \wedge g_0(\C{item\_req},r)\\
         \phi_I & = & \top \\ 
     \G_I & = & \lambda (\C{item\_req},r).~ 
-        r = \langle \C{ol\_o\_id}=\C{k2},\,
-                    \C{ol\_d\_id}=\C{k3},\, 
-                    \C{ol\_i\_id}=\C{item\_req.ol\_i\_id},\, 
-                    \C{ol\_qty}=\C{item\_req.ol\_qty}
-             \rangle\\
+        r = \langle \C{ol\_o\_id}=\C{k2};\,
+                    \C{ol\_d\_id}=\C{k3};\, 
+                    \C{ol\_i\_id}=\C{item\_req.ol\_i\_id};\,\\
+    & & \hspace*{3in}\C{ol\_qty}=\C{item\_req.ol\_qty} \rangle\\
   \end{array}
 \end{smathpar}
 Since the transformer ($\T$) of the \C{foreach} loop is not nested
 does not contain any free iteration variables, the appropriate
 application of the encoding algorithm  is
 $\mssemof{\emptyset}{\T(\stl,\stg)}$, which results in the
-$(\phi,\G)$, as defined below:
+$(\phi_I \wedge \phi_U \wedge \phi_1 \wedge \phi_2,\G)$, where
+$\phi_1$, $\phi_2$, and $\G$ are as defined below:
 \begin{smathpar}
   \begin{array}{lcl}
-    \phi & = & \phi_I \conj \phi_U \conj \\
-    & & \hspace*{0.2in}\forall \C{item\_req}. \forall s.~ 
-        \pi_3 \Leftrightarrow (\C{item\_req} \in \C{item\_reqs} \conj 
-        (\G_U(\C{item\_req},s') \vee \G_I(\C{item\_req},s'))
-        \Rightarrow g_1(s))\\
-    & & \conj \hspace*{0.05in}\forall s.\exists \C{item\_req}. ~ 
-        \pi_4 \Leftrightarrow (g_1(s) \Rightarrow (\C{item\_req} \in \C{item\_reqs} 
-        \conj (\G_U(\C{item\_req},s') \vee \G_I(\C{item\_req},s')))\\
+    \phi_1 & = & \forall \C{item\_req}. \forall s.~ 
+        \pi_3 \Leftrightarrow \C{item\_req} \in \C{item\_reqs} \wedge
+        \G_U(\C{item\_req},s') \vee \G_I(\C{item\_req},s')
+        \Rightarrow g_1(s)\\
+    \phi_2 & = & \forall s.\exists \C{item\_req}. ~ 
+        \pi_4 \Leftrightarrow g_1(s) \Rightarrow \C{item\_req} \in \C{item\_reqs} 
+        \wedge \G_U(\C{item\_req},s') \vee \G_I(\C{item\_req},s')\\
     \G & = & \lambda(r).~\pi_3 \wedge \pi_4 \wedge g_1(r)\\
   \end{array}
 \end{smathpar}
