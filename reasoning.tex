@@ -132,7 +132,8 @@ itself can take its next step according to its isolation specification
 ($\I$). 
 \begin{smathpar}
 \begin{array}{lcl}
-\stable(R, \phi) & \Leftrightarrow & \forall \stl, \stg, \stg'. \phi(\stl, \stg) \wedge R^{*}(\stg, \stg') \wedge \I(\stl, \stg, \stg') \Rightarrow \phi(\stl, \stg')
+\stable(R, \phi) & \Leftrightarrow & \forall \stl, \stg, \stg'. \phi(\stl, \stg) 
+  \wedge R^{*}(\stg, \stg') \wedge \I(\stl, \stg, \stg') \Rightarrow \phi(\stl, \stg')
 \end{array}
 \end{smathpar}
 \noindent A characteristic of RG reasoning is that stability of an
@@ -389,23 +390,23 @@ defined thus:
 \begin{smathpar}
 \begin{array}{lclr}
 \R \vdash \hoare{P}{c}{Q} & \defeq & \forall
-  \stl,\stl',\stg,\stg',\nubar.~ P(\stl,\stg) \conj (\tbox{c}_i,\stl,\stg) \rstepssto{n}
+  \stl,\stl',\stg,\stg'.~ P(\stl,\stg) \conj (\tbox{c}_i,\stl,\stg) \rstepssto{n}
   (\tbox{\cskip}_i, \stl',\stg')
-  \Rightarrow Q(\stl',\stg') & \nubar = \texttt{freevars}(c)\\
+  \Rightarrow Q(\stl',\stg') &\\
 \rg{I,R}{c}{G,I} & \defeq &  \forall \stg.\, I(\stg)
   \Rightarrow (\forall \stg'.\; (c,\stg) 
     \rstepssto{n} (\cskip,\stg') \Rightarrow I(\stg')) \\
-&&\hspace*{0.6in}\conj \texttt{step-guaranteed}(R,G,c,\stg)\\
+&&\hspace*{0.6in}\conj \texttt{txn-guaranteed}(R,G,c,\stg)\\
 \end{array}
 \end{smathpar}
 
 \noindent The
-$\texttt{step-guaranteed}$ predicate used in the semantics of the
+$\texttt{txn-guaranteed}$ predicate used in the semantics of the
 global RG judgment is defined below:\vspace*{-10pt}
 
 \begin{smathpar}
 \begin{array}{lcl}
-\texttt{step-guaranteed}(R,G,c,\stg) &\defeq& \forall c',c''\stg',\stg''.
+\texttt{txn-guaranteed}(R,G,c,\stg) &\defeq& \forall c',c''\stg',\stg''.
 (c,\stg) \rstepssto{n} (c',\stg') \conj (c',\stg') \stepsto
   (c'',\stg'') \Rightarrow G(\stg',\stg'')\\
 \end{array}
@@ -488,4 +489,3 @@ will obey the invariant $I$.
 %% record, the proof is straightforward.
 
 
-		

@@ -7,13 +7,13 @@
 \renewcommand{\arraystretch}{1.2}
 \begin{array}{lclcl}
 \multicolumn{5}{c} {
-  {x,y} \in \mathtt{Variables}\qquad
-  {f} \in \mathtt{Field\;Names} \qquad
+  {x,y} \in \mathtt{Variables}\;\;\spc
+  {f} \in \mathtt{Field\;Names} \;\;\spc
 % {\tau} \in \mathtt{Table\;Names}
-  {i,j} \in \mathbb{N} \qquad
-  {\odot} \in \{+,-,\le,\ge,=\}\qquad
-  {k} \in \mathbb{Z}\cup\mathbb{B} \qquad
-  {\rec} \in \langle \bar{f}=\bar{k}\rangle\
+  {i,j} \in \mathbb{N} \;\;\spc
+  {\odot} \in \{+,-,\le,\ge,=\}\;\;\spc
+  {k} \in \mathbb{Z}\cup\mathbb{B} \;\;\spc
+  {\rec} \in \langle \bar{f}=\bar{k}\rangle
 }\\
 {\stl,\stg,s} & \in & \mathtt{State} & \coloneqq &  \Pow{\langle
   \bar{f}=\bar{k} \rangle} \\
@@ -21,14 +21,15 @@
 v & \in & \mathtt{Values} & \coloneqq & k \ALT \rec \ALT s\\
 e & \in & \mathtt{Expressions} & \coloneqq & v \ALT x \ALT x.f 
     \ALT \langle \bar{f}=\bar{e} \rangle \ALT e_1 \odot e_2\\ 
-c & \in & \mathtt{Commands} & \coloneqq & \cskip \ALT \lete{x}{e}{c}
+c & \in & \mathtt{Commands} & \coloneqq & \lete{x}{e}{c}
     \ALT \ite{e}{c_1}{c_2}\ALT c_1;c_2 \ALT \inserte{x}  \\
 &&&&\ALT \deletee{\lambda x.e}
     \ALT \lete{y}{\selecte{\lambda x.e}}{c}
     \ALT \updatee{\lambda x.e_1}{\lambda x.e_2}\\
 &&&&\ALT \foreache{x}{\lambda y.\lambda z. c} 
     \ALT \foreachr{s_1}{s_2}{\lambda x.\lambda y. e}\\
-&&&&\ALT \ctxn{i}{\I}{ c } \ALT \ctxnr{i}{\I,\stl,\stg}{c} \ALT c1 || c2\\
+&&&&\ALT \ctxn{i}{\I}{ c } \ALT \ctxnr{i}{\I,\stl,\stg}{c} \ALT c_1 ||
+  c_2 \ALT \cskip \\
 % t & \in & \mathtt{Terms} & \coloneqq & e \ALT c\\
 \ectx & \in & \mathtt{Eval\;Ctx} & ::= & \bullet \ALT  
   \bullet || c_2 \ALT c_1 || \bullet \ALT \bullet;\,c_2 

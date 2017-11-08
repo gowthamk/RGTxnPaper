@@ -1,13 +1,7 @@
 \section{Motivation}
 \label{sec:motivation}
 
-We present our ideas in the context of a DSL embedded in OCaml that
-manages an abstract database state that can be manipulated via a
-well-defined \C{SQL} interface. Arbitrary database computations can be
-built around this interface, which can then be run as transactions
-using the \C{atomically\_do} combinator provided by the DSL.
-
-\begin{figure}
+\begin{figure}[!t]
 \centering
 \begin{ocaml}
 let new_order (d_id, c_id, item_reqs) = atomically_do @@ fun () ->
@@ -37,6 +31,12 @@ let new_order (d_id, c_id, item_reqs) = atomically_do @@ fun () ->
 \label{fig:new_order_code}
 \vspace*{-10pt}
 \end{figure}
+
+We present our ideas in the context of a DSL embedded in OCaml that
+manages an abstract database state that can be manipulated via a
+well-defined \C{SQL} interface. Arbitrary database computations can be
+built around this interface, which can then be run as transactions
+using the \C{atomically\_do} combinator provided by the DSL.
 
 Fig.~\ref{fig:new_order_code} shows a simplified version of the TPC-C
 \C{new\_order} transaction written in this language. TPC-C is a
@@ -222,7 +222,7 @@ violates TPC-C's consistency condition.
 
 This example does not exhibit any of the anomalies that
 \emph{characterize} RC isolation~\cite{berenson}\footnote{Berenson et
-al~\cite{berenson} characterize isolation levels in terms of the
+al characterize isolation levels in terms of the
 anomalies they \emph{admit}. For example, RC is characterized by
 \emph{lost writes} because it admits the anomaly.}. For instance,
 there are no \emph{lost writes} since both concurrent transactions' writes

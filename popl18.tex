@@ -54,6 +54,18 @@
 
 \input{mydefs.tex}
 
+%% Journal information (used by PACMPL format)
+%% Supplied to authors by publisher for camera-ready submission
+\setcopyright{rightsretained} 
+\acmJournal{PACMPL}
+\acmYear{2018} 
+\acmVolume{2} 
+\acmNumber{POPL} 
+\acmArticle{27}
+\acmMonth{1} 
+\acmPrice{}
+\acmDOI{10.1145/3158115}
+
 \begin{document}
 
 \special{papersize=8.5in,11in}
@@ -62,36 +74,17 @@
 
 
 \makeatletter\if@ACM@journal\makeatother
-%% Journal information (used by PACMPL format)
-%% Supplied to authors by publisher for camera-ready submission
-\acmJournal{PACMPL}
-\acmVolume{1}
-\acmNumber{1}
-\acmArticle{1}
-\acmYear{2017}
-\acmMonth{1}
-\acmDOI{10.1145/nnnnnnn.nnnnnnn}
 \startPage{1}
 \else\makeatother
-%% Conference information (used by SIGPLAN proceedings format)
-%% Supplied to authors by publisher for camera-ready submission
-\acmConference[PL'17]{ACM SIGPLAN Conference on Programming Languages}{January 01--03, 2017}{New York, NY, USA}
-\acmYear{2017}
-\acmISBN{978-x-xxxx-xxxx-x/YY/MM}
-\acmDOI{10.1145/nnnnnnn.nnnnnnn}
-\startPage{1}
+% %% Conference information (used by SIGPLAN proceedings format)
+% %% Supplied to authors by publisher for camera-ready submission
+% \GK{---- We did not get any ----}
+% \acmConference[PL'17]{ACM SIGPLAN Conference on Programming Languages}{January 01--03, 2017}{New York, NY, USA}
+% \acmYear{2017}
+% \acmISBN{978-x-xxxx-xxxx-x/YY/MM}
+% \acmDOI{10.1145/nnnnnnn.nnnnnnn}
+% \startPage{1}
 \fi
-
-
-%% Copyright information
-%% Supplied to authors (based on authors' rights management selection;
-%% see authors.acm.org) by publisher for camera-ready submission
-\setcopyright{none}             %% For review submission
-%\setcopyright{acmcopyright}
-%\setcopyright{acmlicensed}
-%\setcopyright{rightsretained}
-%\copyrightyear{2017}           %% If different from \acmYear
-
 
 %% Bibliography style
 \bibliographystyle{ACM-Reference-Format}
