@@ -60,9 +60,9 @@ result of executing $c$ under $\stg$ (i.e., $\stg \vdash
   \C{del} field set to true in the local store.}. Note that the
 function $\F$ we call state transformer here is actually the
 \emph{effect} part of the state transformer introduced in
-Sec.~\ref{sec:motivation}, which is a function $\T$ of the form
-$\lambda(\stl,\stg).~\stl \cup \F(\stg)$. Nonetheless, for simplicity,
-we will continue to refer to $\F$ as state transformer. Since the execution is subject
+Sec.~\ref{sec:motivation}, which is a function $\T$ of form
+$\lambda(\stl,\stg).~\stl \cup \F(\stg)$. Nonetheless, we keep
+referring to $\F$ as state transformer. Since the execution is subject
 to isolation-constrained interference, the inference judgment depends
 on the isolation-constrained rely relation $\R$, which is used to
 enforce the stability of the state transformer $\F$.  Recall that $\R$
@@ -258,13 +258,12 @@ We now formally state the correspondence between the inference rules
 given above and the RG judgment of \S\ref{sec:reasoning}:
 \begin{theorem}
   \label{thm:inference-sound}
-  For all $i$,$R$,$I$,$c$,$\Fx$, $\F$, if $\stable(\R,I)$ and $\Fx
+  For all $i$,$R$,$I$,$c$,$\Fx$, $\F$, if $\stable(\R,I)$, $\stable(\R, \Fx)$ and $\Fx
   \vdash c \elabsto \F$, then:\\\vspace*{-0.2cm}
   \begin{smathpar}
   \begin{array}{c}
     \R \vdash \hoare{\lambda(\stl,\stg).~\stl=\Fx(\stg) \conj
-    I(\stg)}{c}{\lambda(\stl,\stg).~\stl = \Fx(\stg) \cup \F(\stg)
-    \conj I(\stg)}
+    I(\stg)}{c}{\lambda(\stl,\stg).~\stl = \Fx(\stg) \cup \F(\stg)}
   \end{array}
   \end{smathpar}
 \end{theorem}
@@ -279,33 +278,34 @@ given above and the RG judgment of \S\ref{sec:reasoning}:
 %     \end{array}
 %   \end{smathpar}
 The proof follows by structural induction on $c$. Assume that $P
-\Leftrightarrow \lambda(\stl,\stg).~\stl=s \conj I(\stg)$ and $Q
-\Leftrightarrow \lambda(\stl,\stg).\stl = \F(s,\stg)$. For each type
+\Leftrightarrow \lambda(\stl,\stg).~\stl=\Fx(\stg) \conj I(\stg)$ and $Q
+\Leftrightarrow \lambda(\stl,\stg).\stl = \Fx(\stg) \cup \F(\stg)$. For each type
 of $c$, our strategy is to show the premises of the corresponding
 RG-rule. The base cases correspond to \C{INSERT}, \C{UPDATE} and \C{DELETE}
 statements. In all these cases, the form of $\F$ directly corresponds
 to the condition linking the pre-condition $P$ and post-condition $Q$
-in the premises of the RG-rules. If $\stable(\R, \F)$, then
-$\stabilize{\F} = \F$ and hence the proof directly follows. Otherwise,
-$\stabilize{\F} = \lambda (\stg).\existsl(\stg', I(\stg'),
+in the premises of the RG-rules. If $\stable(\R, \Fx[\F])$, then
+$\stabilize{\Fx[\F]} = \F$ and hence the proof directly follows. Otherwise,
+$\stabilize{\Fx[\F]} =$ \\%\hspace{2cm}
+ $\lambda (\stg).\existsl(\stg', I(\stg'),
 \F( \stg'))$. Since the pre-condition $P(\stl, \stg)$ asserts
 $I(\stg)$, any state which obeys $P$ provides the existential $\stg'$
 in the above set expression, and hence $\F$ applied on that state
 matches the condition linking $P$ and $Q$. The stability of $P$ with
-respect to $\R$ follows directly from the stability of $I$.
+respect to $\R$ follows directly from $\stable(\R, I)$ and $\stable(\R, \Fx)$.
 
 The proofs for \C{SELECT}, sequencing, and conditionals use the
 inductive hypothesis to infer the RG-judgments present in the
 premises of their corresponding RG-rules. The interesting case is the
 \C{FOREACH} statement, for which we use the loop invariant
-$\psi(\stl, \stg) \Leftrightarrow \stl = s \cup (y \bind (\lambda
-z.~\F(s, \stg)))$, (where assuming that $c$ is the body of the loop,
+$\psi(\stl, \stg) \Leftrightarrow \stl = \Fx(\stg) \cup (y \bind (\lambda
+z.~\F(\stg)))$, (where assuming that $c$ is the body of the loop,
 $c \elabsto \F$) to prove all the premises of
 \rulelabel{RG-Foreach}. Using the same notation as the rule
 $\rulelabel{RG-Foreach}$, $y$ refers to the records already processed
 in previous iterations of the loop, while $z$ refers to the record
 being processed in the current iteration.  At the beginning of the
-loop $[\phi/y]\psi(\stl, \stg)$ just reduces to $\stl = s$ which is
+loop $[\phi/y]\psi(\stl, \stg)$ just reduces to $\stl = \Fx(\stg)$ which is
 implied by the pre-condition $P$. From the inductive hypothesis, we
 can infer that each iteration corresponds to the application of
 $\F$. Since all iterations are assumed to be independent of each other,
@@ -498,10 +498,9 @@ where:
                                  \C{s\_d\_id}=s.\C{s\_d\_id};\,
                                  \C{s\_qty} = \C{k1}\rangle \}\\
          &   & \hspace*{0.8in}} {\emptyset}) \\
-    \F_I & = & \lambda(\stg).~ \{\langle\C{ol\_o\_id}=\C{k2};\,
-                 \C{ol\_d\_id}=\C{k3};\,
-                 \C{ol\_i\_id}=\C{item\_req.ol\_i\_id};\,\\
-         &   & \hspace*{2.3in}\C{ol\_qty}=\C{item\_req.ol\_qty}\rangle\}\\
+    \F_I & = & \lambda(\stg).~ \{\langle\C{ol\_o\_id}=\C{k2},\,
+                 \C{ol\_d\_id}=\C{k3},\, \C{ol\_i\_id}=\C{item\_req.ol\_i\_id},\, 
+                 \C{ol\_qty}=\C{item\_req.ol\_qty}\rangle\}\\
   \end{array}
 \end{smathpar}
 For any $\stg$, $\F_U(\stg)$ and $\F_I(\stg)$ are expressions in
@@ -514,7 +513,7 @@ $(\phi_U,\G_U)$ and $(\phi_I,\G_I)$, respectively, where $\phi_U$,
 $\phi_I$, $\G_U$, $\G_I$ are as shown below:
 \begin{smathpar}
   \begin{array}{lcl}
-    \phi_U & = & \hspace*{0.1in}\forall \C{item\_req}.\forall s. \forall s'.~ 
+    \phi_U & = & \hspace*{0.2in}\forall \C{item\_req}.\forall s. \forall s'.~ 
         \pi_1(\C{item\_req}) \Leftrightarrow \\
     & & \hspace*{0.3in}(s \in \stg) \conj 
         (\itec{{\sf table}(s)=\C{Stock} \wedge 
@@ -524,41 +523,42 @@ $\phi_I$, $\G_U$, $\G_I$ are as shown below:
                             \C{s\_d\_id}=s.\C{s\_d\_id};\,
                             \C{s\_qty} = \C{k1}\rangle\\
     & & \hspace*{0.85in}} {\bot}) \Rightarrow g_0(\C{item\_req},s')\\
-    & & \hspace*{-0.05in}\conj \forall \C{item\_req}.\forall s'. \exists s.~ 
+    & & \conj \hspace*{0.08in}\forall \C{item\_req}.\forall s'. \exists s.~ 
         \pi_2(\C{item\_req}) \Leftrightarrow \\
-    & & \hspace*{0.15in} g_0(\C{item\_req},s') \Rightarrow s \in \stg \conj
-        \itec{{\sf table}(s)=\C{Stock} \wedge 
+    & & \hspace*{0.28in} g_0(\C{item\_req},s') \Rightarrow (s \in \stg) \conj
+        (\itec{{\sf table}(s)=\C{Stock} \wedge 
               s.\C{s\_i\_id} = \C{item\_req.ol\_i\_id}\\
-    & & \hspace*{1.6in}}
+    & & \hspace*{1.8in}}
               {s' = \langle \C{s\_i\_id}=s.\C{s\_i\_id};\, 
                             \C{s\_d\_id}=s.\C{s\_d\_id};\,
                             \C{s\_qty} = \C{k1}\rangle\\
-    & & \hspace*{1.6in}} {\bot} \\
+    & & \hspace*{1.8in}} {\bot}) \\
     \G_U & = & \lambda (\C{item\_req},r).~ \pi_1(\C{item\_req}) \wedge 
         \pi_2(\C{item\_req}) \wedge g_0(\C{item\_req},r)\\
         \phi_I & = & \top \\ 
     \G_I & = & \lambda (\C{item\_req},r).~ 
-        r = \langle \C{ol\_o\_id}=\C{k2};\,
-                    \C{ol\_d\_id}=\C{k3};\, 
-                    \C{ol\_i\_id}=\C{item\_req.ol\_i\_id};\,\\
-    & & \hspace*{3in}\C{ol\_qty}=\C{item\_req.ol\_qty} \rangle\\
+        r = \langle \C{ol\_o\_id}=\C{k2},\,
+                    \C{ol\_d\_id}=\C{k3},\, 
+                    \C{ol\_i\_id}=\C{item\_req.ol\_i\_id},\, 
+                    \C{ol\_qty}=\C{item\_req.ol\_qty}
+             \rangle\\
   \end{array}
 \end{smathpar}
 Since the transformer ($\T$) of the \C{foreach} loop is not nested
 does not contain any free iteration variables, the appropriate
 application of the encoding algorithm  is
 $\mssemof{\emptyset}{\T(\stl,\stg)}$, which results in the
-$(\phi_I \wedge \phi_U \wedge \phi_1 \wedge \phi_2,\G)$, where
-$\phi_1$, $\phi_2$, and $\G$ are as defined below:
+$(\phi,\G)$, as defined below:
 \begin{smathpar}
   \begin{array}{lcl}
-    \phi_1 & = & \forall \C{item\_req}. \forall s.~ 
-        \pi_3 \Leftrightarrow \C{item\_req} \in \C{item\_reqs} \wedge
-        \G_U(\C{item\_req},s') \vee \G_I(\C{item\_req},s')
-        \Rightarrow g_1(s)\\
-    \phi_2 & = & \forall s.\exists \C{item\_req}. ~ 
-        \pi_4 \Leftrightarrow g_1(s) \Rightarrow \C{item\_req} \in \C{item\_reqs} 
-        \wedge \G_U(\C{item\_req},s') \vee \G_I(\C{item\_req},s')\\
+    \phi & = & \phi_I \conj \phi_U \conj \\
+    & & \hspace*{0.2in}\forall \C{item\_req}. \forall s.~ 
+        \pi_3 \Leftrightarrow (\C{item\_req} \in \C{item\_reqs} \conj 
+        (\G_U(\C{item\_req},s') \vee \G_I(\C{item\_req},s'))
+        \Rightarrow g_1(s))\\
+    & & \conj \hspace*{0.05in}\forall s.\exists \C{item\_req}. ~ 
+        \pi_4 \Leftrightarrow (g_1(s) \Rightarrow (\C{item\_req} \in \C{item\_reqs} 
+        \conj (\G_U(\C{item\_req},s') \vee \G_I(\C{item\_req},s')))\\
     \G & = & \lambda(r).~\pi_3 \wedge \pi_4 \wedge g_1(r)\\
   \end{array}
 \end{smathpar}
