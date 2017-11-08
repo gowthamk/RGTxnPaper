@@ -1,6 +1,12 @@
 \section{Motivation}
 \label{sec:motivation}
 
+We present our ideas in the context of a DSL embedded in OCaml that
+manages an abstract database state that can be manipulated via a
+well-defined \C{SQL} interface. Arbitrary database computations can be
+built around this interface, which can then be run as transactions
+using the \C{atomically\_do} combinator provided by the DSL.
+
 \begin{figure}[!t]
 \centering
 \begin{ocaml}
@@ -32,12 +38,6 @@ let new_order (d_id, c_id, item_reqs) = atomically_do @@ fun () ->
 \vspace*{-10pt}
 \end{figure}
 
-We present our ideas in the context of a DSL embedded in OCaml that
-manages an abstract database state that can be manipulated via a
-well-defined \C{SQL} interface. Arbitrary database computations can be
-built around this interface, which can then be run as transactions
-using the \C{atomically\_do} combinator provided by the DSL.
-
 Fig.~\ref{fig:new_order_code} shows a simplified version of the TPC-C
 \C{new\_order} transaction written in this language. TPC-C is a
 widely-used and well-studied Online Transaction Processing (OLTP)
@@ -64,19 +64,19 @@ is a function that maps each selected record to a new (updated)
 record. \C{SQL.insert} inserts a given record into the specified table
 in the database.
 
-%%%SJ: Reviewers may not understand what primary and foreign keys are,
-%%%or why they are important.  There are also some fields (e.g., ol_i_id)
-%%%that are not described either in the caption or the text.
+The \C{new\_order} transaction inserts a new \C{Order} record, whose
+id is the sequence number of the next order under the given district
+(\C{d\_id}). The sequence number is stored in the corresponding
+\C{District} record, and updated each time a new order is added to the
+system. Since each order may request multiple items (\C{item\_reqs}),
+an \C{Order\_line} record is created for each requested item to relate
+the order with the item. Each item has a corresponding record in the
+\C{Stock} table, which keeps track of the quantity of the item left in
+stock (\C{s\_qty}). The quantity is updated by the transaction to
+reflect the processing of new orders (if the stock quantity falls below
+10, it is automatically replenished by 91).
 
-% \begin{figure}[!t]
-% \includegraphics[scale=0.5]{Figures/schema}
-% \caption{Database schema of TPC-C's order management system.
-%   Columns against highlighted background are primary keys. Arrows denote
-%   foreign key relationships.}
-% \label{fig:schema}
-% \end{figure}
-
-\begin{figure}[t]
+\begin{figure}[!t]
   \centering
 	\begin{subfigure}{0.4\textwidth}
 	  \includegraphics[width=0.9\textwidth]{Figures/schema1}
@@ -108,18 +108,6 @@ in the database.
 \label{fig:schema}
 \end{figure}
 
-The \C{new\_order} transaction inserts a new \C{Order} record, whose
-id is the sequence number of the next order under the given district
-(\C{d\_id}). The sequence number is stored in the corresponding
-\C{District} record, and updated each time a new order is added to the
-system. Since each order may request multiple items (\C{item\_reqs}),
-an \C{Order\_line} record is created for each requested item to relate
-the order with the item. Each item has a corresponding record in the
-\C{Stock} table, which keeps track of the quantity of the item left in
-stock (\C{s\_qty}). The quantity is updated by the transaction to
-reflect the processing of new orders (if the stock quantity falls below
-10, it is automatically replenished by 91).
-
 TPC-C defines multiple invariants, called \emph{consistency
   conditions}, over the state of the application in the database. One
 such consistency condition is the requirement that for a given order
@@ -139,6 +127,17 @@ to the size of the \C{item\_reqs} set, which in turn is equal to the
 \C{Order} record's \C{o\_ol\_cnt} field; these constraints ensure that
 the transaction's consistency condition is preserved.
 
+Because the aforementioned reasoning is reasonably simple to perform
+manually, verifying the soundness of TPC-C's consistency conditions
+would appear to be feasible.  Serializability aids the tractability of
+verification by preventing any interference among concurrently
+executing transactions while the \C{new\_order} transaction executes,
+essentially yielding serial behaviors.  Under weak
+isolation\footnote{Weak isolation does not violate atomicity as long
+  as the witnessed effects are those of committed transactions},
+however, interferences of various kinds are permitted, leading to
+executions superficially similar to executions permitted by concurrent
+(racy) programs~\cite{GHE15,HPQ+15}. 
 \begin{wrapfigure}{l}{.4\textwidth}
 \includegraphics[scale=0.45]{Figures/motiv-eg-1-b}
 \caption{\small An RC execution involving two instances ($T_1$ and
@@ -153,17 +152,7 @@ the transaction's consistency condition is preserved.
   consistency condition.}
 \label{fig:new_order_exec}
 \end{wrapfigure}
-Because the aforementioned reasoning is reasonably simple to perform
-manually, verifying the soundness of TPC-C's consistency conditions
-would appear to be feasible.  Serializability aids the tractability of
-verification by preventing any interference among concurrently
-executing transactions while the \C{new\_order} transaction executes,
-essentially yielding serial behaviors.  Under weak
-isolation\footnote{Weak isolation does not violate atomicity as long
-  as the witnessed effects are those of committed transactions},
-however, interferences of various kinds are permitted, leading to
-executions superficially similar to executions permitted by concurrent
-(racy) programs~\cite{GHE15,HPQ+15}.  To illustrate, consider the
+To illustrate, consider the
 behavior of the \C{new\_order} transaction when executed under a
 \emph{Read Committed} (RC) isolation level, the default isolation
 level in 8 of the 18 databases studied in~\cite{bailishotos}.

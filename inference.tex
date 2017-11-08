@@ -278,41 +278,28 @@ given above and the RG judgment of \S\ref{sec:reasoning}:
 %     I(\stg)}{c}{\lambda(\stl,\stg).\stl = \F(s,\stg)}
 %     \end{array}
 %   \end{smathpar}
-The proof follows by structural induction on $c$. Assume that $P
-\Leftrightarrow \lambda(\stl,\stg).~\stl=\Fx(\stg) \conj I(\stg)$ and $Q
-\Leftrightarrow \lambda(\stl,\stg).\stl = \Fx(\stg) \cup \F(\stg)$. For each type
-of $c$, our strategy is to show the premises of the corresponding
-RG-rule. The base cases correspond to \C{INSERT}, \C{UPDATE} and \C{DELETE}
-statements. In all these cases, the form of $\F$ directly corresponds
-to the condition linking the pre-condition $P$ and post-condition $Q$
-in the premises of the RG-rules. If $\stable(\R, \Fx[\F])$, then
-$\stabilize{\Fx[\F]} = \F$ and hence the proof directly follows. Otherwise,
-$\stabilize{\Fx[\F]} =$ \\%\hspace{2cm}
- $\lambda (\stg).\existsl(\stg', I(\stg'),
-\F( \stg'))$. Since the pre-condition $P(\stl, \stg)$ asserts
-$I(\stg)$, any state which obeys $P$ provides the existential $\stg'$
-in the above set expression, and hence $\F$ applied on that state
-matches the condition linking $P$ and $Q$. The stability of $P$ with
-respect to $\R$ follows directly from $\stable(\R, I)$ and $\stable(\R, \Fx)$.
-
-The proofs for \C{SELECT}, sequencing, and conditionals use the
-inductive hypothesis to infer the RG-judgments present in the
-premises of their corresponding RG-rules. The interesting case is the
-\C{FOREACH} statement, for which we use the loop invariant
-$\psi(\stl, \stg) \Leftrightarrow \stl = \Fx(\stg) \cup (y \bind (\lambda
-z.~\F(\stg)))$, (where assuming that $c$ is the body of the loop,
-$c \elabsto \F$) to prove all the premises of
+The proof follows by structural induction on $c$. Let $P
+=\lambda(\stl,\stg).~\stl=\Fx(\stg) \conj I(\stg)$ and $Q
+=\lambda(\stl,\stg).\stl = \Fx(\stg) \cup \F(\stg)$. The base cases
+correspond to \C{INSERT}, \C{UPDATE} and \C{DELETE} statements, where
+the proof is straightforward. The proofs for \C{SELECT}, sequencing,
+and conditionals use the inductive hypothesis to infer the
+RG-judgments present in the premises of their corresponding RG-rules.
+The interesting case is the \C{FOREACH} statement, for which we use
+the loop invariant $\psi(\stl, \stg) \Leftrightarrow \stl = \Fx(\stg)
+\cup (y \bind (\lambda z.~\F(\stg)))$, (where assuming that $c$ is the
+body of the loop, $c \elabsto \F$) to prove all the premises of
 \rulelabel{RG-Foreach}. Using the same notation as the rule
 $\rulelabel{RG-Foreach}$, $y$ refers to the records already processed
 in previous iterations of the loop, while $z$ refers to the record
 being processed in the current iteration.  At the beginning of the
-loop $[\phi/y]\psi(\stl, \stg)$ just reduces to $\stl = \Fx(\stg)$ which is
-implied by the pre-condition $P$. From the inductive hypothesis, we
-can infer that each iteration corresponds to the application of
-$\F$. Since all iterations are assumed to be independent of each other,
-and $z$ is bound to a record in $x$ for each iteration, we conclude
-that at the end of every iteration, the loop invariant $[y \cup
-  \{z\}/y]\psi$ will be satisfied.
+loop $[\phi/y]\psi(\stl, \stg)$ just reduces to $\stl = \Fx(\stg)$
+which is implied by the pre-condition $P$. From the inductive
+hypothesis, we can infer that each iteration corresponds to the
+application of $\F$. Since all iterations are assumed to be
+independent of each other, and $z$ is bound to a record in $x$ for
+each iteration, we conclude that at the end of every iteration, the
+loop invariant $[y \cup \{z\}/y]\psi$ will be satisfied.
 
 \subsection{From $\SL$ to the first-order logic}
 
@@ -329,8 +316,9 @@ The \rulelabel{RG-Txn} rule so updated is shown below ($\Fempty =
 \RULE
 {
    \stable(R,\I)\spc
-   \stable(R,I)\\
-   \R_e = R \backslash \I_e \spc \R_c = R \backslash \I_c \spc
+   \stable(R,I)\spc
+   \R_e = R \backslash \I_e \spc 
+   \R_c = R \backslash \I_c \spc
    \Fempty \vdash c \Longrightarrow_{\langle i,\R_e,I \rangle}\F \\
    \stable(\R_c,\inctxt{\Fempty}{\F}) \spc
    \forall \stg.~ G(\stg,\F(\stg)) \spc
@@ -381,13 +369,8 @@ predicate is also generated. For instance, consider the set $\{1,2\}$.
 The predicate describing the set can be encoded as the function
 $\lambda \v. \v=1 \vee \v=2$, with no further constraints, or it can
 be encoded as the function $\lambda \v. g(\v)$ with an associated
-constraint ($\phi\in\Prop^1$) defining the uninterpreted boolean
-function (i.e., uninterpreted predicate) $g$:
-\begin{smathpar}
-  \begin{array}{lcl}
-    \phi & = & \forall \nu.~g(\nu) \Leftrightarrow \nu=1 \vee \nu=2
-  \end{array}
-\end{smathpar}
+constraint, $\phi\in\Prop^1 = \forall \nu.~g(\nu) \Leftrightarrow
+\nu=1 \vee \nu=2$, defining the uninterpreted predicate $g$.
 The translation adopts one or the other approach, depending on the
 need. For uniformity, we consider the encoding of a set as pair
 ($\phi$,$\G$), where $\G$ is a meta function, and $\phi$ is a FOL
