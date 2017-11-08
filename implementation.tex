@@ -56,9 +56,7 @@ the invariant $I$. The successful result from both checks results
 in the transaction being certified correct under the current choice of
 its isolation level. Successful verification of all transactions
 concludes the top-level execution, returning the inferred isolation
-levels as its output.
-
-\thetool uses the Z3 SMT solver as its underlying reasoning engine. Each
+levels as its output.  \thetool uses the Z3 SMT solver as its underlying reasoning engine. Each
 implication check described above is first encoded in FOL, applying
 the translation described in \S\ref{sec:inference} wherever
 necessary.
@@ -94,7 +92,7 @@ operations $c_1;c_2$, where $c_1$ is effectively a \C{SELECT}
 operation with the same search criteria as \C{UPDATE}, and $c_2$ is
 a slight variation of the original \C{UPDATE} that updates a
 record only if a record with the same id is present in the set of records
-returned by the \C{SELECT}. This transformation is summarized below:
+returned by \C{SELECT}: % This transformation is summarized below:
 \begin{smathpar}
 \begin{array}{lcl}
 \updatee{(\lambda x. ~e_1)}{(\lambda x.~e_2)}
@@ -131,8 +129,7 @@ behavior. For instance:
 \end{smathpar}
 There are however certain set functions whose behavior cannot be
 completely axiomatized in FOL. These include \C{sum}, \C{count} etc.
-For these, we admit imprecise axiomatizations expressed as lemmas
-over these functions.
+For these, we admit imprecise axiomatizations. % expressed as lemmas over these functions.
 
 \textbf{Annotation Burden} \thetool significantly reduces the
 annotation burden in verifying a weakly isolated transactions by

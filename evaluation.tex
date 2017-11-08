@@ -3,7 +3,7 @@
 
 In this section, we present our experience in running \thetool on two
 different applications: \emph{Courseware}: a course registration
-system described by~\cite{gotsmanpopl16}, and the TPC-C benchmark.
+system described by~\cite{gotsmanpopl16}, and TPC-C.
 
 \begin{figure}[!t]
 \begin{ocaml}
@@ -19,14 +19,12 @@ system described by~\cite{gotsmanpopl16}, and the TPC-C benchmark.
     if crse.c_capacity > 0 && Set.is_empty s_c_enrs then
       (SQL.insert Enrollment {e_id=new_id (); e_s_id=sid; e_c_id=cid};
        SQL.update Course (fun c -> {c with c_capacity = c.c_capacity - 1})
-                         (fun c -> c.c_id = cid))
-    else ()
-
+                         (fun c -> c.c_id = cid)) else ()
+       
   let deregister_txn sid = 
     let s_enrs = SQL.select [Enrollment] (fun e -> e.e_s_id = sid) in
     if Set.is_empty s_enrs then
-      SQL.delete Student (fun s -> s.s_id = sid)
-    else ()
+      SQL.delete Student (fun s -> s.s_id = sid) else ()
 \end{ocaml}
 \caption{Courseware Application}
 \label{fig:courseware_code}
@@ -140,6 +138,7 @@ conventional laptop.
 \end{tabular}
 \caption{The discovered isolation levels for TPC-C transactions}
 \label{tab:tpcc}
+\vspace*{-10pt}
 \end{table}
 
 \textbf{TPC-C} The simplified schema of the TPC-C benchmark has been

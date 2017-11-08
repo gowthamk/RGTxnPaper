@@ -29,11 +29,10 @@ amenable for use within a verification toolchain.  ~\cite{WB17}
 presents a dynamic analysis for weak isolation that attempts to
 discover weak isolation anomalies from SQL log files.  Their solution,
 while capable of identifying database attacks due to the use of
-incorrect (excessively weak) isolation levels, does not consider how
+incorrect isolation levels, does not consider how
 to verify application correctness, infer proper isolation levels, or
 formally reason about the relationship between weak-isolation levels
 and application invariants.
-
 \paragraph{Reasoning under weak isolation.} ~\cite{feketessi} propose
 a theory to characterize non-serializable executions that arise under
 {\sc si}. They also propose an algorithm that
@@ -50,7 +49,7 @@ propose informal semantic conditions to ensure the satisfaction of
 application invariants under weaker isolation levels.  All these
 techniques are tailor-made for a finite set of well-understood
 isolation levels (rooted in~\cite{berenson}).
-
+\vspace*{-6pt}
 \paragraph{Reasoning under weak consistency.} There have been several
 recent proposals to reason about programs executing under weak
 consistency~\cite{bailisvldb, alvarocalm, gotsmanpopl16,redblueatc,
@@ -70,7 +69,6 @@ program invariants hold under this model. By parameterizing our proof
 system over a gamut of weak isolation specifications, we avoid the
 need to define a separate proof rule for each new isolation level we
 may encounter.
-
 %% \vspace*{-4pt}
 %% \paragraph{Reasoning under relaxed memory.} The reasoning mechanisms
 %% used to describe and prove properties about weakly-isolated
@@ -86,7 +84,6 @@ may encounter.
 %%   memory model} for Java that defines an axiomatic definition for the
 %% JMM in terms of memory reorderings, and an operational instantiation
 %% consistent with the TSO memory model.
-
 \paragraph{Inference.}  ~\cite{Vaf10,Vaf10a}
 describe \emph{action inference}, an inference procedure for computing
 rely and guarantee relations in the context of RGSep~\cite{VP07}, an
@@ -103,7 +100,7 @@ verified (integrity constraints over relational tables vs. memory
 safety, or linearizability of concurrent data structure operations)
 and the analysis technique used to drive inference (state transformers
 vs. abstract interpretation) are quite different.
-
+\vspace*{-7pt}
 \section{Conclusions}
 \label{sec:conclusions}
 
@@ -125,8 +122,7 @@ inference procedure that facilitates automated verification of
 weakly-isolated transactions, and have applied our ideas on
 widely-used database systems to justify their utility.  Our solution
 enables database applications to leverage the performance advantages
-offered by weak isolation, without compromising safety and
-correctness.
+offered by weak isolation, without compromising correctness.
 
 
 
