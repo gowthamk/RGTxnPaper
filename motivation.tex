@@ -509,7 +509,7 @@ added to the local database. Thus, the state transformer for the
 update statement (call it $\T_U$) is the following function on
 sets\footnote{Bind ($\bind$) has higher precedence than union
 ($\cup$). Angle braces ($\langle \ldots \rangle$) are used to denote
-records in math}:
+records.}:
 \begin{smathpar}
 \begin{array}{l}
   \lambda(\stl,\stg).~ \stl \cup \stg \bind(\lambda \C{s}. 
@@ -545,7 +545,7 @@ satisfied, constructs a new set containing a single record that is
 identical to $\C{s}$ except that it binds field $\C{s\_qty}$ to value
 $\C{k_1}$.  This new set is added (via set union) to the existing
 local database state $\delta$.\footnote{For now, assume that the
-  record being added to $\stl$ is not already present in $\stl$.}
+  record being added is not already present in $\stl$.}
 
 The transformer ($\T_I(\delta,\Delta)$) for the subsequent \C{insert}
 statement can be similarly constructed:
