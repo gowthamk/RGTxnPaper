@@ -51,6 +51,9 @@
 \usepackage{url}
 \usepackage{tikz}
 \usepackage{multirow,array}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
 
 \input{mydefs.tex}
 
@@ -65,6 +68,11 @@
 \acmMonth{1} 
 \acmPrice{}
 \acmDOI{10.1145/3158115}
+
+% To avoid orphans and widows
+\clubpenalty = 10000
+\widowpenalty = 10000
+\displaywidowpenalty = 10000
 
 \begin{document}
 
@@ -182,6 +190,36 @@
 %% Note: \begin{abstract}...\end{abstract} environment must come
 %% before \maketitle command
 \input{abstract}
+
+% Classification
+\begin{CCSXML}
+  <ccs2012>
+    <concept>
+      <concept_id>10011007.10011074.10011099.10011692</concept_id>
+      <concept_desc>Software and its engineering~Formal software verification</concept_desc>
+      <concept_significance>500</concept_significance>
+    </concept>
+    <concept>
+      <concept_id>10002951.10002952.10003190.10003206</concept_id>
+      <concept_desc>Information systems~Integrity checking</concept_desc>
+      <concept_significance>500</concept_significance>
+    </concept>
+    <concept>
+      <concept_id>10002951.10002952.10002953.10002955</concept_id>
+      <concept_desc>Information systems~Relational database model</concept_desc>
+      <concept_significance>300</concept_significance>
+    </concept>
+  </ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Software and its engineering~Formal software verification}
+\ccsdesc[500]{Information systems~Integrity checking}
+\ccsdesc[300]{Information systems~Relational database model}
+
+% Keywords
+\keywords{
+Transactions, Weak Isolation, Concurrency, Rely-Guarantee,
+Verification}
 
 \maketitle
 

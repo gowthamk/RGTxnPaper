@@ -132,12 +132,7 @@ manually, verifying the soundness of TPC-C's consistency conditions
 would appear to be feasible.  Serializability aids the tractability of
 verification by preventing any interference among concurrently
 executing transactions while the \C{new\_order} transaction executes,
-essentially yielding serial behaviors.  Under weak
-isolation\footnote{Weak isolation does not violate atomicity as long
-  as the witnessed effects are those of committed transactions},
-however, interferences of various kinds are permitted, leading to
-executions superficially similar to executions permitted by concurrent
-(racy) programs~\cite{GHE15,HPQ+15}. 
+essentially yielding serial behaviors.  
 \begin{wrapfigure}{l}{.4\textwidth}
 \includegraphics[scale=0.45]{Figures/motiv-eg-1-b}
 \caption{\small An RC execution involving two instances ($T_1$ and
@@ -151,18 +146,24 @@ executions superficially similar to executions permitted by concurrent
   with the same ids, which in turn triggers a violation of TPC-C's
   consistency condition.}
 \label{fig:new_order_exec}
+\vspace*{-10pt}
 \end{wrapfigure}
-To illustrate, consider the
-behavior of the \C{new\_order} transaction when executed under a
-\emph{Read Committed} (RC) isolation level, the default isolation
-level in 8 of the 18 databases studied in~\cite{bailishotos}.
-An executing RC transaction is isolated from \emph{dirty writes},
-i.e., writes of uncommitted transactions, but is allowed to witness
-the writes of concurrent transactions as soon as they are committed.
-Thus, with two concurrent instances of the \C{new\_order} transaction
-(call them $T_1$ and $T_2$), both concurrently placing new orders for
-different customers under the same district (\C{d\_id}), RC isolation
-allows the execution shown in Fig.~\ref{fig:new_order_exec}.
+Under weak isolation\footnote{Weak isolation does not violate
+  atomicity as long as the witnessed effects are those of committed 
+transactions}, however, interferences of various kinds are permitted,
+leading to executions superficially similar to executions permitted by
+concurrent (racy) programs~\cite{GHE15,HPQ+15}.  To illustrate,
+consider the behavior of the \C{new\_order} transaction when executed
+under a \emph{Read Committed} (RC) isolation level, the default
+isolation level in 8 of the 18 databases studied
+in~\cite{bailishotos}.  An executing RC transaction is isolated from
+\emph{dirty writes}, i.e., writes of uncommitted transactions, but is
+allowed to witness the writes of concurrent transactions as soon as
+they are committed.  Thus, with two concurrent instances of the
+\C{new\_order} transaction (call them $T_1$ and $T_2$), both
+concurrently placing new orders for different customers under the same
+district (\C{d\_id}), RC isolation allows the execution shown in
+Fig.~\ref{fig:new_order_exec}.
 
 
 % \begin{figure}[!h]
