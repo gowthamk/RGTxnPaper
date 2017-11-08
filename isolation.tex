@@ -41,7 +41,7 @@ identifiers can be captured as an isolation property thus:
 \begin{smathpar}
 \begin{array}{lcl}
   \I_{id}(\stl,\stg,\stg') & = & \forall(r\in\stl).~
-      r.\idf\notin \dom(\stg) \Rightarrow r.\idf\notin \dom(\stg').
+      r.\idf\notin \dom(\stg) \Rightarrow r.\idf\notin \dom(\stg')
 \end{array}
 \end{smathpar}
 $\I_{id}$ ensures that if the id of a record is globally unique when
@@ -61,7 +61,7 @@ tri-state formulation thus:
 \begin{smathpar}
 \begin{array}{lcl}
   \I_{ww}(\stl,\stg,\stg') & = & \forall(r'\in\stl)(r \in \stg).~
-      r.\idf = r'.\idf  \Rightarrow r\in\stg'.
+      r.\idf = r'.\idf  \Rightarrow r\in\stg'
 \end{array}
 \end{smathpar}
 That is, given a record $r'\in\stl$, if there exists an $r\in\stg$
@@ -86,7 +86,7 @@ isolation levels that execute transactions against a static snapshot
 of the database that can be axiomatized thus:
 \begin{smathpar}
 \begin{array}{lcl}
-  \I_{ss}(\stl,\stg,\stg') & = & \stg' = \stg.
+  \I_{ss}(\stl,\stg,\stg') & = & \stg' = \stg
 \end{array}
 \end{smathpar}
 
@@ -185,7 +185,7 @@ straightforward:
 \begin{smathpar}
 \begin{array}{lcl}
 \I_e\,\,(\stl,\stg,\stg') & = & \stg' = \stg\\
-\I_c\,\,(\stl,\stg,\stg') & = & \stg' = \stg.
+\I_c\,\,(\stl,\stg,\stg') & = & \stg' = \stg
 \end{array}
 \end{smathpar}
 

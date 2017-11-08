@@ -58,7 +58,7 @@ table name (a nullary constructor) as their first argument. The
 higher-order \C{SQL.select1} function accepts a boolean function that
 describes the selection criteria, and returns any record that meets
 the criteria (it models the SQL query \C{SELECT \ldots\xspace LIMIT
-  1}). \C{SQL.update} also accepts a Boolean function (its 3$^{rd}$
+  1}). \C{SQL.update} also accepts a boolean function (its 3$^{rd}$
 argument) to select the records to be updated. Its 2$^{nd}$ argument
 is a function that maps each selected record to a new (updated)
 record. \C{SQL.insert} inserts a given record into the specified table

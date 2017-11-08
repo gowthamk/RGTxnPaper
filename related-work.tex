@@ -25,8 +25,8 @@ like our approach, develops specifications of weak isolation that are not
 tied to implementation-specific artifacts.  However, they do not
 consider verification (manual or automated) of client programs, and it
 is not immediately apparent if their specification formalism is
-amenable for use within a verification toolchain.  ~\cite{WB17}
-presents a dynamic analysis for weak isolation that attempts to
+amenable for use within a verification toolchain. ~\cite{WB17}
+present a dynamic analysis for weak isolation that attempts to
 discover weak isolation anomalies from SQL log files.  Their solution,
 while capable of identifying database attacks due to the use of
 incorrect isolation levels, does not consider how
@@ -44,7 +44,7 @@ analysis that determines the safety of substituting {\sc si} with a
 weaker variant called \iso{Parallel Snapshot Isolation}~\cite{psi}.
 These efforts focus on establishing the equivalence of executions
 between a pair of isolation levels, without taking application
-invariants into account.  Bernstein \emph{et al.}~\cite{bern2000}
+invariants into account. ~\cite{bern2000}
 propose informal semantic conditions to ensure the satisfaction of
 application invariants under weaker isolation levels.  All these
 techniques are tailor-made for a finite set of well-understood
