@@ -50,24 +50,24 @@ serializable transactions are often eschewed.
 Unfortunately, weak isolation admits behaviors that are difficult to
 comprehend~\cite{berenson}. To quantify weak isolation anomalies,
 Fekete \emph{et al.}~\cite{feketevldb09} devised and experimented with
-a microbenchmark suite that executes transactions under a
-weakly-isolated \emph{read committed} isolation level - the default
-level for 8 of the 18 databases studied in~\cite{bailishotos}, and
-found that 25 out of every 1000 rows in the database violate at least
-one integrity constraint. Bailis \emph{et al.}~\cite{bailisferal} rely
-on Rails' \emph{uniqueness validation} to maintain uniqueness of
-records while serving Linkbench's~\cite{linkbench} insertion workload
-(6400 records distributed over 1000 keys; 64 concurrent clients), and
-report discovering more than 10 duplicate records.  Rails relies on
-database transactions to validate uniqueness during insertions, which
-is sensible if transactions are serializable, but incorrect under the
+a microbenchmark suite that executes transactions under \emph{Read
+Committed} weak isolation level - default level for 8 of the 18
+databases studied in~\cite{bailishotos}, and found that 25 out of
+every 1000 rows in the database violate at least one integrity
+constraint. Bailis \emph{et al.}~\cite{bailisferal} rely on Rails'
+\emph{uniqueness validation} to maintain uniqueness of records while
+serving Linkbench's~\cite{linkbench} insertion workload (6400 records
+distributed over 1000 keys; 64 concurrent clients), and report
+discovering more than 10 duplicate records.  Rails relies on database
+transactions to validate uniqueness during insertions, which is
+sensible if transactions are serializable, but incorrect under the
 weak isolation level used in the experiments. The same study has found
 that 13\% of all invariants among 67 open source Ruby-on-Rails
-applications are at risk of being violated due to weak
-isolation. Indeed, incidents of safety violations due to executing
-applications in a weakly-isolated environment have been reported on
-web services in production~\cite{starbucksbug, scimedbug}, including
-in safety-critical applications such as bitcoin
+applications are at risk of being violated due to weak isolation.
+Indeed, incidents of safety violations due to executing applications
+in a weakly-isolated environment have been reported on web services in
+production~\cite{starbucksbug, scimedbug}, including in
+safety-critical applications such as bitcoin
 exchanges~\cite{poloniexbug, bitcoinbug}. While enforcing
 serializability for all transactions would be sufficient to avoid
 these errors and anomalies, it would likely be an overly conservative
@@ -75,8 +75,8 @@ strategy; indeed, 75\% of the invariants studied in~\cite{bailisferal}
 were shown to be preserved under some form of weak isolation.  When to
 use weak isolation, and in what form, is therefore a prominent
 question facing all database programmers.\footnote{This position has
-been echoed by database researchers who lament the lack of a
-better understanding of this problem; see e.g., \url{
+been echoed by database researchers who lament the lack of a better
+understanding of this problem; see e.g., \url{
   http://www.bailis.org/blog/understanding-weak-isolation-is-a-serious-problem}.}
 
 A major problem with weak isolation as currently specified is that its

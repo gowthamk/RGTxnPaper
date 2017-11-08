@@ -211,13 +211,13 @@ of \C{Order\_line} records inserted with that order id.  This clearly
 violates TPC-C's consistency condition.
 
 This example does not exhibit any of the anomalies that
-\emph{characterize} RC isolation~\cite{berenson}\footnote{Berenson et
-al characterize isolation levels in terms of the
-anomalies they \emph{admit}. For example, RC is characterized by
-\emph{lost writes} because it admits the anomaly.}. For instance,
-there are no \emph{lost writes} since both concurrent transactions' writes
-are present in the final state of the database.  Program analyses that
-aim to determine appropriate isolation by checking for possible
+\emph{characterize} RC isolation~\cite{berenson}\footnote{Berenson
+\emph{et al.} characterize isolation levels in terms of the anomalies
+they \emph{admit}. For example, RC is characterized by \emph{lost
+writes} because it admits the anomaly.}. For instance, there are no
+\emph{lost writes} since both concurrent transactions' writes are
+present in the final state of the database.  Program analyses that aim
+to determine appropriate isolation by checking for possible
 manifestations of RC-induced anomalies would fail to identify grounds
 for promoting the isolation level of \C{new\_order} to something
 stronger.  Yet, if we take the semantics of the application into
@@ -229,9 +229,9 @@ reasoning about weak isolation in terms of
 traces~\cite{adyaphd,gotsmanconcur15} on memory read and write actions
 can complicate high-level reasoning.  A possible alternative would be
 to utilize concurrent program verification methods where the
-implementation details. of weak isolation are interleaved within the
-program, yielding a (more-or-less) conventional concurrent program;
-but, considering the size and complexity of real-world transaction
+implementation details of weak isolation are interleaved within the
+program, yielding a (more-or-less) conventional concurrent program.
+But, considering the size and complexity of real-world transaction
 systems, this strategy is unlikely to scale.
 
 In this paper, we adopt a different approach that \emph{lifts}
@@ -442,9 +442,9 @@ SQL statement in the set domain, modeling the database as a set of
 records, and a SQL statement as a function over this set.  Among other
 things, one benefit of this approach is that low-level loops can now
 be substituted with higher-order combinators that automatically lift
-the state transformer of its higher-order argument (i.e., the loop
-body) to the state transformer of the combined expression (i.e., the
-loop).  We illustrate this intuition on a simple example.
+the state transformer of its higher-order argument, i.e., the loop
+body, to the state transformer of the combined expression, i.e., the
+loop.  We illustrate this intuition on a simple example.
 
 
 %% Thus the semantics of a \C{foreach} loop, for instance, can be
@@ -499,7 +499,7 @@ foreach item_reqs @@ fun item_req ->
 
 Fig.~\ref{fig:foreach_code} shows a (simplified) snippet of code taken
 from Fig.~\ref{fig:new_order_code}. Some irrelevant expressions have
-been replaced with constants (\C{k1},\C{k2}, and \C{k3}).  The body of
+been replaced with constants (\C{k1}, \C{k2}, and \C{k3}).  The body of
 the loop executes a SQL update followed by an insert.  Recall that a
 transaction reads from the global database ($\Delta$), and writes to a
 transaction-local database ($\delta$) before committing these
