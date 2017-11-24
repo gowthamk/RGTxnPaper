@@ -131,15 +131,15 @@ conventional laptop.
 
 \begin{table}[]
 \centering
+\caption{The discovered isolation levels for TPC-C transactions}
 \begin{tabular}{l|c|c|c|c|c|}
 \cline{2-6}
                                  & \multicolumn{1}{l|}{\C{new\_order}} & \multicolumn{1}{l|}{\C{delivery}} & \multicolumn{1}{l|}{\C{payment}} & \multicolumn{1}{l|}{\C{order\_status}} & \multicolumn{1}{l|}{\C{stock\_level}} \\ \hline
 \multicolumn{1}{|l|}{MySQL}      & SER                                   & SER                                 & RC                                 & RC                                       & RC                                      \\ \hline
 \multicolumn{1}{|l|}{PostgreSQL} & SI                                    & SI                                  & RC                                 & RC                                       & RC                                      \\ \hline
 \end{tabular}
-\caption{The discovered isolation levels for TPC-C transactions}
 \label{tab:tpcc}
-\vspace*{-10pt}
+\vspace*{-5pt}
 \end{table}
 
 \textbf{TPC-C} The simplified schema of the TPC-C benchmark has been
